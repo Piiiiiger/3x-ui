@@ -45,7 +45,7 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	logger.Info("pigger-agent ", version, " starting")
+	logger.Infof("pigger-agent %s starting", version)
 	a.Run(ctx)
 	logger.Info("pigger-agent stopped")
 }
