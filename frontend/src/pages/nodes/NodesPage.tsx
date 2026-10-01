@@ -89,6 +89,7 @@ export default function NodesPage() {
     fetchInbounds,
     probe,
     updatePanels,
+    mintAgentSecret,
   } = useNodeMutations();
 
   const { data: latestVersion = '' } = useQuery({
@@ -379,6 +380,7 @@ export default function NodesPage() {
           fetchFingerprint={fetchFingerprint}
           fetchInbounds={fetchInbounds}
           save={onSave}
+          mintAgentSecret={mintAgentSecret}
           onOpenChange={setFormOpen}
         />
 

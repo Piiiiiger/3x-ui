@@ -1226,7 +1226,20 @@
       "fetchPin": "Getir",
       "pinFetched": "Düğümün geçerli sertifikası alındı",
       "pinFetchFailed": "Sertifika alınamadı",
-      "intro": "Buradan yönetilen uzak paneller; durumları, sürümleri ve gelen bağlantılarıyla."
+      "intro": "Buradan yönetilen uzak paneller; durumları, sürümleri ve gelen bağlantılarıyla.",
+      "kind": "Tür",
+      "kindHint": "Panel düğümü, bu panelin çağırdığı tam bir 3x-ui panelidir. Ajan ise Xray gömülü küçük bir programdır ve bu panele kendisi bağlanır; tüm ayarları burada tutulur.",
+      "kindPanel": "Panel",
+      "kindAgent": "Ajan",
+      "publicAddress": "Genel adres",
+      "publicAddressHint": "Sunucunun istemci bağlantılarında kullanılan genel IP adresi veya alan adı.",
+      "agentHint": "Kaydettikten sonra gösterilen gizli anahtarla ajanı sunucuya kurun. Ajan bu panele kendisi bağlanır; sunucuda panel portu açmak gerekmez.",
+      "agentNewSecret": "Yeni gizli anahtar",
+      "agentNewSecretConfirm": "Mevcut anahtarı kullanan ajan, yapılandırma dosyasına yenisi yazılana kadar bağlantısını kaybeder.",
+      "agentSecretFailed": "Ajan anahtarı oluşturulamadı",
+      "agentSecretTitle": "{name} için ajan anahtarı",
+      "agentSecretOnce": "Şimdi kopyalayın: anahtar yalnızca bir kez gösterilir.",
+      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)"
     },
     "settings": {
       "defaultTag": "Varsayılan",

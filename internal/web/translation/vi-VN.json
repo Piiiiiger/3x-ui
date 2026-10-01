@@ -1226,7 +1226,20 @@
       "fetchPin": "Lấy",
       "pinFetched": "Đã lấy chứng chỉ hiện tại của node",
       "pinFetchFailed": "Không thể lấy chứng chỉ",
-      "intro": "Các bảng điều khiển từ xa được quản lý tại đây, kèm trạng thái, phiên bản và inbound."
+      "intro": "Các bảng điều khiển từ xa được quản lý tại đây, kèm trạng thái, phiên bản và inbound.",
+      "kind": "Loại",
+      "kindHint": "Nút bảng điều khiển là một bảng 3x-ui đầy đủ mà bảng này gọi tới. Agent là chương trình nhỏ tích hợp Xray, tự kết nối tới bảng này; mọi cài đặt của nó được lưu tại đây.",
+      "kindPanel": "Bảng điều khiển",
+      "kindAgent": "Agent",
+      "publicAddress": "Địa chỉ công khai",
+      "publicAddressHint": "IP công khai hoặc tên miền của máy chủ, dùng trong liên kết của khách hàng.",
+      "agentHint": "Cài agent lên máy chủ bằng khóa bí mật hiển thị sau khi lưu. Agent tự kết nối tới bảng này nên máy chủ không cần mở cổng bảng điều khiển.",
+      "agentNewSecret": "Khóa bí mật mới",
+      "agentNewSecretConfirm": "Agent đang dùng khóa hiện tại sẽ ngắt kết nối cho đến khi tệp cấu hình của nó có khóa mới.",
+      "agentSecretFailed": "Không thể tạo khóa bí mật cho agent",
+      "agentSecretTitle": "Khóa bí mật agent của {name}",
+      "agentSecretOnce": "Hãy sao chép ngay: khóa chỉ hiển thị một lần.",
+      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)"
     },
     "settings": {
       "defaultTag": "Mặc định",

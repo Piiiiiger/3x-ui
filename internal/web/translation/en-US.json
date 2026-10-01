@@ -1345,7 +1345,20 @@
       "fetchPin": "Fetch",
       "pinFetched": "Fetched the node's current certificate",
       "pinFetchFailed": "Could not fetch the certificate",
-      "intro": "Remote panels managed from here, with their status, versions and inbounds."
+      "intro": "Remote panels managed from here, with their status, versions and inbounds.",
+      "kind": "Type",
+      "kindHint": "A panel node is a full 3x-ui panel that this panel calls. An agent is a small program with Xray built in that connects to this panel itself; this panel keeps all of its settings.",
+      "kindPanel": "Panel",
+      "kindAgent": "Agent",
+      "publicAddress": "Public address",
+      "publicAddressHint": "The server's public IP or domain, used in client links.",
+      "agentHint": "Install the agent on the server with the secret shown after saving. The agent connects to this panel itself, so the server needs no open panel port.",
+      "agentNewSecret": "New secret",
+      "agentNewSecretConfirm": "The agent using the current secret disconnects until its config file has the new one.",
+      "agentSecretFailed": "Could not create an agent secret",
+      "agentSecretTitle": "Agent secret for {name}",
+      "agentSecretOnce": "Copy it now: the secret is shown only once.",
+      "agentInstallCommand": "Install command (run it in the folder with the agent files)"
     },
     "settings": {
       "defaultTag": "Default",

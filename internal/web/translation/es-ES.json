@@ -1226,7 +1226,20 @@
       "fetchPin": "Obtener",
       "pinFetched": "Se obtuvo el certificado actual del nodo",
       "pinFetchFailed": "No se pudo obtener el certificado",
-      "intro": "Paneles remotos gestionados desde aquí, con su estado, versiones y entradas."
+      "intro": "Paneles remotos gestionados desde aquí, con su estado, versiones y entradas.",
+      "kind": "Tipo",
+      "kindHint": "Un nodo panel es un panel 3x-ui completo al que llama este panel. Un agente es un programa pequeño con Xray integrado que se conecta por sí mismo a este panel; todos sus ajustes se guardan aquí.",
+      "kindPanel": "Panel",
+      "kindAgent": "Agente",
+      "publicAddress": "Dirección pública",
+      "publicAddressHint": "IP pública o dominio del servidor, usado en los enlaces de los clientes.",
+      "agentHint": "Instala el agente en el servidor con el secreto que se muestra al guardar. El agente se conecta solo a este panel, así que el servidor no necesita un puerto de panel abierto.",
+      "agentNewSecret": "Nuevo secreto",
+      "agentNewSecretConfirm": "El agente que usa el secreto actual se desconectará hasta que su archivo de configuración tenga el nuevo.",
+      "agentSecretFailed": "No se pudo crear el secreto del agente",
+      "agentSecretTitle": "Secreto del agente de {name}",
+      "agentSecretOnce": "Cópialo ahora: el secreto solo se muestra una vez.",
+      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)"
     },
     "settings": {
       "defaultTag": "Predeterminado",
