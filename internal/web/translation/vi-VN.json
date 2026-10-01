@@ -124,8 +124,6 @@
     "hosts": "Hosts",
     "docs": "Tài liệu",
     "openMenu": "Mở menu",
-    "pinSidebar": "Ghim thanh bên",
-    "unpinSidebar": "Bỏ ghim thanh bên",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Cấu hình Peer {n}"
       },
       "sniffingDestOverride": "Ghi đè đích",
-      "advancedTitle": "Cài đặt nâng cao"
+      "advancedTitle": "Cài đặt nâng cao",
+      "intro": "Cổng, giao thức và phương thức truyền tải đang lắng nghe, cùng khách hàng của từng inbound."
     },
     "clients": {
       "tabBasics": "Cơ bản",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "Gia hạn vào ngày này của mỗi tháng dương lịch, lúc nửa đêm theo múi giờ của bảng điều khiển, thay vì mỗi N ngày. Tháng không có ngày đã chọn sẽ gia hạn vào ngày cuối cùng của tháng. 0 giữ nguyên chế độ khoảng cách theo ngày.",
       "renewsUsed": "Số lần gia hạn đã dùng",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Nhập thẻ hex 32 ký tự để đặt hoặc 'none' để xóa kênh tài trợ trên MTProto."
+      "bulkAdTagHint": "Nhập thẻ hex 32 ký tự để đặt hoặc 'none' để xóa kênh tài trợ trên MTProto.",
+      "intro": "Tất cả khách hàng trên các inbound, kèm lưu lượng, hạn dùng và liên kết đăng ký."
     },
     "groups": {
       "name": "Tên",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "Xóa client…",
       "removeFromGroupTitle": "Xóa client khỏi nhóm «{name}»",
       "removeFromGroupDesc": "Chọn thành viên để xóa khỏi nhóm này. Bản thân client được giữ lại (dùng «Xóa client trong nhóm» để xóa hoàn toàn).",
-      "removeFromGroupResult": "Đã xóa {count} client khỏi {name}."
+      "removeFromGroupResult": "Đã xóa {count} client khỏi {name}.",
+      "intro": "Gom khách hàng thành nhóm để đặt lại lưu lượng hoặc xóa cùng lúc."
     },
     "nodes": {
       "addNode": "Thêm nút",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "SHA-256 base64 hoặc hex",
       "fetchPin": "Lấy",
       "pinFetched": "Đã lấy chứng chỉ hiện tại của node",
-      "pinFetchFailed": "Không thể lấy chứng chỉ"
+      "pinFetchFailed": "Không thể lấy chứng chỉ",
+      "intro": "Các bảng điều khiển từ xa được quản lý tại đây, kèm trạng thái, phiên bản và inbound."
     },
     "settings": {
       "defaultTag": "Mặc định",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "URL máy chủ DoH, thường kết thúc bằng /dns-query.",
       "subIncyResolveDnsIp": "IP máy chủ DoH",
       "subIncyResolveDnsIpDesc": "IP máy chủ DoH để khởi tạo.",
-      "subIncyGroupRouting": "Định tuyến"
+      "subIncyGroupRouting": "Định tuyến",
+      "intro": "Truy cập bảng điều khiển, bảo mật, thông báo và cài đặt đăng ký."
     },
     "xray": {
       "importRules": "Nhập quy tắc",
@@ -2242,7 +2245,10 @@
         "poolSize": "Kích thước bể bơi"
       },
       "defaultOutbound": "Outbound mặc định",
-      "defaultOutboundDesc": "Lưu lượng không khớp quy tắc định tuyến dùng outbound này (mục đầu danh sách)."
+      "defaultOutboundDesc": "Lưu lượng không khớp quy tắc định tuyến dùng outbound này (mục đầu danh sách).",
+      "intro": "Mẫu cơ bản của Xray, bộ cân bằng tải, DNS và toàn bộ cấu hình JSON.",
+      "outboundIntro": "Nơi lưu lượng rời máy chủ: trực tiếp, chặn, proxy và chuỗi proxy.",
+      "routingIntro": "Các quy tắc quyết định mỗi kết nối đi qua outbound nào."
     },
     "hosts": {
       "addHost": "Thêm Host",
@@ -2360,7 +2366,8 @@
         "delete": "Xóa host",
         "badTag": "Tag không hợp lệ",
         "badVlessRoute": "Nhập một số duy nhất từ 0 đến 65535"
-      }
+      },
+      "intro": "Địa chỉ và thông số TLS mà liên kết chia sẻ và đăng ký cấp cho từng inbound."
     },
     "sponsors": {
       "title": "Nhà tài trợ",

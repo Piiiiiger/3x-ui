@@ -124,8 +124,6 @@
     "sponsors": "Sponsors",
     "docs": "Documentation",
     "openMenu": "Open menu",
-    "pinSidebar": "Pin sidebar",
-    "unpinSidebar": "Unpin sidebar",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumber": "Peer {n}",
         "peerNumberConfig": "Peer {n} config"
       },
-      "sniffingDestOverride": "Destination override"
+      "sniffingDestOverride": "Destination override",
+      "intro": "Listening ports, protocols and transports, with the clients each one serves."
     },
     "clients": {
       "tabBasics": "Basics",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "Renew on this day of every calendar month, at midnight in the panel's time zone, instead of every N days. A month too short for the chosen day renews on its last day. 0 keeps the day-interval mode.",
       "renewsUsed": "Renewals used",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds."
+      "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds.",
+      "intro": "Every client across your inbounds, with traffic, expiry and subscription links."
     },
     "groups": {
       "name": "Name",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "Remove clients…",
       "removeFromGroupTitle": "Remove clients from group \"{name}\"",
       "removeFromGroupDesc": "Select members to remove from this group. Clients themselves are kept (use \"Delete clients in group\" to remove them entirely).",
-      "removeFromGroupResult": "Removed {count} client(s) from {name}."
+      "removeFromGroupResult": "Removed {count} client(s) from {name}.",
+      "intro": "Group clients so you can reset their traffic or remove them together."
     },
     "hosts": {
       "addHost": "Add Host",
@@ -1126,7 +1127,8 @@
         "delete": "Host deleted successfully",
         "badTag": "Invalid tag",
         "badVlessRoute": "Enter a single number between 0 and 65535"
-      }
+      },
+      "intro": "Addresses and TLS details that share links and subscriptions hand out for each inbound."
     },
     "nodes": {
       "addNode": "Add Node",
@@ -1239,7 +1241,8 @@
       "pinnedCertPlaceholder": "base64 or hex SHA-256",
       "fetchPin": "Fetch",
       "pinFetched": "Fetched the node's current certificate",
-      "pinFetchFailed": "Could not fetch the certificate"
+      "pinFetchFailed": "Could not fetch the certificate",
+      "intro": "Remote panels managed from here, with their status, versions and inbounds."
     },
     "settings": {
       "defaultTag": "Default",
@@ -1857,7 +1860,8 @@
       "subIncyResolveDnsDomainDesc": "DoH server URL, usually ending in /dns-query.",
       "subIncyResolveDnsIp": "DoH server IP",
       "subIncyResolveDnsIpDesc": "IP of the DoH server, used for bootstrap.",
-      "subIncyGroupRouting": "Routing"
+      "subIncyGroupRouting": "Routing",
+      "intro": "Panel access, security, notifications and subscription settings."
     },
     "xray": {
       "save": "Save",
@@ -2360,7 +2364,10 @@
         "poolSize": "Pool Size"
       },
       "defaultOutbound": "Default Outbound",
-      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list)."
+      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list).",
+      "intro": "The Xray base template, balancers, DNS and the full JSON configuration.",
+      "outboundIntro": "Where traffic leaves the server: direct, blocked, proxies and chains.",
+      "routingIntro": "Rules that decide which outbound each connection takes."
     },
     "sponsors": {
       "title": "Sponsors",

@@ -14,7 +14,6 @@
 @media (max-width: 768px) {
   .index-page .content-area {
     padding: 12px;
-    padding-top: 64px;
   }
 
   .index-page {
@@ -176,6 +175,14 @@
   color: var(--ov-label);
 }
 
+.ov-kicker.ov-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ant-color-text);
+}
+
 .ov-kicker-icon {
   display: flex;
   align-items: center;
@@ -216,17 +223,20 @@
   overflow: hidden;
 }
 
+/* Title on the left, accent icon on the right, as on 妙妙屋X's stat cards. */
 .ov-tile-head {
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 14px var(--ov-pad) 0;
+  padding: 16px var(--ov-pad) 0;
   color: var(--ov-accent);
 }
 
 .ov-tile-icon {
   display: inline-flex;
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .ov-tile-value {

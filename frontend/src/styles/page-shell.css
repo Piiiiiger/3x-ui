@@ -118,6 +118,22 @@
   padding: 24px;
 }
 
+/* Content sits in a centred column under the full-width top bar, as on 妙妙屋X. */
+.index-page .content-area,
+.clients-page .content-area,
+.inbounds-page .content-area,
+.xray-page .content-area,
+.settings-page .content-area,
+.nodes-page .content-area,
+.groups-page .content-area,
+.api-docs-page .content-area,
+.hosts-page .content-area,
+.sponsors-page .content-area {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
 @media (max-width: 768px) {
   .clients-page .content-area,
   .inbounds-page .content-area,

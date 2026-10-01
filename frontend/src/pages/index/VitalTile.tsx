@@ -40,7 +40,7 @@ export default function VitalTile({
     <Card hoverable className="ov-tile" styles={{ body: { padding: 0 } }}>
       <div className="ov-tile-head">
         <span className="ov-tile-icon">{icon}</span>
-        <span className="ov-kicker">{label}</span>
+        <span className="ov-kicker ov-card-title">{label}</span>
       </div>
 
       <div className="ov-tile-value">

@@ -1,0 +1,392 @@
+/* --------------------------------------------------------------------------
+   Top bar — brand, page buttons, actions (after 妙妙屋X's header)
+   -------------------------------------------------------------------------- */
+
+.app-nav {
+  position: sticky;
+  top: 0;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 64px;
+  padding: 0 24px;
+  background: var(--ant-color-bg-layout);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.app-nav-brand {
+  flex-shrink: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  color: var(--ant-color-primary);
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.app-nav-brand:hover,
+.app-nav-brand:focus-visible {
+  color: var(--ant-color-primary-hover);
+}
+
+.brand-x {
+  background: linear-gradient(135deg, #f18c6e 10%, #f59e0b 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Page buttons: each item carries a raised square pill; the current page is
+   filled with the accent tint, like 妙妙屋X's active tab. */
+.app-nav-menu.ant-menu-horizontal {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  border-bottom: none;
+  background: transparent;
+  line-height: normal;
+}
+
+.app-nav-menu.ant-menu-horizontal > .ant-menu-item,
+.app-nav-menu.ant-menu-horizontal > .ant-menu-submenu {
+  top: 0;
+  margin: 0;
+  padding: 3px 6px 3px 0;
+  border: 0;
+  background: transparent;
+  line-height: normal;
+}
+
+.app-nav-menu.ant-menu-horizontal > .ant-menu-item::after,
+.app-nav-menu.ant-menu-horizontal > .ant-menu-submenu::after {
+  display: none;
+}
+
+.app-nav-menu.ant-menu-horizontal > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding: 0;
+  line-height: normal;
+}
+
+.app-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-bg-container);
+  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.app-nav-pill .anticon {
+  font-size: 15px;
+}
+
+.app-nav-menu .app-nav-pill .app-nav-caret.anticon {
+  font-size: 10px;
+}
+
+.app-nav-menu.ant-menu-horizontal > li:hover .app-nav-pill {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+  background: color-mix(in srgb, var(--ant-color-primary) 8%, var(--ant-color-bg-container));
+}
+
+.app-nav-menu.ant-menu-horizontal > .ant-menu-item-selected .app-nav-pill,
+.app-nav-menu.ant-menu-horizontal > .ant-menu-submenu-selected .app-nav-pill {
+  background: color-mix(in srgb, var(--ant-color-primary) 16%, var(--ant-color-bg-container));
+  border-color: color-mix(in srgb, var(--ant-color-primary) 60%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   Actions — search, theme, more, logout, menu
+   -------------------------------------------------------------------------- */
+
+.app-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+.app-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-nav-btn .anticon {
+  font-size: 15px;
+}
+
+.app-nav-btn:hover,
+.app-nav-btn:focus-visible {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+  color: var(--ant-color-link);
+  outline: none;
+}
+
+.app-nav-btn:focus-visible {
+  border-color: var(--ant-color-primary);
+}
+
+.app-nav-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+}
+
+.app-nav-btn-label {
+  text-transform: uppercase;
+}
+
+.app-nav-more.is-active {
+  background: var(--ant-color-primary-bg);
+  border-color: color-mix(in srgb, var(--ant-color-primary) 60%, transparent);
+  color: var(--ant-color-link);
+}
+
+.app-nav-actions .sponsor-card {
+  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-nav-menu.ant-menu-horizontal > li:hover .app-nav-pill,
+  .app-nav-btn:hover,
+  .app-nav-btn:focus-visible,
+  .app-nav-btn:active {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Command palette trigger — compact in the bar, full width in the drawer
+   -------------------------------------------------------------------------- */
+
+.nav-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius-sm);
+  background: var(--ant-color-fill-tertiary);
+  color: var(--ant-color-text-secondary);
+  letter-spacing: 0;
+  user-select: none;
+}
+
+.nav-search-kbd .kbd-cmd {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.nav-search-kbd .kbd-key {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nav-search-wide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% - 24px);
+  height: 38px;
+  margin: 12px 12px 4px;
+  padding: 0 10px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-bg-container);
+  color: var(--ant-color-text-secondary);
+  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.nav-search-wide:hover,
+.nav-search-wide:focus-visible {
+  border-color: var(--ant-color-primary);
+  color: var(--ant-color-text);
+  outline: none;
+}
+
+.nav-search-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Drawer — the whole navigation on narrow screens
+   -------------------------------------------------------------------------- */
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.drawer-brand {
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: 1px;
+  color: var(--ant-color-primary);
+  user-select: none;
+}
+
+.drawer-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.drawer-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--ant-border-radius);
+  background: transparent;
+  color: var(--ant-color-text-secondary);
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.drawer-icon-btn:hover,
+.drawer-icon-btn:focus-visible {
+  background: color-mix(in srgb, var(--ant-color-primary) 12%, transparent);
+  color: var(--ant-color-link);
+  outline: none;
+}
+
+.drawer-donate:hover,
+.drawer-donate:focus-visible {
+  background: rgba(236, 72, 153, 0.12);
+  color: #db2777;
+}
+
+.drawer-menu .ant-menu-item {
+  height: 48px;
+  line-height: 48px;
+  margin: 0;
+  border-radius: 0;
+}
+
+.drawer-menu .ant-menu-item .anticon {
+  font-size: 16px;
+}
+
+/* Selected/hover colours come from the Menu tokens in useTheme; the outline and
+   offset shadow make the active item read like the theme's raised buttons. */
+.drawer-menu .ant-menu-item-selected {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ant-color-primary) 55%, transparent),
+    2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
+}
+
+.drawer-utility {
+  margin-top: auto;
+  border-top: 1px solid var(--ant-color-border-secondary);
+}
+
+.drawer-footer {
+  flex: 0 0 auto;
+  padding: 8px 8px 12px;
+}
+
+.drawer-sponsor {
+  margin-bottom: 6px;
+}
+
+.drawer-version {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  color: var(--ant-color-text-secondary);
+  font-family: var(--ant-font-family-code);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.drawer-version:hover,
+.drawer-version:focus-visible {
+  color: var(--ant-color-link);
+  outline: none;
+}
+
+body.dark .ant-drawer-content,
+body.dark .ant-drawer-body {
+  background-color: #0b0e15;
+}
+
+html[data-theme='ultra-dark'] body.dark .ant-drawer-content,
+html[data-theme='ultra-dark'] body.dark .ant-drawer-body {
+  background-color: #050507;
+}
+
+body.dark .ant-drawer-body .drawer-menu,
+body.dark .ant-drawer-body .drawer-menu.ant-menu-dark,
+body.dark .ant-drawer-body .drawer-menu .ant-menu-item,
+body.dark .ant-drawer-body .drawer-menu .ant-menu-sub,
+body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
+  background-color: transparent;
+}
+
+@media (max-width: 991px) {
+  .app-nav {
+    min-height: 56px;
+    padding: 0 12px;
+  }
+
+  .app-nav-brand {
+    font-size: 20px;
+  }
+}

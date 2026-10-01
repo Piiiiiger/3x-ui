@@ -36,7 +36,7 @@ export default function ConnectionsCard({
   return (
     <Card hoverable styles={{ body: { padding: 0 } }}>
       <div className="ov-wide-head ov-wide-head-stack">
-        <div className="ov-kicker">{t('pages.index.connectionCount')}</div>
+        <div className="ov-kicker ov-card-title">{t('pages.index.connectionCount')}</div>
         <div className="ov-conn-total">
           <span className="ov-tile-number">{status.tcpCount + status.udpCount}</span>
           <span className="ov-tile-unit">{t('pages.index.openSockets')}</span>

@@ -124,8 +124,6 @@
     "hosts": "Hosts",
     "docs": "Documentación",
     "openMenu": "Abrir menú",
-    "pinSidebar": "Fijar barra lateral",
-    "unpinSidebar": "Desfijar barra lateral",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Config Peer {n}"
       },
       "sniffingDestOverride": "Anulación de destino",
-      "advancedTitle": "Configuración avanzada"
+      "advancedTitle": "Configuración avanzada",
+      "intro": "Puertos, protocolos y transportes de escucha, con los clientes que atiende cada uno."
     },
     "clients": {
       "tabBasics": "Básico",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "Renueva este día de cada mes natural, a medianoche en la zona horaria del panel, en lugar de cada N días. Si el mes es demasiado corto para el día elegido, renueva su último día. 0 mantiene el modo de intervalo en días.",
       "renewsUsed": "Renovaciones usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto."
+      "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto.",
+      "intro": "Todos los clientes de tus entradas, con tráfico, caducidad y enlaces de suscripción."
     },
     "groups": {
       "name": "Nombre",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "Quitar clientes…",
       "removeFromGroupTitle": "Quitar clientes del grupo «{name}»",
       "removeFromGroupDesc": "Selecciona miembros para quitar de este grupo. Los clientes se conservan (usa «Eliminar clientes del grupo» para eliminarlos por completo).",
-      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}.",
+      "intro": "Agrupa clientes para restablecer su tráfico o eliminarlos a la vez."
     },
     "nodes": {
       "addNode": "Agregar nodo",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "SHA-256 en base64 o hex",
       "fetchPin": "Obtener",
       "pinFetched": "Se obtuvo el certificado actual del nodo",
-      "pinFetchFailed": "No se pudo obtener el certificado"
+      "pinFetchFailed": "No se pudo obtener el certificado",
+      "intro": "Paneles remotos gestionados desde aquí, con su estado, versiones y entradas."
     },
     "settings": {
       "defaultTag": "Predeterminado",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "URL del servidor DoH, normalmente acaba en /dns-query.",
       "subIncyResolveDnsIp": "IP del servidor DoH",
       "subIncyResolveDnsIpDesc": "IP del servidor DoH para el arranque.",
-      "subIncyGroupRouting": "Enrutado"
+      "subIncyGroupRouting": "Enrutado",
+      "intro": "Acceso al panel, seguridad, notificaciones y ajustes de suscripción."
     },
     "xray": {
       "save": "Guardar configuración",
@@ -2242,7 +2245,10 @@
         "poolSize": "Tamaño del grupo"
       },
       "defaultOutbound": "Salida predeterminada",
-      "defaultOutboundDesc": "El tráfico que no coincide con ninguna regla de enrutamiento usa esta salida (la primera de la lista)."
+      "defaultOutboundDesc": "El tráfico que no coincide con ninguna regla de enrutamiento usa esta salida (la primera de la lista).",
+      "intro": "La plantilla base de Xray, los balanceadores, el DNS y la configuración JSON completa.",
+      "outboundIntro": "Por dónde sale el tráfico del servidor: directo, bloqueado, proxies y cadenas.",
+      "routingIntro": "Reglas que deciden qué salida toma cada conexión."
     },
     "hosts": {
       "addHost": "Agregar host",
@@ -2360,7 +2366,8 @@
         "delete": "Eliminar host",
         "badTag": "Etiqueta no válida",
         "badVlessRoute": "Introduce un único número entre 0 y 65535"
-      }
+      },
+      "intro": "Direcciones y datos TLS que los enlaces y las suscripciones entregan para cada entrada."
     },
     "sponsors": {
       "title": "Patrocinadores",

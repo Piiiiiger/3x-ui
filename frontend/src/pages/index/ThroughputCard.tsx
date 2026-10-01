@@ -40,7 +40,7 @@ export default function ThroughputCard({
     <Card hoverable styles={{ body: { padding: 0 } }}>
       <div className="ov-wide-head">
         <div>
-          <div className="ov-kicker">{t('pages.index.overallSpeed')}</div>
+          <div className="ov-kicker ov-card-title">{t('pages.index.overallSpeed')}</div>
           <div className="ov-sub">
             {`${t('pages.index.throughputSub')} · ${t('pages.index.peak')} ${SizeFormatter.speedFormat(peak(down))}`}
           </div>

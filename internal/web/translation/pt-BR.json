@@ -124,8 +124,6 @@
     "hosts": "Hosts",
     "docs": "Documentação",
     "openMenu": "Abrir menu",
-    "pinSidebar": "Fixar barra lateral",
-    "unpinSidebar": "Desafixar barra lateral",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Config Peer {n}"
       },
       "sniffingDestOverride": "Substituição de destino",
-      "advancedTitle": "Configurações avançadas"
+      "advancedTitle": "Configurações avançadas",
+      "intro": "Portas, protocolos e transportes de escuta, com os clientes que cada um atende."
     },
     "clients": {
       "tabBasics": "Básico",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "Renova neste dia de cada mês do calendário, à meia-noite no fuso horário do painel, em vez de a cada N dias. Se o mês for curto demais para o dia escolhido, renova no último dia dele. 0 mantém o modo de intervalo em dias.",
       "renewsUsed": "Renovações usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto."
+      "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto.",
+      "intro": "Todos os clientes das suas entradas, com tráfego, validade e links de assinatura."
     },
     "groups": {
       "name": "Nome",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "Remover clientes…",
       "removeFromGroupTitle": "Remover clientes do grupo «{name}»",
       "removeFromGroupDesc": "Selecione membros para remover deste grupo. Os clientes em si são mantidos (use «Excluir clientes do grupo» para removê-los por completo).",
-      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}.",
+      "intro": "Agrupe clientes para redefinir o tráfego ou removê-los de uma só vez."
     },
     "nodes": {
       "addNode": "Adicionar nó",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "SHA-256 em base64 ou hex",
       "fetchPin": "Obter",
       "pinFetched": "Certificado atual do nó obtido",
-      "pinFetchFailed": "Não foi possível obter o certificado"
+      "pinFetchFailed": "Não foi possível obter o certificado",
+      "intro": "Painéis remotos gerenciados daqui, com status, versões e entradas."
     },
     "settings": {
       "defaultTag": "Padrão",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "URL do servidor DoH, geralmente terminando em /dns-query.",
       "subIncyResolveDnsIp": "IP do servidor DoH",
       "subIncyResolveDnsIpDesc": "IP do servidor DoH para bootstrap.",
-      "subIncyGroupRouting": "Roteamento"
+      "subIncyGroupRouting": "Roteamento",
+      "intro": "Acesso ao painel, segurança, notificações e configurações de assinatura."
     },
     "xray": {
       "importRules": "Importar regras",
@@ -2242,7 +2245,10 @@
         "poolSize": "Tamanho do Pool"
       },
       "defaultOutbound": "Saída padrão",
-      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista)."
+      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista).",
+      "intro": "O modelo base do Xray, balanceadores, DNS e a configuração JSON completa.",
+      "outboundIntro": "Por onde o tráfego sai do servidor: direto, bloqueado, proxies e cadeias.",
+      "routingIntro": "Regras que decidem qual saída cada conexão usa."
     },
     "hosts": {
       "addHost": "Adicionar Host",
@@ -2360,7 +2366,8 @@
         "delete": "Excluir host",
         "badTag": "Tag inválida",
         "badVlessRoute": "Insira um único número entre 0 e 65535"
-      }
+      },
+      "intro": "Endereços e dados de TLS que os links e as assinaturas entregam para cada entrada."
     },
     "sponsors": {
       "title": "Patrocinadores",

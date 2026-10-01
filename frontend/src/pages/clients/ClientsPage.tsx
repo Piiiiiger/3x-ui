@@ -71,7 +71,8 @@ import type {
 import ClientTrafficCell from '@/components/clients/ClientTrafficCell';
 import ClientSpeedTag, { isActiveSpeed } from '@/components/clients/ClientSpeedTag';
 import ClientCardComment from '@/components/clients/ClientCardComment';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
+import { PageHeader } from '@/components/ui';
 import { IntlUtil, SizeFormatter } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import { LazyMount } from '@/components/utility';
@@ -1295,10 +1296,11 @@ export default function ClientsPage() {
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
 
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            <PageHeader title={t('menu.clients')} description={t('pages.clients.intro')} />
             <Spin
               spinning={!fetched || !hostsFetched}
               delay={200}

@@ -110,29 +110,6 @@ const ULTRA_DARK_TOKENS = {
   colorBorderSecondary: 'rgba(255, 255, 255, 0.07)',
 };
 
-const LIGHT_LAYOUT_TOKENS = {
-  lightSiderBg: '#fffdfc',
-  lightTriggerBg: '#fffdfc',
-};
-const DARK_LAYOUT_TOKENS = {
-  bodyBg: '#0d1018',
-  headerBg: '#0b0e15',
-  headerColor: '#f9f4f1',
-  footerBg: '#0d1018',
-  siderBg: '#0b0e15',
-  triggerBg: '#131722',
-  triggerColor: '#f9f4f1',
-};
-const ULTRA_DARK_LAYOUT_TOKENS = {
-  bodyBg: '#000',
-  headerBg: '#050507',
-  headerColor: '#ffffff',
-  footerBg: '#000',
-  siderBg: '#050507',
-  triggerBg: '#0b0b0e',
-  triggerColor: '#ffffff',
-};
-
 const LIGHT_MENU_TOKENS = {
   itemBg: 'transparent',
   subMenuItemBg: 'transparent',
@@ -142,6 +119,11 @@ const LIGHT_MENU_TOKENS = {
   itemHoverColor: CORAL[700],
   itemActiveBg: CORAL[100],
   subMenuItemSelectedColor: CORAL[700],
+  horizontalItemSelectedBg: 'transparent',
+  horizontalItemSelectedColor: CORAL[700],
+  horizontalItemHoverBg: 'transparent',
+  horizontalItemHoverColor: CORAL[700],
+  activeBarHeight: 0,
 };
 const DARK_MENU_TOKENS = {
   darkItemBg: '#0b0e15',
@@ -152,6 +134,11 @@ const DARK_MENU_TOKENS = {
   darkItemHoverColor: CORAL[300],
   darkItemSelectedBg: 'rgba(241, 140, 110, 0.16)',
   darkItemSelectedColor: CORAL[300],
+  horizontalItemSelectedBg: 'transparent',
+  horizontalItemSelectedColor: CORAL[300],
+  horizontalItemHoverBg: 'transparent',
+  horizontalItemHoverColor: CORAL[300],
+  activeBarHeight: 0,
 };
 const ULTRA_DARK_MENU_TOKENS = {
   ...DARK_MENU_TOKENS,
@@ -201,15 +188,19 @@ const LIGHT_TABS_TOKENS = {
   itemActiveColor: CORAL[700],
 };
 
+// Header rows read as plain bold text over the card, like 妙妙屋X's tables; the
+// fill stays opaque so fixed columns still cover the cells scrolling under them.
 const LIGHT_TABLE_TOKENS = {
-  headerBg: '#f8f1ec',
+  headerBg: '#fffdfc',
+  headerSplitColor: 'transparent',
   headerColor: '#271610',
   rowHoverBg: CORAL[50],
   rowSelectedBg: CORAL[100],
   rowSelectedHoverBg: CORAL[200],
 };
 const DARK_TABLE_TOKENS = {
-  headerBg: '#171c28',
+  headerBg: '#131722',
+  headerSplitColor: 'transparent',
   rowHoverBg: 'rgba(241, 140, 110, 0.06)',
   rowSelectedBg: 'rgba(241, 140, 110, 0.12)',
   rowSelectedHoverBg: 'rgba(241, 140, 110, 0.18)',
@@ -267,7 +258,6 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
       components: {
         Statistic: STATISTIC_TOKENS,
         Button: LIGHT_BUTTON_TOKENS,
-        Layout: LIGHT_LAYOUT_TOKENS,
         Menu: LIGHT_MENU_TOKENS,
         Card: LIGHT_CARD_TOKENS,
         Tabs: LIGHT_TABS_TOKENS,
@@ -282,12 +272,11 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
     algorithm: [antdTheme.darkAlgorithm, pinDarkAccents],
     token: isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS,
     components: {
-      Layout: isUltra ? ULTRA_DARK_LAYOUT_TOKENS : DARK_LAYOUT_TOKENS,
       Menu: isUltra ? ULTRA_DARK_MENU_TOKENS : DARK_MENU_TOKENS,
       Card: isUltra ? ULTRA_DARK_CARD_TOKENS : DARK_CARD_TOKENS,
       Statistic: STATISTIC_TOKENS,
       Button: DARK_BUTTON_TOKENS,
-      Table: DARK_TABLE_TOKENS,
+      Table: isUltra ? { ...DARK_TABLE_TOKENS, headerBg: '#0b0b0e' } : DARK_TABLE_TOKENS,
     },
   };
 }

@@ -124,8 +124,6 @@
     "hosts": "主機",
     "docs": "文件",
     "openMenu": "開啟選單",
-    "pinSidebar": "固定側邊欄",
-    "unpinSidebar": "取消固定側邊欄",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "目標覆寫",
-      "advancedTitle": "進階設定"
+      "advancedTitle": "進階設定",
+      "intro": "監聽連接埠、協定與傳輸方式，以及每個入站下的客戶端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "每個自然月的這一天午夜（依面板時區）續期，而不是每 N 天續期一次。若當月沒有該日期，則在當月最後一天續期。填 0 保持按天間隔模式。",
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。"
+      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
+      "intro": "所有入站下的客戶端，包含流量、到期時間與訂閱連結。"
     },
     "groups": {
       "name": "名稱",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "移除客戶端…",
       "removeFromGroupTitle": "從群組「{name}」移除客戶端",
       "removeFromGroupDesc": "選擇要從此群組移除的成員。客戶端本身保留(用「刪除群組中的客戶端」完全移除)。",
-      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。"
+      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。",
+      "intro": "將客戶端分組，方便一起重設流量或批次刪除。"
     },
     "nodes": {
       "addNode": "新增節點",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "base64 或 hex 的 SHA-256",
       "fetchPin": "取得",
       "pinFetched": "已取得節點目前憑證",
-      "pinFetchFailed": "無法取得憑證"
+      "pinFetchFailed": "無法取得憑證",
+      "intro": "由本面板管理的遠端面板，包含狀態、版本與入站。"
     },
     "settings": {
       "defaultTag": "預設",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "DoH 伺服器 URL，通常以 /dns-query 結尾。",
       "subIncyResolveDnsIp": "DoH 伺服器 IP",
       "subIncyResolveDnsIpDesc": "用於引導的 DoH 伺服器 IP。",
-      "subIncyGroupRouting": "路由"
+      "subIncyGroupRouting": "路由",
+      "intro": "面板存取、安全、通知與訂閱相關設定。"
     },
     "xray": {
       "save": "儲存",
@@ -2242,7 +2245,10 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "預設出站",
-      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。"
+      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。",
+      "intro": "Xray 基礎範本、負載平衡、DNS 以及完整的 JSON 設定。",
+      "outboundIntro": "流量離開伺服器的出口：直連、封鎖、代理與鏈式代理。",
+      "routingIntro": "決定每條連線走哪個出站的規則。"
     },
     "hosts": {
       "addHost": "新增 Host",
@@ -2360,7 +2366,8 @@
         "delete": "刪除 Host",
         "badTag": "無效的標籤",
         "badVlessRoute": "請輸入 0 到 65535 之間的單一數字"
-      }
+      },
+      "intro": "為每個入站設定分享連結與訂閱提供的位址與 TLS 參數。"
     },
     "sponsors": {
       "title": "贊助商",

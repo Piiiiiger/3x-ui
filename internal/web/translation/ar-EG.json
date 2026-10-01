@@ -124,8 +124,6 @@
     "hosts": "المضيفات",
     "docs": "التوثيق",
     "openMenu": "فتح القائمة",
-    "pinSidebar": "تثبيت الشريط الجانبي",
-    "unpinSidebar": "إلغاء تثبيت الشريط الجانبي",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "تكوين Peer {n}"
       },
       "sniffingDestOverride": "تجاوز الوجهة",
-      "advancedTitle": "الإعدادات المتقدمة"
+      "advancedTitle": "الإعدادات المتقدمة",
+      "intro": "المنافذ والبروتوكولات وطرق النقل المستمعة، مع العملاء الذين يخدمهم كل منها."
     },
     "clients": {
       "tabBasics": "أساسي",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "يتم التجديد في هذا اليوم من كل شهر ميلادي، عند منتصف الليل بتوقيت اللوحة، بدلاً من كل N يوم. إذا كان الشهر أقصر من اليوم المختار، يتم التجديد في آخر يوم منه. القيمة 0 تُبقي وضع الفاصل اليومي.",
       "renewsUsed": "التجديدات المستخدمة",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto."
+      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto.",
+      "intro": "جميع العملاء عبر الواردات، مع حركة البيانات وتاريخ الانتهاء وروابط الاشتراك."
     },
     "groups": {
       "name": "الاسم",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "إزالة عملاء…",
       "removeFromGroupTitle": "إزالة عملاء من المجموعة «{name}»",
       "removeFromGroupDesc": "اختر الأعضاء لإزالتهم من هذه المجموعة. يُحفظ العملاء (استخدم «حذف عملاء المجموعة» للإزالة الكاملة).",
-      "removeFromGroupResult": "تمت إزالة {count} عميل من {name}."
+      "removeFromGroupResult": "تمت إزالة {count} عميل من {name}.",
+      "intro": "اجمع العملاء في مجموعات لإعادة تعيين حركة بياناتهم أو حذفهم معًا."
     },
     "nodes": {
       "addNode": "إضافة نود",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "SHA-256 بصيغة base64 أو hex",
       "fetchPin": "جلب",
       "pinFetched": "تم جلب شهادة العقدة الحالية",
-      "pinFetchFailed": "تعذّر جلب الشهادة"
+      "pinFetchFailed": "تعذّر جلب الشهادة",
+      "intro": "اللوحات البعيدة التي تُدار من هنا، مع حالتها وإصداراتها ووارداتها."
     },
     "settings": {
       "defaultTag": "افتراضي",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "رابط سيرفر DoH، غالبًا ينتهي بـ /dns-query.",
       "subIncyResolveDnsIp": "IP سيرفر DoH",
       "subIncyResolveDnsIpDesc": "عنوان IP لسيرفر DoH للتهيئة.",
-      "subIncyGroupRouting": "التوجيه"
+      "subIncyGroupRouting": "التوجيه",
+      "intro": "الوصول إلى اللوحة والأمان والإشعارات وإعدادات الاشتراك."
     },
     "xray": {
       "save": "احفظ",
@@ -2242,7 +2245,10 @@
         "poolSize": "حجم المجموعة"
       },
       "defaultOutbound": "الصادر الافتراضي",
-      "defaultOutboundDesc": "الحركة التي لا تطابق أي قاعدة توجيه تستخدم هذا الصادر (الأول في القائمة)."
+      "defaultOutboundDesc": "الحركة التي لا تطابق أي قاعدة توجيه تستخدم هذا الصادر (الأول في القائمة).",
+      "intro": "قالب Xray الأساسي وموازنات التحميل وDNS وإعدادات JSON الكاملة.",
+      "outboundIntro": "حيث تغادر حركة البيانات الخادم: مباشر، محظور، وكلاء وسلاسل.",
+      "routingIntro": "القواعد التي تحدد الصادر الذي يسلكه كل اتصال."
     },
     "hosts": {
       "addHost": "إضافة مضيف",
@@ -2360,7 +2366,8 @@
         "delete": "حذف المضيف",
         "badTag": "وسم غير صالح",
         "badVlessRoute": "أدخل رقماً واحداً بين 0 و65535"
-      }
+      },
+      "intro": "العناوين وتفاصيل TLS التي تقدمها روابط المشاركة والاشتراكات لكل وارد."
     },
     "sponsors": {
       "title": "الرعاة",

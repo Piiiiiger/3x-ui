@@ -124,8 +124,6 @@
     "hosts": "主机",
     "docs": "文档",
     "openMenu": "打开菜单",
-    "pinSidebar": "固定侧边栏",
-    "unpinSidebar": "取消固定侧边栏",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Peer {n} 配置"
       },
       "sniffingDestOverride": "目标覆盖",
-      "advancedTitle": "高级设置"
+      "advancedTitle": "高级设置",
+      "intro": "监听端口、协议与传输方式，以及每个入站下的客户端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "每个自然月的这一天午夜（按面板时区）续期，而不是每 N 天续期一次。若当月没有该日期，则在当月最后一天续期。填 0 保持按天间隔模式。",
       "renewsUsed": "已用续期次数",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。"
+      "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。",
+      "intro": "所有入站下的客户端，包括流量、到期时间和订阅链接。"
     },
     "groups": {
       "name": "名称",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "移除客户端…",
       "removeFromGroupTitle": "从分组 “{name}” 移除客户端",
       "removeFromGroupDesc": "选择要从此分组中移除的成员。客户端本身保留(使用 “删除分组中的客户端” 完全移除)。",
-      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。"
+      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。",
+      "intro": "把客户端分组，方便一起重置流量或批量删除。"
     },
     "nodes": {
       "addNode": "添加节点",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "base64 或 hex 的 SHA-256",
       "fetchPin": "获取",
       "pinFetched": "已获取节点当前证书",
-      "pinFetchFailed": "无法获取证书"
+      "pinFetchFailed": "无法获取证书",
+      "intro": "由本面板管理的远程面板，包括状态、版本和入站。"
     },
     "settings": {
       "defaultTag": "默认",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "DoH 服务器 URL，通常以 /dns-query 结尾。",
       "subIncyResolveDnsIp": "DoH 服务器 IP",
       "subIncyResolveDnsIpDesc": "用于引导的 DoH 服务器 IP。",
-      "subIncyGroupRouting": "路由"
+      "subIncyGroupRouting": "路由",
+      "intro": "面板访问、安全、通知与订阅相关设置。"
     },
     "xray": {
       "importRules": "导入规则",
@@ -2242,7 +2245,10 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "默认出站",
-      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。"
+      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。",
+      "intro": "Xray 基础模板、负载均衡、DNS 以及完整的 JSON 配置。",
+      "outboundIntro": "流量离开服务器的出口：直连、阻断、代理与链式代理。",
+      "routingIntro": "决定每条连接走哪个出站的规则。"
     },
     "hosts": {
       "addHost": "添加主机",
@@ -2360,7 +2366,8 @@
         "delete": "删除主机",
         "badTag": "无效的标签",
         "badVlessRoute": "请输入 0 到 65535 之间的单个数字"
-      }
+      },
+      "intro": "为每个入站设置分享链接和订阅下发的地址与 TLS 参数。"
     },
     "sponsors": {
       "title": "赞助商",

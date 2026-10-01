@@ -124,8 +124,6 @@
     "hosts": "Host'lar",
     "docs": "Belgeler",
     "openMenu": "Menüyü aç",
-    "pinSidebar": "Kenar çubuğunu sabitle",
-    "unpinSidebar": "Kenar çubuğu sabitlemesini kaldır",
     "subFormats": "Abonelik Formatları"
   },
   "pages": {
@@ -714,7 +712,8 @@
         "peerNumberConfig": "Peer {n} Yapılandırması"
       },
       "sniffingDestOverride": "Hedef geçersiz kılma",
-      "advancedTitle": "Gelişmiş Ayarlar"
+      "advancedTitle": "Gelişmiş Ayarlar",
+      "intro": "Dinlenen portlar, protokoller ve taşıma türleri ile her birinin hizmet verdiği kullanıcılar."
     },
     "clients": {
       "tabBasics": "Temel",
@@ -967,7 +966,8 @@
       "renewOnDayDesc": "Her N günde bir yerine, her takvim ayının bu gününde, panel saat diliminde gece yarısı yeniler. Seçilen gün için kısa olan aylarda ayın son gününde yeniler. 0 gün aralığı modunu korur.",
       "renewsUsed": "Kullanılan yenileme",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın."
+      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
+      "intro": "Tüm gelen bağlantılardaki kullanıcılar; trafik, bitiş tarihi ve abonelik bağlantılarıyla."
     },
     "groups": {
       "name": "İsim",
@@ -1008,7 +1008,8 @@
       "removeFromGroup": "Kullanıcı Çıkar…",
       "removeFromGroupTitle": "«{name}» Grubundan Kullanıcı Çıkar",
       "removeFromGroupDesc": "Bu gruptan çıkarılacak üyeleri seçin. Kullanıcılar korunur (tamamen kaldırmak için «Gruptaki kullanıcıları sil» kullanın).",
-      "removeFromGroupResult": "{name} grubundan {count} kullanıcı çıkarıldı."
+      "removeFromGroupResult": "{name} grubundan {count} kullanıcı çıkarıldı.",
+      "intro": "Kullanıcıları gruplayarak trafiklerini birlikte sıfırlayın veya birlikte silin."
     },
     "nodes": {
       "addNode": "Düğüm Ekle",
@@ -1121,7 +1122,8 @@
       "pinnedCertPlaceholder": "base64 veya hex SHA-256",
       "fetchPin": "Getir",
       "pinFetched": "Düğümün geçerli sertifikası alındı",
-      "pinFetchFailed": "Sertifika alınamadı"
+      "pinFetchFailed": "Sertifika alınamadı",
+      "intro": "Buradan yönetilen uzak paneller; durumları, sürümleri ve gelen bağlantılarıyla."
     },
     "settings": {
       "defaultTag": "Varsayılan",
@@ -1739,7 +1741,8 @@
       "subIncyResolveDnsDomainDesc": "DoH sunucu URL'si, genelde /dns-query ile biter.",
       "subIncyResolveDnsIp": "DoH sunucu IP'si",
       "subIncyResolveDnsIpDesc": "Bootstrap için DoH sunucu IP'si.",
-      "subIncyGroupRouting": "Yönlendirme"
+      "subIncyGroupRouting": "Yönlendirme",
+      "intro": "Panel erişimi, güvenlik, bildirimler ve abonelik ayarları."
     },
     "xray": {
       "save": "Kaydet",
@@ -2242,7 +2245,10 @@
         "poolSize": "Havuz Boyutu"
       },
       "defaultOutbound": "Varsayılan giden",
-      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden)."
+      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden).",
+      "intro": "Xray temel şablonu, dengeleyiciler, DNS ve tam JSON yapılandırması.",
+      "outboundIntro": "Trafiğin sunucudan çıktığı yer: doğrudan, engelli, proxy'ler ve zincirler.",
+      "routingIntro": "Her bağlantının hangi giden bağlantıyı kullanacağını belirleyen kurallar."
     },
     "hosts": {
       "addHost": "Host Ekle",
@@ -2360,7 +2366,8 @@
         "delete": "Host'u sil",
         "badTag": "Geçersiz etiket",
         "badVlessRoute": "0 ile 65535 arasında tek bir sayı girin"
-      }
+      },
+      "intro": "Paylaşım bağlantılarının ve aboneliklerin her gelen bağlantı için verdiği adresler ve TLS ayrıntıları."
     },
     "sponsors": {
       "title": "Sponsorlar",
