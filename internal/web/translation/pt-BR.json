@@ -1226,7 +1226,20 @@
       "fetchPin": "Obter",
       "pinFetched": "Certificado atual do nó obtido",
       "pinFetchFailed": "Não foi possível obter o certificado",
-      "intro": "Painéis remotos gerenciados daqui, com status, versões e entradas."
+      "intro": "Painéis remotos gerenciados daqui, com status, versões e entradas.",
+      "kind": "Tipo",
+      "kindHint": "Um nó painel é um painel 3x-ui completo que este painel chama. Um agente é um programa pequeno com Xray embutido que se conecta sozinho a este painel; todas as configurações dele ficam aqui.",
+      "kindPanel": "Painel",
+      "kindAgent": "Agente",
+      "publicAddress": "Endereço público",
+      "publicAddressHint": "IP público ou domínio do servidor, usado nos links dos clientes.",
+      "agentHint": "Instale o agente no servidor com o segredo exibido ao salvar. O agente se conecta sozinho a este painel, então o servidor não precisa de uma porta de painel aberta.",
+      "agentNewSecret": "Novo segredo",
+      "agentNewSecretConfirm": "O agente que usa o segredo atual será desconectado até que seu arquivo de configuração tenha o novo.",
+      "agentSecretFailed": "Não foi possível criar o segredo do agente",
+      "agentSecretTitle": "Segredo do agente de {name}",
+      "agentSecretOnce": "Copie agora: o segredo é exibido apenas uma vez.",
+      "agentInstallCommand": "Comando de instalação (execute na pasta com os arquivos do agente)"
     },
     "settings": {
       "defaultTag": "Padrão",

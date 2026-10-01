@@ -27,6 +27,11 @@ export type trafficLocalApplyAction = z.infer<typeof trafficLocalApplyActionSche
 export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
+export const AgentSecretViewSchema = z.object({
+  secret: z.string(),
+});
+export type AgentSecretView = z.infer<typeof AgentSecretViewSchema>;
+
 export const AllSettingSchema = z.object({
   datepicker: z.string(),
   discordAdminIds: z.string(),
@@ -902,6 +907,7 @@ export const NodeSchema = z.object({
   inboundCount: z.number().int(),
   inboundSyncMode: z.enum(['all', 'selected']),
   inboundTags: z.array(z.string()),
+  kind: z.string(),
   lastError: z.string(),
   lastHeartbeat: z.number().int(),
   latencyMs: z.number().int(),
@@ -938,6 +944,7 @@ export const NodeMutationRequestSchema = z.object({
   id: z.number().int(),
   inboundSyncMode: z.enum(['all', 'selected']),
   inboundTags: z.array(z.string()),
+  kind: z.enum(['panel', 'agent']),
   name: z.string(),
   outboundTag: z.string(),
   pinnedCertSha256: z.string(),
@@ -967,6 +974,7 @@ export const NodeViewSchema = z.object({
   inboundCount: z.number().int(),
   inboundSyncMode: z.string(),
   inboundTags: z.array(z.string()),
+  kind: z.string(),
   lastError: z.string(),
   lastHeartbeat: z.number().int(),
   latencyMs: z.number().int(),

@@ -55,7 +55,13 @@ type XrayAPI struct {
 	grpcClient           *grpc.ClientConn
 	isConnected          bool
 	StatsLastValues      map[string]int64
+	// freshCore makes the next poll count every counter in full; see CountFromZero.
+	freshCore bool
 }
+
+// CountFromZero is for a caller that just started the core: no counter can hold
+// traffic from before, so the next poll counts them all instead of baselining.
+func (x *XrayAPI) CountFromZero() { x.freshCore = true }
 
 func getRequiredUserString(user map[string]any, key string) (string, error) {
 	value, ok := user[key]
@@ -778,7 +784,8 @@ func (x *XrayAPI) GetTraffic() ([]*Traffic, []*ClientTraffic, error) {
 	tagTrafficMap := make(map[string]*Traffic)
 	emailTrafficMap := make(map[string]*ClientTraffic)
 
-	baselinePass := len(x.StatsLastValues) == 0
+	baselinePass := len(x.StatsLastValues) == 0 && !x.freshCore
+	x.freshCore = false
 
 	for _, stat := range resp.GetStat() {
 		lastValue, ok := x.StatsLastValues[stat.Name]

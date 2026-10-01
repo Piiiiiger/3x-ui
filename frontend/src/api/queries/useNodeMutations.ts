@@ -5,6 +5,7 @@ import { parseMsg } from '@/utils/zodValidate';
 import { keys } from '@/api/queryKeys';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { ProbeResultSchema, type ProbeResult } from '@/schemas/node';
+import { AgentSecretViewSchema, type AgentSecretView } from '@/generated/zod';
 
 export type { ProbeResult };
 
@@ -99,5 +100,9 @@ export function useNodeMutations() {
       HttpUtil.post<string>('/panel/api/nodes/certFingerprint', payload),
     fetchInbounds: (payload: Partial<NodeRecord>): Promise<Msg<RemoteInboundOption[]>> =>
       HttpUtil.post<RemoteInboundOption[]>('/panel/api/nodes/inbounds', payload),
+    mintAgentSecret: async (id: number): Promise<Msg<AgentSecretView>> => {
+      const raw = await HttpUtil.post(`/panel/api/nodes/agentSecret/${id}`);
+      return parseMsg(raw, AgentSecretViewSchema, 'nodes/agentSecret');
+    },
   };
 }

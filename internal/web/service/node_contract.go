@@ -13,6 +13,7 @@ type NodeView struct {
 	Id                  int      `json:"id" example:"1"`
 	Name                string   `json:"name" example:"edge-1"`
 	Remark              string   `json:"remark" example:"Primary edge"`
+	Kind                string   `json:"kind" example:"panel"`
 	Scheme              string   `json:"scheme" example:"https"`
 	Address             string   `json:"address" example:"node.example.com"`
 	Port                int      `json:"port" example:"2053"`
@@ -61,6 +62,7 @@ func toNodeView(n *model.Node) *NodeView {
 		Id:                  n.Id,
 		Name:                n.Name,
 		Remark:              n.Remark,
+		Kind:                n.Kind,
 		Scheme:              n.Scheme,
 		Address:             n.Address,
 		Port:                n.Port,
@@ -110,6 +112,11 @@ func toNodeViews(nodes []*model.Node) []*NodeView {
 	return views
 }
 
+// AgentSecretView carries a freshly minted agent secret; it is shown only once.
+type AgentSecretView struct {
+	Secret string `json:"secret" example:"q3vE0mXo1c8lYk2Rr9tW4uZp6aSd7fGh8jKl0zXcVbN"`
+}
+
 // NodeMutationRequest is the node write/probe contract. ApiToken is accepted
 // only as input. On update, nil means keep the stored token; replacement and
 // clearing are explicit and mutually exclusive.
@@ -117,9 +124,10 @@ type NodeMutationRequest struct {
 	Id                  int      `json:"id" form:"id"`
 	Name                string   `json:"name" form:"name" validate:"required"`
 	Remark              string   `json:"remark" form:"remark"`
+	Kind                string   `json:"kind" form:"kind" validate:"omitempty,oneof=panel agent"`
 	Scheme              string   `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https"`
 	Address             string   `json:"address" form:"address" validate:"required"`
-	Port                int      `json:"port" form:"port" validate:"gte=1,lte=65535"`
+	Port                int      `json:"port" form:"port" validate:"omitempty,gte=1,lte=65535"`
 	BasePath            string   `json:"basePath" form:"basePath"`
 	ApiToken            *string  `json:"apiToken,omitempty" form:"apiToken"`
 	ClearApiToken       bool     `json:"clearApiToken,omitempty" form:"clearApiToken"`
@@ -152,11 +160,11 @@ func (r *NodeMutationRequest) validateCredentials(create bool) error {
 		if r.ClearApiToken {
 			return common.NewError("credentials cannot be cleared while creating a node")
 		}
-		if r.ApiToken == nil && r.TlsVerifyMode != "mtls" {
+		if r.ApiToken == nil && r.TlsVerifyMode != "mtls" && r.Kind != model.NodeKindAgent {
 			return common.NewError("apiToken is required unless mtls is enabled")
 		}
 	}
-	if r.ClearApiToken && r.Enable && r.TlsVerifyMode != "mtls" {
+	if r.ClearApiToken && r.Enable && r.TlsVerifyMode != "mtls" && r.Kind != model.NodeKindAgent {
 		return common.NewError("disable the node or enable mtls before clearing its apiToken")
 	}
 	return nil
@@ -167,6 +175,7 @@ func (r *NodeMutationRequest) toNode() *model.Node {
 		Id:                  r.Id,
 		Name:                r.Name,
 		Remark:              r.Remark,
+		Kind:                r.Kind,
 		Scheme:              r.Scheme,
 		Address:             r.Address,
 		Port:                r.Port,

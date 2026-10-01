@@ -5,6 +5,7 @@ export const NodeRecordSchema = z
     id: z.number(),
     name: z.string().optional(),
     remark: z.string().optional(),
+    kind: z.enum(['panel', 'agent']).optional(),
     scheme: z.string().optional(),
     address: z.string().optional(),
     port: z.number().optional(),
@@ -66,6 +67,7 @@ export const NodeFormSchema = z
     id: z.number().optional(),
     name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
     remark: z.string().optional(),
+    kind: z.enum(['panel', 'agent']).default('panel'),
     scheme: z.enum(['http', 'https']),
     address: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
     port: z.number().int().min(1).max(65535),
@@ -88,7 +90,13 @@ export const NodeFormSchema = z
     outboundTag: z.string().optional(),
   })
   .superRefine((val, ctx) => {
-    if (val.tlsVerifyMode !== 'mtls' && val.apiToken.length === 0 && !val.hasStoredToken) {
+    // An agent dials in with its own secret; only a panel node needs a token.
+    if (
+      val.kind === 'panel' &&
+      val.tlsVerifyMode !== 'mtls' &&
+      val.apiToken.length === 0 &&
+      !val.hasStoredToken
+    ) {
       ctx.addIssue({
         code: 'custom',
         path: ['apiToken'],

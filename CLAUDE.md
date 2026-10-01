@@ -51,6 +51,8 @@ file locations when it can answer in one hop.
   listeners, per-peer IPv6 egress aliases.
 - `internal/pia/` — PIA WireGuard protocol client (auth, signed server list, `/addKey`).
 - `internal/sub/` — subscription server (raw / JSON / Clash).
+- `cmd/pigger-agent/` + `internal/agent/` — the lightweight agent behind agent nodes
+  (embedded Xray, dials the panel); `internal/agentproto/` is its wire format.
 - `internal/eventbus/` — in-process pub/sub (outbound/node health, xray.crash,
   cpu.high, memory.high, login.attempt).
 - `internal/logger/`, `internal/util/` (link, crypto, sys, ldap, …),

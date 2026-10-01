@@ -9,6 +9,7 @@ import {
   InputNumber,
   Modal,
   Row,
+  Segmented,
   Select,
   Switch,
   message,
@@ -20,6 +21,8 @@ import type { Msg } from '@/utils';
 import { NodeFormSchema, type NodeFormValues, type ProbeResult } from '@/schemas/node';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { useOutboundTagGroups } from '@/api/queries/useOutboundTags';
+import type { AgentSecretView } from '@/generated/zod';
+import AgentSecretModal from './AgentSecretModal';
 import './NodeFormModal.css';
 
 type Mode = 'add' | 'edit';
@@ -32,6 +35,7 @@ interface NodeFormModalProps {
   fetchFingerprint: (payload: Partial<NodeRecord>) => Promise<Msg<string>>;
   fetchInbounds: (payload: Partial<NodeRecord>) => Promise<Msg<RemoteInboundOption[]>>;
   save: (payload: Partial<NodeRecord>) => Promise<Msg<unknown>>;
+  mintAgentSecret: (id: number) => Promise<Msg<AgentSecretView>>;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -40,6 +44,7 @@ function defaultValues(): NodeFormValues {
     id: 0,
     name: '',
     remark: '',
+    kind: 'panel',
     scheme: 'https',
     address: '',
     port: 2053,
@@ -64,11 +69,14 @@ export default function NodeFormModal({
   fetchFingerprint,
   fetchInbounds,
   save,
+  mintAgentSecret,
   onOpenChange,
 }: NodeFormModalProps) {
   const { t } = useTranslation();
   const methods = useForm<NodeFormValues>({ defaultValues: defaultValues() });
   const [messageApi, messageContextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
+  const [shownSecret, setShownSecret] = useState<{ secret: string; name: string } | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -79,6 +87,7 @@ export default function NodeFormModal({
   const scheme = useWatch({ control: methods.control, name: 'scheme' }) ?? 'https';
   const tlsVerifyMode = useWatch({ control: methods.control, name: 'tlsVerifyMode' }) ?? 'verify';
   const inboundSyncMode = useWatch({ control: methods.control, name: 'inboundSyncMode' }) ?? 'all';
+  const isAgent = (useWatch({ control: methods.control, name: 'kind' }) ?? 'panel') === 'agent';
   const { data: outboundGroups } = useOutboundTagGroups({ excludeBlackhole: true });
 
   // Outbounds and balancers share one picker (like the panel-outbound selector);
@@ -116,6 +125,7 @@ export default function NodeFormModal({
             ...base,
             ...(node as unknown as Partial<NodeFormValues>),
             id: node.id,
+            kind: node.kind ?? base.kind,
             scheme: (node.scheme as 'http' | 'https') || base.scheme,
             inboundSyncMode: (node.inboundSyncMode as 'all' | 'selected') || base.inboundSyncMode,
             inboundTags: node.inboundTags ?? [],
@@ -137,9 +147,20 @@ export default function NodeFormModal({
   const editingWithToken = mode === 'edit' && Boolean(node?.hasApiToken);
 
   function buildPayload(values: NodeFormValues): Partial<NodeRecord> {
+    if (values.kind === 'agent') {
+      return {
+        id: values.id || 0,
+        kind: 'agent',
+        name: values.name.trim(),
+        remark: values.remark?.trim() || '',
+        address: values.address.trim(),
+        enable: values.enable,
+      };
+    }
     const token = values.apiToken.trim();
     const payload: Partial<NodeRecord> = {
       id: values.id || 0,
+      kind: 'panel',
       name: values.name.trim(),
       remark: values.remark?.trim() || '',
       scheme: values.scheme,
@@ -208,6 +229,40 @@ export default function NodeFormModal({
     }
   }
 
+  // A secret is shown once; the agent on that server needs it to dial in.
+  async function revealNewSecret(id: number, name: string) {
+    const msg = await mintAgentSecret(id);
+    if (msg?.success && msg.obj) {
+      setShownSecret({ secret: msg.obj.secret, name });
+    } else {
+      messageApi.error(msg?.msg || t('pages.nodes.agentSecretFailed'));
+    }
+  }
+
+  function confirmNewSecret() {
+    if (!node?.id) return;
+    const { id, name } = node;
+    modal.confirm({
+      title: t('pages.nodes.agentNewSecret'),
+      content: t('pages.nodes.agentNewSecretConfirm'),
+      okText: t('confirm'),
+      cancelText: t('cancel'),
+      onOk: () => revealNewSecret(id, name || ''),
+    });
+  }
+
+  async function saveAgent(payload: Partial<NodeRecord>) {
+    const msg = await save(payload);
+    if (!msg?.success) return;
+    onOpenChange(false);
+    const created = (msg.obj as { id?: number } | null)?.id;
+    const id = mode === 'edit' ? node?.id : created;
+    // A new agent, or a panel node turned into one, has no secret yet.
+    if (id && (mode === 'add' || node?.kind !== 'agent')) {
+      await revealNewSecret(id, payload.name || '');
+    }
+  }
+
   async function onFinish(values: NodeFormValues) {
     const result = NodeFormSchema.safeParse(values);
     if (!result.success) {
@@ -217,6 +272,10 @@ export default function NodeFormModal({
     setSubmitting(true);
     try {
       const payload = buildPayload(result.data);
+      if (result.data.kind === 'agent') {
+        await saveAgent(payload);
+        return;
+      }
       const test = await testConnection(payload);
       const probe = test?.success ? test.obj : null;
       if (!probe || probe.status !== 'online') {
@@ -242,6 +301,12 @@ export default function NodeFormModal({
   return (
     <>
       {messageContextHolder}
+      {modalContextHolder}
+      <AgentSecretModal
+        secret={shownSecret?.secret ?? null}
+        nodeName={shownSecret?.name ?? ''}
+        onClose={() => setShownSecret(null)}
+      />
       <Modal
         open={open}
         title={title}
@@ -255,6 +320,20 @@ export default function NodeFormModal({
       >
         <FormProvider {...methods}>
           <Form layout="vertical">
+            <FormField
+              label={t('pages.nodes.kind')}
+              name="kind"
+              tooltip={t('pages.nodes.kindHint')}
+            >
+              <Segmented
+                block
+                options={[
+                  { value: 'panel', label: t('pages.nodes.kindPanel') },
+                  { value: 'agent', label: t('pages.nodes.kindAgent') },
+                ]}
+              />
+            </FormField>
+
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <FormField
@@ -273,48 +352,55 @@ export default function NodeFormModal({
             </Row>
 
             <Row gutter={16}>
-              <Col xs={24} md={6}>
+              {!isAgent && (
+                <Col xs={24} md={6}>
+                  <FormField
+                    label={t('pages.nodes.scheme')}
+                    name="scheme"
+                    onAfterChange={(value) => {
+                      if (value === 'http') methods.setValue('tlsVerifyMode', 'skip');
+                    }}
+                  >
+                    <Select
+                      options={[
+                        { value: 'https', label: 'https' },
+                        { value: 'http', label: 'http' },
+                      ]}
+                    />
+                  </FormField>
+                </Col>
+              )}
+              <Col xs={24} md={isAgent ? 24 : 12}>
                 <FormField
-                  label={t('pages.nodes.scheme')}
-                  name="scheme"
-                  onAfterChange={(value) => {
-                    if (value === 'http') methods.setValue('tlsVerifyMode', 'skip');
-                  }}
-                >
-                  <Select
-                    options={[
-                      { value: 'https', label: 'https' },
-                      { value: 'http', label: 'http' },
-                    ]}
-                  />
-                </FormField>
-              </Col>
-              <Col xs={24} md={12}>
-                <FormField
-                  label={t('pages.nodes.address')}
+                  label={isAgent ? t('pages.nodes.publicAddress') : t('pages.nodes.address')}
+                  tooltip={isAgent ? t('pages.nodes.publicAddressHint') : undefined}
                   name="address"
                   rules={{ validate: rhfZodValidate(NodeFormSchema.shape.address) }}
                 >
                   <Input placeholder={t('pages.nodes.addressPlaceholder')} />
                 </FormField>
               </Col>
-              <Col xs={24} md={6}>
-                <FormField
-                  label={t('pages.nodes.port')}
-                  name="port"
-                  rules={{ validate: rhfZodValidate(NodeFormSchema.shape.port) }}
-                >
-                  <InputNumber min={1} max={65535} style={{ width: '100%' }} />
-                </FormField>
-              </Col>
+              {!isAgent && (
+                <Col xs={24} md={6}>
+                  <FormField
+                    label={t('pages.nodes.port')}
+                    name="port"
+                    rules={{ validate: rhfZodValidate(NodeFormSchema.shape.port) }}
+                  >
+                    <InputNumber min={1} max={65535} style={{ width: '100%' }} />
+                  </FormField>
+                </Col>
+              )}
             </Row>
 
             <Row gutter={16}>
-              <Col xs={24} md={12}>
-                <FormField label={t('pages.nodes.basePath')} name="basePath">
-                  <Input placeholder="/" />
-                </FormField>
-              </Col>
+              {!isAgent && (
+                <Col xs={24} md={12}>
+                  <FormField label={t('pages.nodes.basePath')} name="basePath">
+                    <Input placeholder="/" />
+                  </FormField>
+                </Col>
+              )}
               <Col xs={24} md={12}>
                 <FormField label={t('pages.nodes.enable')} name="enable" valueProp="checked">
                   <Switch />
@@ -322,165 +408,183 @@ export default function NodeFormModal({
               </Col>
             </Row>
 
-            <FormField
-              label={t('pages.nodes.allowPrivateAddress')}
-              name="allowPrivateAddress"
-              valueProp="checked"
-              tooltip={t('pages.nodes.allowPrivateAddressHint')}
-            >
-              <Switch />
-            </FormField>
-
-            <FormField
-              label={t('pages.nodes.tlsVerifyMode')}
-              name="tlsVerifyMode"
-              tooltip={t('pages.nodes.tlsVerifyModeHint')}
-            >
-              <Select
-                disabled={scheme === 'http'}
-                options={[
-                  { value: 'verify', label: t('pages.nodes.tlsVerify') },
-                  { value: 'pin', label: t('pages.nodes.tlsPin') },
-                  { value: 'skip', label: t('pages.nodes.tlsSkip') },
-                  { value: 'mtls', label: t('pages.nodes.tlsMtls') },
-                ]}
-              />
-            </FormField>
-
-            {tlsVerifyMode === 'skip' && (
-              <Alert
-                type="warning"
-                showIcon
-                style={{ marginBottom: 16 }}
-                title={t('pages.nodes.tlsSkipWarning')}
-              />
-            )}
-
-            {tlsVerifyMode === 'mtls' && (
-              <Alert
-                type="info"
-                showIcon
-                style={{ marginBottom: 16 }}
-                title={t('pages.nodes.mtlsFormHint')}
-              />
-            )}
-
-            {tlsVerifyMode === 'pin' && (
-              <FormField
-                label={t('pages.nodes.pinnedCert')}
-                name="pinnedCertSha256"
-                tooltip={t('pages.nodes.pinnedCertHint')}
-              >
-                <Input.Search
-                  placeholder={t('pages.nodes.pinnedCertPlaceholder')}
-                  enterButton={t('pages.nodes.fetchPin')}
-                  loading={fetchingPin}
-                  onSearch={onFetchPin}
+            {isAgent && (
+              <>
+                <Alert
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                  title={t('pages.nodes.agentHint')}
                 />
-              </FormField>
+                {mode === 'edit' && node?.kind === 'agent' && (
+                  <Button onClick={confirmNewSecret}>{t('pages.nodes.agentNewSecret')}</Button>
+                )}
+              </>
             )}
 
-            <FormField
-              label={t('pages.nodes.apiToken')}
-              name="apiToken"
-              rules={{ validate: rhfZodValidate(NodeFormSchema.shape.apiToken) }}
-              tooltip={t('pages.nodes.apiTokenHint')}
-              extra={editingWithToken ? t('pages.nodes.apiTokenKeepHint') : undefined}
-            >
-              <Input.Password
-                placeholder={
-                  editingWithToken
-                    ? t('pages.nodes.apiTokenKeepHint')
-                    : t('pages.nodes.apiTokenPlaceholder')
-                }
-              />
-            </FormField>
+            {!isAgent && (
+              <>
+                <FormField
+                  label={t('pages.nodes.allowPrivateAddress')}
+                  name="allowPrivateAddress"
+                  valueProp="checked"
+                  tooltip={t('pages.nodes.allowPrivateAddressHint')}
+                >
+                  <Switch />
+                </FormField>
 
-            <FormField
-              label={t('pages.nodes.outboundTag')}
-              name="outboundTag"
-              tooltip={t('pages.nodes.outboundTagHint')}
-              transform={{ input: (v) => (v as string) || undefined }}
-            >
-              <Select
-                allowClear
-                showSearch
-                placeholder={t('pages.nodes.outboundTagPlaceholder')}
-                options={outboundOptions}
-              />
-            </FormField>
+                <FormField
+                  label={t('pages.nodes.tlsVerifyMode')}
+                  name="tlsVerifyMode"
+                  tooltip={t('pages.nodes.tlsVerifyModeHint')}
+                >
+                  <Select
+                    disabled={scheme === 'http'}
+                    options={[
+                      { value: 'verify', label: t('pages.nodes.tlsVerify') },
+                      { value: 'pin', label: t('pages.nodes.tlsPin') },
+                      { value: 'skip', label: t('pages.nodes.tlsSkip') },
+                      { value: 'mtls', label: t('pages.nodes.tlsMtls') },
+                    ]}
+                  />
+                </FormField>
 
-            <FormField
-              label={t('pages.nodes.inboundSyncMode')}
-              name="inboundSyncMode"
-              tooltip={t('pages.nodes.inboundSyncModeHint')}
-            >
-              <Select
-                options={[
-                  { value: 'all', label: t('pages.nodes.allInbounds') },
-                  { value: 'selected', label: t('pages.nodes.selectedInbounds') },
-                ]}
-              />
-            </FormField>
+                {tlsVerifyMode === 'skip' && (
+                  <Alert
+                    type="warning"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                    title={t('pages.nodes.tlsSkipWarning')}
+                  />
+                )}
 
-            {inboundSyncMode === 'selected' && (
-              <FormField
-                label={t('pages.nodes.inboundTags')}
-                name="inboundTags"
-                tooltip={t('pages.nodes.inboundTagsHint')}
-              >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  loading={fetchingInbounds}
-                  placeholder={t('pages.nodes.inboundTagsPlaceholder')}
-                  popupRender={(menu) => (
-                    <>
-                      <Button
-                        type="text"
-                        block
-                        loading={fetchingInbounds}
-                        onClick={onFetchInbounds}
-                      >
-                        {t('pages.nodes.loadInbounds')}
-                      </Button>
-                      {menu}
-                    </>
-                  )}
-                  options={inboundOptions.map((inbound) => ({
-                    value: inbound.tag,
-                    label: `${inbound.remark || inbound.tag}${inbound.protocol ? ` (${inbound.protocol}:${inbound.port || 0})` : ''}`,
-                  }))}
-                />
-              </FormField>
-            )}
+                {tlsVerifyMode === 'mtls' && (
+                  <Alert
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                    title={t('pages.nodes.mtlsFormHint')}
+                  />
+                )}
 
-            <div className="test-row">
-              <Button type="default" loading={testing} onClick={onTest}>
-                {t('pages.nodes.testConnection')}
-              </Button>
-              {testResult && (
-                <div className="test-result">
-                  {testResult.status === 'online' ? (
-                    <Alert
-                      type="success"
-                      showIcon
-                      title={t('pages.nodes.connectionOk', { ms: testResult.latencyMs })}
-                      description={
-                        testResult.xrayVersion ? `Xray ${testResult.xrayVersion}` : undefined
-                      }
+                {tlsVerifyMode === 'pin' && (
+                  <FormField
+                    label={t('pages.nodes.pinnedCert')}
+                    name="pinnedCertSha256"
+                    tooltip={t('pages.nodes.pinnedCertHint')}
+                  >
+                    <Input.Search
+                      placeholder={t('pages.nodes.pinnedCertPlaceholder')}
+                      enterButton={t('pages.nodes.fetchPin')}
+                      loading={fetchingPin}
+                      onSearch={onFetchPin}
                     />
-                  ) : (
-                    <Alert
-                      type="error"
-                      showIcon
-                      title={t('pages.nodes.connectionFailed')}
-                      description={testResult.error}
+                  </FormField>
+                )}
+
+                <FormField
+                  label={t('pages.nodes.apiToken')}
+                  name="apiToken"
+                  rules={{ validate: rhfZodValidate(NodeFormSchema.shape.apiToken) }}
+                  tooltip={t('pages.nodes.apiTokenHint')}
+                  extra={editingWithToken ? t('pages.nodes.apiTokenKeepHint') : undefined}
+                >
+                  <Input.Password
+                    placeholder={
+                      editingWithToken
+                        ? t('pages.nodes.apiTokenKeepHint')
+                        : t('pages.nodes.apiTokenPlaceholder')
+                    }
+                  />
+                </FormField>
+
+                <FormField
+                  label={t('pages.nodes.outboundTag')}
+                  name="outboundTag"
+                  tooltip={t('pages.nodes.outboundTagHint')}
+                  transform={{ input: (v) => (v as string) || undefined }}
+                >
+                  <Select
+                    allowClear
+                    showSearch
+                    placeholder={t('pages.nodes.outboundTagPlaceholder')}
+                    options={outboundOptions}
+                  />
+                </FormField>
+
+                <FormField
+                  label={t('pages.nodes.inboundSyncMode')}
+                  name="inboundSyncMode"
+                  tooltip={t('pages.nodes.inboundSyncModeHint')}
+                >
+                  <Select
+                    options={[
+                      { value: 'all', label: t('pages.nodes.allInbounds') },
+                      { value: 'selected', label: t('pages.nodes.selectedInbounds') },
+                    ]}
+                  />
+                </FormField>
+
+                {inboundSyncMode === 'selected' && (
+                  <FormField
+                    label={t('pages.nodes.inboundTags')}
+                    name="inboundTags"
+                    tooltip={t('pages.nodes.inboundTagsHint')}
+                  >
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      loading={fetchingInbounds}
+                      placeholder={t('pages.nodes.inboundTagsPlaceholder')}
+                      popupRender={(menu) => (
+                        <>
+                          <Button
+                            type="text"
+                            block
+                            loading={fetchingInbounds}
+                            onClick={onFetchInbounds}
+                          >
+                            {t('pages.nodes.loadInbounds')}
+                          </Button>
+                          {menu}
+                        </>
+                      )}
+                      options={inboundOptions.map((inbound) => ({
+                        value: inbound.tag,
+                        label: `${inbound.remark || inbound.tag}${inbound.protocol ? ` (${inbound.protocol}:${inbound.port || 0})` : ''}`,
+                      }))}
                     />
+                  </FormField>
+                )}
+
+                <div className="test-row">
+                  <Button type="default" loading={testing} onClick={onTest}>
+                    {t('pages.nodes.testConnection')}
+                  </Button>
+                  {testResult && (
+                    <div className="test-result">
+                      {testResult.status === 'online' ? (
+                        <Alert
+                          type="success"
+                          showIcon
+                          title={t('pages.nodes.connectionOk', { ms: testResult.latencyMs })}
+                          description={
+                            testResult.xrayVersion ? `Xray ${testResult.xrayVersion}` : undefined
+                          }
+                        />
+                      ) : (
+                        <Alert
+                          type="error"
+                          showIcon
+                          title={t('pages.nodes.connectionFailed')}
+                          description={testResult.error}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </Form>
         </FormProvider>
       </Modal>

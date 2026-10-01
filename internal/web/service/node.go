@@ -406,6 +406,16 @@ func (s *NodeService) normalize(n *model.Node) error {
 		return common.NewError(err.Error())
 	}
 	n.Address = addr
+	if n.Kind == model.NodeKindAgent {
+		// An agent dials in and its config comes whole from this panel, so the
+		// outbound bridge and inbound selection that steer node calls never apply.
+		n.OutboundTag = ""
+		n.InboundSyncMode = "all"
+		n.InboundTags = nil
+		n.BasePath = normalizeBasePath(n.BasePath)
+		return nil
+	}
+	n.Kind = model.NodeKindPanel
 	if n.Port <= 0 || n.Port > 65535 {
 		return common.NewError("node port must be 1-65535")
 	}
@@ -531,6 +541,7 @@ func (s *NodeService) Update(id int, in *model.Node) error {
 	updates := map[string]any{
 		"name":                  in.Name,
 		"remark":                in.Remark,
+		"kind":                  in.Kind,
 		"scheme":                in.Scheme,
 		"address":               in.Address,
 		"port":                  in.Port,
@@ -588,12 +599,13 @@ func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error 
 			return err
 		}
 	}
-	if apiToken == "" && in.Enable && in.TlsVerifyMode != "mtls" {
+	if apiToken == "" && in.Enable && in.TlsVerifyMode != "mtls" && !in.IsAgent() {
 		return common.NewError("apiToken is required unless mtls is enabled")
 	}
 	updates := map[string]any{
 		"name":                  in.Name,
 		"remark":                in.Remark,
+		"kind":                  in.Kind,
 		"scheme":                in.Scheme,
 		"address":               in.Address,
 		"port":                  in.Port,
@@ -650,7 +662,7 @@ func (s *NodeService) RuntimeNodeFromRequest(id int, req *NodeMutationRequest) (
 	if err := s.normalize(n); err != nil {
 		return nil, err
 	}
-	if n.ApiToken == "" && n.Enable && n.TlsVerifyMode != "mtls" {
+	if n.ApiToken == "" && n.Enable && n.TlsVerifyMode != "mtls" && !n.IsAgent() {
 		return nil, common.NewError("apiToken is required unless mtls is enabled")
 	}
 	return n, nil
@@ -1112,6 +1124,9 @@ func (s *NodeService) AggregateNodeMetric(id int, metric string, bucketSeconds i
 }
 
 func (s *NodeService) Probe(ctx context.Context, n *model.Node) (HeartbeatPatch, error) {
+	if n.IsAgent() {
+		return s.probeAgent(n)
+	}
 	proxyURL := ""
 	if n.OutboundTag != "" {
 		if mgr := runtime.GetManager(); mgr != nil {

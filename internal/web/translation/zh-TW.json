@@ -1226,7 +1226,20 @@
       "fetchPin": "取得",
       "pinFetched": "已取得節點目前憑證",
       "pinFetchFailed": "無法取得憑證",
-      "intro": "由本面板管理的遠端面板，包含狀態、版本與入站。"
+      "intro": "由本面板管理的遠端面板，包含狀態、版本與入站。",
+      "kind": "類型",
+      "kindHint": "面板節點是本面板去呼叫的完整 3x-ui 面板。Agent 是內建 Xray 的小程式，由它主動連線本面板，所有設定都保存在本面板。",
+      "kindPanel": "面板",
+      "kindAgent": "Agent",
+      "publicAddress": "公網位址",
+      "publicAddressHint": "伺服器的公網 IP 或網域，用於用戶端連結。",
+      "agentHint": "儲存後會顯示一次金鑰，用它在伺服器上安裝 agent。agent 會自行連線本面板，伺服器上不需要開放面板連接埠。",
+      "agentNewSecret": "重新產生金鑰",
+      "agentNewSecretConfirm": "使用目前金鑰的 agent 會中斷連線，直到它的設定檔換成新金鑰。",
+      "agentSecretFailed": "無法產生 agent 金鑰",
+      "agentSecretTitle": "{name} 的 agent 金鑰",
+      "agentSecretOnce": "請立即複製：金鑰只會顯示這一次。",
+      "agentInstallCommand": "安裝指令（在放有 agent 檔案的資料夾中執行）"
     },
     "settings": {
       "defaultTag": "預設",

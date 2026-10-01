@@ -190,3 +190,33 @@ func TestGetTrafficSkipsAPIInboundAndPrunes(t *testing.T) {
 		t.Fatal("baselines for stats that no longer exist were not pruned")
 	}
 }
+
+// An agent polls the core it just started; counting that first poll as a
+// baseline would drop every byte moved before it.
+func TestGetTrafficCountsAFreshCoreFromZero(t *testing.T) {
+	api := startFakeStats(t, [][]*statsService.Stat{
+		{stat("user>>>alice>>>traffic>>>uplink", 5000)},
+		{stat("user>>>alice>>>traffic>>>uplink", 6000)},
+	})
+	api.CountFromZero()
+
+	_, clients, err := api.GetTraffic()
+	if err != nil {
+		t.Fatalf("GetTraffic: %v", err)
+	}
+	if got := clientTrafficByEmail(t, clients)["alice"]; got == nil || got.Up != 5000 {
+		t.Fatalf("first poll of a fresh core = %+v, want alice up 5000", got)
+	}
+	_, clients, err = api.GetTraffic()
+	if err != nil {
+		t.Fatalf("GetTraffic: %v", err)
+	}
+	if got := clientTrafficByEmail(t, clients)["alice"]; got == nil || got.Up != 1000 {
+		t.Fatalf("second poll = %+v, want the 1000 delta", got)
+	}
+	// The mark covers one poll only: re-attaching to a core later baselines again.
+	api.StatsLastValues = map[string]int64{}
+	if _, clients, err = api.GetTraffic(); err != nil || len(clients) != 0 {
+		t.Fatalf("poll after re-attaching = %+v, %v; want a baseline-only poll", clients, err)
+	}
+}

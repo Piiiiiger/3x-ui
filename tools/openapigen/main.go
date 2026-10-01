@@ -112,6 +112,7 @@ func run(root, outDir string) error {
 				"MLKEM768Response",
 				"NodeMutationRequest",
 				"NodeView",
+				"AgentSecretView",
 				"ProbeResultUI",
 				"RealityScanResult",
 				"GeodataTokenIssue",

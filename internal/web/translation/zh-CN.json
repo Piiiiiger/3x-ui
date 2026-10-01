@@ -1226,7 +1226,20 @@
       "fetchPin": "获取",
       "pinFetched": "已获取节点当前证书",
       "pinFetchFailed": "无法获取证书",
-      "intro": "由本面板管理的远程面板，包括状态、版本和入站。"
+      "intro": "由本面板管理的远程面板，包括状态、版本和入站。",
+      "kind": "类型",
+      "kindHint": "面板节点是本面板去调用的完整 3x-ui 面板。Agent 是内置 Xray 的小程序，由它主动连接本面板，所有设置都保存在本面板。",
+      "kindPanel": "面板",
+      "kindAgent": "Agent",
+      "publicAddress": "公网地址",
+      "publicAddressHint": "服务器的公网 IP 或域名，用于客户端链接。",
+      "agentHint": "保存后会显示一次密钥，用它在服务器上安装 agent。agent 会自己连接本面板，服务器上不需要开放面板端口。",
+      "agentNewSecret": "重新生成密钥",
+      "agentNewSecretConfirm": "使用当前密钥的 agent 会断开，直到它的配置文件换成新密钥。",
+      "agentSecretFailed": "无法生成 agent 密钥",
+      "agentSecretTitle": "{name} 的 agent 密钥",
+      "agentSecretOnce": "请立即复制：密钥只显示这一次。",
+      "agentInstallCommand": "安装命令（在放有 agent 文件的目录中运行）"
     },
     "settings": {
       "defaultTag": "默认",

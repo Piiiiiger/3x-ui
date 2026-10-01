@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -41,10 +42,27 @@ func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.POST("/inbounds", a.inbounds)
 	g.POST("/probe/:id", a.probe)
 	g.POST("/updatePanel", a.updatePanel)
+	g.POST("/agentSecret/:id", a.agentSecret)
 	g.GET("/history/:id/:metric/:bucket", a.history)
 	g.POST("/mtls/ca", a.mtlsCa)
 	g.POST("/mtls/trustCA", a.setMtlsTrustCA)
 	g.POST("/mtls/reloadClient", a.reloadMtlsClient)
+}
+
+// agentSecret gives an agent node a new secret, shown once; the old secret stops
+// working and the agent connected with it is dropped.
+func (a *NodeController) agentSecret(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "get"), err)
+		return
+	}
+	secret, err := a.nodeService.MintAgentSecret(id)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), err)
+		return
+	}
+	jsonObj(c, service.AgentSecretView{Secret: secret}, nil)
 }
 
 // reloadMtlsClient validates the credential currently stored by the master and
@@ -144,7 +162,9 @@ func (a *NodeController) add(c *gin.Context) {
 	if !ok {
 		return
 	}
-	if n.OutboundTag == "" {
+	// An agent dials in only once it is installed with this node's secret.
+	isAgent := n.Kind == model.NodeKindAgent
+	if n.OutboundTag == "" && !isAgent {
 		if err := a.ensureReachable(c, n, 0); err != nil {
 			jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.add"), err)
 			return
@@ -155,7 +175,7 @@ func (a *NodeController) add(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.add"), err)
 		return
 	}
-	if n.OutboundTag != "" {
+	if n.OutboundTag != "" && !isAgent {
 		if err := a.xrayService.RestartXray(false); err != nil {
 			logger.Warning("apply node outbound bridge failed:", err)
 		}
@@ -182,7 +202,8 @@ func (a *NodeController) update(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.obtain"), err)
 		return
 	}
-	if n.OutboundTag == "" && old.OutboundTag == "" && (!n.ClearApiToken || n.Enable) {
+	isAgent := n.Kind == model.NodeKindAgent
+	if n.OutboundTag == "" && old.OutboundTag == "" && (!n.ClearApiToken || n.Enable) && !isAgent {
 		if err := a.ensureReachable(c, n, id); err != nil {
 			jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), err)
 			return
@@ -196,9 +217,11 @@ func (a *NodeController) update(c *gin.Context) {
 		if err := a.xrayService.RestartXray(false); err != nil {
 			logger.Warning("apply node outbound bridge change failed:", err)
 		}
-		if err := a.ensureReachable(c, n, id); err != nil {
-			jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), err)
-			return
+		if !isAgent {
+			if err := a.ensureReachable(c, n, id); err != nil {
+				jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), err)
+				return
+			}
 		}
 	}
 	jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), nil)

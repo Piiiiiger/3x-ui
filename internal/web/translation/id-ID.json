@@ -1226,7 +1226,20 @@
       "fetchPin": "Ambil",
       "pinFetched": "Berhasil mengambil sertifikat node saat ini",
       "pinFetchFailed": "Tidak dapat mengambil sertifikat",
-      "intro": "Panel jarak jauh yang dikelola dari sini, dengan status, versi, dan inbound-nya."
+      "intro": "Panel jarak jauh yang dikelola dari sini, dengan status, versi, dan inbound-nya.",
+      "kind": "Jenis",
+      "kindHint": "Node panel adalah panel 3x-ui lengkap yang dipanggil panel ini. Agen adalah program kecil dengan Xray bawaan yang terhubung sendiri ke panel ini; semua pengaturannya disimpan di sini.",
+      "kindPanel": "Panel",
+      "kindAgent": "Agen",
+      "publicAddress": "Alamat publik",
+      "publicAddressHint": "IP publik atau domain server, dipakai di tautan klien.",
+      "agentHint": "Pasang agen di server dengan rahasia yang ditampilkan setelah menyimpan. Agen terhubung sendiri ke panel ini, jadi server tidak perlu port panel yang terbuka.",
+      "agentNewSecret": "Rahasia baru",
+      "agentNewSecretConfirm": "Agen yang memakai rahasia saat ini akan terputus sampai file konfigurasinya berisi rahasia baru.",
+      "agentSecretFailed": "Gagal membuat rahasia agen",
+      "agentSecretTitle": "Rahasia agen untuk {name}",
+      "agentSecretOnce": "Salin sekarang: rahasia hanya ditampilkan sekali.",
+      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)"
     },
     "settings": {
       "defaultTag": "Bawaan",

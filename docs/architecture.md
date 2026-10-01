@@ -357,6 +357,33 @@ inbound edits converge once it reconnects.
 - Edits to an offline node not applying on reconnect → dirty/reconcile logic in `service/inbound_node.go` + `service/node.go` (`MarkNodeDirty`/`ClearNodeDirty`/`NodeSyncState`).
 - TLS/mTLS handshake failures → `runtime/tls_client.go`, `service/node_mtls.go`, `service/node.go` (`FetchCertFingerprint`).
 
+**Agent nodes.** A node with `Kind = "agent"` is a `pigger-agent` (`cmd/pigger-agent`,
+`internal/agent`) rather than a 3x-ui panel: one small program with Xray built in that dials
+this panel over a WebSocket and runs whatever Xray config the panel sends. The panel owns all
+of an agent's state; nothing is adopted back from it.
+
+- **Wire format:** `internal/agentproto` (hello / status / traffic / result from the agent,
+  apply / restart / ack from the panel). Endpoint `GET <webBasePath>agent/connect`,
+  authenticated by the node's secret (`controller/agent.go`; only a SHA-256 is stored,
+  minted by `nodes/agentSecret`).
+- **Connections:** `runtime/agent_hub.go` keeps one session per node. `AgentRuntime`
+  (`runtime/agent_runtime.go`) is what `RuntimeFor` returns for an agent: every change only
+  nudges the sync loop, resets are no-ops (the panel's counters are the only ones).
+- **Config:** `XrayService.GetAgentXrayConfig` builds the agent's whole config from the same
+  template and per-inbound code as the panel's own (without the panel-only bridges).
+  `job/agent_sync_job.go` pushes it on a hash change every 5 s and on every nudge; the agent
+  applies it through the core API when it can (`xray.ApplyHotDiff`), else restarts its core.
+- **Traffic:** the agent reports deltas tagged `(instance, seq)`;
+  `InboundService.AddAgentTraffic` stores the sequence in the same transaction as the usage,
+  so a report resent after a lost ack counts once. Online clients and IPs arrive with the
+  status and are keyed by `effectiveNodeKey`, like a panel node's.
+- **Status:** `NodeService.Probe` reads the agent's last status from the hub, so the
+  heartbeat job, node events and history charts work unchanged.
+
+Agent bugs: config not reaching the agent → `job/agent_sync_job.go` + `service/agent.go`
+(`SyncAgent`); usage missing or doubled → `AddAgentTraffic` + `internal/agent/outbox.go`;
+agent shown offline → `runtime/agent_hub.go` + `NodeService.probeAgent`.
+
 ### 5.3 Traffic accounting
 
 Per-client and per-inbound up/down counters originate from Xray's stats API and are persisted

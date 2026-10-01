@@ -44,8 +44,9 @@ interface NodeListProps {
   onUpdateSelected: () => void;
 }
 
+// An agent has no panel to update; it is upgraded by replacing its binary.
 function isUpdateEligible(n: NodeRecord): boolean {
-  return !!n.enable && n.status === 'online';
+  return !!n.enable && n.status === 'online' && n.kind !== 'agent';
 }
 
 interface NodeRow extends NodeRecord {
@@ -200,7 +201,10 @@ export default function NodeList({
   const dataSource = useMemo<NodeRow[]>(() => {
     const toRow = (n: NodeRecord): NodeRow => ({
       ...n,
-      url: `${n.scheme}://${n.address}:${n.port}${n.basePath || '/'}`,
+      url:
+        n.kind === 'agent'
+          ? n.address || ''
+          : `${n.scheme}://${n.address}:${n.port}${n.basePath || '/'}`,
       key: n.transitive ? `t-${n.guid || ''}` : n.id,
     });
     const childrenByParent = new Map<string, NodeRecord[]>();
@@ -334,6 +338,9 @@ export default function NodeList({
                 <ApartmentOutlined style={{ marginInlineEnd: 6, opacity: 0.6 }} />
               )}
               {record.name}
+              {record.kind === 'agent' && (
+                <Tag style={{ marginInlineStart: 6 }}>{t('pages.nodes.kindAgent')}</Tag>
+              )}
             </span>
             {record.remark && <span className="remark">{record.remark}</span>}
           </div>
@@ -368,16 +375,19 @@ export default function NodeList({
         ),
         dataIndex: 'url',
         ellipsis: true,
-        render: (_value, record) => (
-          <a
-            href={record.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={showAddress ? 'address-visible' : 'address-hidden'}
-          >
-            {record.url}
-          </a>
-        ),
+        render: (_value, record) =>
+          record.kind === 'agent' ? (
+            <span className={showAddress ? 'address-visible' : 'address-hidden'}>{record.url}</span>
+          ) : (
+            <a
+              href={record.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={showAddress ? 'address-visible' : 'address-hidden'}
+            >
+              {record.url}
+            </a>
+          ),
       },
       {
         title: t('pages.nodes.status'),
