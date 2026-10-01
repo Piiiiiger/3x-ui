@@ -337,6 +337,10 @@ func NewSUBController(g *gin.RouterGroup, options ...SUBControllerOption) *SUBCo
 // initRouter registers HTTP routes for subscription links and JSON endpoints
 // on the provided router group.
 func (a *SUBController) initRouter(g *gin.RouterGroup) {
+	if a.subPath != "/" {
+		// A bare visit to the subscription host lands on the client portal.
+		g.GET("/", func(c *gin.Context) { c.Redirect(http.StatusFound, a.portalPath()) })
+	}
 	gLink := g.Group(a.subPath)
 	gLink.GET(":subid", a.subs)
 	gLink.HEAD(":subid", a.subs)

@@ -1,0 +1,134 @@
+package sub
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	yaml "github.com/goccy/go-yaml"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+)
+
+// A cut-down 妙妙屋X template: proxies: null, groups built on __PROXY_NODES__,
+// a filter-only url-test group and its own MATCH.
+const mmwxStyleTemplate = `port: 7890
+mode: rule
+proxies: null
+proxy-groups:
+  - name: 🔰 节点选择
+    type: select
+    proxies: [__PROXY_NODES__, 🎯 全球直连, 🇸🇬 新加坡（家宽）-Titan]
+  - name: 🇸🇬 新加坡（家宽）-Titan
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    filter: 新加坡
+  - name: 🎯 全球直连
+    type: select
+    proxies: [DIRECT, __PROXY_NODES__]
+rules:
+  - DOMAIN-SUFFIX,cn,🎯 全球直连
+  - MATCH,🔰 节点选择
+`
+
+func TestPlanTemplateRendersLikeMMWX(t *testing.T) {
+	seedSubDB(t)
+	vless := func(email string) string {
+		return `{"clients":[{"id":"11111111-2222-4333-8444-0000000044` + email[:2] + `","email":"` + email + `","subId":"s1","enable":true}],"decryption":"none"}`
+	}
+	db := database.GetDB()
+	for i, tag := range []string{"洛杉矶-DMIT", "新加坡-Titan"} {
+		email := []string{"81@e", "82@e"}[i]
+		ib := seedTunnelSubInbound(t, model.VLESS, tag, "s1", email, vless(email), 4481+i)
+		if err := db.Model(ib).Update("stream_settings", tcpStream).Error; err != nil {
+			t.Fatalf("set stream: %v", err)
+		}
+	}
+	plan := &model.Plan{Name: "Template", ClashRules: mmwxStyleTemplate}
+	if err := db.Create(plan).Error; err != nil {
+		t.Fatalf("create plan: %v", err)
+	}
+	if err := db.Model(&model.ClientRecord{}).Where("sub_id = ?", "s1").Update("plan_id", plan.Id).Error; err != nil {
+		t.Fatalf("assign plan: %v", err)
+	}
+
+	out, _, err := NewSubClashService(false, "", NewSubService("{{INBOUND}}")).GetClash("s1", "req.example.com")
+	if err != nil {
+		t.Fatalf("GetClash: %v", err)
+	}
+	var got struct {
+		Port    int `yaml:"port"`
+		Proxies []struct {
+			Name string `yaml:"name"`
+		} `yaml:"proxies"`
+		Groups []struct {
+			Name    string   `yaml:"name"`
+			Proxies []string `yaml:"proxies"`
+			Filter  string   `yaml:"filter"`
+		} `yaml:"proxy-groups"`
+		Rules []string `yaml:"rules"`
+	}
+	if err := yaml.Unmarshal([]byte(out), &got); err != nil {
+		t.Fatalf("parse %s: %v", out, err)
+	}
+
+	var names []string
+	for _, p := range got.Proxies {
+		names = append(names, p.Name)
+	}
+	assertStrings(t, "proxies", names, []string{"洛杉矶-DMIT", "新加坡-Titan"})
+	if got.Port != 7890 {
+		t.Fatalf("port = %d, want the template's 7890", got.Port)
+	}
+	want := map[string][]string{
+		"🔰 节点选择":           {"洛杉矶-DMIT", "新加坡-Titan", "🎯 全球直连", "🇸🇬 新加坡（家宽）-Titan"},
+		"🇸🇬 新加坡（家宽）-Titan": {"新加坡-Titan"},
+		"🎯 全球直连":           {"DIRECT", "洛杉矶-DMIT", "新加坡-Titan"},
+	}
+	if len(got.Groups) != len(want) {
+		t.Fatalf("groups = %+v, want exactly the template's three", got.Groups)
+	}
+	for _, g := range got.Groups {
+		assertStrings(t, "group "+g.Name, g.Proxies, want[g.Name])
+		if g.Filter != "" {
+			t.Fatalf("group %s still carries filter %q after being filled", g.Name, g.Filter)
+		}
+	}
+	assertStrings(t, "rules", got.Rules, []string{"DOMAIN-SUFFIX,cn,🎯 全球直连", "MATCH,🔰 节点选择"})
+}
+
+// The usage info node is a placeholder socks5 proxy: groups skip it next to real
+// proxies, but keep it when it is all an expired subscription has.
+func TestTemplateGroupsSkipTheInfoNodeUnlessItIsAlone(t *testing.T) {
+	info := map[string]any{"name": "⏳ Expired", "type": "socks5", "server": "127.0.0.1", "port": 1080}
+	node := map[string]any{"name": "洛杉矶-DMIT", "type": "vless", "server": "203.0.113.5", "port": 443}
+	assertStrings(t, "with a node", clashProxyNamesForGroups([]map[string]any{info, node}), []string{"洛杉矶-DMIT"})
+	assertStrings(t, "alone", clashProxyNamesForGroups([]map[string]any{info}), []string{"⏳ Expired"})
+}
+
+func assertStrings(t *testing.T, what string, got, want []string) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("%s = %q, want %q", what, got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("%s = %q, want %q", what, got, want)
+		}
+	}
+}
+
+func TestSubscriptionRootRedirectsToThePortal(t *testing.T) {
+	seedSubDB(t)
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	NewSUBController(router.Group("/"), WithSUBPath("/x/"))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusFound || rec.Header().Get("Location") != "/x/portal" {
+		t.Fatalf("GET / = %d to %q, want 302 to /x/portal", rec.Code, rec.Header().Get("Location"))
+	}
+}

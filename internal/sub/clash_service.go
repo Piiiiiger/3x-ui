@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"net/netip"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -1305,13 +1306,100 @@ func mergeClashRulesYAML(base map[string]any, raw string) error {
 				}
 				continue
 			}
+			// A key left null (templates ship `proxies: null`) means "not set".
+			if value == nil {
+				continue
+			}
 			base[key] = value
 		}
+		expandClashTemplateGroups(base)
 	default:
 		mergeClashRules(base, linesToClashRules(raw))
 	}
 
 	return nil
+}
+
+// clashProxyNodesPlaceholder stands for every generated proxy in a template group,
+// the convention 妙妙屋X templates use.
+const clashProxyNodesPlaceholder = "__PROXY_NODES__"
+
+// expandClashTemplateGroups fills template groups with the generated proxies:
+// __PROXY_NODES__ expands in output order, a filter-only group gets the names it matches.
+func expandClashTemplateGroups(config map[string]any) {
+	groups, ok := asAnySlice(config["proxy-groups"])
+	if !ok {
+		return
+	}
+	names := clashProxyNamesForGroups(config["proxies"])
+	for _, item := range groups {
+		group, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if members, ok := asAnySlice(group["proxies"]); ok && len(members) > 0 {
+			expanded := make([]any, 0, len(members)+len(names))
+			for _, member := range members {
+				if text, _ := member.(string); text == clashProxyNodesPlaceholder {
+					for _, name := range names {
+						expanded = append(expanded, name)
+					}
+					continue
+				}
+				expanded = append(expanded, member)
+			}
+			group["proxies"] = expanded
+			continue
+		}
+		filter, _ := group["filter"].(string)
+		if filter == "" || clashGroupHasSource(group) {
+			continue
+		}
+		pattern, err := regexp.Compile(filter)
+		if err != nil {
+			continue
+		}
+		var matched []any
+		for _, name := range names {
+			if pattern.MatchString(name) {
+				matched = append(matched, name)
+			}
+		}
+		if len(matched) > 0 {
+			group["proxies"] = matched
+			delete(group, "filter")
+		}
+	}
+}
+
+// clashGroupHasSource reports whether Mihomo itself fills the group from providers
+// or from include-all.
+func clashGroupHasSource(group map[string]any) bool {
+	for _, key := range []string{"use", "include-all", "include-all-proxies", "include-all-providers"} {
+		if value, ok := group[key]; ok && value != nil && value != false {
+			return true
+		}
+	}
+	return false
+}
+
+// clashProxyNamesForGroups lists the generated proxy names the way the default PROXY
+// group does, leaving out the info node unless it is the only proxy.
+func clashProxyNamesForGroups(value any) []string {
+	proxies, ok := value.([]map[string]any)
+	if !ok {
+		return nil
+	}
+	names := make([]string, 0, len(proxies))
+	for _, proxy := range proxies {
+		if isDummyProxy(proxy) && len(proxies) > 1 {
+			continue
+		}
+		if name, ok := proxy["name"].(string); ok && name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
 }
 
 // mergeRemoteClashRules lets remote update only the route graph (see
