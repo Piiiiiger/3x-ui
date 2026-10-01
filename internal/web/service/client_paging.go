@@ -133,6 +133,8 @@ const clientSearchCond = `(LOWER(c.email) LIKE ? ESCAPE '\'
 type clientQuery struct {
 	db               *gorm.DB
 	joins            []clientQueryJoin
+	upExpr           string
+	downExpr         string
 	usedExpr         string
 	nowMs            int64
 	expireDiffMs     int64
@@ -151,8 +153,10 @@ func newClientQuery(db *gorm.DB, nowMs, expireDiffMs, trafficDiffBytes int64) cl
 		expireDiffMs:     expireDiffMs,
 		trafficDiffBytes: trafficDiffBytes,
 		joins:            []clientQueryJoin{{sql: "LEFT JOIN client_traffics ct ON ct.email = c.email"}},
-		usedExpr:         "(COALESCE(ct.up, 0) + COALESCE(ct.down, 0))",
+		upExpr:           "COALESCE(ct.up, 0)",
+		downExpr:         "COALESCE(ct.down, 0)",
 	}
+	q.usedExpr = "(" + q.upExpr + " + " + q.downExpr + ")"
 	freshSince := globalTrafficFreshSince()
 	var probe int64
 	err := db.Model(&model.ClientGlobalTraffic{}).
@@ -168,8 +172,9 @@ func newClientQuery(db *gorm.DB, nowMs, expireDiffMs, trafficDiffBytes int64) cl
 			" WHERE updated_at >= ? GROUP BY email) g ON g.email = c.email",
 		args: []any{freshSince},
 	})
-	q.usedExpr = "(CASE WHEN COALESCE(g.up, 0) > COALESCE(ct.up, 0) THEN COALESCE(g.up, 0) ELSE COALESCE(ct.up, 0) END" +
-		" + CASE WHEN COALESCE(g.down, 0) > COALESCE(ct.down, 0) THEN COALESCE(g.down, 0) ELSE COALESCE(ct.down, 0) END)"
+	q.upExpr = "CASE WHEN COALESCE(g.up, 0) > COALESCE(ct.up, 0) THEN COALESCE(g.up, 0) ELSE COALESCE(ct.up, 0) END"
+	q.downExpr = "CASE WHEN COALESCE(g.down, 0) > COALESCE(ct.down, 0) THEN COALESCE(g.down, 0) ELSE COALESCE(ct.down, 0) END"
+	q.usedExpr = "(" + q.upExpr + " + " + q.downExpr + ")"
 	return q
 }
 

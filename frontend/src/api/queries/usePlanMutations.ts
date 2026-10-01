@@ -31,6 +31,7 @@ export function usePlanMutations() {
       queryClient.invalidateQueries({ queryKey: keys.clients.root() }),
       queryClient.invalidateQueries({ queryKey: keys.inbounds.root() }),
       queryClient.invalidateQueries({ queryKey: keys.xray.config() }),
+      queryClient.invalidateQueries({ queryKey: keys.traffic.root() }),
     ]);
   };
 

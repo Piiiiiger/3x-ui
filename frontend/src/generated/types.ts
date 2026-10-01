@@ -403,6 +403,16 @@ export interface ApiTokenView {
   token?: string;
 }
 
+export interface AttentionClient {
+  email: string;
+  enable: boolean;
+  expiryTime: number;
+  planId: number;
+  status: string;
+  totalGB: number;
+  used: number;
+}
+
 export interface Client {
   adTag?: string;
   allowedIPs?: string[];
@@ -1111,6 +1121,27 @@ export interface Traffic {
   IsOutbound: boolean;
   Tag: string;
   Up: number;
+}
+
+export interface TrafficDay {
+  day: string;
+  down: number;
+  up: number;
+}
+
+export interface TrafficOverview {
+  active: number;
+  attention: AttentionClient[];
+  clients: number;
+  daily: TrafficDay[];
+  disabled: number;
+  expired: number;
+  expiring: number;
+  quotaBytes: number;
+  remainingBytes: number;
+  unlimited: number;
+  usedBytes: number;
+  usedUp: number;
 }
 
 export interface TuicClientSettings {

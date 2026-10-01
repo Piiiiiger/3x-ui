@@ -1955,6 +1955,21 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'traffic',
+    title: 'Traffic',
+    description:
+      'Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/traffic/overview',
+        summary:
+          'Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.',
+        responseSchema: 'TrafficOverview',
+      },
+    ],
+  },
+  {
     id: 'backup',
     title: 'Backup',
     description: 'Operations that interact with the configured Telegram bot.',

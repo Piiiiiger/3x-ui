@@ -1647,6 +1647,52 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AttentionClient": {
+    "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
+    "properties": {
+      "email": {
+        "example": "alice",
+        "type": "string"
+      },
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "expiryTime": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "planId": {
+        "example": 1,
+        "type": "integer"
+      },
+      "status": {
+        "example": "expiring",
+        "type": "string"
+      },
+      "totalGB": {
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "used": {
+        "example": 53687091200,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "email",
+      "enable",
+      "expiryTime",
+      "planId",
+      "status",
+      "totalGB",
+      "used"
+    ],
+    "type": "object"
+  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {
@@ -4887,6 +4933,106 @@ export const SCHEMAS: Record<string, unknown> = {
       "IsOutbound",
       "Tag",
       "Up"
+    ],
+    "type": "object"
+  },
+  "TrafficDay": {
+    "description": "TrafficDay is the traffic all clients used on one day of the panel's time zone.",
+    "properties": {
+      "day": {
+        "example": "2026-10-01",
+        "type": "string"
+      },
+      "down": {
+        "example": 4194304,
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "day",
+      "down",
+      "up"
+    ],
+    "type": "object"
+  },
+  "TrafficOverview": {
+    "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+    "properties": {
+      "active": {
+        "example": 9,
+        "type": "integer"
+      },
+      "attention": {
+        "items": {
+          "$ref": "#/components/schemas/AttentionClient"
+        },
+        "type": "array"
+      },
+      "clients": {
+        "example": 12,
+        "type": "integer"
+      },
+      "daily": {
+        "items": {
+          "$ref": "#/components/schemas/TrafficDay"
+        },
+        "type": "array"
+      },
+      "disabled": {
+        "example": 1,
+        "type": "integer"
+      },
+      "expired": {
+        "example": 1,
+        "type": "integer"
+      },
+      "expiring": {
+        "example": 2,
+        "type": "integer"
+      },
+      "quotaBytes": {
+        "example": 1099511627776,
+        "format": "int64",
+        "type": "integer"
+      },
+      "remainingBytes": {
+        "example": 884763262976,
+        "format": "int64",
+        "type": "integer"
+      },
+      "unlimited": {
+        "example": 2,
+        "type": "integer"
+      },
+      "usedBytes": {
+        "example": 322122547200,
+        "format": "int64",
+        "type": "integer"
+      },
+      "usedUp": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "attention",
+      "clients",
+      "daily",
+      "disabled",
+      "expired",
+      "expiring",
+      "quotaBytes",
+      "remainingBytes",
+      "unlimited",
+      "usedBytes",
+      "usedUp"
     ],
     "type": "object"
   },

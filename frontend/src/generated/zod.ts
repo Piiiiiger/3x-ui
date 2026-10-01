@@ -426,6 +426,17 @@ export const ApiTokenViewSchema = z.object({
 });
 export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
 
+export const AttentionClientSchema = z.object({
+  email: z.string(),
+  enable: z.boolean(),
+  expiryTime: z.number().int(),
+  planId: z.number().int(),
+  status: z.string(),
+  totalGB: z.number().int(),
+  used: z.number().int(),
+});
+export type AttentionClient = z.infer<typeof AttentionClientSchema>;
+
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
   allowedIPs: z.array(z.string()).optional(),
@@ -1185,6 +1196,29 @@ export const TrafficSchema = z.object({
   Up: z.number().int(),
 });
 export type Traffic = z.infer<typeof TrafficSchema>;
+
+export const TrafficDaySchema = z.object({
+  day: z.string(),
+  down: z.number().int(),
+  up: z.number().int(),
+});
+export type TrafficDay = z.infer<typeof TrafficDaySchema>;
+
+export const TrafficOverviewSchema = z.object({
+  active: z.number().int(),
+  attention: z.array(z.lazy(() => AttentionClientSchema)),
+  clients: z.number().int(),
+  daily: z.array(z.lazy(() => TrafficDaySchema)),
+  disabled: z.number().int(),
+  expired: z.number().int(),
+  expiring: z.number().int(),
+  quotaBytes: z.number().int(),
+  remainingBytes: z.number().int(),
+  unlimited: z.number().int(),
+  usedBytes: z.number().int(),
+  usedUp: z.number().int(),
+});
+export type TrafficOverview = z.infer<typeof TrafficOverviewSchema>;
 
 export const TuicClientSettingsSchema = z.object({
   email: z.string(),

@@ -1673,6 +1673,52 @@
         ],
         "type": "object"
       },
+      "AttentionClient": {
+        "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
+        "properties": {
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "enable": {
+            "example": true,
+            "type": "boolean"
+          },
+          "expiryTime": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "planId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "status": {
+            "example": "expiring",
+            "type": "string"
+          },
+          "totalGB": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "example": 53687091200,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email",
+          "enable",
+          "expiryTime",
+          "planId",
+          "status",
+          "totalGB",
+          "used"
+        ],
+        "type": "object"
+      },
       "Client": {
         "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
         "properties": {
@@ -4916,6 +4962,106 @@
         ],
         "type": "object"
       },
+      "TrafficDay": {
+        "description": "TrafficDay is the traffic all clients used on one day of the panel's time zone.",
+        "properties": {
+          "day": {
+            "example": "2026-10-01",
+            "type": "string"
+          },
+          "down": {
+            "example": 4194304,
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "example": 1048576,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "down",
+          "up"
+        ],
+        "type": "object"
+      },
+      "TrafficOverview": {
+        "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+        "properties": {
+          "active": {
+            "example": 9,
+            "type": "integer"
+          },
+          "attention": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionClient"
+            },
+            "type": "array"
+          },
+          "clients": {
+            "example": 12,
+            "type": "integer"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficDay"
+            },
+            "type": "array"
+          },
+          "disabled": {
+            "example": 1,
+            "type": "integer"
+          },
+          "expired": {
+            "example": 1,
+            "type": "integer"
+          },
+          "expiring": {
+            "example": 2,
+            "type": "integer"
+          },
+          "quotaBytes": {
+            "example": 1099511627776,
+            "format": "int64",
+            "type": "integer"
+          },
+          "remainingBytes": {
+            "example": 884763262976,
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlimited": {
+            "example": 2,
+            "type": "integer"
+          },
+          "usedBytes": {
+            "example": 322122547200,
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedUp": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "active",
+          "attention",
+          "clients",
+          "daily",
+          "disabled",
+          "expired",
+          "expiring",
+          "quotaBytes",
+          "remainingBytes",
+          "unlimited",
+          "usedBytes",
+          "usedUp"
+        ],
+        "type": "object"
+      },
       "TuicClientSettings": {
         "properties": {
           "email": {
@@ -5078,6 +5224,10 @@
     {
       "name": "Plans",
       "description": "Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds."
+    },
+    {
+      "name": "Traffic",
+      "description": "Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone."
     },
     {
       "name": "Backup",
@@ -13375,6 +13525,71 @@
                   "success": true,
                   "obj": {
                     "affected": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/traffic/overview": {
+      "get": {
+        "tags": [
+          "Traffic"
+        ],
+        "summary": "Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.",
+        "operationId": "get_panel_api_traffic_overview",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/TrafficOverview"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "active": 9,
+                    "attention": [
+                      {
+                        "email": "alice",
+                        "enable": true,
+                        "expiryTime": 1735689600000,
+                        "planId": 1,
+                        "status": "expiring",
+                        "totalGB": 107374182400,
+                        "used": 53687091200
+                      }
+                    ],
+                    "clients": 12,
+                    "daily": [
+                      {
+                        "day": "2026-10-01",
+                        "down": 4194304,
+                        "up": 1048576
+                      }
+                    ],
+                    "disabled": 1,
+                    "expired": 1,
+                    "expiring": 2,
+                    "quotaBytes": 1099511627776,
+                    "remainingBytes": 884763262976,
+                    "unlimited": 2,
+                    "usedBytes": 322122547200,
+                    "usedUp": 1
                   }
                 }
               }

@@ -22,6 +22,10 @@ export const keys = {
     root: () => ['plans'] as const,
     list: () => ['plans', 'list'] as const,
   },
+  traffic: {
+    root: () => ['traffic'] as const,
+    overview: () => ['traffic', 'overview'] as const,
+  },
   settings: {
     root: () => ['settings'] as const,
     all: () => ['settings', 'all'] as const,

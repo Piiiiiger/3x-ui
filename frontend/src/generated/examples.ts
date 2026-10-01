@@ -404,6 +404,15 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
+  "AttentionClient": {
+    "email": "alice",
+    "enable": true,
+    "expiryTime": 1735689600000,
+    "planId": 1,
+    "status": "expiring",
+    "totalGB": 107374182400,
+    "used": 53687091200
+  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [
@@ -1209,6 +1218,41 @@ export const EXAMPLES: Record<string, unknown> = {
     "IsOutbound": false,
     "Tag": "inbound-443",
     "Up": 1048576
+  },
+  "TrafficDay": {
+    "day": "2026-10-01",
+    "down": 4194304,
+    "up": 1048576
+  },
+  "TrafficOverview": {
+    "active": 9,
+    "attention": [
+      {
+        "email": "alice",
+        "enable": true,
+        "expiryTime": 1735689600000,
+        "planId": 1,
+        "status": "expiring",
+        "totalGB": 107374182400,
+        "used": 53687091200
+      }
+    ],
+    "clients": 12,
+    "daily": [
+      {
+        "day": "2026-10-01",
+        "down": 4194304,
+        "up": 1048576
+      }
+    ],
+    "disabled": 1,
+    "expired": 1,
+    "expiring": 2,
+    "quotaBytes": 1099511627776,
+    "remainingBytes": 884763262976,
+    "unlimited": 2,
+    "usedBytes": 322122547200,
+    "usedUp": 1
   },
   "TuicClientSettings": {
     "email": "",

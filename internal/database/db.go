@@ -88,6 +88,8 @@ func allModels() []any {
 		&model.SubBalancer{},
 		&model.Plan{},
 		&model.PlanInbound{},
+		&model.ClientDailyTraffic{},
+		&model.ClientTrafficMark{},
 	}
 }
 

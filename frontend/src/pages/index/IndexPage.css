@@ -199,28 +199,29 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* — vitals tiles — */
+/* — traffic stat tiles — */
 
-.ov-vitals {
+.ov-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--ov-gap);
 }
 
 @media (max-width: 1100px) {
-  .ov-vitals {
+  .ov-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
-  .ov-vitals {
+  .ov-stats {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 .ov-tile {
   overflow: hidden;
+  padding-bottom: 18px;
 }
 
 /* Title on the left, accent icon on the right, as on 妙妙屋X's stat cards. */
@@ -266,22 +267,11 @@
   color: var(--ov-label);
 }
 
-.ov-tile-foot {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 14px var(--ov-pad) 0;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ov-faint);
+.ov-tile-extra {
+  padding: 8px var(--ov-pad) 0;
 }
 
-.ov-tile-chart {
-  margin-top: 6px;
-}
-
-/* — throughput + connections — */
+/* — daily traffic + client states — */
 
 .ov-mid {
   display: grid;
@@ -332,33 +322,6 @@
   white-space: nowrap;
 }
 
-.ov-conn-total {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-top: 12px;
-}
-
-.ov-conn-legend {
-  display: flex;
-  gap: 16px;
-  padding: 16px var(--ov-pad) 0;
-}
-
-.ov-conn-legend > div {
-  flex: 1 1 0;
-}
-
-.ov-conn-legend .ov-legend-label {
-  justify-content: flex-start;
-}
-
-.ov-swatch {
-  width: 14px;
-  height: 2px;
-  flex: none;
-}
-
 .ov-wide-chart {
   padding: 12px 8px 0;
 }
@@ -404,94 +367,68 @@
   }
 }
 
-/* — system strip — */
+/* — client states — */
 
-/* tracks follow SystemStrip's cell order:
-   uptime (xray | os) · panel (memory | threads) · ip addresses */
-.ov-strip-grid {
-  display: grid;
-  grid-template-columns: minmax(max-content, 1.2fr) minmax(max-content, 1.2fr) minmax(0, 1.6fr);
-  gap: 16px;
-  padding: var(--ov-pad);
+.ov-count-bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin: 16px var(--ov-pad) 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--ant-color-fill-secondary);
 }
 
-@media (max-width: 1439px) {
-  .ov-strip-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.ov-counts {
+  list-style: none;
+  margin: 0;
+  padding: 12px var(--ov-pad) 0;
 }
 
-@media (max-width: 1100px) {
-  .ov-strip-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.ov-counts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 13px;
+  color: var(--ov-label);
 }
 
-@media (max-width: 560px) {
-  .ov-strip-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.ov-counts li + li {
+  border-top: 1px solid var(--ant-color-border-secondary);
 }
 
-@media (min-width: 1440px) {
-  .ov-strip-cell + .ov-strip-cell {
-    border-inline-start: 1px solid var(--ov-line);
-    padding-inline-start: 16px;
-  }
+.ov-count-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
 }
 
-.ov-strip-value {
-  font-size: 19px;
+.ov-count-num {
+  margin-inline-start: auto;
+  font-size: 15px;
   font-weight: 600;
-  margin-top: 6px;
   color: var(--ant-color-text);
   font-variant-numeric: tabular-nums;
 }
 
-.ov-strip-split {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
+.ov-counts-foot {
+  padding: 4px calc(var(--ov-pad) - 7px) 12px;
 }
 
-.ov-strip-split-sep {
-  width: 1px;
-  background: var(--ov-line);
-  margin-top: 8px;
+/* — clients needing attention — */
+
+.ov-attention-count {
+  margin-inline-start: 8px;
+  font-weight: 600;
 }
 
-.ov-strip-sub {
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-top: 8px;
-  color: var(--ov-faint);
+.ov-attention-body {
+  padding: 12px var(--ov-pad) var(--ov-pad);
 }
 
-.ov-strip-sub + .ov-strip-value {
-  margin-top: 2px;
-}
-
-.ov-ip {
-  margin-top: 7px;
-  font-size: 13px;
-  overflow-wrap: anywhere;
-  transition: filter 0.2s ease;
-}
-
-.ov-ip-v6 {
-  margin-top: 3px;
-  color: var(--ov-label);
-}
-
-/* — preserved from the previous overview — */
-
-.index-page .ip-toggle-icon {
-  cursor: pointer;
-  font-size: 15px;
-  margin-inline-start: auto;
-}
-
-.index-page .ip-hidden {
-  filter: blur(6px);
+.ov-attention-email {
+  padding: 0;
+  height: auto;
 }
