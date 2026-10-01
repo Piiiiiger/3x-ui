@@ -1071,7 +1071,12 @@
         "assigned": "{count} kullanıcıya paket atandı",
         "renewed": "{count} kullanıcı yenilendi",
         "unassigned": "{count} kullanıcı paketten çıkarıldı"
-      }
+      },
+      "clashRules": "Clash kuralları",
+      "clashInherit": "Genel kuralları kullan",
+      "clashCustom": "Pakete özel kurallar",
+      "clashRulesHint": "Pakete özel kurallar, paketteki kullanıcıların aboneliklerinde genel Clash kurallarının yerini alır; genel Clash yönlendirmesi kapalıyken bile uygulanır. Kurallar/YAML ya da kalıcı bir HTTPS URL'si yapıştırın (arka planda yenilenir).",
+      "errClashRulesRequired": "Kuralları girin ya da genel kurallara dönün"
     },
     "nodes": {
       "addNode": "Düğüm Ekle",

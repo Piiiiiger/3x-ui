@@ -13,6 +13,7 @@ import (
 	yaml "github.com/goccy/go-yaml"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
@@ -165,8 +166,12 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
-	if s.enableRouting && !legacy {
-		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(s.clashRules)
+	if !legacy {
+		rules, err := s.routingRules(subId)
+		if err != nil {
+			return "", "", err
+		}
+		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(rules)
 		if resolveErr == nil && strings.TrimSpace(resolved) != "" {
 			if remote {
 				if err := mergeRemoteClashRules(config, remoteDocument); err != nil {
@@ -184,6 +189,27 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	}
 
 	return string(finalYAML), header, nil
+}
+
+// routingRules picks the subscription's plan rules when its plan has its own,
+// else the global rules while global Clash routing is on.
+func (s *SubClashService) routingRules(subId string) (string, error) {
+	var planRules []string
+	err := database.GetDB().Table("plans AS p").
+		Joins("JOIN clients AS c ON c.plan_id = p.id").
+		Where("c.sub_id = ? AND p.clash_rules <> ''", subId).
+		Order("p.id").Limit(1).
+		Pluck("p.clash_rules", &planRules).Error
+	if err != nil {
+		return "", err
+	}
+	if len(planRules) > 0 {
+		return planRules[0], nil
+	}
+	if s.enableRouting {
+		return s.clashRules, nil
+	}
+	return "", nil
 }
 
 func legacyClashProxies(proxies []map[string]any) []map[string]any {

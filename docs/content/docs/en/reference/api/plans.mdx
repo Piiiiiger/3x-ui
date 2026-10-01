@@ -15,8 +15,10 @@ _openapi:
     - depth: 2
       title: Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0
         means no expiry. trafficReset is never, hourly, daily, weekly or
-        monthly; inbound ids must exist.
-      url: '#create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist'
+        monthly; inbound ids must exist. clashRules (inline rules/YAML or one
+        HTTPS URL) replaces the global Clash rules in members' subscriptions,
+        even with global Clash routing off; empty inherits them.
+      url: '#create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-clashrules-inline-rulesyaml-or-one-https-url-replaces-the-global-clash-rules-in-members-subscriptions-even-with-global-clash-routing-off-empty-inherits-them'
     - depth: 2
       title: Replace a plan. With applyToMembers, its quota, IP limit, reset schedule
         and inbounds are re-stamped onto every client on the plan; their expiry
@@ -48,8 +50,10 @@ _openapi:
         id: list-every-plan-with-the-inbounds-it-grants-and-how-many-clients-use-it
       - content: Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0
           means no expiry. trafficReset is never, hourly, daily, weekly or
-          monthly; inbound ids must exist.
-        id: create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist
+          monthly; inbound ids must exist. clashRules (inline rules/YAML or one
+          HTTPS URL) replaces the global Clash rules in members' subscriptions,
+          even with global Clash routing off; empty inherits them.
+        id: create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-clashrules-inline-rulesyaml-or-one-https-url-replaces-the-global-clash-rules-in-members-subscriptions-even-with-global-clash-routing-off-empty-inherits-them
       - content: Replace a plan. With applyToMembers, its quota, IP limit, reset
           schedule and inbounds are re-stamped onto every client on the plan;
           their expiry and usage are left alone.

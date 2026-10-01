@@ -1071,7 +1071,12 @@
         "assigned": "Plan set for {count} client(s)",
         "renewed": "Renewed {count} client(s)",
         "unassigned": "Removed {count} client(s) from their plan"
-      }
+      },
+      "clashRules": "Clash rules",
+      "clashInherit": "Use global rules",
+      "clashCustom": "Plan's own rules",
+      "clashRulesHint": "The plan's own rules replace the global Clash rules in its clients' subscriptions, even while global Clash routing is off. Paste rules/YAML or one permanent HTTPS URL (refreshed in the background).",
+      "errClashRulesRequired": "Enter rules, or switch back to the global rules"
     },
     "hosts": {
       "addHost": "Add Host",

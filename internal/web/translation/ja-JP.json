@@ -1071,7 +1071,12 @@
         "assigned": "{count} クライアントにプランを設定しました",
         "renewed": "{count} クライアントを更新しました",
         "unassigned": "{count} クライアントをプランから外しました"
-      }
+      },
+      "clashRules": "Clash ルール",
+      "clashInherit": "グローバルルールを使用",
+      "clashCustom": "プラン専用ルール",
+      "clashRulesHint": "専用ルールは、このプランのクライアントのサブスクリプションでグローバル Clash ルールを置き換えます。グローバル Clash ルーティングがオフでも適用されます。ルール/YAML、または固定の HTTPS URL（バックグラウンドで更新）を貼り付けてください。",
+      "errClashRulesRequired": "ルールを入力するか、グローバルルールに戻してください"
     },
     "nodes": {
       "addNode": "ノードを追加",

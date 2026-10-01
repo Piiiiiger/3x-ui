@@ -1071,7 +1071,12 @@
         "assigned": "已為 {count} 位使用者設定方案",
         "renewed": "已為 {count} 位使用者續期",
         "unassigned": "已將 {count} 位使用者移出方案"
-      }
+      },
+      "clashRules": "Clash 規則",
+      "clashInherit": "使用全域規則",
+      "clashCustom": "方案專屬規則",
+      "clashRulesHint": "專屬規則會取代此方案使用者訂閱中的全域 Clash 規則，即使關閉了全域路由也會生效。可貼上規則/YAML，或一個固定的 HTTPS URL（背景定時更新）。",
+      "errClashRulesRequired": "請填寫規則，或改為使用全域規則"
     },
     "nodes": {
       "addNode": "新增節點",

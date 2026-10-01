@@ -1037,6 +1037,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "up": 1048576
   },
   "Plan": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "createdAt": 1735689600000,
     "durationDays": 30,
     "id": 1,
@@ -1054,6 +1055,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "planId": 0
   },
   "PlanInput": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "durationDays": 30,
     "inboundIds": [
       1,
@@ -1067,6 +1069,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "trafficResetDay": 1
   },
   "PlanSummary": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "createdAt": 1735689600000,
     "durationDays": 30,
     "id": 1,

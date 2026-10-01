@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
+import { Checkbox, Form, Input, InputNumber, Modal, Radio, Select } from 'antd';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import SelectAllClearButtons from '@/components/form/SelectAllClearButtons';
+import { remoteSourceBadge } from '@/pages/settings/subscriptionShared';
 import type { PlanSummary } from '@/generated/zod';
 import {
+  PlanClashModeSchema,
   PlanFormSchema,
   PlanTrafficResetSchema,
+  type PlanClashMode,
   type PlanFormValues,
   type PlanTrafficReset,
 } from '@/schemas/plan';
@@ -16,8 +19,16 @@ import { useInboundChoices } from './planText';
 
 const GIB = 1024 ** 3;
 
-// applyToMembers rides along in the form so reopening the modal resets it too.
-type PlanFormState = PlanFormValues & { applyToMembers: boolean };
+// applyToMembers and clashMode ride along in the form so reopening the modal resets them too.
+type PlanFormState = PlanFormValues & { applyToMembers: boolean; clashMode: PlanClashMode };
+
+const CLASH_MODE_LABEL_KEYS: Record<PlanClashMode, string> = {
+  inherit: 'pages.plans.clashInherit',
+  custom: 'pages.plans.clashCustom',
+};
+
+const CLASH_RULES_PLACEHOLDER =
+  'https://…/rules.yaml\n\nDOMAIN-SUFFIX,example.com,DIRECT\nGEOIP,CN,DIRECT';
 
 function initialState(plan: PlanSummary | null): PlanFormState {
   const reset = PlanTrafficResetSchema.safeParse(plan?.trafficReset);
@@ -29,8 +40,10 @@ function initialState(plan: PlanSummary | null): PlanFormState {
     trafficResetDay: plan?.trafficResetDay || 1,
     limitIp: plan?.limitIp ?? 0,
     remark: plan?.remark ?? '',
+    clashRules: plan?.clashRules ?? '',
     inboundIds: [...(plan?.inboundIds ?? [])],
     applyToMembers: true,
+    clashMode: plan?.clashRules ? 'custom' : 'inherit',
   };
 }
 
@@ -54,6 +67,8 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
 
   const trafficReset = useWatch({ control: methods.control, name: 'trafficReset' });
   const inboundIds = useWatch({ control: methods.control, name: 'inboundIds' });
+  const clashMode = useWatch({ control: methods.control, name: 'clashMode' });
+  const clashRules = useWatch({ control: methods.control, name: 'clashRules' });
   const { options: inboundGroups, flat: inboundOptions } = useInboundChoices();
 
   const resetOptions = PlanTrafficResetSchema.options.map((value: PlanTrafficReset) => ({
@@ -61,10 +76,14 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
     label: t(`pages.inbounds.periodicTrafficReset.${value}`),
   }));
 
-  async function onFinish({ applyToMembers, ...values }: PlanFormState) {
+  async function onFinish({ applyToMembers, clashMode: mode, ...values }: PlanFormState) {
     setSaving(true);
     try {
-      await onConfirm(PlanFormSchema.parse(values), isEdit && members > 0 && applyToMembers);
+      const parsed = PlanFormSchema.parse({
+        ...values,
+        clashRules: mode === 'custom' ? values.clashRules : '',
+      });
+      await onConfirm(parsed, isEdit && members > 0 && applyToMembers);
     } finally {
       setSaving(false);
     }
@@ -148,6 +167,32 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
             value={inboundIds || []}
             onChange={(v) => methods.setValue('inboundIds', v, { shouldDirty: true })}
           />
+
+          <FormField
+            label={t('pages.plans.clashRules')}
+            name="clashMode"
+            tooltip={t('pages.plans.clashRulesHint')}
+          >
+            <Radio.Group
+              optionType="button"
+              options={PlanClashModeSchema.options.map((value) => ({
+                value,
+                label: t(CLASH_MODE_LABEL_KEYS[value]),
+              }))}
+            />
+          </FormField>
+          {clashMode === 'custom' && (
+            <FormField
+              name="clashRules"
+              extra={remoteSourceBadge(clashRules ?? '')}
+              rules={{
+                validate: (value) =>
+                  String(value ?? '').trim() !== '' || 'pages.plans.errClashRulesRequired',
+              }}
+            >
+              <Input.TextArea rows={6} placeholder={CLASH_RULES_PLACEHOLDER} spellCheck={false} />
+            </FormField>
+          )}
 
           <FormField label={t('remark')} name="remark">
             <Input maxLength={256} />

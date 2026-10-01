@@ -1071,7 +1071,12 @@
         "assigned": "Plano atribuído a {count} cliente(s)",
         "renewed": "{count} cliente(s) renovado(s)",
         "unassigned": "{count} cliente(s) removido(s) do plano"
-      }
+      },
+      "clashRules": "Regras do Clash",
+      "clashInherit": "Usar regras globais",
+      "clashCustom": "Regras próprias do plano",
+      "clashRulesHint": "As regras próprias do plano substituem as regras globais do Clash nas assinaturas dos clientes dele, mesmo com o roteamento global do Clash desligado. Cole regras/YAML ou uma URL HTTPS permanente (atualizada em segundo plano).",
+      "errClashRulesRequired": "Informe as regras ou volte para as regras globais"
     },
     "nodes": {
       "addNode": "Adicionar nó",

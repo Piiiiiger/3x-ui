@@ -957,6 +957,7 @@ export interface PeerActivity {
 }
 
 export interface Plan {
+  clashRules: string;
   createdAt: number;
   durationDays: number;
   id: number;
@@ -976,6 +977,7 @@ export interface PlanInbound {
 }
 
 export interface PlanInput {
+  clashRules: string;
   durationDays: number;
   inboundIds: number[];
   limitIp: number;
@@ -987,6 +989,7 @@ export interface PlanInput {
 }
 
 export interface PlanSummary {
+  clashRules: string;
   createdAt: number;
   durationDays: number;
   id: number;

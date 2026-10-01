@@ -1071,7 +1071,12 @@
         "assigned": "Đã gán gói cho {count} khách hàng",
         "renewed": "Đã gia hạn {count} khách hàng",
         "unassigned": "Đã gỡ {count} khách hàng khỏi gói"
-      }
+      },
+      "clashRules": "Quy tắc Clash",
+      "clashInherit": "Dùng quy tắc chung",
+      "clashCustom": "Quy tắc riêng của gói",
+      "clashRulesHint": "Quy tắc riêng của gói thay thế quy tắc Clash chung trong gói đăng ký của khách hàng thuộc gói, kể cả khi định tuyến Clash chung đang tắt. Dán quy tắc/YAML hoặc một URL HTTPS cố định (được cập nhật nền).",
+      "errClashRulesRequired": "Hãy nhập quy tắc, hoặc chuyển về quy tắc chung"
     },
     "nodes": {
       "addNode": "Thêm nút",

@@ -1906,8 +1906,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/add',
         summary:
-          'Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist.',
-        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "inboundIds": [1, 2]\n}',
+          "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. clashRules (inline rules/YAML or one HTTPS URL) replaces the global Clash rules in members' subscriptions, even with global Clash routing off; empty inherits them.",
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "",\n  "inboundIds": [1, 2]\n}',
         responseSchema: 'Plan',
       },
       {
@@ -1916,7 +1916,7 @@ export const sections: readonly Section[] = [
         summary:
           'Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
-        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
+        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
       },
       {

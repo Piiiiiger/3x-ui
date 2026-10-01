@@ -1071,7 +1071,12 @@
         "assigned": "Paket ditetapkan untuk {count} klien",
         "renewed": "{count} klien diperpanjang",
         "unassigned": "{count} klien dikeluarkan dari paket"
-      }
+      },
+      "clashRules": "Aturan Clash",
+      "clashInherit": "Gunakan aturan global",
+      "clashCustom": "Aturan khusus paket",
+      "clashRulesHint": "Aturan khusus paket menggantikan aturan Clash global di langganan klien paket ini, bahkan saat perutean Clash global dimatikan. Tempel aturan/YAML atau satu URL HTTPS tetap (diperbarui di latar belakang).",
+      "errClashRulesRequired": "Isi aturan, atau kembali ke aturan global"
     },
     "nodes": {
       "addNode": "Tambah Node",

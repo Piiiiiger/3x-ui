@@ -181,6 +181,12 @@ export default function PlansPage() {
                             <dd>{text.reset}</dd>
                             <dt>{t('pages.clients.limitIp')}</dt>
                             <dd>{text.ipLimit}</dd>
+                            <dt>{t('pages.plans.clashRules')}</dt>
+                            <dd>
+                              {plan.clashRules
+                                ? t('pages.plans.clashCustom')
+                                : t('pages.plans.clashInherit')}
+                            </dd>
                             <dt>{t('pages.plans.servers')}</dt>
                             <dd>
                               {plan.inboundIds.length > 0 ? (

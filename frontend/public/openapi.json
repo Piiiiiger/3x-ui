@@ -4215,6 +4215,11 @@
       "Plan": {
         "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
         "properties": {
+          "clashRules": {
+            "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
           "createdAt": {
             "example": 1735689600000,
             "format": "int64",
@@ -4266,6 +4271,7 @@
           }
         },
         "required": [
+          "clashRules",
           "createdAt",
           "durationDays",
           "id",
@@ -4299,6 +4305,10 @@
       "PlanInput": {
         "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
         "properties": {
+          "clashRules": {
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
           "durationDays": {
             "example": 30,
             "type": "integer"
@@ -4340,6 +4350,7 @@
           }
         },
         "required": [
+          "clashRules",
           "durationDays",
           "inboundIds",
           "limitIp",
@@ -4354,6 +4365,11 @@
       "PlanSummary": {
         "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
         "properties": {
+          "clashRules": {
+            "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
           "createdAt": {
             "example": 1735689600000,
             "format": "int64",
@@ -4419,6 +4435,7 @@
           }
         },
         "required": [
+          "clashRules",
           "createdAt",
           "durationDays",
           "id",
@@ -13162,6 +13179,7 @@
                   "success": true,
                   "obj": [
                     {
+                      "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
                       "createdAt": 1735689600000,
                       "durationDays": 30,
                       "id": 1,
@@ -13192,7 +13210,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist.",
+        "summary": "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. clashRules (inline rules/YAML or one HTTPS URL) replaces the global Clash rules in members' subscriptions, even with global Clash routing off; empty inherits them.",
         "operationId": "post_panel_api_plans_add",
         "requestBody": {
           "required": true,
@@ -13209,6 +13227,7 @@
                 "trafficResetDay": 1,
                 "limitIp": 0,
                 "remark": "",
+                "clashRules": "",
                 "inboundIds": [
                   1,
                   2
@@ -13239,6 +13258,7 @@
                 "example": {
                   "success": true,
                   "obj": {
+                    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
                     "createdAt": 1735689600000,
                     "durationDays": 30,
                     "id": 1,
@@ -13291,6 +13311,7 @@
                 "trafficResetDay": 1,
                 "limitIp": 0,
                 "remark": "",
+                "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
                 "inboundIds": [
                   1,
                   2

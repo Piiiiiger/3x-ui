@@ -1071,7 +1071,12 @@
         "assigned": "已为 {count} 个用户设置套餐",
         "renewed": "已为 {count} 个用户续期",
         "unassigned": "已将 {count} 个用户移出套餐"
-      }
+      },
+      "clashRules": "Clash 规则",
+      "clashInherit": "使用全局规则",
+      "clashCustom": "套餐专属规则",
+      "clashRulesHint": "专属规则会替换该套餐用户订阅中的全局 Clash 规则，即使关闭了全局路由也会生效。可粘贴规则/YAML，或一个固定的 HTTPS URL（后台定时更新）。",
+      "errClashRulesRequired": "请填写规则，或改为使用全局规则"
     },
     "nodes": {
       "addNode": "添加节点",

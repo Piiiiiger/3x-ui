@@ -1019,6 +1019,7 @@ export const PeerActivitySchema = z.object({
 export type PeerActivity = z.infer<typeof PeerActivitySchema>;
 
 export const PlanSchema = z.object({
+  clashRules: z.string(),
   createdAt: z.number().int(),
   durationDays: z.number().int(),
   id: z.number().int(),
@@ -1040,6 +1041,7 @@ export const PlanInboundSchema = z.object({
 export type PlanInbound = z.infer<typeof PlanInboundSchema>;
 
 export const PlanInputSchema = z.object({
+  clashRules: z.string(),
   durationDays: z.number().int(),
   inboundIds: z.array(z.number().int()),
   limitIp: z.number().int(),
@@ -1052,6 +1054,7 @@ export const PlanInputSchema = z.object({
 export type PlanInput = z.infer<typeof PlanInputSchema>;
 
 export const PlanSummarySchema = z.object({
+  clashRules: z.string(),
   createdAt: z.number().int(),
   durationDays: z.number().int(),
   id: z.number().int(),

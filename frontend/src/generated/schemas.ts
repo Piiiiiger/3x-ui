@@ -4189,6 +4189,11 @@ export const SCHEMAS: Record<string, unknown> = {
   "Plan": {
     "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
     "properties": {
+      "clashRules": {
+        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4240,6 +4245,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "clashRules",
       "createdAt",
       "durationDays",
       "id",
@@ -4273,6 +4279,10 @@ export const SCHEMAS: Record<string, unknown> = {
   "PlanInput": {
     "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
     "properties": {
+      "clashRules": {
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
       "durationDays": {
         "example": 30,
         "type": "integer"
@@ -4314,6 +4324,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "clashRules",
       "durationDays",
       "inboundIds",
       "limitIp",
@@ -4328,6 +4339,11 @@ export const SCHEMAS: Record<string, unknown> = {
   "PlanSummary": {
     "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
     "properties": {
+      "clashRules": {
+        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4393,6 +4409,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "clashRules",
       "createdAt",
       "durationDays",
       "id",

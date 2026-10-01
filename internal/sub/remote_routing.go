@@ -175,11 +175,11 @@ func (r *remoteRoutingResolver) resolveEntry(kind remoteRoutingKind, raw string)
 
 // RefreshRemoteRoutingSources warms and refreshes configured remote sources
 // from the cron job; concurrent resolver reads are safe, fetches coalesce.
-func RefreshRemoteRoutingSources(happ, clash, jsonRouting string) {
+func RefreshRemoteRoutingSources(happ string, clash []string, jsonRouting string) {
 	for kind, raw := range map[remoteRoutingKind][]string{
 		remoteRoutingHapp:  {happ},
 		remoteRoutingJson:  {jsonRouting},
-		remoteRoutingClash: {clash},
+		remoteRoutingClash: clash,
 	} {
 		for _, source := range raw {
 			_, remote, parseErr := common.ParseRemoteRoutingURL(source)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"slices"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -381,5 +382,21 @@ func TestListPagedFiltersByPlanAndReportsIt(t *testing.T) {
 	}
 	if without.Filtered != 10 || slices.ContainsFunc(without.Items, func(c ClientSlim) bool { return c.PlanId != 0 }) {
 		t.Fatalf("plan=0 returned %d rows, want the 10 clients without a plan", without.Filtered)
+	}
+}
+
+func TestPlanClashRulesRejectBadURLsAndTreatBlankAsInherit(t *testing.T) {
+	setupPlanDB(t)
+	svc := &PlanService{}
+	_, err := svc.Create(PlanInput{Name: "Bad URL", ClashRules: "https://user:pw@rules.example/x.yaml"})
+	if err == nil || !strings.Contains(err.Error(), "clash rules") {
+		t.Fatalf("create with a credentialed URL: err = %v, want a clash rules error", err)
+	}
+	plan, err := svc.Create(PlanInput{Name: "Blank", ClashRules: "  \n\t"})
+	if err != nil {
+		t.Fatalf("create with blank rules: %v", err)
+	}
+	if plan.ClashRules != "" {
+		t.Fatalf("blank rules stored as %q, want empty so the plan inherits", plan.ClashRules)
 	}
 }
