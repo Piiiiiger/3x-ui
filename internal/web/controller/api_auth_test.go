@@ -76,6 +76,11 @@ func newAPIAuthTestEngine(t *testing.T) (*gin.Engine, *APIController) {
 	api.POST("/clients/clientIpsByGuid", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"reached": true})
 	})
+	for _, path := range []string{"/clients/bulkResetTraffic", "/clients/activeInbounds", "/inbounds/:id/subSortIndex"} {
+		api.POST(path, func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"reached": true})
+		})
+	}
 	return engine, a
 }
 
@@ -162,6 +167,9 @@ func TestNodeSyncScopeAllowlistMatchesRemoteInventory(t *testing.T) {
 		"/server/clientIps":            {http.MethodGet: {}, http.MethodPost: {}},
 		"/clients/clientIpsByGuid":     {http.MethodPost: {}},
 		"/hosts/list":                  {http.MethodGet: {}},
+		"/clients/bulkResetTraffic":    {http.MethodPost: {}},
+		"/clients/activeInbounds":      {http.MethodPost: {}},
+		"/inbounds/:id/subSortIndex":   {http.MethodPost: {}},
 	}
 	if !reflect.DeepEqual(nodeSyncScopeAllow, expected) {
 		t.Fatalf("node-sync allowlist drift:\n got: %#v\nwant: %#v", nodeSyncScopeAllow, expected)
@@ -182,6 +190,11 @@ func TestNodeSyncScopeUsesFullPathPatterns(t *testing.T) {
 		{"detach email parameter", http.MethodPost, "/panel/api/clients/alice@example.com/detach", http.StatusOK},
 		{"reset inbound id parameter", http.MethodPost, "/panel/api/inbounds/42/resetTraffic", http.StatusOK},
 		{"client IP by guid endpoint", http.MethodPost, "/panel/api/clients/clientIpsByGuid", http.StatusOK},
+		// The master calls these on every node: the monthly bulk reset, the traffic
+		// snapshot's active inbounds and the subscription order.
+		{"bulk traffic reset", http.MethodPost, "/panel/api/clients/bulkResetTraffic", http.StatusOK},
+		{"active inbounds in the snapshot", http.MethodPost, "/panel/api/clients/activeInbounds", http.StatusOK},
+		{"subscription order", http.MethodPost, "/panel/api/inbounds/7/subSortIndex", http.StatusOK},
 		{"update panel forbidden", http.MethodPost, "/panel/api/server/updatePanel", http.StatusForbidden},
 	}
 	for _, tc := range cases {

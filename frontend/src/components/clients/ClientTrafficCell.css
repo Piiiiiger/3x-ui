@@ -6,7 +6,7 @@
   min-width: 0;
   box-sizing: border-box;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--ant-border-radius-sm);
   background: var(--ant-color-fill-quaternary);
 }
 

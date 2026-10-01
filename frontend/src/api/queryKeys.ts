@@ -18,6 +18,14 @@ export const keys = {
     root: () => ['sub-balancers'] as const,
     list: () => ['sub-balancers', 'list'] as const,
   },
+  plans: {
+    root: () => ['plans'] as const,
+    list: () => ['plans', 'list'] as const,
+  },
+  traffic: {
+    root: () => ['traffic'] as const,
+    overview: () => ['traffic', 'overview'] as const,
+  },
   settings: {
     root: () => ['settings'] as const,
     all: () => ['settings', 'all'] as const,
@@ -38,6 +46,10 @@ export const keys = {
     activeInbounds: () => ['clients', 'activeInbounds'] as const,
     lastOnline: () => ['clients', 'lastOnline'] as const,
     groups: () => ['clients', 'groups'] as const,
+    portal: (email: string) => ['clients', 'portal', email] as const,
+  },
+  portal: {
+    data: (base: string) => ['portal', 'data', base] as const,
   },
   xray: {
     root: () => ['xray'] as const,

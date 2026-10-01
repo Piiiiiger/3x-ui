@@ -5,12 +5,20 @@
 .settings-page,
 .nodes-page,
 .groups-page,
+.plans-page,
 .api-docs-page,
 .sponsors-page {
-  --bg-page: #e6e8ec;
-  --bg-card: #ffffff;
+  --bg-page: #fdfaf8;
+  --bg-card: #fffdfc;
+  --card-shadow: rgba(39, 22, 16, 0.12);
+  --page-glow:
+    radial-gradient(1100px circle at 0% -10%, rgba(217, 119, 87, 0.16), transparent 60%),
+    radial-gradient(900px circle at 100% 0%, rgba(96, 165, 250, 0.08), transparent 65%);
+  --page-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M30 25h4v14h-4zM25 30h14v4H25z' fill='%23d97757' fill-opacity='0.1'/%3E%3C/svg%3E");
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23d97757' fill-opacity='0.18'/%3E%3C/svg%3E");
   min-height: 100vh;
-  background: var(--bg-page);
+  background: var(--page-glow), var(--bg-page);
+  isolation: isolate;
 }
 
 .index-page.is-dark,
@@ -20,10 +28,17 @@
 .settings-page.is-dark,
 .nodes-page.is-dark,
 .groups-page.is-dark,
+.plans-page.is-dark,
 .api-docs-page.is-dark,
 .sponsors-page.is-dark {
-  --bg-page: #1a1b1f;
-  --bg-card: #23252b;
+  --bg-page: #0d1018;
+  --bg-card: #131722;
+  --card-shadow: rgba(0, 0, 0, 0.45);
+  --page-glow:
+    radial-gradient(900px circle at 10% -5%, rgba(241, 140, 110, 0.14), transparent 65%),
+    radial-gradient(800px circle at 90% 0%, rgba(56, 189, 248, 0.07), transparent 70%);
+  --page-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M30 25h4v14h-4zM25 30h14v4H25z' fill='%23f18c6e' fill-opacity='0.08'/%3E%3C/svg%3E");
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23f18c6e' fill-opacity='0.12'/%3E%3C/svg%3E");
 }
 
 .index-page.is-dark.is-ultra,
@@ -33,10 +48,38 @@
 .settings-page.is-dark.is-ultra,
 .nodes-page.is-dark.is-ultra,
 .groups-page.is-dark.is-ultra,
+.plans-page.is-dark.is-ultra,
 .api-docs-page.is-dark.is-ultra,
 .sponsors-page.is-dark.is-ultra {
   --bg-page: #000;
-  --bg-card: #101013;
+  --bg-card: #0b0b0e;
+  --card-shadow: rgba(0, 0, 0, 0.7);
+  --page-glow: radial-gradient(900px circle at 10% -5%, rgba(241, 140, 110, 0.08), transparent 65%);
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23f18c6e' fill-opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Fixed decorative layer: the page root isolates a stacking context so z-index
+   -1 keeps it above the root's own background but behind every child. */
+.index-page::before,
+.clients-page::before,
+.inbounds-page::before,
+.xray-page::before,
+.settings-page::before,
+.nodes-page::before,
+.groups-page::before,
+.plans-page::before,
+.api-docs-page::before,
+.sponsors-page::before,
+.hosts-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--page-cross), var(--page-dots);
+  background-size:
+    64px 64px,
+    16px 16px;
 }
 
 .index-page .ant-layout,
@@ -52,7 +95,9 @@
 .nodes-page .ant-layout,
 .nodes-page .ant-layout-content,
 .groups-page .ant-layout,
+.plans-page .ant-layout,
 .groups-page .ant-layout-content,
+.plans-page .ant-layout-content,
 .api-docs-page .ant-layout,
 .api-docs-page .ant-layout-content {
   background: transparent;
@@ -65,6 +110,7 @@
 .settings-page .content-shell,
 .nodes-page .content-shell,
 .groups-page .content-shell,
+.plans-page .content-shell,
 .api-docs-page .content-shell {
   background: transparent;
 }
@@ -75,15 +121,34 @@
 .xray-page .content-area,
 .settings-page .content-area,
 .nodes-page .content-area,
-.groups-page .content-area {
+.groups-page .content-area,
+.plans-page .content-area {
   padding: 24px;
+}
+
+/* Content sits in a centred column under the full-width top bar, as on 妙妙屋X. */
+.index-page .content-area,
+.clients-page .content-area,
+.inbounds-page .content-area,
+.xray-page .content-area,
+.settings-page .content-area,
+.nodes-page .content-area,
+.groups-page .content-area,
+.plans-page .content-area,
+.api-docs-page .content-area,
+.hosts-page .content-area,
+.sponsors-page .content-area {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
 }
 
 @media (max-width: 768px) {
   .clients-page .content-area,
   .inbounds-page .content-area,
   .nodes-page .content-area,
-  .groups-page .content-area {
+  .groups-page .content-area,
+  .plans-page .content-area {
     padding: 8px;
   }
 }
@@ -177,7 +242,8 @@ body.dark .ant-dropdown-menu-item-divider {
 .clients-page .summary-card,
 .inbounds-page .summary-card,
 .nodes-page .summary-card,
-.groups-page .summary-card {
+.groups-page .summary-card,
+.plans-page .summary-card {
   padding: 16px;
 }
 
@@ -185,7 +251,8 @@ body.dark .ant-dropdown-menu-item-divider {
   .clients-page .summary-card,
   .inbounds-page .summary-card,
   .nodes-page .summary-card,
-  .groups-page .summary-card {
+  .groups-page .summary-card,
+  .plans-page .summary-card {
     padding: 8px;
   }
 }
@@ -193,20 +260,36 @@ body.dark .ant-dropdown-menu-item-divider {
 /* Hosts page shares the standard panel page shell (background, transparent
    layout, content padding, summary-card padding). */
 .hosts-page {
-  --bg-page: #e6e8ec;
-  --bg-card: #ffffff;
+  --bg-page: #fdfaf8;
+  --bg-card: #fffdfc;
+  --card-shadow: rgba(39, 22, 16, 0.12);
+  --page-glow:
+    radial-gradient(1100px circle at 0% -10%, rgba(217, 119, 87, 0.16), transparent 60%),
+    radial-gradient(900px circle at 100% 0%, rgba(96, 165, 250, 0.08), transparent 65%);
+  --page-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M30 25h4v14h-4zM25 30h14v4H25z' fill='%23d97757' fill-opacity='0.1'/%3E%3C/svg%3E");
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23d97757' fill-opacity='0.18'/%3E%3C/svg%3E");
   min-height: 100vh;
-  background: var(--bg-page);
+  background: var(--page-glow), var(--bg-page);
+  isolation: isolate;
 }
 
 .hosts-page.is-dark {
-  --bg-page: #1a1b1f;
-  --bg-card: #23252b;
+  --bg-page: #0d1018;
+  --bg-card: #131722;
+  --card-shadow: rgba(0, 0, 0, 0.45);
+  --page-glow:
+    radial-gradient(900px circle at 10% -5%, rgba(241, 140, 110, 0.14), transparent 65%),
+    radial-gradient(800px circle at 90% 0%, rgba(56, 189, 248, 0.07), transparent 70%);
+  --page-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M30 25h4v14h-4zM25 30h14v4H25z' fill='%23f18c6e' fill-opacity='0.08'/%3E%3C/svg%3E");
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23f18c6e' fill-opacity='0.12'/%3E%3C/svg%3E");
 }
 
 .hosts-page.is-dark.is-ultra {
   --bg-page: #000;
-  --bg-card: #101013;
+  --bg-card: #0b0b0e;
+  --card-shadow: rgba(0, 0, 0, 0.7);
+  --page-glow: radial-gradient(900px circle at 10% -5%, rgba(241, 140, 110, 0.08), transparent 65%);
+  --page-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='7' y='7' width='2' height='2' fill='%23f18c6e' fill-opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .hosts-page .ant-layout,

@@ -1,6 +1,6 @@
 {
-  "name": "3x-ui",
-  "short_name": "3x-ui",
+  "name": "Pigger",
+  "short_name": "Pigger",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

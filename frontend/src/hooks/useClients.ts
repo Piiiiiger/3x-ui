@@ -77,6 +77,7 @@ export interface ClientQueryParams {
   hasTgId?: 'yes' | 'no' | '';
   hasComment?: 'yes' | 'no' | '';
   group?: string;
+  plan?: string;
 }
 
 const DEFAULT_QUERY: ClientQueryParams = { page: 1, pageSize: 25 };
@@ -114,7 +115,7 @@ export function sameSpeedMap(
   return true;
 }
 
-function buildQS(p: ClientQueryParams): string {
+export function buildClientPageQuery(p: ClientQueryParams): string {
   const sp = new URLSearchParams();
   sp.set('page', String(p.page || 1));
   sp.set('pageSize', String(p.pageSize || DEFAULT_QUERY.pageSize));
@@ -132,11 +133,12 @@ function buildQS(p: ClientQueryParams): string {
   if (p.hasTgId) sp.set('hasTgId', p.hasTgId);
   if (p.hasComment) sp.set('hasComment', p.hasComment);
   if (p.group) sp.set('group', p.group);
+  if (p.plan) sp.set('plan', p.plan);
   return sp.toString();
 }
 
 async function fetchClientPage(params: ClientQueryParams): Promise<ClientPageResponse> {
-  const qs = buildQS(params);
+  const qs = buildClientPageQuery(params);
   const msg = await HttpUtil.get(`/panel/api/clients/list/paged?${qs}`, undefined, {
     silent: true,
   });

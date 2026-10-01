@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ConfigProvider, Tag, Tooltip, message } from 'antd';
 import {
-  ApiOutlined,
   ApartmentOutlined,
+  ApiOutlined,
   CheckCircleFilled,
   ClockCircleOutlined,
   CloseCircleFilled,
@@ -26,6 +26,7 @@ import {
   MessageOutlined,
   MoonOutlined,
   PlusOutlined,
+  ProfileOutlined,
   ReloadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -41,7 +42,8 @@ import { ClipboardManager, HttpUtil, SizeFormatter } from '@/utils';
 import { activateOnKey } from '@/utils/a11y';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import { useAllSettings } from '@/api/queries/useAllSettings';
-import { useTheme } from '@/hooks/useTheme';
+import { THEME_CSS_VAR_SCOPE, useTheme } from '@/hooks/useTheme';
+import { PANEL_NAME } from '@/lib/brand';
 import type { ClientRecord, InboundOption } from '@/schemas/client';
 import { commandPaletteStore, useCommandPalette } from './useCommandPalette';
 import './CommandPalette.css';
@@ -378,6 +380,12 @@ export default function CommandPalette() {
         icon: <TagsOutlined />,
       },
       {
+        path: '/plans',
+        title: t('menu.plans'),
+        keywords: ['plans', 'packages', 'quota', 'renew', '套餐'],
+        icon: <ProfileOutlined />,
+      },
+      {
         path: '/nodes',
         title: t('menu.nodes'),
         keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],
@@ -687,7 +695,7 @@ export default function CommandPalette() {
   return (
     <ConfigProvider theme={antdThemeConfig}>
       <div
-        className={`command-palette-backdrop ${themeModeClass}`}
+        className={`command-palette-backdrop ${THEME_CSS_VAR_SCOPE} ${themeModeClass}`}
         role="presentation"
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
@@ -808,7 +816,7 @@ export default function CommandPalette() {
                 {t('close')}
               </span>
             </div>
-            <span>3x-ui Command Palette</span>
+            <span>{PANEL_NAME} Command Palette</span>
           </div>
         </div>
       </div>

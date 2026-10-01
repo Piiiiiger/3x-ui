@@ -105,7 +105,24 @@
     "support": "Suporte",
     "qrTitle": "Escaneie. Importe. Conecte.",
     "qrHint": "Escaneie com seu aplicativo cliente. Mantenha este código em sigilo.",
-    "saveQr": "Salvar QR"
+    "saveQr": "Salvar QR",
+    "portal": {
+      "title": "Entrar",
+      "intro": "Entre para ver seu plano, seu consumo e seus links de assinatura.",
+      "username": "Usuário",
+      "password": "Senha",
+      "signIn": "Entrar",
+      "signOut": "Sair",
+      "required": "Obrigatório",
+      "invalid": "Usuário ou senha incorretos",
+      "blocked": "Muitas tentativas. Tente novamente em 15 minutos.",
+      "failed": "Não é possível entrar agora. Tente mais tarde.",
+      "plan": "Meu plano",
+      "usage": "Últimos {days} dias",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Sua conta ainda não tem servidores. Fale com o administrador.",
+      "loadFailed": "Não foi possível carregar seus dados. Tente mais tarde."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -113,6 +130,7 @@
     "inbounds": "Entradas",
     "clients": "Clientes",
     "groups": "Grupos",
+    "plans": "Planos",
     "nodes": "Nós",
     "settings": "Configurações do Painel",
     "xray": "Configurações Xray",
@@ -124,8 +142,6 @@
     "hosts": "Hosts",
     "docs": "Documentação",
     "openMenu": "Abrir menu",
-    "pinSidebar": "Fixar barra lateral",
-    "unpinSidebar": "Desafixar barra lateral",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "Inativo",
       "xrayObservatoryLastSeen": "Visto pela última vez",
       "xrayObservatoryLastTry": "Última tentativa",
-      "connectionCount": "Estatísticas de Conexão",
-      "ipAddresses": "Endereços IP",
       "toggleIpVisibility": "Alternar visibilidade do IP",
-      "overallSpeed": "Velocidade geral",
       "upload": "Upload",
       "download": "Download",
       "sent": "Enviado",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "Clique para selecionar e enviar um backup do PostgreSQL (.dump), um banco de dados SQLite (.db) ou um dump de migração do SQLite para restaurar seu banco de dados. Isso substitui todos os dados atuais.",
       "migrationDownload": "Baixar migração",
       "migrationDownloadPgDesc": "Clique para baixar um banco de dados SQLite .db criado a partir dos seus dados do PostgreSQL, pronto para executar este painel no SQLite.",
-      "avg": "média",
-      "peak": "pico",
-      "free": "livre",
-      "openSockets": "sockets abertos",
-      "throughputSub": "Total da interface",
-      "avgWindow": "Média do período",
       "healthWarm": "{list} — um pouco alto",
       "healthCritical": "{list} — crítico",
-      "panel": "Painel",
-      "threads": "Threads",
       "uptime": "Tempo ativo",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Manter as configurações desta máquina",
-      "importKeepHostSettingsDesc": "Mantém os endereços de escuta, as portas, o caminho base, os certificados e a identidade de nó deste painel em vez de obtê-los do arquivo enviado."
+      "importKeepHostSettingsDesc": "Mantém os endereços de escuta, as portas, o caminho base, os certificados e a identidade de nó deste painel em vez de obtê-los do arquivo enviado.",
+      "traffic": {
+        "quota": "Cota total",
+        "quotaDetail": "{limited} com cota · {unlimited} ilimitados",
+        "used": "Usado",
+        "usedDetail": "Hoje {size}",
+        "remaining": "Restante",
+        "remainingDetail": "Ainda disponível nas cotas dos clientes",
+        "usageRate": "Cota usada",
+        "usageRateDetail": "{used} de {quota} consumidos",
+        "noQuota": "Nenhum cliente tem cota",
+        "daily": "Tráfego diário",
+        "dailySub": "Últimos {days} dias · atualizado a cada 10 minutos",
+        "periodTotal": "Total",
+        "today": "Hoje",
+        "dailyAverage": "Média diária",
+        "clientsSub": "{count} clientes no total",
+        "normal": "Ativos",
+        "expiring": "Vencendo em breve",
+        "runningLow": "Acabando",
+        "usedUp": "Esgotados",
+        "expired": "Vencidos",
+        "disabled": "Desativados",
+        "manageClients": "Gerenciar clientes",
+        "attention": "Precisam de atenção",
+        "attentionSub": "Vencem em até 7 dias ou têm menos de 10% da cota, esgotados ou vencidos",
+        "attentionEmpty": "Ninguém precisa de atenção agora"
+      }
     },
     "inbounds": {
       "totalDownUp": "Total Enviado/Recebido",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Config Peer {n}"
       },
       "sniffingDestOverride": "Substituição de destino",
-      "advancedTitle": "Configurações avançadas"
+      "advancedTitle": "Configurações avançadas",
+      "intro": "Portas, protocolos e transportes de escuta, com os clientes que cada um atende."
     },
     "clients": {
       "tabBasics": "Básico",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "Renova neste dia de cada mês do calendário, à meia-noite no fuso horário do painel, em vez de a cada N dias. Se o mês for curto demais para o dia escolhido, renova no último dia dele. 0 mantém o modo de intervalo em dias.",
       "renewsUsed": "Renovações usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto."
+      "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto.",
+      "intro": "Todos os clientes das suas entradas, com tráfego, validade e links de assinatura.",
+      "portal": {
+        "title": "Acesso ao portal",
+        "intro": "Com uma senha, o cliente pode entrar no portal com o próprio usuário e ver o plano, o consumo e os links de assinatura.",
+        "statusOn": "Ativado · senha definida {time}",
+        "statusOff": "Desativado",
+        "url": "Endereço do portal",
+        "newPassword": "Nova senha",
+        "passwordHint": "De 6 a 72 caracteres. Trocar a senha encerra a sessão do cliente em todos os dispositivos.",
+        "passwordLength": "Use de 6 a 72 caracteres",
+        "save": "Salvar senha",
+        "savedToast": "Senha do portal salva",
+        "handout": "Envie estes dados ao cliente:",
+        "copyLogin": "Copiar dados de acesso",
+        "loginText": "Portal: {url}\nUsuário: {username}\nSenha: {password}",
+        "revoke": "Desativar acesso",
+        "revokeConfirm": "Desativar o acesso ao portal de {email}? As sessões abertas terminam na hora.",
+        "revoked": "Acesso ao portal desativado",
+        "subDisabled": "O servidor de assinaturas está desligado, então o cliente não consegue abrir o portal. Ative-o em Configurações → Assinatura."
+      }
     },
     "groups": {
       "name": "Nome",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "Remover clientes…",
       "removeFromGroupTitle": "Remover clientes do grupo «{name}»",
       "removeFromGroupDesc": "Selecione membros para remover deste grupo. Os clientes em si são mantidos (use «Excluir clientes do grupo» para removê-los por completo).",
-      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}.",
+      "intro": "Agrupe clientes para redefinir o tráfego ou removê-los de uma só vez."
+    },
+    "plans": {
+      "intro": "Conjuntos de tráfego, validade e servidores. Coloque os clientes em um plano em vez de configurar cada um manualmente.",
+      "add": "Novo plano",
+      "edit": "Editar plano",
+      "empty": "Nenhum plano ainda",
+      "quota": "Tráfego",
+      "zeroUnlimited": "0 significa ilimitado",
+      "duration": "Validade",
+      "durationHint": "Em dias. 0 significa que nunca expira.",
+      "daysUnit": "dias",
+      "permanent": "sem expiração",
+      "resetDay": "Dia de redefinição",
+      "monthlyOn": "Mensal, no dia {day}",
+      "servers": "Servidores",
+      "noServers": "Nenhum servidor",
+      "members": "{count} cliente(s)",
+      "applyToMembers": "Atualizar também os {count} cliente(s) deste plano",
+      "deleteConfirm": "Excluir o plano {name}?",
+      "deleteBlocked": "Primeiro mova os {count} cliente(s) para outro plano",
+      "assign": "Atribuir plano",
+      "addPeople": "Adicionar clientes",
+      "people": "Clientes",
+      "selectedPeople": "{count} clientes selecionados",
+      "start": "Início da validade",
+      "startNow": "Agora",
+      "startFirstUse": "Na primeira conexão",
+      "startKeep": "Manter a expiração atual",
+      "resetTraffic": "Zerar o tráfego usado",
+      "renew": "Renovar",
+      "renewConfirm": "Renovar {count} cliente(s) pelo plano?",
+      "renewHint": "Cada um é estendido pela duração do plano a partir de agora ou da expiração atual, o que for mais tarde, e o tráfego usado é zerado.",
+      "unassign": "Remover do plano",
+      "unassignConfirm": "Remover {count} cliente(s) do plano? Os limites atuais continuam valendo.",
+      "noPlan": "Sem plano",
+      "needPlan": "Escolha um plano",
+      "needPeople": "Escolha pelo menos um cliente",
+      "errNameRequired": "Informe o nome do plano",
+      "toasts": {
+        "saved": "Plano salvo",
+        "deleted": "Plano excluído",
+        "assigned": "Plano atribuído a {count} cliente(s)",
+        "renewed": "{count} cliente(s) renovado(s)",
+        "unassigned": "{count} cliente(s) removido(s) do plano"
+      },
+      "clashRules": "Regras do Clash",
+      "clashInherit": "Usar regras globais",
+      "clashCustom": "Regras próprias do plano",
+      "clashRulesHint": "As regras próprias do plano substituem as regras globais do Clash nas assinaturas dos clientes dele, mesmo com o roteamento global do Clash desligado. Cole regras/YAML ou uma URL HTTPS permanente (atualizada em segundo plano).",
+      "errClashRulesRequired": "Informe as regras ou volte para as regras globais"
     },
     "nodes": {
       "addNode": "Adicionar nó",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "SHA-256 em base64 ou hex",
       "fetchPin": "Obter",
       "pinFetched": "Certificado atual do nó obtido",
-      "pinFetchFailed": "Não foi possível obter o certificado"
+      "pinFetchFailed": "Não foi possível obter o certificado",
+      "intro": "Painéis remotos gerenciados daqui, com status, versões e entradas."
     },
     "settings": {
       "defaultTag": "Padrão",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "URL do servidor DoH, geralmente terminando em /dns-query.",
       "subIncyResolveDnsIp": "IP do servidor DoH",
       "subIncyResolveDnsIpDesc": "IP do servidor DoH para bootstrap.",
-      "subIncyGroupRouting": "Roteamento"
+      "subIncyGroupRouting": "Roteamento",
+      "intro": "Acesso ao painel, segurança, notificações e configurações de assinatura."
     },
     "xray": {
       "importRules": "Importar regras",
@@ -2242,7 +2348,10 @@
         "poolSize": "Tamanho do Pool"
       },
       "defaultOutbound": "Saída padrão",
-      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista)."
+      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista).",
+      "intro": "O modelo base do Xray, balanceadores, DNS e a configuração JSON completa.",
+      "outboundIntro": "Por onde o tráfego sai do servidor: direto, bloqueado, proxies e cadeias.",
+      "routingIntro": "Regras que decidem qual saída cada conexão usa."
     },
     "hosts": {
       "addHost": "Adicionar Host",
@@ -2360,7 +2469,8 @@
         "delete": "Excluir host",
         "badTag": "Tag inválida",
         "badVlessRoute": "Insira um único número entre 0 e 65535"
-      }
+      },
+      "intro": "Endereços e dados de TLS que os links e as assinaturas entregam para cada entrada."
     },
     "sponsors": {
       "title": "Patrocinadores",

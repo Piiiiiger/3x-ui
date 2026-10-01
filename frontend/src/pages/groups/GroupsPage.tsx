@@ -46,7 +46,8 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useClients } from '@/hooks/useClients';
 import { HttpUtil, SizeFormatter } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
+import { PageHeader } from '@/components/ui';
 import { LazyMount } from '@/components/utility';
 import { keys } from '@/api/queryKeys';
 import {
@@ -492,9 +493,10 @@ export default function GroupsPage() {
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            <PageHeader title={t('menu.groups')} description={t('pages.groups.intro')} />
             <Spin spinning={!fetched} delay={200} description={t('loading')} size="large">
               {!fetched ? (
                 <div className="loading-spacer" />

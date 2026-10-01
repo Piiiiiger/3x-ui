@@ -105,7 +105,24 @@
     "support": "Destek",
     "qrTitle": "Tara. İçe aktar. Bağlan.",
     "qrHint": "İstemci uygulamanızla tarayın. Bu kodu kimseyle paylaşmayın.",
-    "saveQr": "QR'ı kaydet"
+    "saveQr": "QR'ı kaydet",
+    "portal": {
+      "title": "Giriş",
+      "intro": "Paketini, kullanımını ve abonelik bağlantılarını görmek için giriş yap.",
+      "username": "Kullanıcı adı",
+      "password": "Parola",
+      "signIn": "Giriş yap",
+      "signOut": "Çıkış yap",
+      "required": "Zorunlu",
+      "invalid": "Kullanıcı adı veya parola yanlış",
+      "blocked": "Çok fazla deneme. 15 dakika sonra tekrar dene.",
+      "failed": "Şu anda giriş yapılamıyor. Daha sonra tekrar dene.",
+      "plan": "Paketim",
+      "usage": "Son {days} gün",
+      "usageTotal": "Toplam {size}",
+      "noSubscription": "Hesabında henüz sunucu yok. Yöneticiyle iletişime geç.",
+      "loadFailed": "Bilgilerin yüklenemedi. Daha sonra tekrar dene."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -113,6 +130,7 @@
     "inbounds": "Gelen Bağlantılar",
     "clients": "Kullanıcılar",
     "groups": "Gruplar",
+    "plans": "Paketler",
     "nodes": "Düğümler",
     "settings": "Panel Ayarları",
     "xray": "Xray Yapılandırmaları",
@@ -124,8 +142,6 @@
     "hosts": "Host'lar",
     "docs": "Belgeler",
     "openMenu": "Menüyü aç",
-    "pinSidebar": "Kenar çubuğunu sabitle",
-    "unpinSidebar": "Kenar çubuğu sabitlemesini kaldır",
     "subFormats": "Abonelik Formatları"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "Kapalı",
       "xrayObservatoryLastSeen": "Son görülme",
       "xrayObservatoryLastTry": "Son deneme",
-      "connectionCount": "Bağlantı İstatistikleri",
-      "ipAddresses": "IP Adresleri",
       "toggleIpVisibility": "IP görünürlüğünü değiştir",
-      "overallSpeed": "Genel Hız",
       "upload": "Yükleme",
       "download": "İndirme",
       "sent": "Gönderilen",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "Veritabanınızı geri yüklemek için bir PostgreSQL yedeği (.dump), SQLite veritabanı (.db) veya SQLite taşıma dökümü seçip yüklemek üzere tıklayın. Bu, tüm mevcut verilerin yerini alır.",
       "migrationDownload": "Geçiş Dosyasını İndir",
       "migrationDownloadPgDesc": "PostgreSQL verilerinizden oluşturulan ve bu paneli SQLite üzerinde çalıştırmaya hazır bir .db SQLite veritabanı indirmek için tıklayın.",
-      "avg": "ort.",
-      "peak": "tepe",
-      "free": "boş",
-      "openSockets": "açık soket",
-      "throughputSub": "Arayüz toplamı",
-      "avgWindow": "Dönem ortalaması",
       "healthWarm": "{list} — yükseliyor",
       "healthCritical": "{list} — kritik",
-      "panel": "Panel",
-      "threads": "İş parçacıkları",
       "uptime": "Çalışma süresi",
       "logLevelDebug": "Hata Ayıklama",
       "logLevelInfo": "Bilgi",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Bu makinenin ayarlarını koru",
-      "importKeepHostSettingsDesc": "Yüklenen dosyadan almak yerine bu panelin dinleme adreslerini, portlarını, temel yolunu, sertifikalarını ve düğüm kimliğini korur."
+      "importKeepHostSettingsDesc": "Yüklenen dosyadan almak yerine bu panelin dinleme adreslerini, portlarını, temel yolunu, sertifikalarını ve düğüm kimliğini korur.",
+      "traffic": {
+        "quota": "Toplam kota",
+        "quotaDetail": "Kotalı {limited} · sınırsız {unlimited}",
+        "used": "Kullanılan",
+        "usedDetail": "Bugün {size}",
+        "remaining": "Kalan",
+        "remainingDetail": "Kullanıcı kotalarında hâlâ kullanılabilir",
+        "usageRate": "Kota kullanımı",
+        "usageRateDetail": "{quota} kotanın {used} kadarı kullanıldı",
+        "noQuota": "Kotası olan kullanıcı yok",
+        "daily": "Günlük trafik",
+        "dailySub": "Son {days} gün · 10 dakikada bir güncellenir",
+        "periodTotal": "Toplam",
+        "today": "Bugün",
+        "dailyAverage": "Günlük ortalama",
+        "clientsSub": "Toplam {count} kullanıcı",
+        "normal": "Aktif",
+        "expiring": "Yakında bitiyor",
+        "runningLow": "Azalıyor",
+        "usedUp": "Tükendi",
+        "expired": "Süresi doldu",
+        "disabled": "Devre dışı",
+        "manageClients": "Kullanıcıları yönet",
+        "attention": "İlgi gerekenler",
+        "attentionSub": "7 gün içinde bitecek ya da kotasının %10'undan azı kalmış, tükenmiş veya süresi dolmuş",
+        "attentionEmpty": "Şu anda ilgi gerektiren kimse yok"
+      }
     },
     "inbounds": {
       "totalDownUp": "Toplam Gönderilen/Alınan",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Peer {n} Yapılandırması"
       },
       "sniffingDestOverride": "Hedef geçersiz kılma",
-      "advancedTitle": "Gelişmiş Ayarlar"
+      "advancedTitle": "Gelişmiş Ayarlar",
+      "intro": "Dinlenen portlar, protokoller ve taşıma türleri ile her birinin hizmet verdiği kullanıcılar."
     },
     "clients": {
       "tabBasics": "Temel",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "Her N günde bir yerine, her takvim ayının bu gününde, panel saat diliminde gece yarısı yeniler. Seçilen gün için kısa olan aylarda ayın son gününde yeniler. 0 gün aralığı modunu korur.",
       "renewsUsed": "Kullanılan yenileme",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın."
+      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
+      "intro": "Tüm gelen bağlantılardaki kullanıcılar; trafik, bitiş tarihi ve abonelik bağlantılarıyla.",
+      "portal": {
+        "title": "Portal girişi",
+        "intro": "Parola verildiğinde kullanıcı kendi adıyla portala girip paketini, kullanımını ve abonelik bağlantılarını görebilir.",
+        "statusOn": "Açık · parola {time} tarihinde ayarlandı",
+        "statusOff": "Kapalı",
+        "url": "Portal adresi",
+        "newPassword": "Yeni parola",
+        "passwordHint": "6 ile 72 karakter. Parolayı değiştirmek kullanıcının tüm cihazlardaki oturumunu kapatır.",
+        "passwordLength": "6 ile 72 karakter girin",
+        "save": "Parolayı kaydet",
+        "savedToast": "Portal parolası kaydedildi",
+        "handout": "Bu bilgileri kullanıcıya gönder:",
+        "copyLogin": "Giriş bilgilerini kopyala",
+        "loginText": "Portal: {url}\nKullanıcı adı: {username}\nParola: {password}",
+        "revoke": "Girişi kapat",
+        "revokeConfirm": "{email} için portal girişi kapatılsın mı? Açık oturumlar hemen sona erer.",
+        "revoked": "Portal girişi kapatıldı",
+        "subDisabled": "Abonelik sunucusu kapalı, bu yüzden kullanıcı portalı açamaz. Ayarlar → Abonelik bölümünden açın."
+      }
     },
     "groups": {
       "name": "İsim",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "Kullanıcı Çıkar…",
       "removeFromGroupTitle": "«{name}» Grubundan Kullanıcı Çıkar",
       "removeFromGroupDesc": "Bu gruptan çıkarılacak üyeleri seçin. Kullanıcılar korunur (tamamen kaldırmak için «Gruptaki kullanıcıları sil» kullanın).",
-      "removeFromGroupResult": "{name} grubundan {count} kullanıcı çıkarıldı."
+      "removeFromGroupResult": "{name} grubundan {count} kullanıcı çıkarıldı.",
+      "intro": "Kullanıcıları gruplayarak trafiklerini birlikte sıfırlayın veya birlikte silin."
+    },
+    "plans": {
+      "intro": "Trafik, geçerlilik süresi ve sunuculardan oluşan setler. Her kullanıcıyı tek tek ayarlamak yerine bir pakete atayın.",
+      "add": "Yeni paket",
+      "edit": "Paketi düzenle",
+      "empty": "Henüz paket yok",
+      "quota": "Trafik",
+      "zeroUnlimited": "0 sınırsız demektir",
+      "duration": "Geçerlilik",
+      "durationHint": "Gün cinsinden. 0 hiç sona ermez demektir.",
+      "daysUnit": "gün",
+      "permanent": "süresiz",
+      "resetDay": "Sıfırlama günü",
+      "monthlyOn": "Her ayın {day}. günü",
+      "servers": "Sunucular",
+      "noServers": "Sunucu seçilmedi",
+      "members": "{count} kullanıcı",
+      "applyToMembers": "Bu paketteki {count} kullanıcıyı da güncelle",
+      "deleteConfirm": "{name} paketi silinsin mi?",
+      "deleteBlocked": "Önce {count} kullanıcısını başka bir pakete taşıyın",
+      "assign": "Paket ata",
+      "addPeople": "Kullanıcı ekle",
+      "people": "Kullanıcılar",
+      "selectedPeople": "{count} kullanıcı seçildi",
+      "start": "Geçerlilik başlangıcı",
+      "startNow": "Şimdi",
+      "startFirstUse": "İlk bağlantıda",
+      "startKeep": "Mevcut bitiş tarihini koru",
+      "resetTraffic": "Kullanılan trafiği sıfırla",
+      "renew": "Yenile",
+      "renewConfirm": "{count} kullanıcının paketi yenilensin mi?",
+      "renewHint": "Her biri, şimdiden veya mevcut bitiş tarihinden (hangisi daha geçse) paket süresi kadar uzatılır ve kullanılan trafiği sıfırlanır.",
+      "unassign": "Paketten çıkar",
+      "unassignConfirm": "{count} kullanıcı paketten çıkarılsın mı? Mevcut sınırları korunur.",
+      "noPlan": "Paket yok",
+      "needPlan": "Bir paket seçin",
+      "needPeople": "En az bir kullanıcı seçin",
+      "errNameRequired": "Paket adını girin",
+      "toasts": {
+        "saved": "Paket kaydedildi",
+        "deleted": "Paket silindi",
+        "assigned": "{count} kullanıcıya paket atandı",
+        "renewed": "{count} kullanıcı yenilendi",
+        "unassigned": "{count} kullanıcı paketten çıkarıldı"
+      },
+      "clashRules": "Clash kuralları",
+      "clashInherit": "Genel kuralları kullan",
+      "clashCustom": "Pakete özel kurallar",
+      "clashRulesHint": "Pakete özel kurallar, paketteki kullanıcıların aboneliklerinde genel Clash kurallarının yerini alır; genel Clash yönlendirmesi kapalıyken bile uygulanır. Kurallar/YAML ya da kalıcı bir HTTPS URL'si yapıştırın (arka planda yenilenir).",
+      "errClashRulesRequired": "Kuralları girin ya da genel kurallara dönün"
     },
     "nodes": {
       "addNode": "Düğüm Ekle",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "base64 veya hex SHA-256",
       "fetchPin": "Getir",
       "pinFetched": "Düğümün geçerli sertifikası alındı",
-      "pinFetchFailed": "Sertifika alınamadı"
+      "pinFetchFailed": "Sertifika alınamadı",
+      "intro": "Buradan yönetilen uzak paneller; durumları, sürümleri ve gelen bağlantılarıyla."
     },
     "settings": {
       "defaultTag": "Varsayılan",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "DoH sunucu URL'si, genelde /dns-query ile biter.",
       "subIncyResolveDnsIp": "DoH sunucu IP'si",
       "subIncyResolveDnsIpDesc": "Bootstrap için DoH sunucu IP'si.",
-      "subIncyGroupRouting": "Yönlendirme"
+      "subIncyGroupRouting": "Yönlendirme",
+      "intro": "Panel erişimi, güvenlik, bildirimler ve abonelik ayarları."
     },
     "xray": {
       "save": "Kaydet",
@@ -2242,7 +2348,10 @@
         "poolSize": "Havuz Boyutu"
       },
       "defaultOutbound": "Varsayılan giden",
-      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden)."
+      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden).",
+      "intro": "Xray temel şablonu, dengeleyiciler, DNS ve tam JSON yapılandırması.",
+      "outboundIntro": "Trafiğin sunucudan çıktığı yer: doğrudan, engelli, proxy'ler ve zincirler.",
+      "routingIntro": "Her bağlantının hangi giden bağlantıyı kullanacağını belirleyen kurallar."
     },
     "hosts": {
       "addHost": "Host Ekle",
@@ -2360,7 +2469,8 @@
         "delete": "Host'u sil",
         "badTag": "Geçersiz etiket",
         "badVlessRoute": "0 ile 65535 arasında tek bir sayı girin"
-      }
+      },
+      "intro": "Paylaşım bağlantılarının ve aboneliklerin her gelen bağlantı için verdiği adresler ve TLS ayrıntıları."
     },
     "sponsors": {
       "title": "Sponsorlar",

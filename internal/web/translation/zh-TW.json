@@ -105,7 +105,24 @@
     "support": "支援",
     "qrTitle": "掃描。匯入。連線。",
     "qrHint": "使用用戶端應用程式掃描。請勿外洩此 QR 碼。",
-    "saveQr": "儲存 QR 碼"
+    "saveQr": "儲存 QR 碼",
+    "portal": {
+      "title": "使用者登入",
+      "intro": "登入後可以查看你的方案、用量和訂閱連結。",
+      "username": "使用者名稱",
+      "password": "密碼",
+      "signIn": "登入",
+      "signOut": "登出",
+      "required": "必填",
+      "invalid": "使用者名稱或密碼錯誤",
+      "blocked": "嘗試次數過多，請 15 分鐘後再試",
+      "failed": "暫時無法登入，請稍後再試",
+      "plan": "我的方案",
+      "usage": "近 {days} 天用量",
+      "usageTotal": "合計 {size}",
+      "noSubscription": "你的帳號暫時沒有可用線路，請聯絡管理員。",
+      "loadFailed": "暫時無法載入你的資訊，請稍後再試。"
+    }
   },
   "menu": {
     "theme": "主題",
@@ -113,6 +130,7 @@
     "inbounds": "入站",
     "clients": "客戶端",
     "groups": "群組",
+    "plans": "方案",
     "nodes": "節點",
     "settings": "面板設定",
     "xray": "Xray 設定",
@@ -124,8 +142,6 @@
     "hosts": "主機",
     "docs": "文件",
     "openMenu": "開啟選單",
-    "pinSidebar": "固定側邊欄",
-    "unpinSidebar": "取消固定側邊欄",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "離線",
       "xrayObservatoryLastSeen": "最後在線",
       "xrayObservatoryLastTry": "最後嘗試",
-      "connectionCount": "連線數",
-      "ipAddresses": "IP 地址",
       "toggleIpVisibility": "切換 IP 可見性",
-      "overallSpeed": "整體速度",
       "upload": "上傳",
       "download": "下載",
       "sent": "已發送",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "點擊選擇並上傳 PostgreSQL 備份（.dump）、SQLite 資料庫（.db）或 SQLite 遷移匯出檔以還原您的資料庫。此操作將取代所有目前的資料。",
       "migrationDownload": "下載遷移檔案",
       "migrationDownloadPgDesc": "點擊下載由 PostgreSQL 資料建立的 .db SQLite 資料庫，可用於在 SQLite 上執行本面板。",
-      "avg": "均值",
-      "peak": "峰值",
-      "free": "剩餘",
-      "openSockets": "開啟的通訊端",
-      "throughputSub": "網路介面總計",
-      "avgWindow": "視窗均值",
       "healthWarm": "{list} — 偏高",
       "healthCritical": "{list} — 危險",
-      "panel": "面板",
-      "threads": "執行緒",
       "uptime": "執行時間",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "保留本機設定",
-      "importKeepHostSettingsDesc": "保留本面板的監聽位址、連接埠、基礎路徑、憑證與節點身分，而不是使用上傳檔案中的值。"
+      "importKeepHostSettingsDesc": "保留本面板的監聽位址、連接埠、基礎路徑、憑證與節點身分，而不是使用上傳檔案中的值。",
+      "traffic": {
+        "quota": "總流量配額",
+        "quotaDetail": "{limited} 位限額使用者 · {unlimited} 位不限量",
+        "used": "已用流量",
+        "usedDetail": "今日 {size}",
+        "remaining": "剩餘流量",
+        "remainingDetail": "限額使用者還能使用的流量",
+        "usageRate": "使用率",
+        "usageRateDetail": "已消耗 {used} / {quota}",
+        "noQuota": "目前沒有限額使用者",
+        "daily": "每日流量",
+        "dailySub": "近 {days} 天 · 每 10 分鐘更新",
+        "periodTotal": "合計",
+        "today": "今日",
+        "dailyAverage": "日均",
+        "clientsSub": "共 {count} 位使用者",
+        "normal": "正常",
+        "expiring": "即將到期",
+        "runningLow": "流量將盡",
+        "usedUp": "流量用完",
+        "expired": "已到期",
+        "disabled": "已停用",
+        "manageClients": "管理使用者",
+        "attention": "需要關注",
+        "attentionSub": "7 天內到期或流量剩餘不足 10%、流量用完、已到期",
+        "attentionEmpty": "目前沒有需要處理的使用者"
+      }
     },
     "inbounds": {
       "totalDownUp": "總上傳 / 下載",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "目標覆寫",
-      "advancedTitle": "進階設定"
+      "advancedTitle": "進階設定",
+      "intro": "監聽連接埠、協定與傳輸方式，以及每個入站下的客戶端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "每個自然月的這一天午夜（依面板時區）續期，而不是每 N 天續期一次。若當月沒有該日期，則在當月最後一天續期。填 0 保持按天間隔模式。",
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。"
+      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
+      "intro": "所有入站下的客戶端，包含流量、到期時間與訂閱連結。",
+      "portal": {
+        "title": "入口網站登入",
+        "intro": "設定密碼後，使用者可以用自己的使用者名稱登入入口網站，查看方案、用量和訂閱連結。",
+        "statusOn": "已開通 · 密碼設定於 {time}",
+        "statusOff": "未開通",
+        "url": "入口網站位址",
+        "newPassword": "新密碼",
+        "passwordHint": "6–72 個字元。更換密碼會讓該使用者在所有裝置上登出。",
+        "passwordLength": "請輸入 6–72 個字元",
+        "save": "儲存密碼",
+        "savedToast": "已儲存入口網站密碼",
+        "handout": "把下面的登入資訊傳給使用者：",
+        "copyLogin": "複製登入資訊",
+        "loginText": "入口網站：{url}\n使用者名稱：{username}\n密碼：{password}",
+        "revoke": "關閉登入",
+        "revokeConfirm": "關閉 {email} 的入口網站登入？已登入的裝置會立即登出。",
+        "revoked": "已關閉入口網站登入",
+        "subDisabled": "訂閱服務未開啟，使用者暫時無法開啟入口網站。請先在 設定 → 訂閱 中開啟。"
+      }
     },
     "groups": {
       "name": "名稱",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "移除客戶端…",
       "removeFromGroupTitle": "從群組「{name}」移除客戶端",
       "removeFromGroupDesc": "選擇要從此群組移除的成員。客戶端本身保留(用「刪除群組中的客戶端」完全移除)。",
-      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。"
+      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。",
+      "intro": "將客戶端分組，方便一起重設流量或批次刪除。"
+    },
+    "plans": {
+      "intro": "流量、有效期與伺服器的組合。把使用者放進方案，不必逐一手動設定。",
+      "add": "新增方案",
+      "edit": "編輯方案",
+      "empty": "尚無方案",
+      "quota": "流量",
+      "zeroUnlimited": "0 表示不限",
+      "duration": "有效期",
+      "durationHint": "單位為天，0 表示永不過期。",
+      "daysUnit": "天",
+      "permanent": "永久",
+      "resetDay": "每月重設日",
+      "monthlyOn": "每月 {day} 日",
+      "servers": "伺服器",
+      "noServers": "未選擇伺服器",
+      "members": "{count} 位使用者",
+      "applyToMembers": "同時更新此方案的 {count} 位使用者",
+      "deleteConfirm": "刪除方案 {name}？",
+      "deleteBlocked": "請先將其中的 {count} 位使用者移到其他方案",
+      "assign": "指派方案",
+      "addPeople": "新增使用者",
+      "people": "使用者",
+      "selectedPeople": "已選 {count} 位使用者",
+      "start": "有效期開始",
+      "startNow": "立即",
+      "startFirstUse": "首次連線時",
+      "startKeep": "保留目前到期時間",
+      "resetTraffic": "清除已用流量",
+      "renew": "續期",
+      "renewConfirm": "為 {count} 位使用者依方案續期？",
+      "renewHint": "每人依其方案時長續期，從現在或目前到期時間中較晚者起算，並清除已用流量。",
+      "unassign": "移出方案",
+      "unassignConfirm": "將 {count} 位使用者移出方案？他們目前的限額維持不變。",
+      "noPlan": "無方案",
+      "needPlan": "請選擇方案",
+      "needPeople": "請至少選擇一位使用者",
+      "errNameRequired": "請輸入方案名稱",
+      "toasts": {
+        "saved": "方案已儲存",
+        "deleted": "方案已刪除",
+        "assigned": "已為 {count} 位使用者設定方案",
+        "renewed": "已為 {count} 位使用者續期",
+        "unassigned": "已將 {count} 位使用者移出方案"
+      },
+      "clashRules": "Clash 規則",
+      "clashInherit": "使用全域規則",
+      "clashCustom": "方案專屬規則",
+      "clashRulesHint": "專屬規則會取代此方案使用者訂閱中的全域 Clash 規則，即使關閉了全域路由也會生效。可貼上規則/YAML，或一個固定的 HTTPS URL（背景定時更新）。",
+      "errClashRulesRequired": "請填寫規則，或改為使用全域規則"
     },
     "nodes": {
       "addNode": "新增節點",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "base64 或 hex 的 SHA-256",
       "fetchPin": "取得",
       "pinFetched": "已取得節點目前憑證",
-      "pinFetchFailed": "無法取得憑證"
+      "pinFetchFailed": "無法取得憑證",
+      "intro": "由本面板管理的遠端面板，包含狀態、版本與入站。"
     },
     "settings": {
       "defaultTag": "預設",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "DoH 伺服器 URL，通常以 /dns-query 結尾。",
       "subIncyResolveDnsIp": "DoH 伺服器 IP",
       "subIncyResolveDnsIpDesc": "用於引導的 DoH 伺服器 IP。",
-      "subIncyGroupRouting": "路由"
+      "subIncyGroupRouting": "路由",
+      "intro": "面板存取、安全、通知與訂閱相關設定。"
     },
     "xray": {
       "save": "儲存",
@@ -2242,7 +2348,10 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "預設出站",
-      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。"
+      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。",
+      "intro": "Xray 基礎範本、負載平衡、DNS 以及完整的 JSON 設定。",
+      "outboundIntro": "流量離開伺服器的出口：直連、封鎖、代理與鏈式代理。",
+      "routingIntro": "決定每條連線走哪個出站的規則。"
     },
     "hosts": {
       "addHost": "新增 Host",
@@ -2360,7 +2469,8 @@
         "delete": "刪除 Host",
         "badTag": "無效的標籤",
         "badVlessRoute": "請輸入 0 到 65535 之間的單一數字"
-      }
+      },
+      "intro": "為每個入站設定分享連結與訂閱提供的位址與 TLS 參數。"
     },
     "sponsors": {
       "title": "贊助商",

@@ -40,6 +40,8 @@ func run(root, outDir string) error {
 				"InboundFallback",
 				"Host",
 				"SubBalancer",
+				"Plan",
+				"PlanInbound",
 			),
 			AliasAllow: setOf("Protocol"),
 			Overrides: map[string][]walkOverride{
@@ -91,6 +93,12 @@ func run(root, outDir string) error {
 			Path: resolveRel(root, "internal/web/service"),
 			StructAllow: setOf(
 				"InboundOption",
+				"PlanInput",
+				"PlanSummary",
+				"TrafficOverview",
+				"ClientPortalStatus",
+				"TrafficDay",
+				"AttentionClient",
 				"HappLinkResult",
 				"ClientSlim",
 				"ClientRenewalPreviewRequest",

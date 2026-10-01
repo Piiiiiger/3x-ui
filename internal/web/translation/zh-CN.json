@@ -105,7 +105,24 @@
     "support": "支持",
     "qrTitle": "扫码。导入。连接。",
     "qrHint": "使用客户端应用扫描。请勿泄露此二维码。",
-    "saveQr": "保存二维码"
+    "saveQr": "保存二维码",
+    "portal": {
+      "title": "用户登录",
+      "intro": "登录后可以查看你的套餐、用量和订阅链接。",
+      "username": "用户名",
+      "password": "密码",
+      "signIn": "登录",
+      "signOut": "退出登录",
+      "required": "必填",
+      "invalid": "用户名或密码错误",
+      "blocked": "尝试次数过多，请 15 分钟后再试",
+      "failed": "暂时无法登录，请稍后再试",
+      "plan": "我的套餐",
+      "usage": "近 {days} 天用量",
+      "usageTotal": "合计 {size}",
+      "noSubscription": "你的账号暂时没有可用线路，请联系管理员。",
+      "loadFailed": "暂时无法加载你的信息，请稍后再试。"
+    }
   },
   "menu": {
     "theme": "主题",
@@ -113,6 +130,7 @@
     "inbounds": "入站",
     "clients": "客户端",
     "groups": "分组",
+    "plans": "套餐",
     "nodes": "节点",
     "settings": "面板设置",
     "xray": "Xray 配置",
@@ -124,8 +142,6 @@
     "hosts": "主机",
     "docs": "文档",
     "openMenu": "打开菜单",
-    "pinSidebar": "固定侧边栏",
-    "unpinSidebar": "取消固定侧边栏",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "离线",
       "xrayObservatoryLastSeen": "最后在线",
       "xrayObservatoryLastTry": "最后尝试",
-      "connectionCount": "连接数",
-      "ipAddresses": "IP 地址",
       "toggleIpVisibility": "切换 IP 可见性",
-      "overallSpeed": "整体速度",
       "upload": "上传",
       "download": "下载",
       "sent": "已发送",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "点击选择并上传 PostgreSQL 备份（.dump）、SQLite 数据库（.db）或 SQLite 迁移导出文件以恢复您的数据库。此操作将替换所有当前数据。",
       "migrationDownload": "下载迁移文件",
       "migrationDownloadPgDesc": "点击下载由 PostgreSQL 数据构建的 .db SQLite 数据库，可用于在 SQLite 上运行本面板。",
-      "avg": "均值",
-      "peak": "峰值",
-      "free": "剩余",
-      "openSockets": "打开的套接字",
-      "throughputSub": "网卡总计",
-      "avgWindow": "窗口均值",
       "healthWarm": "{list} — 偏高",
       "healthCritical": "{list} — 危险",
-      "panel": "面板",
-      "threads": "线程",
       "uptime": "运行时间",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "保留本机设置",
-      "importKeepHostSettingsDesc": "保留本面板的监听地址、端口、基础路径、证书和节点身份，而不是使用上传文件中的值。"
+      "importKeepHostSettingsDesc": "保留本面板的监听地址、端口、基础路径、证书和节点身份，而不是使用上传文件中的值。",
+      "traffic": {
+        "quota": "总流量配额",
+        "quotaDetail": "{limited} 个限额用户 · {unlimited} 个不限量",
+        "used": "已用流量",
+        "usedDetail": "今日 {size}",
+        "remaining": "剩余流量",
+        "remainingDetail": "限额用户还能使用的流量",
+        "usageRate": "使用率",
+        "usageRateDetail": "已消耗 {used} / {quota}",
+        "noQuota": "暂无限额用户",
+        "daily": "每日流量",
+        "dailySub": "近 {days} 天 · 每 10 分钟更新",
+        "periodTotal": "合计",
+        "today": "今日",
+        "dailyAverage": "日均",
+        "clientsSub": "共 {count} 个用户",
+        "normal": "正常",
+        "expiring": "即将到期",
+        "runningLow": "流量将尽",
+        "usedUp": "流量用完",
+        "expired": "已到期",
+        "disabled": "已停用",
+        "manageClients": "管理用户",
+        "attention": "需要关注",
+        "attentionSub": "7 天内到期或流量剩余不足 10%、流量用完、已到期",
+        "attentionEmpty": "暂时没有需要处理的用户"
+      }
     },
     "inbounds": {
       "totalDownUp": "总上传 / 下载",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Peer {n} 配置"
       },
       "sniffingDestOverride": "目标覆盖",
-      "advancedTitle": "高级设置"
+      "advancedTitle": "高级设置",
+      "intro": "监听端口、协议与传输方式，以及每个入站下的客户端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "每个自然月的这一天午夜（按面板时区）续期，而不是每 N 天续期一次。若当月没有该日期，则在当月最后一天续期。填 0 保持按天间隔模式。",
       "renewsUsed": "已用续期次数",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。"
+      "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。",
+      "intro": "所有入站下的客户端，包括流量、到期时间和订阅链接。",
+      "portal": {
+        "title": "门户登录",
+        "intro": "设置密码后，用户可以用自己的用户名登录门户，查看套餐、用量和订阅链接。",
+        "statusOn": "已开通 · 密码设置于 {time}",
+        "statusOff": "未开通",
+        "url": "门户地址",
+        "newPassword": "新密码",
+        "passwordHint": "6–72 个字符。更换密码会让该用户在所有设备上退出登录。",
+        "passwordLength": "请输入 6–72 个字符",
+        "save": "保存密码",
+        "savedToast": "已保存门户密码",
+        "handout": "把下面的登录信息发给用户：",
+        "copyLogin": "复制登录信息",
+        "loginText": "门户：{url}\n用户名：{username}\n密码：{password}",
+        "revoke": "关闭登录",
+        "revokeConfirm": "关闭 {email} 的门户登录？已登录的设备会立即退出。",
+        "revoked": "已关闭门户登录",
+        "subDisabled": "订阅服务未开启，用户暂时打不开门户。请先在 设置 → 订阅 中开启。"
+      }
     },
     "groups": {
       "name": "名称",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "移除客户端…",
       "removeFromGroupTitle": "从分组 “{name}” 移除客户端",
       "removeFromGroupDesc": "选择要从此分组中移除的成员。客户端本身保留(使用 “删除分组中的客户端” 完全移除)。",
-      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。"
+      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。",
+      "intro": "把客户端分组，方便一起重置流量或批量删除。"
+    },
+    "plans": {
+      "intro": "流量、有效期和服务器的组合。把用户放进套餐，不用逐个手动设置。",
+      "add": "新建套餐",
+      "edit": "编辑套餐",
+      "empty": "还没有套餐",
+      "quota": "流量",
+      "zeroUnlimited": "0 表示不限",
+      "duration": "有效期",
+      "durationHint": "单位为天，0 表示永不过期。",
+      "daysUnit": "天",
+      "permanent": "永久",
+      "resetDay": "每月重置日",
+      "monthlyOn": "每月 {day} 日",
+      "servers": "服务器",
+      "noServers": "未选择服务器",
+      "members": "{count} 个用户",
+      "applyToMembers": "同时更新该套餐的 {count} 个用户",
+      "deleteConfirm": "删除套餐 {name}？",
+      "deleteBlocked": "请先把其中的 {count} 个用户移到其他套餐",
+      "assign": "分配套餐",
+      "addPeople": "添加用户",
+      "people": "用户",
+      "selectedPeople": "已选 {count} 个用户",
+      "start": "有效期开始",
+      "startNow": "立即",
+      "startFirstUse": "首次连接时",
+      "startKeep": "保持当前到期时间",
+      "resetTraffic": "清零已用流量",
+      "renew": "续期",
+      "renewConfirm": "为 {count} 个用户按套餐续期？",
+      "renewHint": "每人按其套餐时长续期，从现在或当前到期时间中较晚者起算，并清零已用流量。",
+      "unassign": "移出套餐",
+      "unassignConfirm": "将 {count} 个用户移出套餐？他们当前的限额保持不变。",
+      "noPlan": "无套餐",
+      "needPlan": "请选择套餐",
+      "needPeople": "请至少选择一个用户",
+      "errNameRequired": "请输入套餐名称",
+      "toasts": {
+        "saved": "套餐已保存",
+        "deleted": "套餐已删除",
+        "assigned": "已为 {count} 个用户设置套餐",
+        "renewed": "已为 {count} 个用户续期",
+        "unassigned": "已将 {count} 个用户移出套餐"
+      },
+      "clashRules": "Clash 规则",
+      "clashInherit": "使用全局规则",
+      "clashCustom": "套餐专属规则",
+      "clashRulesHint": "专属规则会替换该套餐用户订阅中的全局 Clash 规则，即使关闭了全局路由也会生效。可粘贴规则/YAML，或一个固定的 HTTPS URL（后台定时更新）。",
+      "errClashRulesRequired": "请填写规则，或改为使用全局规则"
     },
     "nodes": {
       "addNode": "添加节点",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "base64 或 hex 的 SHA-256",
       "fetchPin": "获取",
       "pinFetched": "已获取节点当前证书",
-      "pinFetchFailed": "无法获取证书"
+      "pinFetchFailed": "无法获取证书",
+      "intro": "由本面板管理的远程面板，包括状态、版本和入站。"
     },
     "settings": {
       "defaultTag": "默认",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "DoH 服务器 URL，通常以 /dns-query 结尾。",
       "subIncyResolveDnsIp": "DoH 服务器 IP",
       "subIncyResolveDnsIpDesc": "用于引导的 DoH 服务器 IP。",
-      "subIncyGroupRouting": "路由"
+      "subIncyGroupRouting": "路由",
+      "intro": "面板访问、安全、通知与订阅相关设置。"
     },
     "xray": {
       "importRules": "导入规则",
@@ -2242,7 +2348,10 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "默认出站",
-      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。"
+      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。",
+      "intro": "Xray 基础模板、负载均衡、DNS 以及完整的 JSON 配置。",
+      "outboundIntro": "流量离开服务器的出口：直连、阻断、代理与链式代理。",
+      "routingIntro": "决定每条连接走哪个出站的规则。"
     },
     "hosts": {
       "addHost": "添加主机",
@@ -2360,7 +2469,8 @@
         "delete": "删除主机",
         "badTag": "无效的标签",
         "badVlessRoute": "请输入 0 到 65535 之间的单个数字"
-      }
+      },
+      "intro": "为每个入站设置分享链接和订阅下发的地址与 TLS 参数。"
     },
     "sponsors": {
       "title": "赞助商",

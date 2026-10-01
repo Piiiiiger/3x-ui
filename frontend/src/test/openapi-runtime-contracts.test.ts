@@ -208,11 +208,12 @@ describe('generated OpenAPI runtime contracts', () => {
       'hasTgId',
       'hasComment',
       'group',
+      'plan',
     ]);
     expect(paged.parameters?.every((param) => param.required === false)).toBe(true);
 
     const params = Object.fromEntries((paged.parameters ?? []).map((param) => [param.name, param]));
-    for (const name of ['filter', 'protocol', 'inbound', 'group']) {
+    for (const name of ['filter', 'protocol', 'inbound', 'group', 'plan']) {
       expect(params[name].description).toContain('CSV');
     }
     expect(params.sort.schema.enum).toEqual([

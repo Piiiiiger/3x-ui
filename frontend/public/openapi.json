@@ -1673,6 +1673,52 @@
         ],
         "type": "object"
       },
+      "AttentionClient": {
+        "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
+        "properties": {
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "enable": {
+            "example": true,
+            "type": "boolean"
+          },
+          "expiryTime": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "planId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "status": {
+            "example": "expiring",
+            "type": "string"
+          },
+          "totalGB": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "example": 53687091200,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email",
+          "enable",
+          "expiryTime",
+          "planId",
+          "status",
+          "totalGB",
+          "used"
+        ],
+        "type": "object"
+      },
       "Client": {
         "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
         "properties": {
@@ -1920,6 +1966,25 @@
         ],
         "type": "object"
       },
+      "ClientPortalStatus": {
+        "description": "ClientPortalStatus tells the admin whether a client can sign in to the portal.",
+        "properties": {
+          "enabled": {
+            "example": true,
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "ClientRecord": {
         "properties": {
           "adTag": {
@@ -1971,6 +2036,9 @@
           },
           "password": {
             "type": "string"
+          },
+          "planId": {
+            "type": "integer"
           },
           "preSharedKey": {
             "type": "string"
@@ -2042,6 +2110,7 @@
           "limitHwid",
           "limitIp",
           "password",
+          "planId",
           "preSharedKey",
           "privateKey",
           "publicKey",
@@ -2209,6 +2278,10 @@
           },
           "limitIp": {
             "example": 0,
+            "type": "integer"
+          },
+          "planId": {
+            "example": 1,
             "type": "integer"
           },
           "reset": {
@@ -4158,6 +4231,246 @@
         ],
         "type": "object"
       },
+      "Plan": {
+        "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
+        "properties": {
+          "clashRules": {
+            "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
+          "createdAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "durationDays": {
+            "description": "0 = never expires",
+            "example": 30,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "type": "integer"
+          },
+          "limitIp": {
+            "example": 0,
+            "type": "integer"
+          },
+          "name": {
+            "example": "Monthly 100G",
+            "type": "string"
+          },
+          "remark": {
+            "example": "Hong Kong and Singapore",
+            "type": "string"
+          },
+          "sortIndex": {
+            "example": 0,
+            "type": "integer"
+          },
+          "totalGB": {
+            "description": "bytes, 0 = unlimited",
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "trafficReset": {
+            "example": "monthly",
+            "type": "string"
+          },
+          "trafficResetDay": {
+            "example": 1,
+            "type": "integer"
+          },
+          "updatedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "clashRules",
+          "createdAt",
+          "durationDays",
+          "id",
+          "limitIp",
+          "name",
+          "remark",
+          "sortIndex",
+          "totalGB",
+          "trafficReset",
+          "trafficResetDay",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "PlanInbound": {
+        "description": "PlanInbound is the plan-to-inbound join: the servers a plan grants its members.",
+        "properties": {
+          "inboundId": {
+            "type": "integer"
+          },
+          "planId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "inboundId",
+          "planId"
+        ],
+        "type": "object"
+      },
+      "PlanInput": {
+        "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
+        "properties": {
+          "clashRules": {
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
+          "durationDays": {
+            "example": 30,
+            "type": "integer"
+          },
+          "inboundIds": {
+            "example": [
+              1,
+              2
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "limitIp": {
+            "example": 0,
+            "type": "integer"
+          },
+          "name": {
+            "example": "Monthly 100G",
+            "type": "string"
+          },
+          "remark": {
+            "example": "Hong Kong and Singapore",
+            "type": "string"
+          },
+          "totalGB": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "trafficReset": {
+            "example": "monthly",
+            "type": "string"
+          },
+          "trafficResetDay": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "clashRules",
+          "durationDays",
+          "inboundIds",
+          "limitIp",
+          "name",
+          "remark",
+          "totalGB",
+          "trafficReset",
+          "trafficResetDay"
+        ],
+        "type": "object"
+      },
+      "PlanSummary": {
+        "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
+        "properties": {
+          "clashRules": {
+            "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+            "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+            "type": "string"
+          },
+          "createdAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "durationDays": {
+            "description": "0 = never expires",
+            "example": 30,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "type": "integer"
+          },
+          "inboundIds": {
+            "example": [
+              1,
+              2
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "limitIp": {
+            "example": 0,
+            "type": "integer"
+          },
+          "memberCount": {
+            "example": 4,
+            "type": "integer"
+          },
+          "name": {
+            "example": "Monthly 100G",
+            "type": "string"
+          },
+          "remark": {
+            "example": "Hong Kong and Singapore",
+            "type": "string"
+          },
+          "sortIndex": {
+            "example": 0,
+            "type": "integer"
+          },
+          "totalGB": {
+            "description": "bytes, 0 = unlimited",
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "trafficReset": {
+            "example": "monthly",
+            "type": "string"
+          },
+          "trafficResetDay": {
+            "example": 1,
+            "type": "integer"
+          },
+          "updatedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "clashRules",
+          "createdAt",
+          "durationDays",
+          "id",
+          "inboundIds",
+          "limitIp",
+          "memberCount",
+          "name",
+          "remark",
+          "sortIndex",
+          "totalGB",
+          "trafficReset",
+          "trafficResetDay",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "ProbeResultUI": {
         "properties": {
           "cpuPct": {
@@ -4685,6 +4998,106 @@
         ],
         "type": "object"
       },
+      "TrafficDay": {
+        "description": "TrafficDay is the traffic all clients used on one day of the panel's time zone.",
+        "properties": {
+          "day": {
+            "example": "2026-10-01",
+            "type": "string"
+          },
+          "down": {
+            "example": 4194304,
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "example": 1048576,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "down",
+          "up"
+        ],
+        "type": "object"
+      },
+      "TrafficOverview": {
+        "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+        "properties": {
+          "active": {
+            "example": 9,
+            "type": "integer"
+          },
+          "attention": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionClient"
+            },
+            "type": "array"
+          },
+          "clients": {
+            "example": 12,
+            "type": "integer"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficDay"
+            },
+            "type": "array"
+          },
+          "disabled": {
+            "example": 1,
+            "type": "integer"
+          },
+          "expired": {
+            "example": 1,
+            "type": "integer"
+          },
+          "expiring": {
+            "example": 2,
+            "type": "integer"
+          },
+          "quotaBytes": {
+            "example": 1099511627776,
+            "format": "int64",
+            "type": "integer"
+          },
+          "remainingBytes": {
+            "example": 884763262976,
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlimited": {
+            "example": 2,
+            "type": "integer"
+          },
+          "usedBytes": {
+            "example": 322122547200,
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedUp": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "active",
+          "attention",
+          "clients",
+          "daily",
+          "disabled",
+          "expired",
+          "expiring",
+          "quotaBytes",
+          "remainingBytes",
+          "unlimited",
+          "usedBytes",
+          "usedUp"
+        ],
+        "type": "object"
+      },
       "TuicClientSettings": {
         "properties": {
           "email": {
@@ -4843,6 +5256,14 @@
     {
       "name": "Hosts",
       "description": "Per-inbound override endpoints. Each enabled host renders one extra subscription link/proxy with its own address/port/TLS, superseding the legacy externalProxy array. All endpoints under /panel/api/hosts."
+    },
+    {
+      "name": "Plans",
+      "description": "Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds."
+    },
+    {
+      "name": "Traffic",
+      "description": "Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone."
     },
     {
       "name": "Backup",
@@ -8355,6 +8776,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "plan",
+            "in": "query",
+            "required": false,
+            "description": "CSV plan ids; 0 matches clients on no plan. Values are ORed.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -8398,6 +8828,7 @@
                         ],
                         "limitHwid": 0,
                         "limitIp": 0,
+                        "planId": 1,
                         "reset": 0,
                         "resetDay": 0,
                         "resetMax": 0,
@@ -9027,6 +9458,167 @@
                 },
                 "example": {
                   "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/{email}/portal": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Whether the client can sign in to the subscription server portal ({subPath}portal), and when its password was last set.",
+        "operationId": "get_panel_api_clients_email_portal",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientPortalStatus"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enabled": true,
+                    "updatedAt": 1735689600000
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set or replace the client portal password (6 to 72 bytes, stored as a bcrypt hash). Replacing it signs out the client portal sessions.",
+        "operationId": "post_panel_api_clients_email_portal",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "password": "a-long-passphrase"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientPortalStatus"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enabled": true,
+                    "updatedAt": 1735689600000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/{email}/portal/clear": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Remove the client portal password: the client can no longer sign in and open sessions end.",
+        "operationId": "post_panel_api_clients_email_portal_clear",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientPortalStatus"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enabled": true,
+                    "updatedAt": 1735689600000
+                  }
                 }
               }
             }
@@ -12726,6 +13318,479 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/list": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "List every plan with the inbounds it grants and how many clients use it.",
+        "operationId": "get_panel_api_plans_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PlanSummary"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+                      "createdAt": 1735689600000,
+                      "durationDays": 30,
+                      "id": 1,
+                      "inboundIds": [
+                        1,
+                        2
+                      ],
+                      "limitIp": 0,
+                      "memberCount": 4,
+                      "name": "Monthly 100G",
+                      "remark": "Hong Kong and Singapore",
+                      "sortIndex": 0,
+                      "totalGB": 107374182400,
+                      "trafficReset": "monthly",
+                      "trafficResetDay": 1,
+                      "updatedAt": 1735689600000
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/add": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. clashRules (inline rules/YAML or one HTTPS URL) replaces the global Clash rules in members' subscriptions, even with global Clash routing off; empty inherits them.",
+        "operationId": "post_panel_api_plans_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Monthly 100G",
+                "totalGB": 107374182400,
+                "durationDays": 30,
+                "trafficReset": "monthly",
+                "trafficResetDay": 1,
+                "limitIp": 0,
+                "remark": "",
+                "clashRules": "",
+                "inboundIds": [
+                  1,
+                  2
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/Plan"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+                    "createdAt": 1735689600000,
+                    "durationDays": 30,
+                    "id": 1,
+                    "limitIp": 0,
+                    "name": "Monthly 100G",
+                    "remark": "Hong Kong and Singapore",
+                    "sortIndex": 0,
+                    "totalGB": 107374182400,
+                    "trafficReset": "monthly",
+                    "trafficResetDay": 1,
+                    "updatedAt": 1735689600000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/update/{id}": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.",
+        "operationId": "post_panel_api_plans_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Plan id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Monthly 200G",
+                "totalGB": 214748364800,
+                "durationDays": 30,
+                "trafficReset": "monthly",
+                "trafficResetDay": 1,
+                "limitIp": 0,
+                "remark": "",
+                "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+                "inboundIds": [
+                  1,
+                  2
+                ],
+                "applyToMembers": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/del/{id}": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Delete a plan. Refused while any client is on it — move or unassign those clients first.",
+        "operationId": "post_panel_api_plans_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Plan id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/assign": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Put clients on a plan. Each gets the plan quota, IP limit and reset schedule, and exactly the plan inbounds. start sets the expiry: now (duration from now), firstUse (duration from the first connection) or keep (unchanged). resetTraffic zeroes usage and re-enables the client.",
+        "operationId": "post_panel_api_plans_assign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "emails": [
+                  "alice",
+                  "bob"
+                ],
+                "planId": 1,
+                "start": "now",
+                "resetTraffic": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "affected": 2
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/unassign": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Take clients off their plan. Their current quota, expiry and inbounds stay as they are.",
+        "operationId": "post_panel_api_plans_unassign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "emails": [
+                  "alice"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "affected": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/renew": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Renew clients on their plan: the expiry moves forward by the plan duration from the later of now and the current expiry, usage is zeroed and the client is re-enabled. Fails for a client with no plan.",
+        "operationId": "post_panel_api_plans_renew",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "emails": [
+                  "alice"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "affected": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/traffic/overview": {
+      "get": {
+        "tags": [
+          "Traffic"
+        ],
+        "summary": "Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.",
+        "operationId": "get_panel_api_traffic_overview",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/TrafficOverview"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "active": 9,
+                    "attention": [
+                      {
+                        "email": "alice",
+                        "enable": true,
+                        "expiryTime": 1735689600000,
+                        "planId": 1,
+                        "status": "expiring",
+                        "totalGB": 107374182400,
+                        "used": 53687091200
+                      }
+                    ],
+                    "clients": 12,
+                    "daily": [
+                      {
+                        "day": "2026-10-01",
+                        "down": 4194304,
+                        "up": 1048576
+                      }
+                    ],
+                    "disabled": 1,
+                    "expired": 1,
+                    "expiring": 2,
+                    "quotaBytes": 1099511627776,
+                    "remainingBytes": 884763262976,
+                    "unlimited": 2,
+                    "usedBytes": 322122547200,
+                    "usedUp": 1
                   }
                 }
               }

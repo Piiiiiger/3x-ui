@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/loginlimit"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -85,6 +86,10 @@ type SUBController struct {
 	subClashService *SubClashService
 	clientService   service.ClientService
 	settingService  service.SettingService
+	portalService   service.ClientPortalService
+	statsService    service.TrafficStatsService
+	portalLimiter   *loginlimit.Limiter
+	portalUserCap   *loginlimit.Limiter
 
 	subTemplateMu    sync.RWMutex
 	subTemplateCache map[string]*cachedSubTemplate
@@ -322,6 +327,8 @@ func NewSUBController(g *gin.RouterGroup, options ...SUBControllerOption) *SUBCo
 		subClashService: NewSubClashService(config.subClashEnableRouting, config.subClashRules, sub),
 
 		subTemplateCache: map[string]*cachedSubTemplate{},
+		portalLimiter:    loginlimit.New(loginlimit.MaxFailures, loginlimit.Window, loginlimit.Cooldown),
+		portalUserCap:    loginlimit.New(portalUserMaxFailures, portalUserWindow, portalUserWindow),
 	}
 	a.initRouter(g)
 	return a
@@ -330,11 +337,19 @@ func NewSUBController(g *gin.RouterGroup, options ...SUBControllerOption) *SUBCo
 // initRouter registers HTTP routes for subscription links and JSON endpoints
 // on the provided router group.
 func (a *SUBController) initRouter(g *gin.RouterGroup) {
+	if a.subPath != "/" {
+		// A bare visit to the subscription host lands on the client portal.
+		g.GET("/", func(c *gin.Context) { c.Redirect(http.StatusFound, a.portalPath()) })
+	}
 	gLink := g.Group(a.subPath)
 	gLink.GET(":subid", a.subs)
 	gLink.HEAD(":subid", a.subs)
 	gLink.GET(":subid/hwid-status", a.hwidStatus)
 	gLink.HEAD(":subid/hwid-status", a.hwidStatus)
+	gLink.GET("portal", a.portalPage)
+	gLink.GET("portal/data", a.portalData)
+	gLink.POST("portal/login", a.portalLogin)
+	gLink.POST("portal/logout", a.portalLogout)
 	if a.jsonEnabled {
 		gJson := g.Group(a.subJsonPath)
 		gJson.GET(":subid", a.subJsons)
@@ -417,14 +432,23 @@ func (a *SUBController) maybeServeSubInfo(c *gin.Context) bool {
 }
 
 func (a *SUBController) buildSubPageData(c *gin.Context) (PageData, bool) {
-	subId := c.Param("subid")
+	page, found, err := a.pageDataFor(c, c.Param("subid"))
+	if err != nil || !found {
+		writeSubError(c, err)
+		return PageData{}, false
+	}
+	return page, true
+}
+
+// pageDataFor builds the subscription page's data for subId; found is false
+// when the subscription has nothing to show.
+func (a *SUBController) pageDataFor(c *gin.Context, subId string) (page PageData, found bool, err error) {
 	_, host, _, hostHeader := a.subService.ResolveRequest(c)
 	subReq := a.subService.ForRequest(host)
 	subReq.subscriptionBody = false
 	subs, emails, lastOnline, traffic, err := subReq.getSubs(subId)
 	if err != nil || subs == nil {
-		writeSubError(c, err)
-		return PageData{}, false
+		return PageData{}, false, err
 	}
 	subURL, subJsonURL, subClashURL := subReq.BuildURLs(a.subPath, a.subJsonPath, a.subClashPath, subId)
 	if !a.jsonEnabled {
@@ -439,9 +463,9 @@ func (a *SUBController) buildSubPageData(c *gin.Context) (PageData, bool) {
 	}
 	basePathStr := basePath.(string)
 	metadata := a.metadataForSubRequest(func() *SubService { return subReq }, subId, "")
-	page := subReq.BuildPageData(subId, hostHeader, traffic, lastOnline, subs, emails, subURL, subJsonURL, subClashURL, basePathStr, metadata.Title, metadata.SupportURL)
+	page = subReq.BuildPageData(subId, hostHeader, traffic, lastOnline, subs, emails, subURL, subJsonURL, subClashURL, basePathStr, metadata.Title, metadata.SupportURL)
 	page.SubAnnounce = metadata.Announce
-	return page, true
+	return page, true, nil
 }
 
 func dedupeEmails(emails []string) []string {
@@ -582,22 +606,14 @@ func compileUserAgentRegex(name, pattern, defaultPattern string) *regexp.Regexp 
 	return regexp.MustCompile(defaultPattern)
 }
 
-// serveSubPage renders internal/web/dist/subpage.html for the current subscription
-// request. The Vite-built SPA reads window.__SUB_PAGE_DATA__ on mount —
-// we inject that here, along with window.X_UI_BASE_PATH so the
-// page's static asset references resolve correctly when the panel runs
-// behind a URL prefix.
-func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageData) {
-	var body []byte
-	if diskBody, diskErr := os.ReadFile("internal/web/dist/subpage.html"); diskErr == nil {
-		body = diskBody
-	} else {
-		readBody, err := fs.ReadFile(distFS, "dist/subpage.html")
-		if err != nil {
-			c.String(http.StatusInternalServerError, "missing embedded subpage")
-			return
+// subPageHTML loads the subscription page bundle with its asset URLs pointed
+// at basePath.
+func subPageHTML(basePath string) ([]byte, error) {
+	body, err := os.ReadFile("internal/web/dist/subpage.html")
+	if err != nil {
+		if body, err = fs.ReadFile(distFS, "dist/subpage.html"); err != nil {
+			return nil, err
 		}
-		body = readBody
 	}
 
 	// Vite emits absolute asset URLs (`/assets/...`); when the panel is
@@ -607,6 +623,31 @@ func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageD
 	if basePath != "/" && basePath != "" {
 		body = bytes.ReplaceAll(body, []byte(`src="/assets/`), []byte(`src="`+basePath+`assets/`))
 		body = bytes.ReplaceAll(body, []byte(`href="/assets/`), []byte(`href="`+basePath+`assets/`))
+	}
+	return body, nil
+}
+
+// jsStringEscaper hardens values embedded in an inline script's string literal.
+var jsStringEscaper = strings.NewReplacer(
+	`\`, `\\`,
+	`"`, `\"`,
+	"\n", `\n`,
+	"\r", `\r`,
+	"<", `\u003c`,
+	">", `\u003e`,
+	"&", `\u0026`,
+)
+
+// serveSubPage renders internal/web/dist/subpage.html for the current subscription
+// request. The Vite-built SPA reads window.__SUB_PAGE_DATA__ on mount —
+// we inject that here, along with window.X_UI_BASE_PATH so the
+// page's static asset references resolve correctly when the panel runs
+// behind a URL prefix.
+func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageData) {
+	body, err := subPageHTML(basePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "missing embedded subpage")
+		return
 	}
 
 	subData := a.subPageContext(page)
@@ -637,18 +678,7 @@ func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageD
 		subDataJSON = []byte("{}")
 	}
 
-	// Defense-in-depth string-escape for the basePath embed — admin-
-	// controlled but cheap to harden.
-	jsEscape := strings.NewReplacer(
-		`\`, `\\`,
-		`"`, `\"`,
-		"\n", `\n`,
-		"\r", `\r`,
-		"<", `<`,
-		">", `>`,
-		"&", `&`,
-	)
-	escapedBase := jsEscape.Replace(basePath)
+	escapedBase := jsStringEscaper.Replace(basePath)
 
 	inject := []byte(`<script>window.X_UI_BASE_PATH="` + escapedBase + `";` +
 		`window.__SUB_PAGE_DATA__=` + string(subDataJSON) + `;</script></head>`)

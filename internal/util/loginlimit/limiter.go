@@ -1,4 +1,6 @@
-package controller
+// Package loginlimit slows password guessing: too many failures from one IP for
+// one username block that pair for a cooldown.
+package loginlimit
 
 import (
 	"strings"
@@ -7,46 +9,47 @@ import (
 )
 
 const (
-	loginLimitMaxFailures = 5
-	loginLimitWindow      = 5 * time.Minute
-	loginLimitCooldown    = 15 * time.Minute
+	MaxFailures = 5
+	Window      = 5 * time.Minute
+	Cooldown    = 15 * time.Minute
 	// Hard ceiling on tracked (ip, username) records. The key includes the
 	// caller-supplied username, so an unauthenticated attacker rotating
 	// usernames would otherwise grow the map without bound.
-	loginLimitMaxRecords = 10000
+	maxRecords = 10000
 )
 
-var defaultLoginLimiter = newLoginLimiter(loginLimitMaxFailures, loginLimitWindow, loginLimitCooldown)
-
-type loginLimiter struct {
+// Limiter tracks failed logins per (IP, username) pair.
+type Limiter struct {
 	mu          sync.Mutex
 	now         func() time.Time
 	maxFailures int
 	window      time.Duration
 	cooldown    time.Duration
-	attempts    map[string]*loginLimitRecord
+	attempts    map[string]*attemptRecord
 }
 
-type loginLimitRecord struct {
+type attemptRecord struct {
 	failures     []time.Time
 	blockedUntil time.Time
 }
 
-func newLoginLimiter(maxFailures int, window, cooldown time.Duration) *loginLimiter {
-	return &loginLimiter{
+// New blocks a pair for cooldown once it fails maxFailures times within window.
+func New(maxFailures int, window, cooldown time.Duration) *Limiter {
+	return &Limiter{
 		now:         time.Now,
 		maxFailures: maxFailures,
 		window:      window,
 		cooldown:    cooldown,
-		attempts:    make(map[string]*loginLimitRecord),
+		attempts:    make(map[string]*attemptRecord),
 	}
 }
 
-func (l *loginLimiter) allow(ip, username string) (time.Time, bool) {
+// Allow reports whether the pair may try now and, if not, until when it is blocked.
+func (l *Limiter) Allow(ip, username string) (time.Time, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	key := loginLimitKey(ip, username)
+	key := attemptKey(ip, username)
 	record := l.attempts[key]
 	if record == nil {
 		return time.Time{}, true
@@ -56,26 +59,27 @@ func (l *loginLimiter) allow(ip, username string) (time.Time, bool) {
 		return record.blockedUntil, false
 	}
 	record.blockedUntil = time.Time{}
-	record.failures = pruneLoginFailures(record.failures, now.Add(-l.window))
+	record.failures = pruneFailures(record.failures, now.Add(-l.window))
 	if len(record.failures) == 0 {
 		delete(l.attempts, key)
 	}
 	return time.Time{}, true
 }
 
-func (l *loginLimiter) registerFailure(ip, username string) (time.Time, bool) {
+// RegisterFailure counts a failed login and reports whether it started a block.
+func (l *Limiter) RegisterFailure(ip, username string) (time.Time, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	now := l.now()
-	key := loginLimitKey(ip, username)
+	key := attemptKey(ip, username)
 	record := l.attempts[key]
 	if record == nil {
 		l.evictForRoom(now)
-		record = &loginLimitRecord{}
+		record = &attemptRecord{}
 		l.attempts[key] = record
 	}
-	record.failures = pruneLoginFailures(record.failures, now.Add(-l.window))
+	record.failures = pruneFailures(record.failures, now.Add(-l.window))
 	record.failures = append(record.failures, now)
 	if len(record.failures) >= l.maxFailures {
 		record.failures = nil
@@ -85,10 +89,11 @@ func (l *loginLimiter) registerFailure(ip, username string) (time.Time, bool) {
 	return time.Time{}, false
 }
 
-func (l *loginLimiter) registerSuccess(ip, username string) {
+// RegisterSuccess forgets the pair's earlier failures.
+func (l *Limiter) RegisterSuccess(ip, username string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	delete(l.attempts, loginLimitKey(ip, username))
+	delete(l.attempts, attemptKey(ip, username))
 }
 
 // evictForRoom keeps the attempts map bounded before inserting a new record.
@@ -96,8 +101,8 @@ func (l *loginLimiter) registerSuccess(ip, username string) {
 // aged out of the window; if the map is still at the ceiling (a genuine
 // broad flood), it drops one arbitrary record so memory can never grow past the
 // cap. Callers hold l.mu.
-func (l *loginLimiter) evictForRoom(now time.Time) {
-	if len(l.attempts) < loginLimitMaxRecords {
+func (l *Limiter) evictForRoom(now time.Time) {
+	if len(l.attempts) < maxRecords {
 		return
 	}
 	cutoff := now.Add(-l.window)
@@ -105,12 +110,12 @@ func (l *loginLimiter) evictForRoom(now time.Time) {
 		if now.Before(record.blockedUntil) {
 			continue
 		}
-		record.failures = pruneLoginFailures(record.failures, cutoff)
+		record.failures = pruneFailures(record.failures, cutoff)
 		if len(record.failures) == 0 {
 			delete(l.attempts, key)
 		}
 	}
-	if len(l.attempts) < loginLimitMaxRecords {
+	if len(l.attempts) < maxRecords {
 		return
 	}
 	for key, record := range l.attempts {
@@ -126,11 +131,11 @@ func (l *loginLimiter) evictForRoom(now time.Time) {
 	}
 }
 
-func loginLimitKey(ip, username string) string {
+func attemptKey(ip, username string) string {
 	return strings.TrimSpace(ip) + "\x00" + strings.ToLower(strings.TrimSpace(username))
 }
 
-func pruneLoginFailures(failures []time.Time, cutoff time.Time) []time.Time {
+func pruneFailures(failures []time.Time, cutoff time.Time) []time.Time {
 	keepFrom := 0
 	for keepFrom < len(failures) && failures[keepFrom].Before(cutoff) {
 		keepFrom++

@@ -207,7 +207,7 @@ export default function OutboundCardList({
                 ],
               }}
             >
-              <Button shape="circle" size="small" icon={<MoreOutlined />} aria-label={t('more')} />
+              <Button size="small" icon={<MoreOutlined />} aria-label={t('more')} />
             </Dropdown>
           </div>
           {outboundAddresses(record).length > 0 && (
@@ -236,7 +236,6 @@ export default function OutboundCardList({
               ) : null}
               <Button
                 type="primary"
-                shape="circle"
                 size="small"
                 loading={isTesting(outboundTestStates, record.key)}
                 disabled={isUntestable(record) || isTesting(outboundTestStates, record.key)}

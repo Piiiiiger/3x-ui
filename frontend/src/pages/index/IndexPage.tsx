@@ -1,16 +1,9 @@
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ConfigProvider, Layout, Modal, Result, Spin, message } from 'antd';
-import {
-  CopyOutlined,
-  CloudDownloadOutlined,
-  DashboardOutlined,
-  DatabaseOutlined,
-  HddOutlined,
-  SwapOutlined,
-} from '@ant-design/icons';
+import { CopyOutlined, CloudDownloadOutlined } from '@ant-design/icons';
 
-import { HttpUtil, CPUFormatter, SizeFormatter, ClipboardManager, FileManager } from '@/utils';
+import { HttpUtil, ClipboardManager, FileManager } from '@/utils';
 import {
   USAGE_CRIT_COLOR,
   USAGE_CRIT_PERCENT,
@@ -20,16 +13,12 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 import { useStatusQuery } from '@/api/queries/useStatusQuery';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
 import { LazyMount } from '@/components/utility';
 import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import { setMessageInstance } from '@/utils/messageBus';
 import OverviewActionBar from './OverviewActionBar';
-import VitalTile from './VitalTile';
-import ThroughputCard from './ThroughputCard';
-import ConnectionsCard from './ConnectionsCard';
-import SystemStrip from './SystemStrip';
-import { mean, peak, useOverviewHistory } from './useOverviewHistory';
+import TrafficOverviewSection from './TrafficOverviewSection';
 import type { PanelUpdateInfo } from './PanelUpdateModal';
 const JsonEditor = lazy(() => import('@/components/form/JsonEditor'));
 const PanelUpdateModal = lazy(() => import('./PanelUpdateModal'));
@@ -62,7 +51,6 @@ export default function IndexPage() {
 
   const basePath = window.X_UI_BASE_PATH || '';
 
-  const [showIp, setShowIp] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [panelUpdateOpen, setPanelUpdateOpen] = useState(false);
@@ -75,8 +63,6 @@ export default function IndexPage() {
   const [configText, setConfigText] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingTip, setLoadingTip] = useState(t('loading'));
-
-  const history = useOverviewHistory(status, fetched && !fetchError);
 
   useEffect(() => {
     HttpUtil.post<{ accessLogEnable?: boolean; devChannelEnable?: boolean }>(
@@ -142,8 +128,6 @@ export default function IndexPage() {
   }
 
   const pageClass = `index-page ${isDark ? 'is-dark' : ''} ${isUltra ? 'is-ultra' : ''}`.trim();
-  const totalDisk = status.disk.total;
-  const freeDisk = Math.max(0, totalDisk - status.disk.current);
 
   const health = useMemo(() => {
     const items = [
@@ -169,7 +153,7 @@ export default function IndexPage() {
     <ConfigProvider theme={antdThemeConfig}>
       {messageContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
 
         <Layout className="content-shell">
           <Layout.Content className="content-area">
@@ -225,75 +209,7 @@ export default function IndexPage() {
 
                   <hr className="ov-rule" />
 
-                  <div className="ov-vitals">
-                    <VitalTile
-                      icon={<DashboardOutlined />}
-                      label={t('pages.index.cpu')}
-                      percent={status.cpu.percent}
-                      statusColor={status.cpu.color}
-                      detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
-                      data={history.series.cpu}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<DatabaseOutlined />}
-                      label={t('pages.index.memory')}
-                      percent={status.mem.percent}
-                      statusColor={status.mem.color}
-                      detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
-                      data={history.series.mem}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<SwapOutlined />}
-                      label={t('pages.index.swap')}
-                      percent={status.swap.percent}
-                      statusColor={status.swap.color}
-                      detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
-                      data={history.series.swap}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<HddOutlined />}
-                      label={t('pages.index.storage')}
-                      percent={status.disk.percent}
-                      statusColor={status.disk.color}
-                      detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
-                      footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
-                      footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}
-                      data={history.series.diskUsage}
-                      isMobile={isMobile}
-                    />
-                  </div>
-
-                  <div className="ov-mid">
-                    <ThroughputCard
-                      status={status}
-                      up={history.series.netUp}
-                      down={history.series.netDown}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                    <ConnectionsCard
-                      status={status}
-                      tcp={history.series.tcpCount}
-                      udp={history.series.udpCount}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                  </div>
-
-                  <SystemStrip
-                    status={status}
-                    showIp={showIp}
-                    onToggleIp={() => setShowIp((v) => !v)}
-                  />
+                  <TrafficOverviewSection isMobile={isMobile} />
                 </div>
               )}
             </Spin>

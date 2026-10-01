@@ -322,7 +322,6 @@ export default function BalancersTab({
             {!isMobile && (
               <Button
                 aria-label={t('edit')}
-                shape="circle"
                 size="small"
                 icon={<EditOutlined />}
                 onClick={() => openEdit(index)}
@@ -358,7 +357,7 @@ export default function BalancersTab({
                 ],
               }}
             >
-              <Button aria-label={t('more')} shape="circle" size="small" icon={<MoreOutlined />} />
+              <Button aria-label={t('more')} size="small" icon={<MoreOutlined />} />
             </Dropdown>
           </div>
         </div>

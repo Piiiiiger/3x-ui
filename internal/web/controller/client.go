@@ -39,6 +39,7 @@ type ClientController struct {
 	inboundService service.InboundService
 	xrayService    service.XrayService
 	settingService service.SettingService
+	portalService  service.ClientPortalService
 	happGenerator  service.HappLinkGenerator
 }
 
@@ -66,6 +67,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/:email/attach", a.attach)
 	g.POST("/:email/detach", a.detach)
 	g.POST("/:email/externalLinks", a.setExternalLinks)
+	a.initPortalRoutes(g)
 	g.GET("/export", a.export)
 	g.POST("/import", a.importClients)
 	g.POST("/delOrphans", a.delOrphans)

@@ -92,6 +92,7 @@ describe('clients table row cells', () => {
 
   it('keeps the row actions wired to the right client across re-renders', async () => {
     const onShowQr = vi.fn();
+    const onPortal = vi.fn();
     const onEdit = vi.fn();
     const noop = vi.fn();
     let bump: () => void = () => {};
@@ -104,6 +105,7 @@ describe('clients table row cells', () => {
             <ClientRowActions
               email="alice@x"
               onShowQr={onShowQr}
+              onPortal={onPortal}
               onShowInfo={noop}
               onResetTraffic={noop}
               onEdit={onEdit}
@@ -120,13 +122,15 @@ describe('clients table row cells', () => {
 
     // Queried by position rather than label: the suite loads the real en-US
     // bundle, so the aria-labels are translated strings, not keys. Order is
-    // QR, info, reset traffic, edit, delete.
+    // QR, portal login, info, reset traffic, edit, delete.
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5);
+    expect(buttons).toHaveLength(6);
     await userEvent.click(buttons[0]);
-    await userEvent.click(buttons[3]);
+    await userEvent.click(buttons[1]);
+    await userEvent.click(buttons[4]);
 
     expect(onShowQr).toHaveBeenCalledExactlyOnceWith('alice@x');
+    expect(onPortal).toHaveBeenCalledExactlyOnceWith('alice@x');
     expect(onEdit).toHaveBeenCalledExactlyOnceWith('alice@x');
   });
 });

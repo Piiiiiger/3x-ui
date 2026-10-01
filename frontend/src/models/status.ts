@@ -5,6 +5,13 @@ export const USAGE_CRIT_PERCENT = 90;
 export const USAGE_WARN_COLOR = '#faad14';
 export const USAGE_CRIT_COLOR = '#ff4d4f';
 
+// The normal tier comes from the caller so it can follow the theme's primary.
+export function usageTierColor(percent: number, normalColor: string): string {
+  if (percent < USAGE_WARN_PERCENT) return normalColor;
+  if (percent < USAGE_CRIT_PERCENT) return USAGE_WARN_COLOR;
+  return USAGE_CRIT_COLOR;
+}
+
 export class CurTotal {
   current: number;
   total: number;
@@ -17,13 +24,6 @@ export class CurTotal {
   get percent(): number {
     if (this.total === 0) return 0;
     return NumberFormatter.toFixed((this.current / this.total) * 100, 2);
-  }
-
-  get color(): string {
-    const p = this.percent;
-    if (p < USAGE_WARN_PERCENT) return '#1677ff';
-    if (p < USAGE_CRIT_PERCENT) return USAGE_WARN_COLOR;
-    return USAGE_CRIT_COLOR;
   }
 }
 

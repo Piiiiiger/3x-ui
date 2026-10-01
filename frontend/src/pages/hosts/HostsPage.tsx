@@ -20,7 +20,8 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useHostsQuery, type HostRecord } from '@/api/queries/useHostsQuery';
 import { useHostMutations } from '@/api/queries/useHostMutations';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
+import { PageHeader } from '@/components/ui';
 import { setMessageInstance } from '@/utils/messageBus';
 import type { BulkAddHostValues } from '@/schemas/api/host';
 import HostList, { sortHosts } from './HostList';
@@ -148,9 +149,10 @@ export default function HostsPage() {
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            <PageHeader title={t('menu.hosts')} description={t('pages.hosts.intro')} />
             <Spin spinning={!fetched} delay={200} size="large">
               {!fetched ? (
                 <div className="loading-spacer" />

@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 
 import type { InboundOption } from '@/hooks/useClients';
+import type { PlanSummary } from '@/generated/zod';
 import type { NodeRecord } from '@/schemas/node';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { emptyFilters, type ClientFilters } from './filters';
@@ -31,6 +32,7 @@ interface FilterDrawerProps {
   protocols: string[];
   groups: string[];
   nodes: NodeRecord[];
+  plans: PlanSummary[];
 }
 
 const BUCKET_KEYS = ['active', 'expiring', 'depleted', 'deactive', 'online'] as const;
@@ -44,6 +46,7 @@ export default function FilterDrawer({
   protocols,
   groups,
   nodes,
+  plans,
 }: FilterDrawerProps) {
   const { t } = useTranslation();
 
@@ -66,6 +69,14 @@ export default function FilterDrawer({
   );
 
   const groupOptions = useMemo(() => groups.map((g) => ({ value: g, label: g })), [groups]);
+
+  const planOptions = useMemo(
+    () => [
+      { value: 0, label: t('pages.plans.noPlan') },
+      ...plans.map((p) => ({ value: p.id, label: p.name })),
+    ],
+    [plans, t],
+  );
 
   // 0 is the "local panel" sentinel (inbounds without a nodeId) — see
   // ClientFilters.nodeIds (#4997).
@@ -168,6 +179,21 @@ export default function FilterDrawer({
             listHeight={220}
           />
         </Form.Item>
+
+        {plans.length > 0 && (
+          <Form.Item label={t('menu.plans')}>
+            <Select
+              mode="multiple"
+              value={filters.plans}
+              onChange={(v) => patch('plans', v as number[])}
+              options={planOptions}
+              maxTagCount="responsive"
+              allowClear
+              showSearch={{ optionFilterProp: 'label' }}
+              listHeight={220}
+            />
+          </Form.Item>
+        )}
 
         <Form.Item label={t('pages.clients.expiryTime')}>
           <DatePicker.RangePicker

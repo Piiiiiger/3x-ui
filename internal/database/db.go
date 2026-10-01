@@ -86,6 +86,11 @@ func allModels() []any {
 		&model.NodePendingReset{},
 		&model.OutboundSubscription{},
 		&model.SubBalancer{},
+		&model.Plan{},
+		&model.PlanInbound{},
+		&model.ClientDailyTraffic{},
+		&model.ClientTrafficMark{},
+		&model.ClientPortalLogin{},
 	}
 }
 
@@ -192,6 +197,9 @@ func initModels() error {
 		return err
 	}
 	if err := migrateSyncOrphanColumns(); err != nil {
+		return err
+	}
+	if err := migrateClientPlanColumn(); err != nil {
 		return err
 	}
 	if err := migrateClientEmailLowerIndex(); err != nil {
@@ -388,6 +396,15 @@ func migrateSyncOrphanColumns() error {
 		return nil
 	}
 	return db.Exec("UPDATE clients SET sync_orphaned_at = 0 WHERE sync_orphaned_at IS NULL").Error
+}
+
+// AutoMigrate adds the column; this only backfills the NULLs an older SQLite
+// ALTER TABLE leaves behind, which would fail every ClientRecord scan.
+func migrateClientPlanColumn() error {
+	if !db.Migrator().HasColumn(&model.ClientRecord{}, "plan_id") {
+		return nil
+	}
+	return db.Exec("UPDATE clients SET plan_id = 0 WHERE plan_id IS NULL").Error
 }
 
 // The client identity checks match emails case-insensitively; without an

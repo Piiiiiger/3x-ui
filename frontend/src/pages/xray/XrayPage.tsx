@@ -21,7 +21,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useXraySetting } from '@/hooks/useXraySetting';
 import type { XraySettingsValue } from '@/hooks/useXraySetting';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
+import { PageHeader } from '@/components/ui';
 import { JsonEditor } from '@/components/form';
 import { setMessageInstance } from '@/utils/messageBus';
 
@@ -314,10 +315,17 @@ export default function XrayPage() {
     <ConfigProvider theme={antdThemeConfig}>
       {messageContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
 
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            {activeSection === 'outbound' ? (
+              <PageHeader title={t('menu.outbounds')} description={t('pages.xray.outboundIntro')} />
+            ) : activeSection === 'routing' ? (
+              <PageHeader title={t('menu.routing')} description={t('pages.xray.routingIntro')} />
+            ) : (
+              <PageHeader title={t('menu.xray')} description={t('pages.xray.intro')} />
+            )}
             <Spin
               spinning={spinning || !fetched}
               delay={200}

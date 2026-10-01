@@ -404,6 +404,15 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
+  "AttentionClient": {
+    "email": "alice",
+    "enable": true,
+    "expiryTime": 1735689600000,
+    "planId": 1,
+    "status": "expiring",
+    "totalGB": 107374182400,
+    "used": 53687091200
+  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [
@@ -466,6 +475,7 @@ export const EXAMPLES: Record<string, unknown> = {
         ],
         "limitHwid": 0,
         "limitIp": 0,
+        "planId": 1,
         "reset": 0,
         "resetDay": 0,
         "resetMax": 0,
@@ -496,6 +506,10 @@ export const EXAMPLES: Record<string, unknown> = {
     },
     "total": 2000
   },
+  "ClientPortalStatus": {
+    "enabled": true,
+    "updatedAt": 1735689600000
+  },
   "ClientRecord": {
     "adTag": "",
     "allowedIPs": "",
@@ -513,6 +527,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "limitHwid": 0,
     "limitIp": 0,
     "password": "",
+    "planId": 0,
     "preSharedKey": "",
     "privateKey": "",
     "publicKey": "",
@@ -566,6 +581,7 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limitHwid": 0,
     "limitIp": 0,
+    "planId": 1,
     "reset": 0,
     "resetDay": 0,
     "resetMax": 0,
@@ -1024,6 +1040,57 @@ export const EXAMPLES: Record<string, unknown> = {
     "tag": "inbound-51820",
     "up": 1048576
   },
+  "Plan": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+    "createdAt": 1735689600000,
+    "durationDays": 30,
+    "id": 1,
+    "limitIp": 0,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "sortIndex": 0,
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1,
+    "updatedAt": 1735689600000
+  },
+  "PlanInbound": {
+    "inboundId": 0,
+    "planId": 0
+  },
+  "PlanInput": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+    "durationDays": 30,
+    "inboundIds": [
+      1,
+      2
+    ],
+    "limitIp": 0,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1
+  },
+  "PlanSummary": {
+    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
+    "createdAt": 1735689600000,
+    "durationDays": 30,
+    "id": 1,
+    "inboundIds": [
+      1,
+      2
+    ],
+    "limitIp": 0,
+    "memberCount": 4,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "sortIndex": 0,
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1,
+    "updatedAt": 1735689600000
+  },
   "ProbeResultUI": {
     "cpuPct": 12.5,
     "error": "",
@@ -1158,6 +1225,41 @@ export const EXAMPLES: Record<string, unknown> = {
     "IsOutbound": false,
     "Tag": "inbound-443",
     "Up": 1048576
+  },
+  "TrafficDay": {
+    "day": "2026-10-01",
+    "down": 4194304,
+    "up": 1048576
+  },
+  "TrafficOverview": {
+    "active": 9,
+    "attention": [
+      {
+        "email": "alice",
+        "enable": true,
+        "expiryTime": 1735689600000,
+        "planId": 1,
+        "status": "expiring",
+        "totalGB": 107374182400,
+        "used": 53687091200
+      }
+    ],
+    "clients": 12,
+    "daily": [
+      {
+        "day": "2026-10-01",
+        "down": 4194304,
+        "up": 1048576
+      }
+    ],
+    "disabled": 1,
+    "expired": 1,
+    "expiring": 2,
+    "quotaBytes": 1099511627776,
+    "remainingBytes": 884763262976,
+    "unlimited": 2,
+    "usedBytes": 322122547200,
+    "usedUp": 1
   },
   "TuicClientSettings": {
     "email": "",

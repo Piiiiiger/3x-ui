@@ -105,7 +105,24 @@
     "support": "Dukungan",
     "qrTitle": "Pindai. Impor. Terhubung.",
     "qrHint": "Pindai dengan aplikasi klien Anda. Jaga kerahasiaan kode ini.",
-    "saveQr": "Simpan QR"
+    "saveQr": "Simpan QR",
+    "portal": {
+      "title": "Masuk",
+      "intro": "Masuk untuk melihat paket, pemakaian, dan tautan langgananmu.",
+      "username": "Nama pengguna",
+      "password": "Kata sandi",
+      "signIn": "Masuk",
+      "signOut": "Keluar",
+      "required": "Wajib diisi",
+      "invalid": "Nama pengguna atau kata sandi salah",
+      "blocked": "Terlalu banyak percobaan. Coba lagi dalam 15 menit.",
+      "failed": "Saat ini tidak bisa masuk. Coba lagi nanti.",
+      "plan": "Paket saya",
+      "usage": "{days} hari terakhir",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Akunmu belum punya server. Hubungi administrator.",
+      "loadFailed": "Datamu tidak dapat dimuat. Coba lagi nanti."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -113,6 +130,7 @@
     "inbounds": "Inbound",
     "clients": "Klien",
     "groups": "Grup",
+    "plans": "Paket",
     "nodes": "Node",
     "settings": "Pengaturan Panel",
     "xray": "Konfigurasi Xray",
@@ -124,8 +142,6 @@
     "hosts": "Host",
     "docs": "Dokumentasi",
     "openMenu": "Buka menu",
-    "pinSidebar": "Sematkan bilah sisi",
-    "unpinSidebar": "Lepas sematan bilah sisi",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "Mati",
       "xrayObservatoryLastSeen": "Terakhir terlihat",
       "xrayObservatoryLastTry": "Percobaan terakhir",
-      "connectionCount": "Statistik Koneksi",
-      "ipAddresses": "Alamat IP",
       "toggleIpVisibility": "Alihkan visibilitas IP",
-      "overallSpeed": "Kecepatan keseluruhan",
       "upload": "Unggah",
       "download": "Unduh",
       "sent": "Dikirim",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "Klik untuk memilih dan mengunggah cadangan PostgreSQL (.dump), basis data SQLite (.db), atau dump migrasi SQLite guna memulihkan basis data Anda. Ini menggantikan semua data saat ini.",
       "migrationDownload": "Unduh migrasi",
       "migrationDownloadPgDesc": "Klik untuk mengunduh basis data SQLite .db yang dibuat dari data PostgreSQL Anda, siap menjalankan panel ini di SQLite.",
-      "avg": "rerata",
-      "peak": "puncak",
-      "free": "tersisa",
-      "openSockets": "soket terbuka",
-      "throughputSub": "Total antarmuka",
-      "avgWindow": "Rerata periode",
       "healthWarm": "{list} — mulai tinggi",
       "healthCritical": "{list} — kritis",
-      "panel": "Panel",
-      "threads": "Thread",
       "uptime": "Waktu aktif",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Pertahankan pengaturan mesin ini",
-      "importKeepHostSettingsDesc": "Mempertahankan alamat dengar, port, path dasar, sertifikat, dan identitas node panel ini alih-alih mengambilnya dari berkas yang diunggah."
+      "importKeepHostSettingsDesc": "Mempertahankan alamat dengar, port, path dasar, sertifikat, dan identitas node panel ini alih-alih mengambilnya dari berkas yang diunggah.",
+      "traffic": {
+        "quota": "Total kuota",
+        "quotaDetail": "{limited} dengan kuota · {unlimited} tanpa batas",
+        "used": "Terpakai",
+        "usedDetail": "Hari ini {size}",
+        "remaining": "Sisa",
+        "remainingDetail": "Masih tersedia di kuota klien",
+        "usageRate": "Kuota terpakai",
+        "usageRateDetail": "{used} dari {quota} terpakai",
+        "noQuota": "Tidak ada klien dengan kuota",
+        "daily": "Trafik harian",
+        "dailySub": "{days} hari terakhir · diperbarui tiap 10 menit",
+        "periodTotal": "Total",
+        "today": "Hari ini",
+        "dailyAverage": "Rata-rata harian",
+        "clientsSub": "Total {count} klien",
+        "normal": "Aktif",
+        "expiring": "Segera berakhir",
+        "runningLow": "Hampir habis",
+        "usedUp": "Habis",
+        "expired": "Kedaluwarsa",
+        "disabled": "Nonaktif",
+        "manageClients": "Kelola klien",
+        "attention": "Perlu perhatian",
+        "attentionSub": "Berakhir dalam 7 hari atau sisa kuota kurang dari 10%, habis, atau kedaluwarsa",
+        "attentionEmpty": "Saat ini tidak ada yang perlu perhatian"
+      }
     },
     "inbounds": {
       "totalDownUp": "Total Terkirim/Diterima",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Konfig Peer {n}"
       },
       "sniffingDestOverride": "Penggantian tujuan",
-      "advancedTitle": "Pengaturan Lanjutan"
+      "advancedTitle": "Pengaturan Lanjutan",
+      "intro": "Port, protokol, dan transport yang didengarkan, beserta klien yang dilayani masing-masing."
     },
     "clients": {
       "tabBasics": "Dasar",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "Perpanjang pada tanggal ini setiap bulan kalender, pada tengah malam menurut zona waktu panel, alih-alih setiap N hari. Bulan yang terlalu pendek untuk tanggal yang dipilih diperpanjang pada hari terakhirnya. 0 mempertahankan mode interval hari.",
       "renewsUsed": "Perpanjangan terpakai",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto."
+      "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto.",
+      "intro": "Semua klien di seluruh inbound Anda, dengan trafik, masa berlaku, dan tautan langganan.",
+      "portal": {
+        "title": "Login portal",
+        "intro": "Dengan kata sandi, klien bisa masuk ke portal dengan nama penggunanya dan melihat paket, pemakaian, serta tautan langganan.",
+        "statusOn": "Aktif · kata sandi diatur {time}",
+        "statusOff": "Nonaktif",
+        "url": "Alamat portal",
+        "newPassword": "Kata sandi baru",
+        "passwordHint": "6 sampai 72 karakter. Menggantinya mengeluarkan klien dari semua perangkat.",
+        "passwordLength": "Gunakan 6 sampai 72 karakter",
+        "save": "Simpan kata sandi",
+        "savedToast": "Kata sandi portal disimpan",
+        "handout": "Kirim data berikut ke klien:",
+        "copyLogin": "Salin data login",
+        "loginText": "Portal: {url}\nNama pengguna: {username}\nKata sandi: {password}",
+        "revoke": "Matikan login",
+        "revokeConfirm": "Matikan login portal untuk {email}? Sesi yang terbuka langsung berakhir.",
+        "revoked": "Login portal dimatikan",
+        "subDisabled": "Server langganan sedang mati, jadi klien tidak bisa membuka portal. Nyalakan di Pengaturan → Langganan."
+      }
     },
     "groups": {
       "name": "Nama",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "Hapus klien…",
       "removeFromGroupTitle": "Hapus klien dari grup «{name}»",
       "removeFromGroupDesc": "Pilih anggota untuk dihapus dari grup ini. Klien tetap dipertahankan (gunakan «Hapus klien di grup» untuk menghapus sepenuhnya).",
-      "removeFromGroupResult": "{count} klien dihapus dari {name}."
+      "removeFromGroupResult": "{count} klien dihapus dari {name}.",
+      "intro": "Kelompokkan klien untuk mereset trafik atau menghapusnya sekaligus."
+    },
+    "plans": {
+      "intro": "Kumpulan trafik, masa berlaku, dan server. Tetapkan paket ke klien alih-alih mengatur satu per satu.",
+      "add": "Paket baru",
+      "edit": "Ubah paket",
+      "empty": "Belum ada paket",
+      "quota": "Trafik",
+      "zeroUnlimited": "0 berarti tanpa batas",
+      "duration": "Masa berlaku",
+      "durationHint": "Dalam hari. 0 berarti tidak pernah kedaluwarsa.",
+      "daysUnit": "hari",
+      "permanent": "tanpa batas waktu",
+      "resetDay": "Tanggal reset",
+      "monthlyOn": "Bulanan, tanggal {day}",
+      "servers": "Server",
+      "noServers": "Tidak ada server",
+      "members": "{count} klien",
+      "applyToMembers": "Perbarui juga {count} klien pada paket ini",
+      "deleteConfirm": "Hapus paket {name}?",
+      "deleteBlocked": "Pindahkan dulu {count} kliennya ke paket lain",
+      "assign": "Tetapkan paket",
+      "addPeople": "Tambah klien",
+      "people": "Klien",
+      "selectedPeople": "{count} klien dipilih",
+      "start": "Masa berlaku dimulai",
+      "startNow": "Sekarang",
+      "startFirstUse": "Saat koneksi pertama",
+      "startKeep": "Pertahankan masa berlaku saat ini",
+      "resetTraffic": "Hapus trafik terpakai",
+      "renew": "Perpanjang",
+      "renewConfirm": "Perpanjang {count} klien sesuai paketnya?",
+      "renewHint": "Masing-masing diperpanjang sepanjang durasi paketnya, dihitung dari sekarang atau dari masa berlaku saat ini, mana yang lebih akhir, dan trafik terpakainya dihapus.",
+      "unassign": "Keluarkan dari paket",
+      "unassignConfirm": "Keluarkan {count} klien dari paketnya? Batas mereka saat ini tetap berlaku.",
+      "noPlan": "Tanpa paket",
+      "needPlan": "Pilih paket",
+      "needPeople": "Pilih minimal satu klien",
+      "errNameRequired": "Masukkan nama paket",
+      "toasts": {
+        "saved": "Paket disimpan",
+        "deleted": "Paket dihapus",
+        "assigned": "Paket ditetapkan untuk {count} klien",
+        "renewed": "{count} klien diperpanjang",
+        "unassigned": "{count} klien dikeluarkan dari paket"
+      },
+      "clashRules": "Aturan Clash",
+      "clashInherit": "Gunakan aturan global",
+      "clashCustom": "Aturan khusus paket",
+      "clashRulesHint": "Aturan khusus paket menggantikan aturan Clash global di langganan klien paket ini, bahkan saat perutean Clash global dimatikan. Tempel aturan/YAML atau satu URL HTTPS tetap (diperbarui di latar belakang).",
+      "errClashRulesRequired": "Isi aturan, atau kembali ke aturan global"
     },
     "nodes": {
       "addNode": "Tambah Node",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "SHA-256 base64 atau hex",
       "fetchPin": "Ambil",
       "pinFetched": "Berhasil mengambil sertifikat node saat ini",
-      "pinFetchFailed": "Tidak dapat mengambil sertifikat"
+      "pinFetchFailed": "Tidak dapat mengambil sertifikat",
+      "intro": "Panel jarak jauh yang dikelola dari sini, dengan status, versi, dan inbound-nya."
     },
     "settings": {
       "defaultTag": "Bawaan",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "URL server DoH, biasanya berakhiran /dns-query.",
       "subIncyResolveDnsIp": "IP server DoH",
       "subIncyResolveDnsIpDesc": "IP server DoH untuk bootstrap.",
-      "subIncyGroupRouting": "Perutean"
+      "subIncyGroupRouting": "Perutean",
+      "intro": "Akses panel, keamanan, notifikasi, dan pengaturan langganan."
     },
     "xray": {
       "save": "Simpan",
@@ -2242,7 +2348,10 @@
         "poolSize": "Ukuran Kolam"
       },
       "defaultOutbound": "Outbound default",
-      "defaultOutboundDesc": "Lalu lintas tanpa aturan routing memakai outbound ini (yang pertama dalam daftar)."
+      "defaultOutboundDesc": "Lalu lintas tanpa aturan routing memakai outbound ini (yang pertama dalam daftar).",
+      "intro": "Templat dasar Xray, penyeimbang, DNS, dan konfigurasi JSON lengkap.",
+      "outboundIntro": "Tempat trafik keluar dari server: langsung, diblokir, proxy, dan rantai.",
+      "routingIntro": "Aturan yang menentukan outbound mana yang dipakai setiap koneksi."
     },
     "hosts": {
       "addHost": "Tambah Host",
@@ -2360,7 +2469,8 @@
         "delete": "Hapus host",
         "badTag": "Tag tidak valid",
         "badVlessRoute": "Masukkan satu angka antara 0 dan 65535"
-      }
+      },
+      "intro": "Alamat dan detail TLS yang diberikan tautan berbagi dan langganan untuk setiap inbound."
     },
     "sponsors": {
       "title": "Sponsor",

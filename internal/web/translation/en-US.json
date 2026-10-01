@@ -105,7 +105,24 @@
     "support": "Support",
     "qrTitle": "Scan. Import. Connect.",
     "qrHint": "Scan with your client app. Keep this code private.",
-    "saveQr": "Save QR"
+    "saveQr": "Save QR",
+    "portal": {
+      "title": "Sign in",
+      "intro": "Sign in to see your plan, usage and subscription links.",
+      "username": "Username",
+      "password": "Password",
+      "signIn": "Sign in",
+      "signOut": "Sign out",
+      "required": "Required",
+      "invalid": "Wrong username or password",
+      "blocked": "Too many attempts. Try again in 15 minutes.",
+      "failed": "Signing in is not possible right now. Try again later.",
+      "plan": "My plan",
+      "usage": "Last {days} days",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Your account has no servers yet. Contact the administrator.",
+      "loadFailed": "Your details could not be loaded. Try again later."
+    }
   },
   "menu": {
     "theme": "Theme",
@@ -113,6 +130,7 @@
     "inbounds": "Inbounds",
     "clients": "Clients",
     "groups": "Groups",
+    "plans": "Plans",
     "nodes": "Nodes",
     "hosts": "Hosts",
     "settings": "Panel Settings",
@@ -124,8 +142,6 @@
     "sponsors": "Sponsors",
     "docs": "Documentation",
     "openMenu": "Open menu",
-    "pinSidebar": "Pin sidebar",
-    "unpinSidebar": "Unpin sidebar",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "Down",
       "xrayObservatoryLastSeen": "Last seen",
       "xrayObservatoryLastTry": "Last try",
-      "connectionCount": "Connection Stats",
-      "ipAddresses": "IP Addresses",
       "toggleIpVisibility": "Toggle visibility of the IP",
-      "overallSpeed": "Overall Speed",
       "upload": "Upload",
       "download": "Download",
       "sent": "Sent",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "Click to select and upload a PostgreSQL backup (.dump), a SQLite database (.db), or a SQLite migration dump to restore your database. This replaces all current data.",
       "migrationDownload": "Download Migration",
       "migrationDownloadPgDesc": "Click to download a .db SQLite database built from your PostgreSQL data, ready to run this panel on SQLite.",
-      "avg": "avg",
-      "peak": "peak",
-      "free": "free",
-      "openSockets": "open sockets",
-      "throughputSub": "Interface total",
-      "avgWindow": "Avg over window",
       "healthWarm": "{list} — running warm",
       "healthCritical": "{list} — critical",
-      "panel": "Panel",
-      "threads": "Threads",
       "uptime": "Uptime",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Keep this machine's settings",
-      "importKeepHostSettingsDesc": "Keeps this panel's listen addresses, ports, base path, certificates and node identity instead of taking them from the uploaded file."
+      "importKeepHostSettingsDesc": "Keeps this panel's listen addresses, ports, base path, certificates and node identity instead of taking them from the uploaded file.",
+      "traffic": {
+        "quota": "Total quota",
+        "quotaDetail": "{limited} with a quota · {unlimited} unlimited",
+        "used": "Used",
+        "usedDetail": "Today {size}",
+        "remaining": "Remaining",
+        "remainingDetail": "Still available on clients' quotas",
+        "usageRate": "Quota used",
+        "usageRateDetail": "{used} of {quota} consumed",
+        "noQuota": "No client has a quota",
+        "daily": "Daily traffic",
+        "dailySub": "Last {days} days · updated every 10 minutes",
+        "periodTotal": "Total",
+        "today": "Today",
+        "dailyAverage": "Daily average",
+        "clientsSub": "{count} clients in total",
+        "normal": "Active",
+        "expiring": "Expiring soon",
+        "runningLow": "Running low",
+        "usedUp": "Used up",
+        "expired": "Expired",
+        "disabled": "Disabled",
+        "manageClients": "Manage clients",
+        "attention": "Needs attention",
+        "attentionSub": "Ending within 7 days or under 10% of quota left, used up, or expired",
+        "attentionEmpty": "Nobody needs attention right now"
+      }
     },
     "inbounds": {
       "totalDownUp": "Total Sent/Received",
@@ -714,7 +746,8 @@
         "peerNumber": "Peer {n}",
         "peerNumberConfig": "Peer {n} config"
       },
-      "sniffingDestOverride": "Destination override"
+      "sniffingDestOverride": "Destination override",
+      "intro": "Listening ports, protocols and transports, with the clients each one serves."
     },
     "clients": {
       "tabBasics": "Basics",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "Renew on this day of every calendar month, at midnight in the panel's time zone, instead of every N days. A month too short for the chosen day renews on its last day. 0 keeps the day-interval mode.",
       "renewsUsed": "Renewals used",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds."
+      "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds.",
+      "intro": "Every client across your inbounds, with traffic, expiry and subscription links.",
+      "portal": {
+        "title": "Portal login",
+        "intro": "With a password, the client can sign in to the portal with their username and see their plan, usage and subscription links.",
+        "statusOn": "On · password set {time}",
+        "statusOff": "Off",
+        "url": "Portal address",
+        "newPassword": "New password",
+        "passwordHint": "6 to 72 characters. Changing it signs the client out everywhere.",
+        "passwordLength": "Use 6 to 72 characters",
+        "save": "Save password",
+        "savedToast": "Portal password saved",
+        "handout": "Send these details to the client:",
+        "copyLogin": "Copy login details",
+        "loginText": "Portal: {url}\nUsername: {username}\nPassword: {password}",
+        "revoke": "Turn off login",
+        "revokeConfirm": "Turn off portal login for {email}? Their open sessions end at once.",
+        "revoked": "Portal login turned off",
+        "subDisabled": "The subscription server is off, so the client cannot open the portal. Turn it on in Settings → Subscription."
+      }
     },
     "groups": {
       "name": "Name",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "Remove clients…",
       "removeFromGroupTitle": "Remove clients from group \"{name}\"",
       "removeFromGroupDesc": "Select members to remove from this group. Clients themselves are kept (use \"Delete clients in group\" to remove them entirely).",
-      "removeFromGroupResult": "Removed {count} client(s) from {name}."
+      "removeFromGroupResult": "Removed {count} client(s) from {name}.",
+      "intro": "Group clients so you can reset their traffic or remove them together."
+    },
+    "plans": {
+      "intro": "Bundles of traffic, validity and servers. Put clients on a plan instead of setting each one up by hand.",
+      "add": "New plan",
+      "edit": "Edit plan",
+      "empty": "No plans yet",
+      "quota": "Traffic",
+      "zeroUnlimited": "0 means unlimited",
+      "duration": "Valid for",
+      "durationHint": "In days. 0 means it never expires.",
+      "daysUnit": "days",
+      "permanent": "no expiry",
+      "resetDay": "Reset on day",
+      "monthlyOn": "Monthly on day {day}",
+      "servers": "Servers",
+      "noServers": "No servers",
+      "members": "{count} client(s)",
+      "applyToMembers": "Also update the {count} client(s) on this plan",
+      "deleteConfirm": "Delete plan {name}?",
+      "deleteBlocked": "Move its {count} client(s) to another plan first",
+      "assign": "Assign plan",
+      "addPeople": "Add clients",
+      "people": "Clients",
+      "selectedPeople": "{count} selected clients",
+      "start": "Validity starts",
+      "startNow": "Now",
+      "startFirstUse": "At first connection",
+      "startKeep": "Keep current expiry",
+      "resetTraffic": "Clear used traffic",
+      "renew": "Renew",
+      "renewConfirm": "Renew {count} client(s) on their plans?",
+      "renewHint": "Each is extended by their plan's length from now or their current expiry, whichever is later, and their used traffic is cleared.",
+      "unassign": "Remove from plan",
+      "unassignConfirm": "Remove {count} client(s) from their plan? Their current limits stay.",
+      "noPlan": "No plan",
+      "needPlan": "Choose a plan",
+      "needPeople": "Choose at least one client",
+      "errNameRequired": "Enter a plan name",
+      "toasts": {
+        "saved": "Plan saved",
+        "deleted": "Plan deleted",
+        "assigned": "Plan set for {count} client(s)",
+        "renewed": "Renewed {count} client(s)",
+        "unassigned": "Removed {count} client(s) from their plan"
+      },
+      "clashRules": "Clash rules",
+      "clashInherit": "Use global rules",
+      "clashCustom": "Plan's own rules",
+      "clashRulesHint": "The plan's own rules replace the global Clash rules in its clients' subscriptions, even while global Clash routing is off. Paste rules/YAML or one permanent HTTPS URL (refreshed in the background).",
+      "errClashRulesRequired": "Enter rules, or switch back to the global rules"
     },
     "hosts": {
       "addHost": "Add Host",
@@ -1126,7 +1230,8 @@
         "delete": "Host deleted successfully",
         "badTag": "Invalid tag",
         "badVlessRoute": "Enter a single number between 0 and 65535"
-      }
+      },
+      "intro": "Addresses and TLS details that share links and subscriptions hand out for each inbound."
     },
     "nodes": {
       "addNode": "Add Node",
@@ -1239,7 +1344,8 @@
       "pinnedCertPlaceholder": "base64 or hex SHA-256",
       "fetchPin": "Fetch",
       "pinFetched": "Fetched the node's current certificate",
-      "pinFetchFailed": "Could not fetch the certificate"
+      "pinFetchFailed": "Could not fetch the certificate",
+      "intro": "Remote panels managed from here, with their status, versions and inbounds."
     },
     "settings": {
       "defaultTag": "Default",
@@ -1857,7 +1963,8 @@
       "subIncyResolveDnsDomainDesc": "DoH server URL, usually ending in /dns-query.",
       "subIncyResolveDnsIp": "DoH server IP",
       "subIncyResolveDnsIpDesc": "IP of the DoH server, used for bootstrap.",
-      "subIncyGroupRouting": "Routing"
+      "subIncyGroupRouting": "Routing",
+      "intro": "Panel access, security, notifications and subscription settings."
     },
     "xray": {
       "save": "Save",
@@ -2360,7 +2467,10 @@
         "poolSize": "Pool Size"
       },
       "defaultOutbound": "Default Outbound",
-      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list)."
+      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list).",
+      "intro": "The Xray base template, balancers, DNS and the full JSON configuration.",
+      "outboundIntro": "Where traffic leaves the server: direct, blocked, proxies and chains.",
+      "routingIntro": "Rules that decide which outbound each connection takes."
     },
     "sponsors": {
       "title": "Sponsors",

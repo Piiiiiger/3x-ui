@@ -105,7 +105,24 @@
     "support": "サポート",
     "qrTitle": "スキャン。インポート。接続。",
     "qrHint": "クライアントアプリでスキャンしてください。このコードは他人に見せないでください。",
-    "saveQr": "QR を保存"
+    "saveQr": "QR を保存",
+    "portal": {
+      "title": "ログイン",
+      "intro": "ログインすると、プラン・使用量・サブスクリプションリンクを確認できます。",
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "signIn": "ログイン",
+      "signOut": "ログアウト",
+      "required": "必須",
+      "invalid": "ユーザー名またはパスワードが違います",
+      "blocked": "試行回数が多すぎます。15 分後にもう一度お試しください。",
+      "failed": "現在ログインできません。しばらくしてからお試しください。",
+      "plan": "マイプラン",
+      "usage": "過去 {days} 日の使用量",
+      "usageTotal": "合計 {size}",
+      "noSubscription": "まだ利用できるサーバーがありません。管理者にお問い合わせください。",
+      "loadFailed": "情報を読み込めませんでした。しばらくしてからお試しください。"
+    }
   },
   "menu": {
     "theme": "テーマ",
@@ -113,6 +130,7 @@
     "inbounds": "インバウンド",
     "clients": "クライアント",
     "groups": "グループ",
+    "plans": "プラン",
     "nodes": "ノード",
     "settings": "パネル設定",
     "xray": "Xray 設定",
@@ -124,8 +142,6 @@
     "hosts": "ホスト",
     "docs": "ドキュメント",
     "openMenu": "メニューを開く",
-    "pinSidebar": "サイドバーを固定",
-    "unpinSidebar": "サイドバーの固定を解除",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "停止",
       "xrayObservatoryLastSeen": "最終確認",
       "xrayObservatoryLastTry": "最終試行",
-      "connectionCount": "接続数",
-      "ipAddresses": "IPアドレス",
       "toggleIpVisibility": "IPの表示を切り替える",
-      "overallSpeed": "全体の速度",
       "upload": "アップロード",
       "download": "ダウンロード",
       "sent": "送信",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "データベースを復元するために PostgreSQL バックアップ (.dump)、SQLite データベース (.db)、または SQLite 移行ダンプを選択してアップロードするにはクリックしてください。現在のすべてのデータが置き換えられます。",
       "migrationDownload": "移行ファイルをダウンロード",
       "migrationDownloadPgDesc": "PostgreSQL のデータから作成した .db SQLite データベースをダウンロードします。このパネルを SQLite で実行する準備が整います。",
-      "avg": "平均",
-      "peak": "ピーク",
-      "free": "空き",
-      "openSockets": "オープンソケット",
-      "throughputSub": "インターフェース合計",
-      "avgWindow": "期間平均",
       "healthWarm": "{list} — 高めです",
       "healthCritical": "{list} — 危険水準",
-      "panel": "パネル",
-      "threads": "スレッド",
       "uptime": "稼働時間",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "このマシンの設定を保持する",
-      "importKeepHostSettingsDesc": "アップロードしたファイルの値ではなく、このパネルのリッスンアドレス、ポート、ベースパス、証明書、ノード ID を保持します。"
+      "importKeepHostSettingsDesc": "アップロードしたファイルの値ではなく、このパネルのリッスンアドレス、ポート、ベースパス、証明書、ノード ID を保持します。",
+      "traffic": {
+        "quota": "合計クォータ",
+        "quotaDetail": "上限あり {limited} · 無制限 {unlimited}",
+        "used": "使用量",
+        "usedDetail": "今日 {size}",
+        "remaining": "残り",
+        "remainingDetail": "クライアントのクォータでまだ使える量",
+        "usageRate": "クォータ使用率",
+        "usageRateDetail": "{quota} のうち {used} を消費",
+        "noQuota": "クォータのあるクライアントはいません",
+        "daily": "日別トラフィック",
+        "dailySub": "過去 {days} 日 · 10 分ごとに更新",
+        "periodTotal": "合計",
+        "today": "今日",
+        "dailyAverage": "1 日平均",
+        "clientsSub": "合計 {count} クライアント",
+        "normal": "正常",
+        "expiring": "まもなく期限切れ",
+        "runningLow": "残りわずか",
+        "usedUp": "使い切り",
+        "expired": "期限切れ",
+        "disabled": "無効",
+        "manageClients": "クライアントを管理",
+        "attention": "要対応",
+        "attentionSub": "7 日以内に期限切れ、残量 10% 未満、使い切り、または期限切れ",
+        "attentionEmpty": "現在対応が必要なクライアントはいません"
+      }
     },
     "inbounds": {
       "totalDownUp": "総アップロード / ダウンロード",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "宛先のオーバーライド",
-      "advancedTitle": "詳細設定"
+      "advancedTitle": "詳細設定",
+      "intro": "待ち受けポート、プロトコル、トランスポートと、それぞれが受け持つクライアント。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "毎月この日の深夜（パネルのタイムゾーン基準）に更新します。N 日ごとの更新の代わりになります。その日が存在しない月は月末に更新されます。0 で日数間隔モードのままになります。",
       "renewsUsed": "使用済み更新回数",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "設定するには 32 文字の 16 進数タグを入力し、クリアするには 'none' を入力します (MTProto 用)。"
+      "bulkAdTagHint": "設定するには 32 文字の 16 進数タグを入力し、クリアするには 'none' を入力します (MTProto 用)。",
+      "intro": "すべてのインバウンドのクライアントと、その通信量・有効期限・サブスクリプションリンク。",
+      "portal": {
+        "title": "ポータルログイン",
+        "intro": "パスワードを設定すると、クライアントは自分のユーザー名でポータルにログインし、プラン・使用量・サブスクリプションリンクを確認できます。",
+        "statusOn": "有効 · パスワード設定日時 {time}",
+        "statusOff": "無効",
+        "url": "ポータルのアドレス",
+        "newPassword": "新しいパスワード",
+        "passwordHint": "6〜72 文字。変更すると、このクライアントはすべての端末でログアウトされます。",
+        "passwordLength": "6〜72 文字で入力してください",
+        "save": "パスワードを保存",
+        "savedToast": "ポータルのパスワードを保存しました",
+        "handout": "次のログイン情報をクライアントに送ってください：",
+        "copyLogin": "ログイン情報をコピー",
+        "loginText": "ポータル：{url}\nユーザー名：{username}\nパスワード：{password}",
+        "revoke": "ログインを無効化",
+        "revokeConfirm": "{email} のポータルログインを無効にしますか？ログイン中のセッションはすぐに終了します。",
+        "revoked": "ポータルログインを無効にしました",
+        "subDisabled": "サブスクリプションサーバーがオフのため、クライアントはポータルを開けません。設定 → サブスクリプション でオンにしてください。"
+      }
     },
     "groups": {
       "name": "名前",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "クライアントを削除…",
       "removeFromGroupTitle": "グループ「{name}」からクライアントを削除",
       "removeFromGroupDesc": "このグループから外すメンバーを選択してください。クライアント自体は保持されます (完全に削除するには「グループのクライアントを削除」を使用)。",
-      "removeFromGroupResult": "{count} クライアントを {name} から外しました。"
+      "removeFromGroupResult": "{count} クライアントを {name} から外しました。",
+      "intro": "クライアントをグループにまとめ、通信量のリセットや削除を一括で行います。"
+    },
+    "plans": {
+      "intro": "通信量・有効期間・サーバーをまとめたセット。クライアントを一人ずつ設定する代わりにプランに割り当てます。",
+      "add": "新しいプラン",
+      "edit": "プランを編集",
+      "empty": "プランはまだありません",
+      "quota": "通信量",
+      "zeroUnlimited": "0 は無制限",
+      "duration": "有効期間",
+      "durationHint": "日数。0 は無期限です。",
+      "daysUnit": "日",
+      "permanent": "無期限",
+      "resetDay": "リセット日",
+      "monthlyOn": "毎月 {day} 日",
+      "servers": "サーバー",
+      "noServers": "サーバー未選択",
+      "members": "{count} クライアント",
+      "applyToMembers": "このプランの {count} クライアントにも反映する",
+      "deleteConfirm": "プラン {name} を削除しますか？",
+      "deleteBlocked": "先に {count} クライアントを別のプランに移してください",
+      "assign": "プランを割り当て",
+      "addPeople": "クライアントを追加",
+      "people": "クライアント",
+      "selectedPeople": "選択中の {count} クライアント",
+      "start": "有効期間の開始",
+      "startNow": "今すぐ",
+      "startFirstUse": "初回接続時",
+      "startKeep": "現在の期限を維持",
+      "resetTraffic": "使用済み通信量をクリア",
+      "renew": "更新",
+      "renewConfirm": "{count} クライアントをプランで更新しますか？",
+      "renewHint": "各クライアントは現在時刻と現在の期限の遅い方からプランの期間分延長され、使用済み通信量がクリアされます。",
+      "unassign": "プランから外す",
+      "unassignConfirm": "{count} クライアントをプランから外しますか？現在の制限はそのまま残ります。",
+      "noPlan": "プランなし",
+      "needPlan": "プランを選択してください",
+      "needPeople": "クライアントを 1 つ以上選択してください",
+      "errNameRequired": "プラン名を入力してください",
+      "toasts": {
+        "saved": "プランを保存しました",
+        "deleted": "プランを削除しました",
+        "assigned": "{count} クライアントにプランを設定しました",
+        "renewed": "{count} クライアントを更新しました",
+        "unassigned": "{count} クライアントをプランから外しました"
+      },
+      "clashRules": "Clash ルール",
+      "clashInherit": "グローバルルールを使用",
+      "clashCustom": "プラン専用ルール",
+      "clashRulesHint": "専用ルールは、このプランのクライアントのサブスクリプションでグローバル Clash ルールを置き換えます。グローバル Clash ルーティングがオフでも適用されます。ルール/YAML、または固定の HTTPS URL（バックグラウンドで更新）を貼り付けてください。",
+      "errClashRulesRequired": "ルールを入力するか、グローバルルールに戻してください"
     },
     "nodes": {
       "addNode": "ノードを追加",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "base64 または hex の SHA-256",
       "fetchPin": "取得",
       "pinFetched": "ノードの現在の証明書を取得しました",
-      "pinFetchFailed": "証明書を取得できませんでした"
+      "pinFetchFailed": "証明書を取得できませんでした",
+      "intro": "このパネルから管理するリモートパネルと、その状態・バージョン・インバウンド。"
     },
     "settings": {
       "defaultTag": "デフォルト",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "DoH サーバー URL。通常は /dns-query で終わります。",
       "subIncyResolveDnsIp": "DoH サーバー IP",
       "subIncyResolveDnsIpDesc": "ブートストラップ用の DoH サーバー IP。",
-      "subIncyGroupRouting": "ルーティング"
+      "subIncyGroupRouting": "ルーティング",
+      "intro": "パネルへのアクセス、セキュリティ、通知、サブスクリプションの設定。"
     },
     "xray": {
       "importRules": "ルールをインポート",
@@ -2242,7 +2348,10 @@
         "poolSize": "プールサイズ"
       },
       "defaultOutbound": "デフォルトアウトバウンド",
-      "defaultOutboundDesc": "ルーティング規則に一致しないトラフィックはこのアウトバウンドを使います（一覧の先頭）。"
+      "defaultOutboundDesc": "ルーティング規則に一致しないトラフィックはこのアウトバウンドを使います（一覧の先頭）。",
+      "intro": "Xray の基本テンプレート、バランサー、DNS、および JSON 設定全体。",
+      "outboundIntro": "トラフィックがサーバーを出る先：直接接続、ブロック、プロキシ、チェーン。",
+      "routingIntro": "各接続がどのアウトバウンドを通るかを決めるルール。"
     },
     "hosts": {
       "addHost": "ホストを追加",
@@ -2360,7 +2469,8 @@
         "delete": "ホストを削除",
         "badTag": "無効なタグ",
         "badVlessRoute": "0〜65535 の単一の数値を入力してください"
-      }
+      },
+      "intro": "共有リンクとサブスクリプションが各インバウンドに配布するアドレスと TLS 設定。"
     },
     "sponsors": {
       "title": "スポンサー",

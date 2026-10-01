@@ -1,24 +1,30 @@
 .api-docs-page.is-dark {
-  --sw-bg: #1f2026;
-  --sw-bg-soft: #25272e;
-  --sw-bg-input: #15161a;
+  --sw-bg: var(--ant-color-bg-container);
+  --sw-bg-soft: var(--ant-color-bg-elevated);
+  --sw-bg-input: var(--ant-color-bg-layout);
   --sw-bg-code: #0d0e12;
   --sw-border: rgba(255, 255, 255, 0.08);
   --sw-border-strong: rgba(255, 255, 255, 0.15);
   --sw-text: rgba(255, 255, 255, 0.88);
   --sw-text-muted: rgba(255, 255, 255, 0.6);
   --sw-text-dim: rgba(255, 255, 255, 0.45);
-  --sw-accent: #58a6ff;
+  --sw-accent: var(--ant-color-link);
   color-scheme: dark;
 }
 
 .api-docs-page.is-dark.is-ultra {
-  --sw-bg: #0a0a0d;
-  --sw-bg-soft: #131316;
-  --sw-bg-input: #050507;
   --sw-bg-code: #000;
   --sw-border: rgba(255, 255, 255, 0.06);
   --sw-border-strong: rgba(255, 255, 255, 0.12);
+}
+
+.api-docs-page .swagger-ui .info a {
+  color: var(--ant-color-link);
+}
+
+.api-docs-page .swagger-ui .btn.execute {
+  background-color: var(--ant-color-link);
+  border-color: var(--ant-color-link);
 }
 
 .api-docs-page .content-shell {
@@ -27,19 +33,17 @@
 
 .api-docs-page .content-area {
   padding: 16px;
-  max-width: 100%;
 }
 
 @media (max-width: 768px) {
   .api-docs-page .content-area {
     padding: 8px;
-    padding-top: 56px;
   }
 }
 
 .api-docs-page .docs-wrapper {
   background: var(--bg-card);
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   border: 1px solid var(--ant-color-border-secondary);
   overflow: hidden;
 }
@@ -48,7 +52,7 @@
   padding: 20px;
   background: var(--bg-card);
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
 }
 
 .api-docs-page .swagger-ui .section-tabs {
@@ -62,7 +66,7 @@
   overflow: auto;
   color: var(--sw-text, inherit);
   background: var(--sw-bg-code, var(--ant-color-fill-quaternary));
-  border-radius: 6px;
+  border-radius: var(--ant-border-radius);
   font-size: 12px;
 }
 
@@ -292,7 +296,7 @@
 }
 
 .api-docs-page.is-dark .swagger-ui .btn.execute:hover {
-  background: #79b9ff;
+  background: var(--ant-color-link-hover);
 }
 
 .api-docs-page.is-dark .swagger-ui .btn.authorize {
@@ -376,7 +380,12 @@
 }
 
 .api-docs-page.is-dark .swagger-ui a:hover {
-  color: #79b9ff;
+  color: var(--ant-color-link-hover);
+}
+
+/* Swagger wraps every path and tag heading in a.nostyle, meant to read as text. */
+.api-docs-page.is-dark .swagger-ui a.nostyle {
+  color: inherit;
 }
 
 .api-docs-page.is-dark .swagger-ui .info .title small {

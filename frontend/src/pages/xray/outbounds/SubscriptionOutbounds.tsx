@@ -123,7 +123,6 @@ export default function SubscriptionOutbounds({
         <Button
           aria-label={t('check')}
           type="primary"
-          shape="circle"
           size={isMobile ? 'small' : undefined}
           loading={isTesting(subscriptionTestStates, key)}
           disabled={!record.tag || isUntestable(record) || isTesting(subscriptionTestStates, key)}

@@ -63,7 +63,7 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   font-size: 22px;
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
@@ -103,7 +103,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   font-size: 17px;
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
@@ -137,6 +137,5 @@
 @media (max-width: 768px) {
   .sponsors-page .content-area {
     padding: 12px;
-    padding-top: 64px;
   }
 }

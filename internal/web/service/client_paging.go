@@ -30,6 +30,7 @@ type ClientSlim struct {
 	ResetWeekday int                 `json:"resetWeekday" example:"0"`
 	ResetMax     int                 `json:"resetMax" example:"0"`
 	Group        string              `json:"group,omitempty" example:"staff"`
+	PlanId       int                 `json:"planId,omitempty" example:"1"`
 	Comment      string              `json:"comment,omitempty" example:"Primary device"`
 	InboundIds   []int               `json:"inboundIds" example:"[3,5]"`
 	Traffic      *xray.ClientTraffic `json:"traffic,omitempty"`
@@ -62,6 +63,8 @@ type ClientPageParams struct {
 	HasTgID    string `form:"hasTgId"`
 	HasComment string `form:"hasComment"`
 	Group      string `form:"group"`
+	// Plan takes plan ids; 0 matches clients on no plan.
+	Plan string `form:"plan"`
 }
 
 // ClientPageResponse is the shape returned by ListPaged. `Total` is the
@@ -130,6 +133,8 @@ const clientSearchCond = `(LOWER(c.email) LIKE ? ESCAPE '\'
 type clientQuery struct {
 	db               *gorm.DB
 	joins            []clientQueryJoin
+	upExpr           string
+	downExpr         string
 	usedExpr         string
 	nowMs            int64
 	expireDiffMs     int64
@@ -148,8 +153,10 @@ func newClientQuery(db *gorm.DB, nowMs, expireDiffMs, trafficDiffBytes int64) cl
 		expireDiffMs:     expireDiffMs,
 		trafficDiffBytes: trafficDiffBytes,
 		joins:            []clientQueryJoin{{sql: "LEFT JOIN client_traffics ct ON ct.email = c.email"}},
-		usedExpr:         "(COALESCE(ct.up, 0) + COALESCE(ct.down, 0))",
+		upExpr:           "COALESCE(ct.up, 0)",
+		downExpr:         "COALESCE(ct.down, 0)",
 	}
+	q.usedExpr = "(" + q.upExpr + " + " + q.downExpr + ")"
 	freshSince := globalTrafficFreshSince()
 	var probe int64
 	err := db.Model(&model.ClientGlobalTraffic{}).
@@ -165,8 +172,9 @@ func newClientQuery(db *gorm.DB, nowMs, expireDiffMs, trafficDiffBytes int64) cl
 			" WHERE updated_at >= ? GROUP BY email) g ON g.email = c.email",
 		args: []any{freshSince},
 	})
-	q.usedExpr = "(CASE WHEN COALESCE(g.up, 0) > COALESCE(ct.up, 0) THEN COALESCE(g.up, 0) ELSE COALESCE(ct.up, 0) END" +
-		" + CASE WHEN COALESCE(g.down, 0) > COALESCE(ct.down, 0) THEN COALESCE(g.down, 0) ELSE COALESCE(ct.down, 0) END)"
+	q.upExpr = "CASE WHEN COALESCE(g.up, 0) > COALESCE(ct.up, 0) THEN COALESCE(g.up, 0) ELSE COALESCE(ct.up, 0) END"
+	q.downExpr = "CASE WHEN COALESCE(g.down, 0) > COALESCE(ct.down, 0) THEN COALESCE(g.down, 0) ELSE COALESCE(ct.down, 0) END"
+	q.usedExpr = "(" + q.upExpr + " + " + q.downExpr + ")"
 	return q
 }
 
@@ -265,6 +273,9 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 	}
 	if groups := parseCSVStrings(params.Group); len(groups) > 0 {
 		where("LOWER(TRIM(COALESCE(c.group_name, ''))) IN ?", groups)
+	}
+	if planIds := parsePlanFilter(params.Plan); len(planIds) > 0 {
+		where("COALESCE(c.plan_id, 0) IN ?", planIds)
 	}
 	return tx, narrowed
 }
@@ -611,6 +622,7 @@ func toClientSlim(c ClientWithAttachments) ClientSlim {
 		ResetWeekday: c.ResetWeekday,
 		ResetMax:     c.ResetMax,
 		Group:        c.Group,
+		PlanId:       c.PlanId,
 		Comment:      c.Comment,
 		InboundIds:   c.InboundIds,
 		Traffic:      c.Traffic,
@@ -664,6 +676,17 @@ func parseCSVStrings(raw string) []string {
 
 // parseCSVInts is parseCSVStrings for positive integer IDs; non-numeric or
 // non-positive entries are silently dropped.
+// parsePlanFilter keeps 0, unlike parseCSVInts: it stands for "on no plan".
+func parsePlanFilter(raw string) []int {
+	var ids []int
+	for _, p := range strings.Split(raw, ",") {
+		if n, err := strconv.Atoi(strings.TrimSpace(p)); err == nil && n >= 0 {
+			ids = append(ids, n)
+		}
+	}
+	return ids
+}
+
 func parseCSVInts(raw string) []int {
 	if raw == "" {
 		return nil

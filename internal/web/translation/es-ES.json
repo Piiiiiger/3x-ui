@@ -105,7 +105,24 @@
     "support": "Soporte",
     "qrTitle": "Escanea. Importa. Conéctate.",
     "qrHint": "Escanéalo con tu aplicación cliente. Mantén este código en privado.",
-    "saveQr": "Guardar QR"
+    "saveQr": "Guardar QR",
+    "portal": {
+      "title": "Iniciar sesión",
+      "intro": "Inicia sesión para ver tu plan, tu consumo y tus enlaces de suscripción.",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "signIn": "Iniciar sesión",
+      "signOut": "Cerrar sesión",
+      "required": "Obligatorio",
+      "invalid": "Usuario o contraseña incorrectos",
+      "blocked": "Demasiados intentos. Vuelve a intentarlo en 15 minutos.",
+      "failed": "Ahora no es posible iniciar sesión. Inténtalo más tarde.",
+      "plan": "Mi plan",
+      "usage": "Últimos {days} días",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Tu cuenta aún no tiene servidores. Contacta con el administrador.",
+      "loadFailed": "No se pudieron cargar tus datos. Inténtalo más tarde."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -113,6 +130,7 @@
     "inbounds": "Entradas",
     "clients": "Clientes",
     "groups": "Grupos",
+    "plans": "Planes",
     "nodes": "Nodos",
     "settings": "Ajustes del panel",
     "xray": "Configuración Xray",
@@ -124,8 +142,6 @@
     "hosts": "Hosts",
     "docs": "Documentación",
     "openMenu": "Abrir menú",
-    "pinSidebar": "Fijar barra lateral",
-    "unpinSidebar": "Desfijar barra lateral",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "Caído",
       "xrayObservatoryLastSeen": "Visto por última vez",
       "xrayObservatoryLastTry": "Último intento",
-      "connectionCount": "Número de Conexiones",
-      "ipAddresses": "Direcciones IP",
       "toggleIpVisibility": "Alternar visibilidad de la IP",
-      "overallSpeed": "Velocidad general",
       "upload": "Subida",
       "download": "Descargar",
       "sent": "Enviado",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "Haz clic para seleccionar y subir una copia de seguridad de PostgreSQL (.dump), una base de datos SQLite (.db) o un volcado de migración de SQLite para restaurar tu base de datos. Esto reemplaza todos los datos actuales.",
       "migrationDownload": "Descargar migración",
       "migrationDownloadPgDesc": "Haz clic para descargar una base de datos SQLite .db creada a partir de tus datos de PostgreSQL, lista para ejecutar este panel en SQLite.",
-      "avg": "media",
-      "peak": "pico",
-      "free": "libre",
-      "openSockets": "sockets abiertos",
-      "throughputSub": "Total de la interfaz",
-      "avgWindow": "Media del periodo",
       "healthWarm": "{list} — algo elevado",
       "healthCritical": "{list} — crítico",
-      "panel": "Panel",
-      "threads": "Hilos",
       "uptime": "Tiempo activo",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Mantener la configuración de esta máquina",
-      "importKeepHostSettingsDesc": "Conserva las direcciones de escucha, los puertos, la ruta base, los certificados y la identidad de nodo de este panel en lugar de tomarlos del archivo subido."
+      "importKeepHostSettingsDesc": "Conserva las direcciones de escucha, los puertos, la ruta base, los certificados y la identidad de nodo de este panel en lugar de tomarlos del archivo subido.",
+      "traffic": {
+        "quota": "Cuota total",
+        "quotaDetail": "{limited} con cuota · {unlimited} ilimitados",
+        "used": "Usado",
+        "usedDetail": "Hoy {size}",
+        "remaining": "Restante",
+        "remainingDetail": "Aún disponible en las cuotas de los clientes",
+        "usageRate": "Cuota usada",
+        "usageRateDetail": "{used} de {quota} consumidos",
+        "noQuota": "Ningún cliente tiene cuota",
+        "daily": "Tráfico diario",
+        "dailySub": "Últimos {days} días · se actualiza cada 10 minutos",
+        "periodTotal": "Total",
+        "today": "Hoy",
+        "dailyAverage": "Promedio diario",
+        "clientsSub": "{count} clientes en total",
+        "normal": "Activos",
+        "expiring": "Vencen pronto",
+        "runningLow": "Queda poco",
+        "usedUp": "Agotados",
+        "expired": "Vencidos",
+        "disabled": "Desactivados",
+        "manageClients": "Gestionar clientes",
+        "attention": "Requieren atención",
+        "attentionSub": "Vencen en 7 días o les queda menos del 10 % de la cuota, agotados o vencidos",
+        "attentionEmpty": "Nadie requiere atención por ahora"
+      }
     },
     "inbounds": {
       "totalDownUp": "Subidas/Descargas Totales",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "Config Peer {n}"
       },
       "sniffingDestOverride": "Anulación de destino",
-      "advancedTitle": "Configuración avanzada"
+      "advancedTitle": "Configuración avanzada",
+      "intro": "Puertos, protocolos y transportes de escucha, con los clientes que atiende cada uno."
     },
     "clients": {
       "tabBasics": "Básico",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "Renueva este día de cada mes natural, a medianoche en la zona horaria del panel, en lugar de cada N días. Si el mes es demasiado corto para el día elegido, renueva su último día. 0 mantiene el modo de intervalo en días.",
       "renewsUsed": "Renovaciones usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto."
+      "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto.",
+      "intro": "Todos los clientes de tus entradas, con tráfico, caducidad y enlaces de suscripción.",
+      "portal": {
+        "title": "Acceso al portal",
+        "intro": "Con una contraseña, el cliente puede entrar al portal con su usuario y ver su plan, su consumo y sus enlaces de suscripción.",
+        "statusOn": "Activado · contraseña definida {time}",
+        "statusOff": "Desactivado",
+        "url": "Dirección del portal",
+        "newPassword": "Nueva contraseña",
+        "passwordHint": "De 6 a 72 caracteres. Cambiarla cierra la sesión del cliente en todos sus dispositivos.",
+        "passwordLength": "Usa de 6 a 72 caracteres",
+        "save": "Guardar contraseña",
+        "savedToast": "Contraseña del portal guardada",
+        "handout": "Envía estos datos al cliente:",
+        "copyLogin": "Copiar datos de acceso",
+        "loginText": "Portal: {url}\nUsuario: {username}\nContraseña: {password}",
+        "revoke": "Desactivar acceso",
+        "revokeConfirm": "¿Desactivar el acceso al portal de {email}? Sus sesiones abiertas terminan de inmediato.",
+        "revoked": "Acceso al portal desactivado",
+        "subDisabled": "El servidor de suscripciones está apagado, así que el cliente no puede abrir el portal. Actívalo en Ajustes → Suscripción."
+      }
     },
     "groups": {
       "name": "Nombre",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "Quitar clientes…",
       "removeFromGroupTitle": "Quitar clientes del grupo «{name}»",
       "removeFromGroupDesc": "Selecciona miembros para quitar de este grupo. Los clientes se conservan (usa «Eliminar clientes del grupo» para eliminarlos por completo).",
-      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}.",
+      "intro": "Agrupa clientes para restablecer su tráfico o eliminarlos a la vez."
+    },
+    "plans": {
+      "intro": "Conjuntos de tráfico, vigencia y servidores. Asigna un plan a los clientes en lugar de configurarlos uno a uno.",
+      "add": "Nuevo plan",
+      "edit": "Editar plan",
+      "empty": "Aún no hay planes",
+      "quota": "Tráfico",
+      "zeroUnlimited": "0 significa ilimitado",
+      "duration": "Vigencia",
+      "durationHint": "En días. 0 significa que nunca caduca.",
+      "daysUnit": "días",
+      "permanent": "sin caducidad",
+      "resetDay": "Día de reinicio",
+      "monthlyOn": "Mensual, el día {day}",
+      "servers": "Servidores",
+      "noServers": "Sin servidores",
+      "members": "{count} cliente(s)",
+      "applyToMembers": "Actualizar también los {count} cliente(s) de este plan",
+      "deleteConfirm": "¿Eliminar el plan {name}?",
+      "deleteBlocked": "Primero mueve sus {count} cliente(s) a otro plan",
+      "assign": "Asignar plan",
+      "addPeople": "Añadir clientes",
+      "people": "Clientes",
+      "selectedPeople": "{count} clientes seleccionados",
+      "start": "Inicio de la vigencia",
+      "startNow": "Ahora",
+      "startFirstUse": "En la primera conexión",
+      "startKeep": "Mantener la caducidad actual",
+      "resetTraffic": "Borrar el tráfico usado",
+      "renew": "Renovar",
+      "renewConfirm": "¿Renovar {count} cliente(s) según su plan?",
+      "renewHint": "Cada uno se amplía la duración de su plan desde ahora o desde su caducidad actual, lo que sea posterior, y se borra su tráfico usado.",
+      "unassign": "Quitar del plan",
+      "unassignConfirm": "¿Quitar {count} cliente(s) de su plan? Sus límites actuales se mantienen.",
+      "noPlan": "Sin plan",
+      "needPlan": "Elige un plan",
+      "needPeople": "Elige al menos un cliente",
+      "errNameRequired": "Escribe un nombre para el plan",
+      "toasts": {
+        "saved": "Plan guardado",
+        "deleted": "Plan eliminado",
+        "assigned": "Plan asignado a {count} cliente(s)",
+        "renewed": "{count} cliente(s) renovado(s)",
+        "unassigned": "{count} cliente(s) quitado(s) de su plan"
+      },
+      "clashRules": "Reglas de Clash",
+      "clashInherit": "Usar reglas globales",
+      "clashCustom": "Reglas propias del plan",
+      "clashRulesHint": "Las reglas propias del plan sustituyen las reglas globales de Clash en las suscripciones de sus clientes, incluso con el enrutamiento global de Clash desactivado. Pega reglas/YAML o una URL HTTPS permanente (se actualiza en segundo plano).",
+      "errClashRulesRequired": "Escribe las reglas o vuelve a las reglas globales"
     },
     "nodes": {
       "addNode": "Agregar nodo",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "SHA-256 en base64 o hex",
       "fetchPin": "Obtener",
       "pinFetched": "Se obtuvo el certificado actual del nodo",
-      "pinFetchFailed": "No se pudo obtener el certificado"
+      "pinFetchFailed": "No se pudo obtener el certificado",
+      "intro": "Paneles remotos gestionados desde aquí, con su estado, versiones y entradas."
     },
     "settings": {
       "defaultTag": "Predeterminado",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "URL del servidor DoH, normalmente acaba en /dns-query.",
       "subIncyResolveDnsIp": "IP del servidor DoH",
       "subIncyResolveDnsIpDesc": "IP del servidor DoH para el arranque.",
-      "subIncyGroupRouting": "Enrutado"
+      "subIncyGroupRouting": "Enrutado",
+      "intro": "Acceso al panel, seguridad, notificaciones y ajustes de suscripción."
     },
     "xray": {
       "save": "Guardar configuración",
@@ -2242,7 +2348,10 @@
         "poolSize": "Tamaño del grupo"
       },
       "defaultOutbound": "Salida predeterminada",
-      "defaultOutboundDesc": "El tráfico que no coincide con ninguna regla de enrutamiento usa esta salida (la primera de la lista)."
+      "defaultOutboundDesc": "El tráfico que no coincide con ninguna regla de enrutamiento usa esta salida (la primera de la lista).",
+      "intro": "La plantilla base de Xray, los balanceadores, el DNS y la configuración JSON completa.",
+      "outboundIntro": "Por dónde sale el tráfico del servidor: directo, bloqueado, proxies y cadenas.",
+      "routingIntro": "Reglas que deciden qué salida toma cada conexión."
     },
     "hosts": {
       "addHost": "Agregar host",
@@ -2360,7 +2469,8 @@
         "delete": "Eliminar host",
         "badTag": "Etiqueta no válida",
         "badVlessRoute": "Introduce un único número entre 0 y 65535"
-      }
+      },
+      "intro": "Direcciones y datos TLS que los enlaces y las suscripciones entregan para cada entrada."
     },
     "sponsors": {
       "title": "Patrocinadores",

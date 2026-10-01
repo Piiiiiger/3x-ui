@@ -22,7 +22,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAllSettings } from '@/api/queries/useAllSettings';
 import { AllSettingSchema } from '@/schemas/setting';
-import AppSidebar from '@/layouts/AppSidebar';
+import AppNav from '@/layouts/AppNav';
+import { PageHeader } from '@/components/ui';
 import GeneralTab from './GeneralTab';
 import SecurityTab from './SecurityTab';
 import TelegramTab from './TelegramTab';
@@ -237,10 +238,11 @@ export default function SettingsPage() {
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
+        <AppNav />
 
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            <PageHeader title={t('menu.settings')} description={t('pages.settings.intro')} />
             <Spin
               spinning={spinning || !fetched}
               delay={200}

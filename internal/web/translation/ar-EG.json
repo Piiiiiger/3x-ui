@@ -105,7 +105,24 @@
     "support": "الدعم",
     "qrTitle": "امسح. استورد. اتصل.",
     "qrHint": "امسح الرمز بتطبيق العميل. لا تشارك هذا الرمز مع أحد.",
-    "saveQr": "حفظ QR"
+    "saveQr": "حفظ QR",
+    "portal": {
+      "title": "تسجيل الدخول",
+      "intro": "سجّل الدخول لترى باقتك واستهلاكك وروابط اشتراكك.",
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "signIn": "دخول",
+      "signOut": "تسجيل الخروج",
+      "required": "مطلوب",
+      "invalid": "اسم المستخدم أو كلمة المرور غير صحيحة",
+      "blocked": "محاولات كثيرة جدًا. حاول مرة أخرى بعد 15 دقيقة.",
+      "failed": "تسجيل الدخول غير متاح الآن. حاول لاحقًا.",
+      "plan": "باقتي",
+      "usage": "آخر {days} يومًا",
+      "usageTotal": "الإجمالي {size}",
+      "noSubscription": "لا توجد خوادم لحسابك بعد. تواصل مع المسؤول.",
+      "loadFailed": "تعذّر تحميل بياناتك. حاول لاحقًا."
+    }
   },
   "menu": {
     "theme": "الثيم",
@@ -113,6 +130,7 @@
     "inbounds": "الواردات",
     "clients": "العملاء",
     "groups": "المجموعات",
+    "plans": "الباقات",
     "nodes": "النودز",
     "settings": "إعدادات اللوحة",
     "xray": "إعدادات Xray",
@@ -124,8 +142,6 @@
     "hosts": "المضيفات",
     "docs": "التوثيق",
     "openMenu": "فتح القائمة",
-    "pinSidebar": "تثبيت الشريط الجانبي",
-    "unpinSidebar": "إلغاء تثبيت الشريط الجانبي",
     "subFormats": "Sub Formats"
   },
   "pages": {
@@ -205,10 +221,7 @@
       "xrayObservatoryDead": "غير متصل",
       "xrayObservatoryLastSeen": "آخر مشاهدة",
       "xrayObservatoryLastTry": "آخر محاولة",
-      "connectionCount": "إحصائيات الاتصال",
-      "ipAddresses": "عناوين IP",
       "toggleIpVisibility": "بدل إظهار IP",
-      "overallSpeed": "السرعة الكلية",
       "upload": "رفع",
       "download": "تنزيل",
       "sent": "مرسل",
@@ -271,16 +284,8 @@
       "importDatabasePgDesc": "انقر لاختيار ورفع نسخة احتياطية من PostgreSQL (.dump) أو قاعدة بيانات SQLite (.db) أو ملف ترحيل SQLite لاستعادة قاعدة البيانات. سيؤدي هذا إلى استبدال جميع البيانات الحالية.",
       "migrationDownload": "تنزيل ملف الترحيل",
       "migrationDownloadPgDesc": "انقر لتنزيل قاعدة بيانات SQLite بامتداد .db مبنية من بيانات PostgreSQL الخاصة بك، جاهزة لتشغيل هذه اللوحة على SQLite.",
-      "avg": "متوسط",
-      "peak": "ذروة",
-      "free": "متاح",
-      "openSockets": "مقابس مفتوحة",
-      "throughputSub": "إجمالي الواجهة",
-      "avgWindow": "متوسط الفترة",
       "healthWarm": "{list} — مرتفع قليلاً",
       "healthCritical": "{list} — حرج",
-      "panel": "اللوحة",
-      "threads": "الخيوط",
       "uptime": "مدة التشغيل",
       "logLevelDebug": "Debug",
       "logLevelInfo": "Info",
@@ -291,7 +296,34 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "الاحتفاظ بإعدادات هذا الجهاز",
-      "importKeepHostSettingsDesc": "يحتفظ بعناوين الاستماع والمنافذ والمسار الأساسي والشهادات وهوية العقدة الخاصة بهذه اللوحة بدلًا من أخذها من الملف المرفوع."
+      "importKeepHostSettingsDesc": "يحتفظ بعناوين الاستماع والمنافذ والمسار الأساسي والشهادات وهوية العقدة الخاصة بهذه اللوحة بدلًا من أخذها من الملف المرفوع.",
+      "traffic": {
+        "quota": "إجمالي الحصة",
+        "quotaDetail": "{limited} بحصة · {unlimited} بلا حد",
+        "used": "المستخدم",
+        "usedDetail": "اليوم {size}",
+        "remaining": "المتبقي",
+        "remainingDetail": "ما زال متاحًا ضمن حصص العملاء",
+        "usageRate": "نسبة استخدام الحصة",
+        "usageRateDetail": "تم استهلاك {used} من {quota}",
+        "noQuota": "لا يوجد عميل لديه حصة",
+        "daily": "الترافيك اليومي",
+        "dailySub": "آخر {days} يومًا · يتحدّث كل 10 دقائق",
+        "periodTotal": "الإجمالي",
+        "today": "اليوم",
+        "dailyAverage": "المتوسط اليومي",
+        "clientsSub": "إجمالي العملاء: {count}",
+        "normal": "نشط",
+        "expiring": "تنتهي قريبًا",
+        "runningLow": "توشك على النفاد",
+        "usedUp": "نفدت",
+        "expired": "منتهية",
+        "disabled": "معطّل",
+        "manageClients": "إدارة العملاء",
+        "attention": "تحتاج إلى متابعة",
+        "attentionSub": "تنتهي خلال 7 أيام أو تبقّى أقل من 10% من الحصة، أو نفدت، أو انتهت",
+        "attentionEmpty": "لا أحد يحتاج إلى متابعة حاليًا"
+      }
     },
     "inbounds": {
       "totalDownUp": "إجمالي المرسل/المستقبل",
@@ -714,7 +746,8 @@
         "peerNumberConfig": "تكوين Peer {n}"
       },
       "sniffingDestOverride": "تجاوز الوجهة",
-      "advancedTitle": "الإعدادات المتقدمة"
+      "advancedTitle": "الإعدادات المتقدمة",
+      "intro": "المنافذ والبروتوكولات وطرق النقل المستمعة، مع العملاء الذين يخدمهم كل منها."
     },
     "clients": {
       "tabBasics": "أساسي",
@@ -967,7 +1000,27 @@
       "renewOnDayDesc": "يتم التجديد في هذا اليوم من كل شهر ميلادي، عند منتصف الليل بتوقيت اللوحة، بدلاً من كل N يوم. إذا كان الشهر أقصر من اليوم المختار، يتم التجديد في آخر يوم منه. القيمة 0 تُبقي وضع الفاصل اليومي.",
       "renewsUsed": "التجديدات المستخدمة",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto."
+      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto.",
+      "intro": "جميع العملاء عبر الواردات، مع حركة البيانات وتاريخ الانتهاء وروابط الاشتراك.",
+      "portal": {
+        "title": "الدخول إلى البوابة",
+        "intro": "بكلمة مرور يستطيع العميل الدخول إلى البوابة باسمه ورؤية باقته واستهلاكه وروابط اشتراكه.",
+        "statusOn": "مفعّل · عُيّنت كلمة المرور في {time}",
+        "statusOff": "غير مفعّل",
+        "url": "عنوان البوابة",
+        "newPassword": "كلمة مرور جديدة",
+        "passwordHint": "من 6 إلى 72 حرفًا. تغييرها يُخرج العميل من كل أجهزته.",
+        "passwordLength": "استخدم من 6 إلى 72 حرفًا",
+        "save": "حفظ كلمة المرور",
+        "savedToast": "تم حفظ كلمة مرور البوابة",
+        "handout": "أرسل هذه البيانات إلى العميل:",
+        "copyLogin": "نسخ بيانات الدخول",
+        "loginText": "البوابة: {url}\nاسم المستخدم: {username}\nكلمة المرور: {password}",
+        "revoke": "إيقاف الدخول",
+        "revokeConfirm": "إيقاف الدخول إلى البوابة لـ {email}؟ تنتهي الجلسات المفتوحة فورًا.",
+        "revoked": "تم إيقاف الدخول إلى البوابة",
+        "subDisabled": "خادم الاشتراكات متوقف، لذلك لا يستطيع العميل فتح البوابة. شغّله من الإعدادات ← الاشتراك."
+      }
     },
     "groups": {
       "name": "الاسم",
@@ -1008,7 +1061,58 @@
       "removeFromGroup": "إزالة عملاء…",
       "removeFromGroupTitle": "إزالة عملاء من المجموعة «{name}»",
       "removeFromGroupDesc": "اختر الأعضاء لإزالتهم من هذه المجموعة. يُحفظ العملاء (استخدم «حذف عملاء المجموعة» للإزالة الكاملة).",
-      "removeFromGroupResult": "تمت إزالة {count} عميل من {name}."
+      "removeFromGroupResult": "تمت إزالة {count} عميل من {name}.",
+      "intro": "اجمع العملاء في مجموعات لإعادة تعيين حركة بياناتهم أو حذفهم معًا."
+    },
+    "plans": {
+      "intro": "مجموعات من حركة البيانات ومدة الصلاحية والخوادم. ضع العملاء في باقة بدلًا من ضبط كل عميل يدويًا.",
+      "add": "باقة جديدة",
+      "edit": "تعديل الباقة",
+      "empty": "لا توجد باقات بعد",
+      "quota": "حركة البيانات",
+      "zeroUnlimited": "0 يعني غير محدود",
+      "duration": "مدة الصلاحية",
+      "durationHint": "بالأيام. 0 يعني أنها لا تنتهي أبدًا.",
+      "daysUnit": "يوم",
+      "permanent": "بلا انتهاء",
+      "resetDay": "يوم إعادة التعيين",
+      "monthlyOn": "شهريًا في اليوم {day}",
+      "servers": "الخوادم",
+      "noServers": "لم يتم اختيار خوادم",
+      "members": "{count} عميل",
+      "applyToMembers": "حدّث أيضًا العملاء ({count}) في هذه الباقة",
+      "deleteConfirm": "حذف الباقة {name}؟",
+      "deleteBlocked": "انقل عملاءها ({count}) إلى باقة أخرى أولًا",
+      "assign": "تعيين باقة",
+      "addPeople": "إضافة عملاء",
+      "people": "العملاء",
+      "selectedPeople": "{count} عميل محدد",
+      "start": "بدء الصلاحية",
+      "startNow": "الآن",
+      "startFirstUse": "عند أول اتصال",
+      "startKeep": "الإبقاء على تاريخ الانتهاء الحالي",
+      "resetTraffic": "مسح حركة البيانات المستخدمة",
+      "renew": "تجديد",
+      "renewConfirm": "تجديد {count} عميل حسب باقاتهم؟",
+      "renewHint": "يُمدَّد كل عميل بمدة باقته بدءًا من الآن أو من تاريخ انتهائه الحالي، أيهما أبعد، وتُمسح حركة البيانات المستخدمة.",
+      "unassign": "إزالة من الباقة",
+      "unassignConfirm": "إزالة {count} عميل من باقاتهم؟ تبقى حدودهم الحالية كما هي.",
+      "noPlan": "بلا باقة",
+      "needPlan": "اختر باقة",
+      "needPeople": "اختر عميلًا واحدًا على الأقل",
+      "errNameRequired": "أدخل اسم الباقة",
+      "toasts": {
+        "saved": "تم حفظ الباقة",
+        "deleted": "تم حذف الباقة",
+        "assigned": "تم تعيين الباقة لـ {count} عميل",
+        "renewed": "تم تجديد {count} عميل",
+        "unassigned": "تمت إزالة {count} عميل من الباقة"
+      },
+      "clashRules": "قواعد Clash",
+      "clashInherit": "استخدام القواعد العامة",
+      "clashCustom": "قواعد خاصة بالباقة",
+      "clashRulesHint": "تحل القواعد الخاصة بالباقة محل قواعد Clash العامة في اشتراكات عملائها، حتى عند إيقاف توجيه Clash العام. ألصق قواعد/YAML أو عنوان HTTPS دائمًا واحدًا (يُحدَّث في الخلفية).",
+      "errClashRulesRequired": "أدخل القواعد أو عُد إلى القواعد العامة"
     },
     "nodes": {
       "addNode": "إضافة نود",
@@ -1121,7 +1225,8 @@
       "pinnedCertPlaceholder": "SHA-256 بصيغة base64 أو hex",
       "fetchPin": "جلب",
       "pinFetched": "تم جلب شهادة العقدة الحالية",
-      "pinFetchFailed": "تعذّر جلب الشهادة"
+      "pinFetchFailed": "تعذّر جلب الشهادة",
+      "intro": "اللوحات البعيدة التي تُدار من هنا، مع حالتها وإصداراتها ووارداتها."
     },
     "settings": {
       "defaultTag": "افتراضي",
@@ -1739,7 +1844,8 @@
       "subIncyResolveDnsDomainDesc": "رابط سيرفر DoH، غالبًا ينتهي بـ /dns-query.",
       "subIncyResolveDnsIp": "IP سيرفر DoH",
       "subIncyResolveDnsIpDesc": "عنوان IP لسيرفر DoH للتهيئة.",
-      "subIncyGroupRouting": "التوجيه"
+      "subIncyGroupRouting": "التوجيه",
+      "intro": "الوصول إلى اللوحة والأمان والإشعارات وإعدادات الاشتراك."
     },
     "xray": {
       "save": "احفظ",
@@ -2242,7 +2348,10 @@
         "poolSize": "حجم المجموعة"
       },
       "defaultOutbound": "الصادر الافتراضي",
-      "defaultOutboundDesc": "الحركة التي لا تطابق أي قاعدة توجيه تستخدم هذا الصادر (الأول في القائمة)."
+      "defaultOutboundDesc": "الحركة التي لا تطابق أي قاعدة توجيه تستخدم هذا الصادر (الأول في القائمة).",
+      "intro": "قالب Xray الأساسي وموازنات التحميل وDNS وإعدادات JSON الكاملة.",
+      "outboundIntro": "حيث تغادر حركة البيانات الخادم: مباشر، محظور، وكلاء وسلاسل.",
+      "routingIntro": "القواعد التي تحدد الصادر الذي يسلكه كل اتصال."
     },
     "hosts": {
       "addHost": "إضافة مضيف",
@@ -2360,7 +2469,8 @@
         "delete": "حذف المضيف",
         "badTag": "وسم غير صالح",
         "badVlessRoute": "أدخل رقماً واحداً بين 0 و65535"
-      }
+      },
+      "intro": "العناوين وتفاصيل TLS التي تقدمها روابط المشاركة والاشتراكات لكل وارد."
     },
     "sponsors": {
       "title": "الرعاة",

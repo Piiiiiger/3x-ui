@@ -13,6 +13,8 @@
     "subscription-server",
     "subscription-balancers",
     "hosts",
+    "plans",
+    "traffic",
     "nodes",
     "backup",
     "websocket"

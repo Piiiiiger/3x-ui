@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Select, Tabs } from 'antd';
+import { Modal, Select, Tabs, theme } from 'antd';
 import {
   ApiOutlined,
   DashboardOutlined,
@@ -17,7 +17,7 @@ import {
 import { HttpUtil, SizeFormatter } from '@/utils';
 import { Sparkline } from '@/components/viz';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import type { Status } from '@/models/status';
+import { usageTierColor, type Status } from '@/models/status';
 import './SystemHistoryModal.css';
 
 interface SystemHistoryModalProps {
@@ -271,7 +271,10 @@ export default function SystemHistoryModal({ open, status, onClose }: SystemHist
 
   const activeMetric = useMemo(() => METRICS.find((m) => m.key === activeKey), [activeKey]);
   const trName = (n?: string) => (n && n.startsWith('pages.') ? t(n) : n);
-  const strokeColor = activeMetric?.stroke || status?.cpu?.color || '#008771';
+  const { token } = theme.useToken();
+  const strokeColor =
+    activeMetric?.stroke ||
+    (status ? usageTierColor(status.cpu.percent, token.colorPrimary) : token.colorPrimary);
   const yFormatter = useMemo(
     () => unitFormatter(activeMetric?.unit ?? '', activeKey),
     [activeMetric, activeKey],

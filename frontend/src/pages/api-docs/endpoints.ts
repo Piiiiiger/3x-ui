@@ -1120,6 +1120,13 @@ export const sections: readonly Section[] = [
             desc: 'CSV group names, matched case-insensitively after trimming. Values are ORed.',
             optional: true,
           },
+          {
+            name: 'plan',
+            in: 'query',
+            type: 'string',
+            desc: 'CSV plan ids; 0 matches clients on no plan. Values are ORed.',
+            optional: true,
+          },
         ],
         responseSchema: 'ClientPageResponse',
       },
@@ -1303,6 +1310,31 @@ export const sections: readonly Section[] = [
         ],
         body: '{\n  "externalLinks": [\n    { "kind": "link", "value": "vless://uuid@host:443?...#srv", "remark": "DE", "enable": true, "expiryTime": 0 },\n    { "kind": "subscription", "value": "https://provider.example/sub/abc", "remark": "Provider", "enable": false, "expiryTime": 1767225600000, "namePrefix": "[zjh] " }\n  ]\n}',
         response: '{\n  "success": true\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/:email/portal',
+        summary:
+          'Whether the client can sign in to the subscription server portal ({subPath}portal), and when its password was last set.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientPortalStatus',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/:email/portal',
+        summary:
+          'Set or replace the client portal password (6 to 72 bytes, stored as a bcrypt hash). Replacing it signs out the client portal sessions.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        body: '{\n  "password": "a-long-passphrase"\n}',
+        responseSchema: 'ClientPortalStatus',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/:email/portal/clear',
+        summary:
+          'Remove the client portal password: the client can no longer sign in and open sessions end.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientPortalStatus',
       },
       {
         method: 'POST',
@@ -1882,6 +1914,86 @@ export const sections: readonly Section[] = [
     ],
   },
 
+  {
+    id: 'plans',
+    title: 'Plans',
+    description:
+      'Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/plans/list',
+        summary: 'List every plan with the inbounds it grants and how many clients use it.',
+        responseSchema: 'PlanSummary',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/add',
+        summary:
+          "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. clashRules (inline rules/YAML or one HTTPS URL) replaces the global Clash rules in members' subscriptions, even with global Clash routing off; empty inherits them.",
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "",\n  "inboundIds": [1, 2]\n}',
+        responseSchema: 'Plan',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/update/:id',
+        summary:
+          'Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
+        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/del/:id',
+        summary:
+          'Delete a plan. Refused while any client is on it — move or unassign those clients first.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
+        response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/assign',
+        summary:
+          'Put clients on a plan. Each gets the plan quota, IP limit and reset schedule, and exactly the plan inbounds. start sets the expiry: now (duration from now), firstUse (duration from the first connection) or keep (unchanged). resetTraffic zeroes usage and re-enables the client.',
+        body: '{\n  "emails": ["alice", "bob"],\n  "planId": 1,\n  "start": "now",\n  "resetTraffic": true\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 2\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/unassign',
+        summary:
+          'Take clients off their plan. Their current quota, expiry and inbounds stay as they are.',
+        body: '{\n  "emails": ["alice"]\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/renew',
+        summary:
+          'Renew clients on their plan: the expiry moves forward by the plan duration from the later of now and the current expiry, usage is zeroed and the client is re-enabled. Fails for a client with no plan.',
+        body: '{\n  "emails": ["alice"]\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
+      },
+    ],
+  },
+
+  {
+    id: 'traffic',
+    title: 'Traffic',
+    description:
+      'Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/traffic/overview',
+        summary:
+          'Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.',
+        responseSchema: 'TrafficOverview',
+      },
+    ],
+  },
   {
     id: 'backup',
     title: 'Backup',

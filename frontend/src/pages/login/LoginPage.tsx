@@ -24,6 +24,7 @@ import {
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { HttpUtil, LanguageManager } from '@/utils';
+import { PANEL_NAME } from '@/lib/brand';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { setMessageInstance } from '@/utils/messageBus';
 import SponsorSlot from '@/components/sponsor/SponsorSlot';
@@ -138,7 +139,6 @@ export default function LoginPage() {
           <div className="login-toolbar">
             <Button
               id="login-theme-cycle"
-              shape="circle"
               size="large"
               className="toolbar-btn"
               aria-label={t('menu.theme')}
@@ -163,7 +163,6 @@ export default function LoginPage() {
               }
             >
               <Button
-                shape="circle"
                 size="large"
                 className="toolbar-btn"
                 aria-label={t('pages.settings.language')}
@@ -180,7 +179,7 @@ export default function LoginPage() {
             ) : (
               <div className="login-card">
                 <div className="brand">
-                  <span className="brand-name">3X-UI</span>
+                  <span className="brand-name">{PANEL_NAME}</span>
                   <span className="brand-accent" aria-hidden="true" />
                 </div>
                 <h2 className="welcome">

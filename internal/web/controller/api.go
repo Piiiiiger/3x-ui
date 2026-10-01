@@ -115,6 +115,9 @@ var nodeSyncScopeAllow = map[string]map[string]struct{}{
 	"/server/clientIps":            {http.MethodGet: {}, http.MethodPost: {}},
 	"/clients/clientIpsByGuid":     {http.MethodPost: {}},
 	"/hosts/list":                  {http.MethodGet: {}},
+	"/clients/bulkResetTraffic":    {http.MethodPost: {}},
+	"/clients/activeInbounds":      {http.MethodPost: {}},
+	"/inbounds/:id/subSortIndex":   {http.MethodPost: {}},
 }
 
 // enforceTokenScope applies explicit allowlists to monitor and node-sync tokens.
@@ -198,6 +201,13 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")
 	a.hostController = NewHostController(hosts)
+
+	// Plans API — reusable limit sets stamped onto clients
+	plans := api.Group("/plans")
+	NewPlanController(plans)
+
+	traffic := api.Group("/traffic")
+	NewTrafficController(traffic)
 
 	// Settings + Xray config management live under the API surface too, so the
 	// same API token drives them. Paths are /panel/api/setting/* and

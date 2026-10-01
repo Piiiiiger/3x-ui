@@ -5,6 +5,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   InfoCircleOutlined,
+  KeyOutlined,
   QrcodeOutlined,
   RetweetOutlined,
 } from '@ant-design/icons';
@@ -17,20 +18,22 @@ const ICON_BUTTON_STYLE = { fontSize: 16 } as const;
 interface ClientRowActionsProps {
   email: string;
   onShowQr: (email: string) => void;
+  onPortal: (email: string) => void;
   onShowInfo: (email: string) => void;
   onResetTraffic: (email: string) => void;
   onEdit: (email: string) => void;
   onDelete: (email: string) => void;
 }
 
-// Five Tooltip-wrapped buttons per row, none of which depend on traffic. Left
+// Six Tooltip-wrapped buttons per row, none of which depend on traffic. Left
 // inline they re-ran rc-tooltip's alignment machinery for every visible row on
-// every traffic push — 125 Tooltips on a 25-row page, five seconds apart.
+// every traffic push — 150 Tooltips on a 25-row page, five seconds apart.
 // Keyed on the email rather than the row object, because a push replaces the row
 // object of every client whose counters moved; the page resolves the live row.
 export const ClientRowActions = memo(function ClientRowActions({
   email,
   onShowQr,
+  onPortal,
   onShowInfo,
   onResetTraffic,
   onEdit,
@@ -47,6 +50,16 @@ export const ClientRowActions = memo(function ClientRowActions({
           icon={<QrcodeOutlined />}
           aria-label={t('pages.clients.qrCode')}
           onClick={() => onShowQr(email)}
+        />
+      </Tooltip>
+      <Tooltip title={t('pages.clients.portal.title')}>
+        <Button
+          size="small"
+          type="text"
+          style={ICON_BUTTON_STYLE}
+          icon={<KeyOutlined />}
+          aria-label={t('pages.clients.portal.title')}
+          onClick={() => onPortal(email)}
         />
       </Tooltip>
       <Tooltip title={t('pages.clients.clientInfo')}>

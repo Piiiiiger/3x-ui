@@ -1647,6 +1647,52 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AttentionClient": {
+    "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
+    "properties": {
+      "email": {
+        "example": "alice",
+        "type": "string"
+      },
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "expiryTime": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "planId": {
+        "example": 1,
+        "type": "integer"
+      },
+      "status": {
+        "example": "expiring",
+        "type": "string"
+      },
+      "totalGB": {
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "used": {
+        "example": 53687091200,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "email",
+      "enable",
+      "expiryTime",
+      "planId",
+      "status",
+      "totalGB",
+      "used"
+    ],
+    "type": "object"
+  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {
@@ -1894,6 +1940,25 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ClientPortalStatus": {
+    "description": "ClientPortalStatus tells the admin whether a client can sign in to the portal.",
+    "properties": {
+      "enabled": {
+        "example": true,
+        "type": "boolean"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "enabled",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
   "ClientRecord": {
     "properties": {
       "adTag": {
@@ -1945,6 +2010,9 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "password": {
         "type": "string"
+      },
+      "planId": {
+        "type": "integer"
       },
       "preSharedKey": {
         "type": "string"
@@ -2016,6 +2084,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "limitHwid",
       "limitIp",
       "password",
+      "planId",
       "preSharedKey",
       "privateKey",
       "publicKey",
@@ -2183,6 +2252,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "limitIp": {
         "example": 0,
+        "type": "integer"
+      },
+      "planId": {
+        "example": 1,
         "type": "integer"
       },
       "reset": {
@@ -4132,6 +4205,246 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "Plan": {
+    "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
+    "properties": {
+      "clashRules": {
+        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
+      "createdAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "durationDays": {
+        "description": "0 = never expires",
+        "example": 30,
+        "type": "integer"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "sortIndex": {
+        "example": 0,
+        "type": "integer"
+      },
+      "totalGB": {
+        "description": "bytes, 0 = unlimited",
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "clashRules",
+      "createdAt",
+      "durationDays",
+      "id",
+      "limitIp",
+      "name",
+      "remark",
+      "sortIndex",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "PlanInbound": {
+    "description": "PlanInbound is the plan-to-inbound join: the servers a plan grants its members.",
+    "properties": {
+      "inboundId": {
+        "type": "integer"
+      },
+      "planId": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "inboundId",
+      "planId"
+    ],
+    "type": "object"
+  },
+  "PlanInput": {
+    "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
+    "properties": {
+      "clashRules": {
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
+      "durationDays": {
+        "example": 30,
+        "type": "integer"
+      },
+      "inboundIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "totalGB": {
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "clashRules",
+      "durationDays",
+      "inboundIds",
+      "limitIp",
+      "name",
+      "remark",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay"
+    ],
+    "type": "object"
+  },
+  "PlanSummary": {
+    "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
+    "properties": {
+      "clashRules": {
+        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
+      "createdAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "durationDays": {
+        "description": "0 = never expires",
+        "example": 30,
+        "type": "integer"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "inboundIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "memberCount": {
+        "example": 4,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "sortIndex": {
+        "example": 0,
+        "type": "integer"
+      },
+      "totalGB": {
+        "description": "bytes, 0 = unlimited",
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "clashRules",
+      "createdAt",
+      "durationDays",
+      "id",
+      "inboundIds",
+      "limitIp",
+      "memberCount",
+      "name",
+      "remark",
+      "sortIndex",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
   "ProbeResultUI": {
     "properties": {
       "cpuPct": {
@@ -4656,6 +4969,106 @@ export const SCHEMAS: Record<string, unknown> = {
       "IsOutbound",
       "Tag",
       "Up"
+    ],
+    "type": "object"
+  },
+  "TrafficDay": {
+    "description": "TrafficDay is the traffic all clients used on one day of the panel's time zone.",
+    "properties": {
+      "day": {
+        "example": "2026-10-01",
+        "type": "string"
+      },
+      "down": {
+        "example": 4194304,
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "day",
+      "down",
+      "up"
+    ],
+    "type": "object"
+  },
+  "TrafficOverview": {
+    "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+    "properties": {
+      "active": {
+        "example": 9,
+        "type": "integer"
+      },
+      "attention": {
+        "items": {
+          "$ref": "#/components/schemas/AttentionClient"
+        },
+        "type": "array"
+      },
+      "clients": {
+        "example": 12,
+        "type": "integer"
+      },
+      "daily": {
+        "items": {
+          "$ref": "#/components/schemas/TrafficDay"
+        },
+        "type": "array"
+      },
+      "disabled": {
+        "example": 1,
+        "type": "integer"
+      },
+      "expired": {
+        "example": 1,
+        "type": "integer"
+      },
+      "expiring": {
+        "example": 2,
+        "type": "integer"
+      },
+      "quotaBytes": {
+        "example": 1099511627776,
+        "format": "int64",
+        "type": "integer"
+      },
+      "remainingBytes": {
+        "example": 884763262976,
+        "format": "int64",
+        "type": "integer"
+      },
+      "unlimited": {
+        "example": 2,
+        "type": "integer"
+      },
+      "usedBytes": {
+        "example": 322122547200,
+        "format": "int64",
+        "type": "integer"
+      },
+      "usedUp": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "attention",
+      "clients",
+      "daily",
+      "disabled",
+      "expired",
+      "expiring",
+      "quotaBytes",
+      "remainingBytes",
+      "unlimited",
+      "usedBytes",
+      "usedUp"
     ],
     "type": "object"
   },

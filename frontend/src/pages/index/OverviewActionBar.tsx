@@ -197,7 +197,6 @@ export default function OverviewActionBar({
             {group.map((action) => (
               <Button
                 key={action.key}
-                type={action.primary ? undefined : 'text'}
                 color={action.primary ? 'primary' : undefined}
                 variant={action.primary ? 'outlined' : undefined}
                 size={size}
