@@ -431,6 +431,25 @@ func (s *SettingService) saveSetting(key string, value string) error {
 	return db.Save(setting).Error
 }
 
+// saveSettingsTogether writes several settings in one transaction, so a
+// failure part-way never leaves a set that only makes sense as a whole half-saved.
+func saveSettingsTogether(values map[string]string) error {
+	return database.GetDB().Transaction(func(tx *gorm.DB) error {
+		for key, value := range values {
+			result := tx.Model(&model.Setting{}).Where("key = ?", key).Update("value", value)
+			if result.Error != nil {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				if err := tx.Create(&model.Setting{Key: key, Value: value}).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
+
 func (s *SettingService) getString(key string) (string, error) {
 	setting, err := s.getSetting(key)
 	if database.IsNotFound(err) {

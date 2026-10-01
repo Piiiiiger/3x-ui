@@ -12,10 +12,6 @@ import (
 	"strings"
 	"sync"
 
-	"gorm.io/gorm"
-
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
@@ -142,24 +138,10 @@ func (s *SettingService) EnsureMasterClientCert() (crypto.CertKeyPEM, error) {
 }
 
 func saveMasterClientCredential(client crypto.CertKeyPEM, pin string) error {
-	values := map[string]string{
+	return saveSettingsTogether(map[string]string{
 		settingNodeMtlsClientCert: string(client.CertPEM),
 		settingNodeMtlsClientKey:  string(client.KeyPEM),
 		settingNodeMtlsClientPin:  pin,
-	}
-	return database.GetDB().Transaction(func(tx *gorm.DB) error {
-		for key, value := range values {
-			result := tx.Model(&model.Setting{}).Where("key = ?", key).Update("value", value)
-			if result.Error != nil {
-				return result.Error
-			}
-			if result.RowsAffected == 0 {
-				if err := tx.Create(&model.Setting{Key: key, Value: value}).Error; err != nil {
-					return err
-				}
-			}
-		}
-		return nil
 	})
 }
 
