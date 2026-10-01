@@ -42,6 +42,7 @@ import {
 
 import { HttpUtil } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
+import { PANEL_NAME } from '@/lib/brand';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAllSettings } from '@/api/queries/useAllSettings';
@@ -320,7 +321,7 @@ export default function AppNav() {
     <>
       <header className="app-nav">
         <Link to="/" className="app-nav-brand">
-          3<span className="brand-x">X</span>-UI
+          {PANEL_NAME}
         </Link>
         {!navCollapsed && (
           <Menu
@@ -412,9 +413,7 @@ export default function AppNav() {
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
-          <span className="drawer-brand">
-            3<span className="brand-x">X</span>-UI
-          </span>
+          <span className="drawer-brand">{PANEL_NAME}</span>
           <div className="drawer-header-actions">
             <a
               href={DOCS_URL}

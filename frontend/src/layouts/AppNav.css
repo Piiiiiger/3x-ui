@@ -32,13 +32,6 @@
   color: var(--ant-color-primary-hover);
 }
 
-.brand-x {
-  background: linear-gradient(135deg, #f18c6e 10%, #f59e0b 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 /* Page buttons: each item carries a raised square pill; the current page is
    filled with the accent tint, like 妙妙屋X's active tab. */
 .app-nav-menu.ant-menu-horizontal {

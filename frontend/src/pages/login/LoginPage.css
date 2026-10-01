@@ -141,14 +141,7 @@
   font-size: 30px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: var(--color-text);
-}
-
-.brand-x {
-  background: linear-gradient(135deg, #f18c6e 10%, #f59e0b 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-accent);
 }
 
 .brand-accent {

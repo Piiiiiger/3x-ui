@@ -42,6 +42,7 @@ import { activateOnKey } from '@/utils/a11y';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import { useAllSettings } from '@/api/queries/useAllSettings';
 import { THEME_CSS_VAR_SCOPE, useTheme } from '@/hooks/useTheme';
+import { PANEL_NAME } from '@/lib/brand';
 import type { ClientRecord, InboundOption } from '@/schemas/client';
 import { commandPaletteStore, useCommandPalette } from './useCommandPalette';
 import './CommandPalette.css';
@@ -808,7 +809,7 @@ export default function CommandPalette() {
                 {t('close')}
               </span>
             </div>
-            <span>3x-ui Command Palette</span>
+            <span>{PANEL_NAME} Command Palette</span>
           </div>
         </div>
       </div>

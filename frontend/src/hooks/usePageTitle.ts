@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
+import { PANEL_NAME } from '@/lib/brand';
+
 const TITLE_KEYS: Record<string, string> = {
   '/': 'menu.dashboard',
   '/inbounds': 'menu.inbounds',
@@ -23,7 +25,7 @@ export function usePageTitle() {
 
   useEffect(() => {
     const key = TITLE_KEYS[pathname];
-    const title = key ? t(key) : '3X-UI';
+    const title = key ? t(key) : PANEL_NAME;
     const host = window.location.hostname;
     document.title = host ? `${host} - ${title}` : title;
   }, [pathname, t]);
