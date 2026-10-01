@@ -77,6 +77,10 @@ build-fe: ## Build the Vite bundles into internal/web/dist
 build: build-fe ## Build the frontend then the Go binary
 	go build ./...
 
+.PHONY: build-agent
+build-agent: ## Build pigger-agent (static, no cgo) into ./pigger-agent
+	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$$(git describe --tags --always --dirty)" -o pigger-agent ./cmd/pigger-agent
+
 .PHONY: build-storybook
 build-storybook: ## Build the static Storybook (compile-checks all stories)
 	cd $(FRONTEND) && npm run build-storybook
