@@ -5,6 +5,7 @@
 .settings-page,
 .nodes-page,
 .groups-page,
+.plans-page,
 .api-docs-page,
 .sponsors-page {
   --bg-page: #fdfaf8;
@@ -27,6 +28,7 @@
 .settings-page.is-dark,
 .nodes-page.is-dark,
 .groups-page.is-dark,
+.plans-page.is-dark,
 .api-docs-page.is-dark,
 .sponsors-page.is-dark {
   --bg-page: #0d1018;
@@ -46,6 +48,7 @@
 .settings-page.is-dark.is-ultra,
 .nodes-page.is-dark.is-ultra,
 .groups-page.is-dark.is-ultra,
+.plans-page.is-dark.is-ultra,
 .api-docs-page.is-dark.is-ultra,
 .sponsors-page.is-dark.is-ultra {
   --bg-page: #000;
@@ -64,6 +67,7 @@
 .settings-page::before,
 .nodes-page::before,
 .groups-page::before,
+.plans-page::before,
 .api-docs-page::before,
 .sponsors-page::before,
 .hosts-page::before {
@@ -91,7 +95,9 @@
 .nodes-page .ant-layout,
 .nodes-page .ant-layout-content,
 .groups-page .ant-layout,
+.plans-page .ant-layout,
 .groups-page .ant-layout-content,
+.plans-page .ant-layout-content,
 .api-docs-page .ant-layout,
 .api-docs-page .ant-layout-content {
   background: transparent;
@@ -104,6 +110,7 @@
 .settings-page .content-shell,
 .nodes-page .content-shell,
 .groups-page .content-shell,
+.plans-page .content-shell,
 .api-docs-page .content-shell {
   background: transparent;
 }
@@ -114,7 +121,8 @@
 .xray-page .content-area,
 .settings-page .content-area,
 .nodes-page .content-area,
-.groups-page .content-area {
+.groups-page .content-area,
+.plans-page .content-area {
   padding: 24px;
 }
 
@@ -126,6 +134,7 @@
 .settings-page .content-area,
 .nodes-page .content-area,
 .groups-page .content-area,
+.plans-page .content-area,
 .api-docs-page .content-area,
 .hosts-page .content-area,
 .sponsors-page .content-area {
@@ -138,7 +147,8 @@
   .clients-page .content-area,
   .inbounds-page .content-area,
   .nodes-page .content-area,
-  .groups-page .content-area {
+  .groups-page .content-area,
+  .plans-page .content-area {
     padding: 8px;
   }
 }
@@ -232,7 +242,8 @@ body.dark .ant-dropdown-menu-item-divider {
 .clients-page .summary-card,
 .inbounds-page .summary-card,
 .nodes-page .summary-card,
-.groups-page .summary-card {
+.groups-page .summary-card,
+.plans-page .summary-card {
   padding: 16px;
 }
 
@@ -240,7 +251,8 @@ body.dark .ant-dropdown-menu-item-divider {
   .clients-page .summary-card,
   .inbounds-page .summary-card,
   .nodes-page .summary-card,
-  .groups-page .summary-card {
+  .groups-page .summary-card,
+  .plans-page .summary-card {
     padding: 8px;
   }
 }

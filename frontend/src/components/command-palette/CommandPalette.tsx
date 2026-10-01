@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ConfigProvider, Tag, Tooltip, message } from 'antd';
 import {
-  ApiOutlined,
   ApartmentOutlined,
+  ApiOutlined,
   CheckCircleFilled,
   ClockCircleOutlined,
   CloseCircleFilled,
@@ -26,6 +26,7 @@ import {
   MessageOutlined,
   MoonOutlined,
   PlusOutlined,
+  ProfileOutlined,
   ReloadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -377,6 +378,12 @@ export default function CommandPalette() {
         title: t('menu.groups'),
         keywords: ['groups', 'tags', 'batch'],
         icon: <TagsOutlined />,
+      },
+      {
+        path: '/plans',
+        title: t('menu.plans'),
+        keywords: ['plans', 'packages', 'quota', 'renew', '套餐'],
+        icon: <ProfileOutlined />,
       },
       {
         path: '/nodes',

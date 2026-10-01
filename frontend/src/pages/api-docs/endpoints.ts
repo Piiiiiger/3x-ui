@@ -1120,6 +1120,13 @@ export const sections: readonly Section[] = [
             desc: 'CSV group names, matched case-insensitively after trimming. Values are ORed.',
             optional: true,
           },
+          {
+            name: 'plan',
+            in: 'query',
+            type: 'string',
+            desc: 'CSV plan ids; 0 matches clients on no plan. Values are ORed.',
+            optional: true,
+          },
         ],
         responseSchema: 'ClientPageResponse',
       },
@@ -1878,6 +1885,71 @@ export const sections: readonly Section[] = [
         path: '/panel/api/hosts/bulk/del',
         summary: 'Delete many host groups in one call.',
         body: '{\n  "ids": ["abc-123", "def-456"]\n}',
+      },
+    ],
+  },
+
+  {
+    id: 'plans',
+    title: 'Plans',
+    description:
+      'Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/plans/list',
+        summary: 'List every plan with the inbounds it grants and how many clients use it.',
+        responseSchema: 'PlanSummary',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/add',
+        summary:
+          'Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist.',
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "inboundIds": [1, 2]\n}',
+        responseSchema: 'Plan',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/update/:id',
+        summary:
+          'Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
+        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/del/:id',
+        summary:
+          'Delete a plan. Refused while any client is on it — move or unassign those clients first.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
+        response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/assign',
+        summary:
+          'Put clients on a plan. Each gets the plan quota, IP limit and reset schedule, and exactly the plan inbounds. start sets the expiry: now (duration from now), firstUse (duration from the first connection) or keep (unchanged). resetTraffic zeroes usage and re-enables the client.',
+        body: '{\n  "emails": ["alice", "bob"],\n  "planId": 1,\n  "start": "now",\n  "resetTraffic": true\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 2\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/unassign',
+        summary:
+          'Take clients off their plan. Their current quota, expiry and inbounds stay as they are.',
+        body: '{\n  "emails": ["alice"]\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/renew',
+        summary:
+          'Renew clients on their plan: the expiry moves forward by the plan duration from the later of now and the current expiry, usage is zeroed and the client is re-enabled. Fails for a client with no plan.',
+        body: '{\n  "emails": ["alice"]\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
       },
     ],
   },

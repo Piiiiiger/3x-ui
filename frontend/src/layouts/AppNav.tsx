@@ -29,6 +29,7 @@ import {
   MessageOutlined,
   MoonFilled,
   MoonOutlined,
+  ProfileOutlined,
   ReadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -68,6 +69,7 @@ type IconName =
   | 'inbound'
   | 'team'
   | 'groups'
+  | 'plans'
   | 'setting'
   | 'tool'
   | 'cluster'
@@ -83,6 +85,7 @@ const iconByName: Record<IconName, ComponentType> = {
   inbound: ImportOutlined,
   team: TeamOutlined,
   groups: TagsOutlined,
+  plans: ProfileOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
@@ -128,6 +131,7 @@ export default function AppNav() {
       { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
+      { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },

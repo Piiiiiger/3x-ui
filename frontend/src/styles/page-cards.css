@@ -5,6 +5,7 @@
 .settings-page .ant-card,
 .nodes-page .ant-card,
 .groups-page .ant-card,
+.plans-page .ant-card,
 .api-docs-page .ant-card,
 .hosts-page .ant-card {
   border-radius: var(--ant-border-radius-lg);
@@ -24,6 +25,7 @@
 .settings-page .ant-card.ant-card-hoverable:hover,
 .nodes-page .ant-card.ant-card-hoverable:hover,
 .groups-page .ant-card.ant-card-hoverable:hover,
+.plans-page .ant-card.ant-card-hoverable:hover,
 .api-docs-page .ant-card.ant-card-hoverable:hover,
 .hosts-page .ant-card.ant-card-hoverable:hover {
   cursor: default;
@@ -39,6 +41,7 @@
   .settings-page .ant-card.ant-card-hoverable:hover,
   .nodes-page .ant-card.ant-card-hoverable:hover,
   .groups-page .ant-card.ant-card-hoverable:hover,
+  .plans-page .ant-card.ant-card-hoverable:hover,
   .api-docs-page .ant-card.ant-card-hoverable:hover,
   .hosts-page .ant-card.ant-card-hoverable:hover {
     transform: none;
@@ -52,6 +55,7 @@
 .settings-page .ant-card .ant-card-actions,
 .nodes-page .ant-card .ant-card-actions,
 .groups-page .ant-card .ant-card-actions,
+.plans-page .ant-card .ant-card-actions,
 .api-docs-page .ant-card .ant-card-actions,
 .hosts-page .ant-card .ant-card-actions {
   background: transparent;

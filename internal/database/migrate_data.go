@@ -59,6 +59,8 @@ func migrationModels() []any {
 		&model.NodePendingReset{},
 		&model.OutboundSubscription{},
 		&model.SubBalancer{},
+		&model.Plan{},
+		&model.PlanInbound{},
 	}
 }
 

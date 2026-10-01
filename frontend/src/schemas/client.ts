@@ -38,6 +38,7 @@ export const ClientRecordSchema = z
     tgId: z.union([z.number(), z.string()]).optional(),
     group: z.string().optional(),
     comment: z.string().optional(),
+    planId: z.number().int().optional(),
     enable: z.boolean().optional(),
     reset: z.number().optional(),
     resetDay: z.number().optional(),

@@ -466,6 +466,7 @@ export const EXAMPLES: Record<string, unknown> = {
         ],
         "limitHwid": 0,
         "limitIp": 0,
+        "planId": 1,
         "reset": 0,
         "resetDay": 0,
         "resetMax": 0,
@@ -513,6 +514,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "limitHwid": 0,
     "limitIp": 0,
     "password": "",
+    "planId": 0,
     "preSharedKey": "",
     "privateKey": "",
     "publicKey": "",
@@ -566,6 +568,7 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limitHwid": 0,
     "limitIp": 0,
+    "planId": 1,
     "reset": 0,
     "resetDay": 0,
     "resetMax": 0,
@@ -1023,6 +1026,54 @@ export const EXAMPLES: Record<string, unknown> = {
     "online": true,
     "tag": "inbound-51820",
     "up": 1048576
+  },
+  "Plan": {
+    "createdAt": 1735689600000,
+    "durationDays": 30,
+    "id": 1,
+    "limitIp": 0,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "sortIndex": 0,
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1,
+    "updatedAt": 1735689600000
+  },
+  "PlanInbound": {
+    "inboundId": 0,
+    "planId": 0
+  },
+  "PlanInput": {
+    "durationDays": 30,
+    "inboundIds": [
+      1,
+      2
+    ],
+    "limitIp": 0,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1
+  },
+  "PlanSummary": {
+    "createdAt": 1735689600000,
+    "durationDays": 30,
+    "id": 1,
+    "inboundIds": [
+      1,
+      2
+    ],
+    "limitIp": 0,
+    "memberCount": 4,
+    "name": "Monthly 100G",
+    "remark": "Hong Kong and Singapore",
+    "sortIndex": 0,
+    "totalGB": 107374182400,
+    "trafficReset": "monthly",
+    "trafficResetDay": 1,
+    "updatedAt": 1735689600000
   },
   "ProbeResultUI": {
     "cpuPct": 12.5,

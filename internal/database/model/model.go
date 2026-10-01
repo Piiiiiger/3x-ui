@@ -942,6 +942,7 @@ type ClientRecord struct {
 	TgID            int64  `json:"tgId" gorm:"column:tg_id;index:idx_clients_tg_id"`
 	Group           string `json:"group" gorm:"column:group_name;default:'';index:idx_client_record_group"`
 	Comment         string `json:"comment"`
+	PlanId          int    `json:"planId" gorm:"column:plan_id;default:0;index"`
 	Reset           int    `json:"reset" gorm:"default:0"`
 	ResetDay        int    `json:"resetDay" gorm:"column:reset_day;default:0"`
 	ResetWeekday    int    `json:"resetWeekday" gorm:"column:reset_weekday;default:0"`

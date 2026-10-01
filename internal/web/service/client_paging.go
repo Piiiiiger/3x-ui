@@ -30,6 +30,7 @@ type ClientSlim struct {
 	ResetWeekday int                 `json:"resetWeekday" example:"0"`
 	ResetMax     int                 `json:"resetMax" example:"0"`
 	Group        string              `json:"group,omitempty" example:"staff"`
+	PlanId       int                 `json:"planId,omitempty" example:"1"`
 	Comment      string              `json:"comment,omitempty" example:"Primary device"`
 	InboundIds   []int               `json:"inboundIds" example:"[3,5]"`
 	Traffic      *xray.ClientTraffic `json:"traffic,omitempty"`
@@ -62,6 +63,8 @@ type ClientPageParams struct {
 	HasTgID    string `form:"hasTgId"`
 	HasComment string `form:"hasComment"`
 	Group      string `form:"group"`
+	// Plan takes plan ids; 0 matches clients on no plan.
+	Plan string `form:"plan"`
 }
 
 // ClientPageResponse is the shape returned by ListPaged. `Total` is the
@@ -265,6 +268,9 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 	}
 	if groups := parseCSVStrings(params.Group); len(groups) > 0 {
 		where("LOWER(TRIM(COALESCE(c.group_name, ''))) IN ?", groups)
+	}
+	if planIds := parsePlanFilter(params.Plan); len(planIds) > 0 {
+		where("COALESCE(c.plan_id, 0) IN ?", planIds)
 	}
 	return tx, narrowed
 }
@@ -611,6 +617,7 @@ func toClientSlim(c ClientWithAttachments) ClientSlim {
 		ResetWeekday: c.ResetWeekday,
 		ResetMax:     c.ResetMax,
 		Group:        c.Group,
+		PlanId:       c.PlanId,
 		Comment:      c.Comment,
 		InboundIds:   c.InboundIds,
 		Traffic:      c.Traffic,
@@ -664,6 +671,17 @@ func parseCSVStrings(raw string) []string {
 
 // parseCSVInts is parseCSVStrings for positive integer IDs; non-numeric or
 // non-positive entries are silently dropped.
+// parsePlanFilter keeps 0, unlike parseCSVInts: it stands for "on no plan".
+func parsePlanFilter(raw string) []int {
+	var ids []int
+	for _, p := range strings.Split(raw, ",") {
+		if n, err := strconv.Atoi(strings.TrimSpace(p)); err == nil && n >= 0 {
+			ids = append(ids, n)
+		}
+	}
+	return ids
+}
+
 func parseCSVInts(raw string) []int {
 	if raw == "" {
 		return nil

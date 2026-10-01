@@ -18,6 +18,10 @@ export const keys = {
     root: () => ['sub-balancers'] as const,
     list: () => ['sub-balancers', 'list'] as const,
   },
+  plans: {
+    root: () => ['plans'] as const,
+    list: () => ['plans', 'list'] as const,
+  },
   settings: {
     root: () => ['settings'] as const,
     all: () => ['settings', 'all'] as const,

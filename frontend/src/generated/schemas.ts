@@ -1946,6 +1946,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "password": {
         "type": "string"
       },
+      "planId": {
+        "type": "integer"
+      },
       "preSharedKey": {
         "type": "string"
       },
@@ -2016,6 +2019,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "limitHwid",
       "limitIp",
       "password",
+      "planId",
       "preSharedKey",
       "privateKey",
       "publicKey",
@@ -2183,6 +2187,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "limitIp": {
         "example": 0,
+        "type": "integer"
+      },
+      "planId": {
+        "example": 1,
         "type": "integer"
       },
       "reset": {
@@ -4129,6 +4137,229 @@ export const SCHEMAS: Record<string, unknown> = {
       "online",
       "tag",
       "up"
+    ],
+    "type": "object"
+  },
+  "Plan": {
+    "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
+    "properties": {
+      "createdAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "durationDays": {
+        "description": "0 = never expires",
+        "example": 30,
+        "type": "integer"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "sortIndex": {
+        "example": 0,
+        "type": "integer"
+      },
+      "totalGB": {
+        "description": "bytes, 0 = unlimited",
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "createdAt",
+      "durationDays",
+      "id",
+      "limitIp",
+      "name",
+      "remark",
+      "sortIndex",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "PlanInbound": {
+    "description": "PlanInbound is the plan-to-inbound join: the servers a plan grants its members.",
+    "properties": {
+      "inboundId": {
+        "type": "integer"
+      },
+      "planId": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "inboundId",
+      "planId"
+    ],
+    "type": "object"
+  },
+  "PlanInput": {
+    "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
+    "properties": {
+      "durationDays": {
+        "example": 30,
+        "type": "integer"
+      },
+      "inboundIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "totalGB": {
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "durationDays",
+      "inboundIds",
+      "limitIp",
+      "name",
+      "remark",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay"
+    ],
+    "type": "object"
+  },
+  "PlanSummary": {
+    "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
+    "properties": {
+      "createdAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "durationDays": {
+        "description": "0 = never expires",
+        "example": 30,
+        "type": "integer"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "inboundIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "memberCount": {
+        "example": 4,
+        "type": "integer"
+      },
+      "name": {
+        "example": "Monthly 100G",
+        "type": "string"
+      },
+      "remark": {
+        "example": "Hong Kong and Singapore",
+        "type": "string"
+      },
+      "sortIndex": {
+        "example": 0,
+        "type": "integer"
+      },
+      "totalGB": {
+        "description": "bytes, 0 = unlimited",
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "example": "monthly",
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "example": 1,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "createdAt",
+      "durationDays",
+      "id",
+      "inboundIds",
+      "limitIp",
+      "memberCount",
+      "name",
+      "remark",
+      "sortIndex",
+      "totalGB",
+      "trafficReset",
+      "trafficResetDay",
+      "updatedAt"
     ],
     "type": "object"
   },

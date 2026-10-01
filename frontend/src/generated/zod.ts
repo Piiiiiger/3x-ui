@@ -6,6 +6,9 @@ export type GeoKind = z.infer<typeof GeoKindSchema>;
 export const OnlineAPISupportSchema = z.number().int();
 export type OnlineAPISupport = z.infer<typeof OnlineAPISupportSchema>;
 
+export const PlanStartSchema = z.string();
+export type PlanStart = z.infer<typeof PlanStartSchema>;
+
 export const ProcessStateSchema = z.string();
 export type ProcessState = z.infer<typeof ProcessStateSchema>;
 
@@ -495,6 +498,7 @@ export const ClientRecordSchema = z.object({
   limitHwid: z.number().int(),
   limitIp: z.number().int(),
   password: z.string(),
+  planId: z.number().int(),
   preSharedKey: z.string(),
   privateKey: z.string(),
   publicKey: z.string(),
@@ -553,6 +557,7 @@ export const ClientSlimSchema = z.object({
   inboundIds: z.array(z.number().int()),
   limitHwid: z.number().int(),
   limitIp: z.number().int(),
+  planId: z.number().int().optional(),
   reset: z.number().int(),
   resetDay: z.number().int(),
   resetMax: z.number().int(),
@@ -1001,6 +1006,56 @@ export const PeerActivitySchema = z.object({
   up: z.number().int(),
 });
 export type PeerActivity = z.infer<typeof PeerActivitySchema>;
+
+export const PlanSchema = z.object({
+  createdAt: z.number().int(),
+  durationDays: z.number().int(),
+  id: z.number().int(),
+  limitIp: z.number().int(),
+  name: z.string(),
+  remark: z.string(),
+  sortIndex: z.number().int(),
+  totalGB: z.number().int(),
+  trafficReset: z.string(),
+  trafficResetDay: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type Plan = z.infer<typeof PlanSchema>;
+
+export const PlanInboundSchema = z.object({
+  inboundId: z.number().int(),
+  planId: z.number().int(),
+});
+export type PlanInbound = z.infer<typeof PlanInboundSchema>;
+
+export const PlanInputSchema = z.object({
+  durationDays: z.number().int(),
+  inboundIds: z.array(z.number().int()),
+  limitIp: z.number().int(),
+  name: z.string(),
+  remark: z.string(),
+  totalGB: z.number().int(),
+  trafficReset: z.string(),
+  trafficResetDay: z.number().int(),
+});
+export type PlanInput = z.infer<typeof PlanInputSchema>;
+
+export const PlanSummarySchema = z.object({
+  createdAt: z.number().int(),
+  durationDays: z.number().int(),
+  id: z.number().int(),
+  inboundIds: z.array(z.number().int()),
+  limitIp: z.number().int(),
+  memberCount: z.number().int(),
+  name: z.string(),
+  remark: z.string(),
+  sortIndex: z.number().int(),
+  totalGB: z.number().int(),
+  trafficReset: z.string(),
+  trafficResetDay: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type PlanSummary = z.infer<typeof PlanSummarySchema>;
 
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),

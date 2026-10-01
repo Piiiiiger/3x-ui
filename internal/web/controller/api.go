@@ -199,6 +199,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	hosts := api.Group("/hosts")
 	a.hostController = NewHostController(hosts)
 
+	// Plans API — reusable limit sets stamped onto clients
+	plans := api.Group("/plans")
+	NewPlanController(plans)
+
 	// Settings + Xray config management live under the API surface too, so the
 	// same API token drives them. Paths are /panel/api/setting/* and
 	// /panel/api/xray/*.

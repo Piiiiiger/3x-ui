@@ -35,11 +35,14 @@ import {
   DisconnectOutlined,
   DownloadOutlined,
   EditOutlined,
+  FieldTimeOutlined,
   FilterOutlined,
   InfoCircleOutlined,
   LinkOutlined,
+  MinusCircleOutlined,
   MoreOutlined,
   PlusOutlined,
+  ProfileOutlined,
   QrcodeOutlined,
   RestOutlined,
   RetweetOutlined,
@@ -61,6 +64,9 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useClients } from '@/hooks/useClients';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import { useHostsQuery } from '@/api/queries/useHostsQuery';
+import { usePlansQuery } from '@/api/queries/usePlansQuery';
+import { usePlanMutations } from '@/api/queries/usePlanMutations';
+import AssignPlanModal from '@/pages/plans/AssignPlanModal';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import type {
   ClientRecord,
@@ -235,6 +241,7 @@ function readFilterState(): PersistedFilterState {
         inboundIds: Array.isArray(fromRaw.inboundIds) ? fromRaw.inboundIds : [],
         nodeIds: Array.isArray(fromRaw.nodeIds) ? fromRaw.nodeIds : [],
         groups: Array.isArray(fromRaw.groups) ? fromRaw.groups : [],
+        plans: Array.isArray(fromRaw.plans) ? fromRaw.plans : [],
       },
       sort: typeof raw.sort === 'string' ? raw.sort : '',
       pageSize: typeof raw.pageSize === 'number' && raw.pageSize > 0 ? raw.pageSize : null,
@@ -437,8 +444,18 @@ export default function ClientsPage() {
   const [searchKey, setSearchKey] = useState(
     searchParam !== null ? searchParam : initial.searchKey,
   );
-  const [filters, setFilters] = useState<ClientFilters>(initial.filters);
+  // ?plan=<id> (the plans page links here) opens the list on that plan's people.
+  const planParam = searchParams.get('plan');
+  const [filters, setFilters] = useState<ClientFilters>(() =>
+    planParam !== null && /^\d+$/.test(planParam)
+      ? { ...initial.filters, plans: [Number(planParam)] }
+      : initial.filters,
+  );
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const { plans } = usePlansQuery();
+  const { renew: renewPlan, unassign: unassignPlan } = usePlanMutations();
+  const planNames = useMemo(() => new Map(plans.map((p) => [p.id, p.name])), [plans]);
+  const [planTarget, setPlanTarget] = useState<{ emails: string[]; planId?: number } | null>(null);
 
   const initialSort = SORT_OPTIONS.find((o) => o.value === initial.sort) ?? DEFAULT_SORT;
   const [sortColumn, setSortColumn] = useState<string | null>(initialSort.column);
@@ -528,6 +545,7 @@ export default function ClientsPage() {
       hasTgId: filters.hasTgId || undefined,
       hasComment: filters.hasComment || undefined,
       group: filters.groups.join(',') || undefined,
+      plan: filters.plans.join(',') || undefined,
       sort: sortColumn || undefined,
       order: sortOrder || undefined,
     });
@@ -930,6 +948,42 @@ export default function ClientsPage() {
     });
   }
 
+  function onBulkRenewPlan() {
+    const emails = [...selectedRowKeys];
+    if (emails.length === 0) return;
+    modal.confirm({
+      title: t('pages.plans.renewConfirm', { count: emails.length }),
+      content: t('pages.plans.renewHint'),
+      okText: t('confirm'),
+      cancelText: t('cancel'),
+      onOk: async () => {
+        const msg = await renewPlan(emails);
+        if (msg?.success) {
+          setSelectedRowKeys([]);
+          messageApi.success(t('pages.plans.toasts.renewed', { count: emails.length }));
+        }
+      },
+    });
+  }
+
+  function onBulkUnassignPlan() {
+    const emails = [...selectedRowKeys];
+    if (emails.length === 0) return;
+    modal.confirm({
+      title: t('pages.plans.unassignConfirm', { count: emails.length }),
+      okText: t('confirm'),
+      okType: 'danger',
+      cancelText: t('cancel'),
+      onOk: async () => {
+        const msg = await unassignPlan(emails);
+        if (msg?.success) {
+          setSelectedRowKeys([]);
+          messageApi.success(t('pages.plans.toasts.unassigned', { count: emails.length }));
+        }
+      },
+    });
+  }
+
   function onBulkSetEnable(enable: boolean) {
     const emails = [...selectedRowKeys];
     if (emails.length === 0) return;
@@ -1153,6 +1207,27 @@ export default function ClientsPage() {
               }}
             >
               {record.group}
+            </Tag>
+          );
+        },
+      },
+      {
+        title: t('menu.plans'),
+        key: 'plan',
+        width: 130,
+        hidden: plans.length === 0,
+        render: (_v, record) => {
+          const name = record.planId ? planNames.get(record.planId) : undefined;
+          return (
+            <Tag
+              color={name ? 'volcano' : undefined}
+              style={{ margin: 0, cursor: 'pointer', borderStyle: name ? undefined : 'dashed' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPlanTarget({ emails: [record.email], planId: record.planId || undefined });
+              }}
+            >
+              {name ?? t('pages.plans.noPlan')}
             </Tag>
           );
         },
@@ -1444,6 +1519,31 @@ export default function ClientsPage() {
                                         danger: true,
                                         onClick: onBulkUngroup,
                                       },
+                                      ...(plans.length > 0
+                                        ? [
+                                            { type: 'divider' as const },
+                                            {
+                                              key: 'assignPlan',
+                                              icon: <ProfileOutlined />,
+                                              label: t('pages.plans.assign'),
+                                              onClick: () =>
+                                                setPlanTarget({ emails: [...selectedRowKeys] }),
+                                            },
+                                            {
+                                              key: 'renewPlan',
+                                              icon: <FieldTimeOutlined />,
+                                              label: t('pages.plans.renew'),
+                                              onClick: onBulkRenewPlan,
+                                            },
+                                            {
+                                              key: 'unassignPlan',
+                                              icon: <MinusCircleOutlined />,
+                                              label: t('pages.plans.unassign'),
+                                              danger: true,
+                                              onClick: onBulkUnassignPlan,
+                                            },
+                                          ]
+                                        : []),
                                       { type: 'divider' as const },
                                       {
                                         key: 'enable',
@@ -1644,6 +1744,22 @@ export default function ClientsPage() {
                               }
                             >
                               {t('pages.clients.group')}: {g}
+                            </Tag>
+                          ))}
+                          {filters.plans.map((id) => (
+                            <Tag
+                              key={`p-${id}`}
+                              closable
+                              color="volcano"
+                              onClose={() =>
+                                setFilters({
+                                  ...filters,
+                                  plans: filters.plans.filter((x) => x !== id),
+                                })
+                              }
+                            >
+                              {t('menu.plans')}:{' '}
+                              {id === 0 ? t('pages.plans.noPlan') : (planNames.get(id) ?? `#${id}`)}
                             </Tag>
                           ))}
                           {(filters.expiryFrom || filters.expiryTo) && (
@@ -2028,8 +2144,17 @@ export default function ClientsPage() {
             protocols={protocolOptions}
             groups={groupOptions}
             nodes={nodes}
+            plans={plans}
           />
         </LazyMount>
+        <AssignPlanModal
+          open={planTarget !== null}
+          plans={plans}
+          emails={planTarget?.emails ?? []}
+          planId={planTarget?.planId}
+          onClose={() => setPlanTarget(null)}
+          onAssigned={() => setSelectedRowKeys([])}
+        />
         <LazyMount when={textOpen}>
           <TextModal
             open={textOpen}
