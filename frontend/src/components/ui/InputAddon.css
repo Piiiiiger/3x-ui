@@ -7,7 +7,7 @@
   line-height: 30px;
   background-color: var(--ant-color-fill-tertiary);
   border: 1px solid var(--ant-color-border);
-  border-radius: 6px;
+  border-radius: var(--ant-border-radius);
   position: relative;
   z-index: 1;
   color: var(--ant-color-text);

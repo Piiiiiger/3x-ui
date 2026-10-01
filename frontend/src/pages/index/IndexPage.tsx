@@ -230,7 +230,6 @@ export default function IndexPage() {
                       icon={<DashboardOutlined />}
                       label={t('pages.index.cpu')}
                       percent={status.cpu.percent}
-                      statusColor={status.cpu.color}
                       detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
                       footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
                       footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
@@ -241,7 +240,6 @@ export default function IndexPage() {
                       icon={<DatabaseOutlined />}
                       label={t('pages.index.memory')}
                       percent={status.mem.percent}
-                      statusColor={status.mem.color}
                       detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
                       footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
                       footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
@@ -252,7 +250,6 @@ export default function IndexPage() {
                       icon={<SwapOutlined />}
                       label={t('pages.index.swap')}
                       percent={status.swap.percent}
-                      statusColor={status.swap.color}
                       detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
                       footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
                       footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
@@ -263,7 +260,6 @@ export default function IndexPage() {
                       icon={<HddOutlined />}
                       label={t('pages.index.storage')}
                       percent={status.disk.percent}
-                      statusColor={status.disk.color}
                       detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
                       footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
                       footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}

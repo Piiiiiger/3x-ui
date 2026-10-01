@@ -1,6 +1,6 @@
 .qr-panel {
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   padding: 10px;
   margin-bottom: 10px;
   display: flex;
@@ -28,7 +28,7 @@
 .qr-panel-canvas .qr-code {
   cursor: pointer;
   background: #fff;
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   line-height: 0;
 }
 

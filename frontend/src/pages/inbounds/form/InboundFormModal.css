@@ -16,7 +16,7 @@
 .advanced-panel {
   padding: 14px;
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 12px;
+  border-radius: var(--ant-border-radius-lg);
   background: var(--ant-color-fill-quaternary);
 }
 
@@ -53,7 +53,7 @@
 @media (max-width: 768px) {
   .advanced-panel {
     padding: 12px;
-    border-radius: 10px;
+    border-radius: var(--ant-border-radius-lg);
   }
 
   .advanced-inner-tabs .ant-tabs-tab {

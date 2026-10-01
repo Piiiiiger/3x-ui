@@ -3,13 +3,13 @@ import type { ReactNode } from 'react';
 import { Card, theme } from 'antd';
 
 import { Sparkline } from '@/components/viz';
+import { usageTierColor } from '@/models/status';
 import { mean, peak } from './useOverviewHistory';
 
 interface VitalTileProps {
   icon: ReactNode;
   label: string;
   percent: number;
-  statusColor: string;
   detail: string;
   footLeft: string;
   footRight: string;
@@ -21,7 +21,6 @@ export default function VitalTile({
   icon,
   label,
   percent,
-  statusColor,
   detail,
   footLeft,
   footRight,
@@ -30,6 +29,7 @@ export default function VitalTile({
 }: VitalTileProps) {
   const { token } = theme.useToken();
   const meanColor = token.colorTextTertiary;
+  const statusColor = usageTierColor(percent, token.colorPrimary);
 
   const referenceLines = useMemo(
     () => (data.length > 1 ? [{ y: mean(data), dash: '3 4', color: meanColor }] : []),

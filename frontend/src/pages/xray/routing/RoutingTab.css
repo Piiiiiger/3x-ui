@@ -32,7 +32,7 @@
   padding: 2px 6px;
   font-size: 12px;
   color: var(--ant-color-text-tertiary);
-  border-radius: 4px;
+  border-radius: var(--ant-border-radius-sm);
   background: var(--ant-color-fill-tertiary);
   max-width: 100%;
   overflow: hidden;
@@ -107,7 +107,7 @@
 .criterion-more {
   font-size: 11px;
   padding: 0 5px;
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   background: var(--ant-color-fill-tertiary);
 }
 
@@ -140,7 +140,7 @@
   padding: 10px 12px;
   background: var(--bg-card, #fff);
   border: 1px solid var(--ant-color-border);
-  border-radius: 8px;
+  border-radius: var(--ant-border-radius-lg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition:
     opacity 0.15s,
@@ -239,7 +239,7 @@
   padding: 1px 6px;
   font-size: 11px;
   background: var(--ant-color-fill-tertiary);
-  border-radius: 4px;
+  border-radius: var(--ant-border-radius-sm);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
