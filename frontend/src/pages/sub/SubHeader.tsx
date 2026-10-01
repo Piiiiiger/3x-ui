@@ -74,7 +74,6 @@ export default function SubHeader({ title, sId, email, lang, onLangChange }: Sub
       <div className="sub-toolbar">
         <Button
           id="sub-theme-cycle"
-          shape="circle"
           size="large"
           className="toolbar-btn"
           aria-label={t('menu.theme')}
@@ -99,7 +98,6 @@ export default function SubHeader({ title, sId, email, lang, onLangChange }: Sub
           }
         >
           <Button
-            shape="circle"
             size="large"
             className="toolbar-btn"
             aria-label={t('pages.settings.language')}

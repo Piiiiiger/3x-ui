@@ -60,20 +60,20 @@ const apps = buildSubApps({ subUrl, sId, subTitle });
 const initialPlatform = detectPlatform(navigator.userAgent);
 const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
 
-// The sub page runs its own violet accent, so every antd control on it picks the
-// hue up instead of the panel blue useTheme pins. Mirrored in SubPage.css.
+// The sub page pins the AA-safe coral shades (deeper than the panel's decorative
+// coral in light mode) so its text-heavy controls stay readable. Mirrored in SubPage.css.
 const ACCENT = {
   light: {
-    primary: '#7c3aed',
-    hover: '#8b5cf6',
-    active: '#6d28d9',
-    rail: 'rgba(124, 58, 237, 0.16)',
+    primary: '#b5482d',
+    hover: '#c25236',
+    active: '#a4432d',
+    rail: 'rgba(217, 119, 87, 0.16)',
   },
   dark: {
-    primary: '#a78bfa',
-    hover: '#c4b5fd',
-    active: '#8b5cf6',
-    rail: 'rgba(167, 139, 250, 0.18)',
+    primary: '#f18c6e',
+    hover: '#f7b5a3',
+    active: '#d97757',
+    rail: 'rgba(241, 140, 110, 0.18)',
   },
 };
 

@@ -82,7 +82,6 @@ export function useOutboundColumns({
             <span className="row-index">{index + 1}</span>
             <div className="action-buttons">
               <Button
-                shape="circle"
                 size="small"
                 icon={<EditOutlined />}
                 aria-label={t('edit')}
@@ -147,12 +146,7 @@ export function useOutboundColumns({
                   ],
                 }}
               >
-                <Button
-                  shape="circle"
-                  size="small"
-                  icon={<MoreOutlined />}
-                  aria-label={t('more')}
-                />
+                <Button size="small" icon={<MoreOutlined />} aria-label={t('more')} />
               </Dropdown>
             </div>
           </div>
@@ -335,7 +329,6 @@ export function useOutboundColumns({
           >
             <Button
               type="primary"
-              shape="circle"
               loading={isTesting(outboundTestStates, record.key)}
               disabled={isUntestable(record) || isTesting(outboundTestStates, record.key)}
               icon={<ThunderboltOutlined />}

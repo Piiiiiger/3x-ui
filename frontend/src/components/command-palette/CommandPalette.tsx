@@ -41,7 +41,7 @@ import { ClipboardManager, HttpUtil, SizeFormatter } from '@/utils';
 import { activateOnKey } from '@/utils/a11y';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import { useAllSettings } from '@/api/queries/useAllSettings';
-import { useTheme } from '@/hooks/useTheme';
+import { THEME_CSS_VAR_SCOPE, useTheme } from '@/hooks/useTheme';
 import type { ClientRecord, InboundOption } from '@/schemas/client';
 import { commandPaletteStore, useCommandPalette } from './useCommandPalette';
 import './CommandPalette.css';
@@ -687,7 +687,7 @@ export default function CommandPalette() {
   return (
     <ConfigProvider theme={antdThemeConfig}>
       <div
-        className={`command-palette-backdrop ${themeModeClass}`}
+        className={`command-palette-backdrop ${THEME_CSS_VAR_SCOPE} ${themeModeClass}`}
         role="presentation"
         onClick={(e) => {
           if (e.target === e.currentTarget) close();

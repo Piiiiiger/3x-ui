@@ -138,7 +138,6 @@ export default function LoginPage() {
           <div className="login-toolbar">
             <Button
               id="login-theme-cycle"
-              shape="circle"
               size="large"
               className="toolbar-btn"
               aria-label={t('menu.theme')}
@@ -163,7 +162,6 @@ export default function LoginPage() {
               }
             >
               <Button
-                shape="circle"
                 size="large"
                 className="toolbar-btn"
                 aria-label={t('pages.settings.language')}
@@ -180,7 +178,9 @@ export default function LoginPage() {
             ) : (
               <div className="login-card">
                 <div className="brand">
-                  <span className="brand-name">3X-UI</span>
+                  <span className="brand-name">
+                    3<span className="brand-x">X</span>-UI
+                  </span>
                   <span className="brand-accent" aria-hidden="true" />
                 </div>
                 <h2 className="welcome">
