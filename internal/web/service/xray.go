@@ -1472,104 +1472,13 @@ func (s *XrayService) tryHotApply(process *xray.Process, newCfg *xray.Config) bo
 	}
 	defer hotAPI.Close()
 
-	// Removals first so changed handlers and port swaps never collide with
-	// the additions that follow.
-	for _, u := range diff.RemovedUsers {
-		if err := hotAPI.RemoveUser(u.Tag, u.Email); err != nil && !xray.IsMissingHandlerErr(err) {
-			logger.Info("hot apply: remove user [", u.Email, "] from [", u.Tag, "] failed:", err)
-			return false
-		}
-	}
-	for _, tag := range diff.RemovedInboundTags {
-		if err := hotAPI.DelInbound(tag); err != nil && !xray.IsMissingHandlerErr(err) {
-			logger.Info("hot apply: remove inbound [", tag, "] failed:", err)
-			return false
-		}
-	}
-	for _, tag := range diff.RemovedOutboundTags {
-		if err := hotAPI.DelOutbound(tag); err != nil && !xray.IsMissingHandlerErr(err) {
-			logger.Info("hot apply: remove outbound [", tag, "] failed:", err)
-			return false
-		}
-	}
-	for _, ob := range diff.AddedOutbounds {
-		if err := addOutboundReconciling(&hotAPI, ob); err != nil {
-			logger.Info("hot apply: add outbound failed:", err)
-			return false
-		}
-	}
-	for _, ib := range diff.AddedInbounds {
-		if err := addInboundReconciling(&hotAPI, ib); err != nil {
-			logger.Info("hot apply: add inbound failed:", err)
-			return false
-		}
-	}
-	for _, u := range diff.AddedUsers {
-		if err := addUserReconciling(&hotAPI, u); err != nil {
-			logger.Info("hot apply: add user [", u.Email, "] to [", u.Tag, "] failed:", err)
-			return false
-		}
-	}
-	if diff.RoutingConfig != nil {
-		if err := hotAPI.ApplyRoutingConfig(diff.RoutingConfig); err != nil {
-			logger.Info("hot apply: apply routing config failed:", err)
-			return false
-		}
+	if err := xray.ApplyHotDiff(&hotAPI, diff); err != nil {
+		logger.Info("hot apply:", err)
+		return false
 	}
 
 	process.SetConfig(newCfg)
 	return true
-}
-
-// addUserReconciling adds a user, and on an email conflict (the user was
-// already applied through the runtime API) replaces the existing user instead.
-func addUserReconciling(api *xray.XrayAPI, u xray.UserOp) error {
-	err := api.AddUser(u.Protocol, u.Tag, u.User)
-	if err == nil || !xray.IsUserExistsErr(err) {
-		return err
-	}
-	if delErr := api.RemoveUser(u.Tag, u.Email); delErr != nil && !xray.IsMissingHandlerErr(delErr) {
-		return delErr
-	}
-	return api.AddUser(u.Protocol, u.Tag, u.User)
-}
-
-// addInboundReconciling adds an inbound, and on a tag conflict (the handler
-// was already created through the runtime API while the stored snapshot was
-// stale) replaces the existing handler instead.
-func addInboundReconciling(api *xray.XrayAPI, inbound []byte) error {
-	err := api.AddInbound(inbound)
-	if err == nil || !xray.IsExistingTagErr(err) {
-		return err
-	}
-	var meta struct {
-		Tag string `json:"tag"`
-	}
-	if jsonErr := json.Unmarshal(inbound, &meta); jsonErr != nil || meta.Tag == "" {
-		return err
-	}
-	if delErr := api.DelInbound(meta.Tag); delErr != nil && !xray.IsMissingHandlerErr(delErr) {
-		return delErr
-	}
-	return api.AddInbound(inbound)
-}
-
-// addOutboundReconciling mirrors addInboundReconciling for outbounds.
-func addOutboundReconciling(api *xray.XrayAPI, outbound []byte) error {
-	err := api.AddOutbound(outbound)
-	if err == nil || !xray.IsExistingTagErr(err) {
-		return err
-	}
-	var meta struct {
-		Tag string `json:"tag"`
-	}
-	if jsonErr := json.Unmarshal(outbound, &meta); jsonErr != nil || meta.Tag == "" {
-		return err
-	}
-	if delErr := api.DelOutbound(meta.Tag); delErr != nil && !xray.IsMissingHandlerErr(delErr) {
-		return delErr
-	}
-	return api.AddOutbound(outbound)
 }
 
 // StopXray stops the running Xray process.
