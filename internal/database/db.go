@@ -91,6 +91,7 @@ func allModels() []any {
 		&model.ClientDailyTraffic{},
 		&model.ClientTrafficMark{},
 		&model.ClientPortalLogin{},
+		&model.ProbeLink{},
 	}
 }
 

@@ -209,6 +209,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	traffic := api.Group("/traffic")
 	NewTrafficController(traffic)
 
+	// Probe API — server status read from the Lite monitor on this host
+	probe := api.Group("/probe")
+	NewProbeController(probe)
+
 	// Settings + Xray config management live under the API surface too, so the
 	// same API token drives them. Paths are /panel/api/setting/* and
 	// /panel/api/xray/*.

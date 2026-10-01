@@ -2,6 +2,7 @@ package sub
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -57,6 +58,8 @@ type portalData struct {
 	Page  map[string]any       `json:"page"`
 	Plan  *portalPlan          `json:"plan"`
 	Daily []service.TrafficDay `json:"daily"`
+	// Probe offers the probe view: set when one of the client's hosts is linked.
+	Probe bool `json:"probe"`
 }
 
 func (a *SUBController) portalPath() string {
@@ -212,26 +215,36 @@ func (a *SUBController) portalLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
-func (a *SUBController) portalData(c *gin.Context) {
-	setNoCacheHeaders(c)
+// portalSessionClient returns the client the session cookie names. Without a
+// valid session it answers the request itself and reports false.
+func (a *SUBController) portalSessionClient(c *gin.Context) (*model.ClientRecord, bool) {
 	value, err := c.Cookie(portalCookieName)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
+		return nil, false
 	}
 	session, ok := a.readPortalSession(value, time.Now())
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
+		return nil, false
 	}
 	client, err := a.portalService.SessionClient(session.ClientId, session.Tag)
 	if errors.Is(err, service.ErrPortalLogin) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
+		return nil, false
 	}
 	if err != nil {
 		logger.Warning("portal: could not load the session's client:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "server"})
+		return nil, false
+	}
+	return client, true
+}
+
+func (a *SUBController) portalData(c *gin.Context) {
+	setNoCacheHeaders(c)
+	client, ok := a.portalSessionClient(c)
+	if !ok {
 		return
 	}
 
@@ -264,5 +277,28 @@ func (a *SUBController) portalData(c *gin.Context) {
 		logger.Warning("portal: could not load daily traffic:", err)
 		data.Daily = []service.TrafficDay{}
 	}
+	if data.Probe, err = a.probeService.ClientHasLinkedHost(client); err != nil {
+		logger.Warning("portal: could not check the client's probe links:", err)
+	}
 	c.JSON(http.StatusOK, data)
+}
+
+// portalProbe returns the status of the servers behind the signed-in client's
+// own inbounds; the page polls it while the probe view is open.
+func (a *SUBController) portalProbe(c *gin.Context) {
+	setNoCacheHeaders(c)
+	client, ok := a.portalSessionClient(c)
+	if !ok {
+		return
+	}
+	probe, err := a.probeService.ClientServers(c.Request.Context(), client)
+	if err != nil {
+		// A client that stopped waiting is not a fault worth a log line.
+		if !errors.Is(err, context.Canceled) {
+			logger.Warning("portal: could not load the client's servers:", err)
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server"})
+		return
+	}
+	c.JSON(http.StatusOK, probe)
 }

@@ -259,6 +259,10 @@ var defaultValueMap = map[string]string{
 	"discordMemory":        "80",
 	"discordLang":          "en-US",
 	"discordEnabledEvents": "login.attempt,cpu.high",
+	// Probe: the Lite monitor on this host and its public page. Hidden keys with
+	// their own validated endpoint, so a generic settings save cannot set them.
+	"probeLiteURL":       "",
+	"probeLitePublicURL": "",
 }
 
 // SettingService provides business logic for application settings management.

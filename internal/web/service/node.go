@@ -879,6 +879,12 @@ func (s *NodeService) Delete(id int) error {
 		if err := tx.Where("node_id = ?", id).Delete(&model.NodePendingReset{}).Error; err != nil {
 			return err
 		}
+		// probe_links keeps the master's own host under node id 0, which is no node.
+		if id > 0 {
+			if err := tx.Where("node_id = ?", id).Delete(&model.ProbeLink{}).Error; err != nil {
+				return err
+			}
+		}
 		guids := []string{synthNodeGuid(id)}
 		if guid != "" {
 			guids = append(guids, guid)

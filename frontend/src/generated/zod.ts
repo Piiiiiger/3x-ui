@@ -1085,6 +1085,75 @@ export const PlanSummarySchema = z.object({
 });
 export type PlanSummary = z.infer<typeof PlanSummarySchema>;
 
+export const PortalProbeSchema = z.object({
+  enabled: z.boolean(),
+  fetchedAt: z.number().int(),
+  servers: z.array(z.lazy(() => PortalProbeServerSchema)),
+  stale: z.boolean(),
+});
+export type PortalProbe = z.infer<typeof PortalProbeSchema>;
+
+export const PortalProbeServerSchema = z.object({
+  cpu: z.number(),
+  diskTotal: z.number().int(),
+  diskUsed: z.number().int(),
+  id: z.number().int(),
+  load1: z.number(),
+  load15: z.number(),
+  load5: z.number(),
+  memTotal: z.number().int(),
+  memUsed: z.number().int(),
+  name: z.string(),
+  netIn: z.number().int(),
+  netOut: z.number().int(),
+  netTotalDown: z.number().int(),
+  netTotalUp: z.number().int(),
+  pings: z.array(z.lazy(() => ProbePingSchema)),
+  region: z.string(),
+  status: z.enum(['online', 'offline', 'unknown', 'unmonitored']),
+  updatedAt: z.number().int(),
+  uptime: z.number().int(),
+});
+export type PortalProbeServer = z.infer<typeof PortalProbeServerSchema>;
+
+export const ProbeLinkInputSchema = z.object({
+  nodeId: z.number().int(),
+  serverId: z.string(),
+});
+export type ProbeLinkInput = z.infer<typeof ProbeLinkInputSchema>;
+
+export const ProbeLinkViewSchema = z.object({
+  address: z.string(),
+  nodeId: z.number().int(),
+  nodeName: z.string(),
+  serverId: z.string(),
+  serverName: z.string(),
+});
+export type ProbeLinkView = z.infer<typeof ProbeLinkViewSchema>;
+
+export const ProbeLinksInputSchema = z.object({
+  links: z.array(z.lazy(() => ProbeLinkInputSchema)),
+});
+export type ProbeLinksInput = z.infer<typeof ProbeLinksInputSchema>;
+
+export const ProbeOverviewSchema = z.object({
+  configured: z.boolean(),
+  error: z.string(),
+  fetchedAt: z.number().int(),
+  publicUrl: z.string(),
+  servers: z.array(z.lazy(() => ProbeServerSchema)),
+  stale: z.boolean(),
+});
+export type ProbeOverview = z.infer<typeof ProbeOverviewSchema>;
+
+export const ProbePingSchema = z.object({
+  id: z.number().int(),
+  latency: z.number().int(),
+  loss: z.number(),
+  name: z.string(),
+});
+export type ProbePing = z.infer<typeof ProbePingSchema>;
+
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),
   error: z.string(),
@@ -1098,6 +1167,44 @@ export const ProbeResultUISchema = z.object({
   xrayVersion: z.string(),
 });
 export type ProbeResultUI = z.infer<typeof ProbeResultUISchema>;
+
+export const ProbeServerSchema = z.object({
+  arch: z.string(),
+  cpu: z.number(),
+  cpuCores: z.number().int(),
+  diskTotal: z.number().int(),
+  diskUsed: z.number().int(),
+  id: z.string(),
+  linked: z.boolean(),
+  load1: z.number(),
+  load15: z.number(),
+  load5: z.number(),
+  memTotal: z.number().int(),
+  memUsed: z.number().int(),
+  name: z.string(),
+  netIn: z.number().int(),
+  netOut: z.number().int(),
+  netTotalDown: z.number().int(),
+  netTotalUp: z.number().int(),
+  nodeId: z.number().int(),
+  nodeName: z.string(),
+  os: z.string(),
+  pings: z.array(z.lazy(() => ProbePingSchema)),
+  region: z.string(),
+  status: z.enum(['online', 'offline', 'unknown']),
+  trafficLimit: z.number().int(),
+  trafficUsed: z.number().int(),
+  updatedAt: z.number().int(),
+  uptime: z.number().int(),
+  virtualization: z.string(),
+});
+export type ProbeServer = z.infer<typeof ProbeServerSchema>;
+
+export const ProbeSettingsSchema = z.object({
+  publicUrl: z.string(),
+  url: z.string(),
+});
+export type ProbeSettings = z.infer<typeof ProbeSettingsSchema>;
 
 export const RealityScanResultSchema = z.object({
   alpn: z.string(),

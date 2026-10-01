@@ -2003,6 +2003,55 @@ export const sections: readonly Section[] = [
     ],
   },
   {
+    id: 'probe',
+    title: 'Probe',
+    description:
+      "Server status read from a Lite monitor running on the panel's own host. The panel asks Lite over loopback without a credential, so it shows Lite's guest view: a server hidden in Lite is hidden here, and a private Lite site cannot be read. Answers are cached for 2 seconds; while Lite fails, the last good answer is served for up to 90 seconds, marked stale. Links say which Lite server is which panel host (node id 0 is the panel itself); the client portal uses them to show each client only the servers behind its own inbounds.",
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/probe/servers',
+        summary:
+          'List every server Lite reports with its status (online, offline or unknown), its metrics while online, and the panel host it is linked to. A Lite failure is not a failed request: success stays true and error carries the reason.',
+        responseSchema: 'ProbeOverview',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/probe/links',
+        summary:
+          'List the panel itself (node id 0) and every node with the Lite server each is linked to. serverName is empty when the link points at a server Lite no longer lists.',
+        responseSchema: 'ProbeLinkView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/probe/links',
+        summary:
+          'Replace the whole set of links. nodeId must be 0 or an existing node and may appear once; a serverId (at most 64 characters) may be linked to one host only; an empty serverId leaves that host unlinked. Returns the new list.',
+        body: '{\n  "links": [\n    { "nodeId": 0, "serverId": "00000000-0000-4000-8000-000000000002" },\n    { "nodeId": 2, "serverId": "00000000-0000-4000-8000-000000000001" },\n    { "nodeId": 3, "serverId": "" }\n  ]\n}',
+        requestSchema: { $ref: '#/components/schemas/ProbeLinksInput' },
+        responseSchema: 'ProbeLinkView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/probe/settings',
+        summary:
+          'Get the Lite address the panel reads and the public status page the Probe page links to. An empty url means the probe is off.',
+        responseSchema: 'ProbeSettings',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/probe/settings',
+        summary:
+          'Save both settings. url must be empty or http(s)://<literal loopback IP>[:port] (127.0.0.0/8 or [::1]) with no path, query, fragment or credentials; publicUrl must be empty or an http(s) URL. Returns the values as stored.',
+        body: '{\n  "url": "http://127.0.0.1:27777",\n  "publicUrl": "https://probe.example.com"\n}',
+        requestSchema: { $ref: '#/components/schemas/ProbeSettings' },
+        responseSchema: 'ProbeSettings',
+      },
+    ],
+  },
+  {
     id: 'backup',
     title: 'Backup',
     description: 'Operations that interact with the configured Telegram bot.',

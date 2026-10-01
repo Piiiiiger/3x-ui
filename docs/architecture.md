@@ -476,6 +476,28 @@ unreachable. It periodically probes an HTTP URL (default: Cloudflare trace endpo
 the tunnel; after N successive failures (default 3) it fires a recovery callback wired to an
 Xray restart.
 
+### 5.9 Probe (server status from a Lite monitor)
+
+The Probe pages show host metrics (CPU, memory, disk, load, traffic, ping) that the panel
+does not collect itself. They come from a separate program, Lite, running on the panel's own
+host; the panel reads Lite's JSON-RPC over loopback and serves its own DTOs. It never proxies
+Lite's pages and stores no Lite credential, so it sees Lite's guest view.
+
+- **Client:** `service/probe_lite.go` sends one batch (`common:getNodes` +
+  `common:getNodesLatestStatus`) and maps it. A server without a status entry is `unknown`
+  (nothing reported since Lite started), not offline. The dialer refuses anything but a
+  literal loopback address, whatever the setting says.
+- **Cache:** `service/probe.go` holds one answer per Lite address for 2 s (a failure too),
+  shares one fetch between waiting callers, and serves the last good answer marked stale for
+  up to 90 s while Lite fails. The panel and the subscription server share it (one process).
+- **Links:** table `probe_links` maps a host to a Lite server uuid; node id 0 is the panel's
+  own host (inbounds with `node_id` NULL). Link data is joined per request, never cached.
+- **Settings:** hidden keys `probeLiteURL` / `probeLitePublicURL` (`service/setting_probe.go`),
+  saved only through `/panel/api/probe/settings`.
+- **Scoping:** the admin API (`controller/probe.go`) lists every server. The portal route
+  `<subPath>portal/probe` (`sub/portal.go`) goes through `ProbeService.ClientServers`: only
+  the hosts behind the client's own subscription inbounds, with whitelisted fields.
+
 ---
 
 ## 6. Data model cheat-sheet
@@ -496,6 +518,7 @@ for AutoMigrate in `internal/database/db.go`.
 | `NodeClientTraffic`             | Per-node client traffic baseline          | cross-node merge (anti-double-count)                                                                                                                               |
 | `NodePendingReset`              | Client resets a node has not confirmed    | `NodeId`, `Email`, `QueuedAt`; replayed by the node sync, freezes that client's node verdict until delivered                                                       |
 | `NodeClientIp`                  | Per-node client IP attribution            | `NodeGuid`, `Email`, `Ips`                                                                                                                                         |
+| `ProbeLink`                     | Host ↔ Lite server link (`probe_links`)   | `NodeId` (0 = the panel's own host), `ServerId` (Lite uuid); both unique                                                                                           |
 | `ClientGlobalTraffic`           | Cross-master usage totals                 | `MasterGuid`, `Email`, `Up`, `Down`                                                                                                                                |
 | `xray.ClientTraffic`            | Per-client counters (`client_traffics`)   | `Email`, `Up`, `Down`, `Total`, `ExpiryTime`, `LastOnline`                                                                                                         |
 | `InboundClientIps`              | IP set per client email                   | drives IP-limit enforcement                                                                                                                                        |
@@ -549,6 +572,7 @@ for AutoMigrate in `internal/database/db.go`.
 | **Frontend route / screen**                                                       | `frontend/src/pages/<area>/`, `frontend/src/routes.tsx`                      | `frontend/src/api/queries/`                                                                         |
 | **Frontend ↔ backend type mismatch**                                              | regenerate: `cd frontend && npm run gen` (`tools/openapigen`)                | `frontend/src/generated/`                                                                           |
 | **System status / CPU / metrics**                                                 | `service/server.go`, `service/xray_metrics.go`, `service/metric_history.go`  | `controller/server.go`, gopsutil                                                                    |
+| **Probe** page empty, stale or showing the wrong servers                          | `service/probe.go`, `service/probe_lite.go`                                  | `controller/probe.go`, `sub/portal.go` (`portalProbe`), model `ProbeLink`                           |
 
 ---
 

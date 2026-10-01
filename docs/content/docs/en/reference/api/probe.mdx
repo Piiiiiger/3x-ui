@@ -1,0 +1,80 @@
+---
+title: Probe
+description: "Server status read from a Lite monitor running on the panel's own
+  host. The panel asks Lite over loopback without a credential, so it shows
+  Lite's guest view: a server hidden in Lite is hidden here, and a private Lite
+  site cannot be read. Answers are cached for 2 seconds; while Lite fails, the
+  last good answer is served for up to 90 seconds, marked stale. Links say which
+  Lite server is which panel host (node id 0 is the panel itself); the client
+  portal uses them to show each client only the servers behind its own
+  inbounds."
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: 'List every server Lite reports with its status (online, offline or
+        unknown), its metrics while online, and the panel host it is linked to.
+        A Lite failure is not a failed request: success stays true and error
+        carries the reason.'
+      url: '#list-every-server-lite-reports-with-its-status-online-offline-or-unknown-its-metrics-while-online-and-the-panel-host-it-is-linked-to-a-lite-failure-is-not-a-failed-request-success-stays-true-and-error-carries-the-reason'
+    - depth: 2
+      title: List the panel itself (node id 0) and every node with the Lite server
+        each is linked to. serverName is empty when the link points at a server
+        Lite no longer lists.
+      url: '#list-the-panel-itself-node-id-0-and-every-node-with-the-lite-server-each-is-linked-to-servername-is-empty-when-the-link-points-at-a-server-lite-no-longer-lists'
+    - depth: 2
+      title: Replace the whole set of links. nodeId must be 0 or an existing node and
+        may appear once; a serverId (at most 64 characters) may be linked to one
+        host only; an empty serverId leaves that host unlinked. Returns the new
+        list.
+      url: '#replace-the-whole-set-of-links-nodeid-must-be-0-or-an-existing-node-and-may-appear-once-a-serverid-at-most-64-characters-may-be-linked-to-one-host-only-an-empty-serverid-leaves-that-host-unlinked-returns-the-new-list'
+    - depth: 2
+      title: Get the Lite address the panel reads and the public status page the Probe
+        page links to. An empty url means the probe is off.
+      url: '#get-the-lite-address-the-panel-reads-and-the-public-status-page-the-probe-page-links-to-an-empty-url-means-the-probe-is-off'
+    - depth: 2
+      title: Save both settings. url must be empty or http(s)://<literal loopback
+        IP>[:port] (127.0.0.0/8 or [::1]) with no path, query, fragment or
+        credentials; publicUrl must be empty or an http(s) URL. Returns the
+        values as stored.
+      url: '#save-both-settings-url-must-be-empty-or-httpsliteral-loopback-ipport-1270008-or-1-with-no-path-query-fragment-or-credentials-publicurl-must-be-empty-or-an-https-url-returns-the-values-as-stored'
+  structuredData:
+    headings:
+      - content: 'List every server Lite reports with its status (online, offline or
+          unknown), its metrics while online, and the panel host it is linked
+          to. A Lite failure is not a failed request: success stays true and
+          error carries the reason.'
+        id: list-every-server-lite-reports-with-its-status-online-offline-or-unknown-its-metrics-while-online-and-the-panel-host-it-is-linked-to-a-lite-failure-is-not-a-failed-request-success-stays-true-and-error-carries-the-reason
+      - content: List the panel itself (node id 0) and every node with the Lite server
+          each is linked to. serverName is empty when the link points at a
+          server Lite no longer lists.
+        id: list-the-panel-itself-node-id-0-and-every-node-with-the-lite-server-each-is-linked-to-servername-is-empty-when-the-link-points-at-a-server-lite-no-longer-lists
+      - content: Replace the whole set of links. nodeId must be 0 or an existing node
+          and may appear once; a serverId (at most 64 characters) may be linked
+          to one host only; an empty serverId leaves that host unlinked. Returns
+          the new list.
+        id: replace-the-whole-set-of-links-nodeid-must-be-0-or-an-existing-node-and-may-appear-once-a-serverid-at-most-64-characters-may-be-linked-to-one-host-only-an-empty-serverid-leaves-that-host-unlinked-returns-the-new-list
+      - content: Get the Lite address the panel reads and the public status page the
+          Probe page links to. An empty url means the probe is off.
+        id: get-the-lite-address-the-panel-reads-and-the-public-status-page-the-probe-page-links-to-an-empty-url-means-the-probe-is-off
+      - content: Save both settings. url must be empty or http(s)://<literal loopback
+          IP>[:port] (127.0.0.0/8 or [::1]) with no path, query, fragment or
+          credentials; publicUrl must be empty or an http(s) URL. Returns the
+          values as stored.
+        id: save-both-settings-url-must-be-empty-or-httpsliteral-loopback-ipport-1270008-or-1-with-no-path-query-fragment-or-credentials-publicurl-must-be-empty-or-an-https-url-returns-the-values-as-stored
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/probe/servers","method":"get"},{"path":"/panel/api/probe/links","method":"get"},{"path":"/panel/api/probe/links","method":"post"},{"path":"/panel/api/probe/settings","method":"get"},{"path":"/panel/api/probe/settings","method":"post"}]} showTitle />
+    </>
+  );
+}

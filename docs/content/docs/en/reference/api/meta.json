@@ -15,6 +15,7 @@
     "hosts",
     "plans",
     "traffic",
+    "probe",
     "nodes",
     "backup",
     "websocket"

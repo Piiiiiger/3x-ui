@@ -4477,6 +4477,292 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "PortalProbe": {
+    "description": "PortalProbe is what the client portal shows: the client's own hosts. enabled\nis false while no Lite address is set; stale marks figures from fetchedAt.",
+    "properties": {
+      "enabled": {
+        "example": true,
+        "type": "boolean"
+      },
+      "fetchedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "servers": {
+        "items": {
+          "$ref": "#/components/schemas/PortalProbeServer"
+        },
+        "type": "array"
+      },
+      "stale": {
+        "example": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "enabled",
+      "fetchedAt",
+      "servers",
+      "stale"
+    ],
+    "type": "object"
+  },
+  "PortalProbeServer": {
+    "description": "PortalProbeServer is one host of the signed-in client, named by its inbound\nremarks. The field list is the privacy whitelist: nothing else of Lite is sent.",
+    "properties": {
+      "cpu": {
+        "example": 12.5,
+        "type": "number"
+      },
+      "diskTotal": {
+        "example": 42949672960,
+        "format": "int64",
+        "type": "integer"
+      },
+      "diskUsed": {
+        "example": 8589934592,
+        "format": "int64",
+        "type": "integer"
+      },
+      "id": {
+        "example": 2,
+        "type": "integer"
+      },
+      "load1": {
+        "example": 0.31,
+        "type": "number"
+      },
+      "load15": {
+        "example": 0.18,
+        "type": "number"
+      },
+      "load5": {
+        "example": 0.22,
+        "type": "number"
+      },
+      "memTotal": {
+        "example": 2147483648,
+        "format": "int64",
+        "type": "integer"
+      },
+      "memUsed": {
+        "example": 858993459,
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "example": "Hong Kong",
+        "type": "string"
+      },
+      "netIn": {
+        "example": 5678,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netOut": {
+        "example": 1234,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netTotalDown": {
+        "example": 2000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netTotalUp": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "pings": {
+        "items": {
+          "$ref": "#/components/schemas/ProbePing"
+        },
+        "type": "array"
+      },
+      "region": {
+        "example": "🇭🇰",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "online",
+          "offline",
+          "unknown",
+          "unmonitored"
+        ],
+        "example": "online",
+        "type": "string"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "uptime": {
+        "example": 86400,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "cpu",
+      "diskTotal",
+      "diskUsed",
+      "id",
+      "load1",
+      "load15",
+      "load5",
+      "memTotal",
+      "memUsed",
+      "name",
+      "netIn",
+      "netOut",
+      "netTotalDown",
+      "netTotalUp",
+      "pings",
+      "region",
+      "status",
+      "updatedAt",
+      "uptime"
+    ],
+    "type": "object"
+  },
+  "ProbeLinkInput": {
+    "description": "ProbeLinkInput links one host to a Lite server; an empty serverId unlinks it.",
+    "properties": {
+      "nodeId": {
+        "example": 2,
+        "type": "integer"
+      },
+      "serverId": {
+        "example": "00000000-0000-4000-8000-000000000001",
+        "type": "string"
+      }
+    },
+    "required": [
+      "nodeId",
+      "serverId"
+    ],
+    "type": "object"
+  },
+  "ProbeLinkView": {
+    "description": "ProbeLinkView is one host of this panel (node id 0 is the panel itself) and\nthe Lite server linked to it; serverName is empty when Lite no longer lists it.",
+    "properties": {
+      "address": {
+        "example": "203.0.113.7",
+        "type": "string"
+      },
+      "nodeId": {
+        "example": 2,
+        "type": "integer"
+      },
+      "nodeName": {
+        "example": "edge-hk",
+        "type": "string"
+      },
+      "serverId": {
+        "example": "00000000-0000-4000-8000-000000000001",
+        "type": "string"
+      },
+      "serverName": {
+        "example": "hk-1",
+        "type": "string"
+      }
+    },
+    "required": [
+      "address",
+      "nodeId",
+      "nodeName",
+      "serverId",
+      "serverName"
+    ],
+    "type": "object"
+  },
+  "ProbeLinksInput": {
+    "description": "ProbeLinksInput is the whole set of links; saving it replaces the stored set.",
+    "properties": {
+      "links": {
+        "items": {
+          "$ref": "#/components/schemas/ProbeLinkInput"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "links"
+    ],
+    "type": "object"
+  },
+  "ProbeOverview": {
+    "description": "ProbeOverview is the admin page's data: every server Lite lists. A failed\nfetch is reported in error, next to the last good servers while stale is set.",
+    "properties": {
+      "configured": {
+        "example": true,
+        "type": "boolean"
+      },
+      "error": {
+        "type": "string"
+      },
+      "fetchedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "publicUrl": {
+        "example": "https://probe.example.com",
+        "type": "string"
+      },
+      "servers": {
+        "items": {
+          "$ref": "#/components/schemas/ProbeServer"
+        },
+        "type": "array"
+      },
+      "stale": {
+        "example": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "configured",
+      "error",
+      "fetchedAt",
+      "publicUrl",
+      "servers",
+      "stale"
+    ],
+    "type": "object"
+  },
+  "ProbePing": {
+    "description": "ProbePing is one ping task of a server over the last hour: latency is the\naverage in ms (-1 when no reply came back at all), loss is a percentage.",
+    "properties": {
+      "id": {
+        "example": 2,
+        "type": "integer"
+      },
+      "latency": {
+        "example": 31,
+        "type": "integer"
+      },
+      "loss": {
+        "example": 0.4,
+        "type": "number"
+      },
+      "name": {
+        "example": "China Telecom",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "latency",
+      "loss",
+      "name"
+    ],
+    "type": "object"
+  },
   "ProbeResultUI": {
     "properties": {
       "cpuPct": {
@@ -4530,6 +4816,191 @@ export const SCHEMAS: Record<string, unknown> = {
       "xrayError",
       "xrayState",
       "xrayVersion"
+    ],
+    "type": "object"
+  },
+  "ProbeServer": {
+    "description": "ProbeServer is one server of the Lite monitor. Its metrics are zero unless\nstatus is online; linked with nodeId 0 means the panel's own host.",
+    "properties": {
+      "arch": {
+        "example": "amd64",
+        "type": "string"
+      },
+      "cpu": {
+        "example": 12.5,
+        "type": "number"
+      },
+      "cpuCores": {
+        "example": 2,
+        "type": "integer"
+      },
+      "diskTotal": {
+        "example": 42949672960,
+        "format": "int64",
+        "type": "integer"
+      },
+      "diskUsed": {
+        "example": 8589934592,
+        "format": "int64",
+        "type": "integer"
+      },
+      "id": {
+        "example": "00000000-0000-4000-8000-000000000001",
+        "type": "string"
+      },
+      "linked": {
+        "example": true,
+        "type": "boolean"
+      },
+      "load1": {
+        "example": 0.31,
+        "type": "number"
+      },
+      "load15": {
+        "example": 0.18,
+        "type": "number"
+      },
+      "load5": {
+        "example": 0.22,
+        "type": "number"
+      },
+      "memTotal": {
+        "example": 2147483648,
+        "format": "int64",
+        "type": "integer"
+      },
+      "memUsed": {
+        "example": 858993459,
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "example": "hk-1",
+        "type": "string"
+      },
+      "netIn": {
+        "example": 5678,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netOut": {
+        "example": 1234,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netTotalDown": {
+        "example": 2000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "netTotalUp": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "nodeId": {
+        "example": 2,
+        "type": "integer"
+      },
+      "nodeName": {
+        "example": "edge-hk",
+        "type": "string"
+      },
+      "os": {
+        "example": "Debian GNU/Linux 13 (trixie)",
+        "type": "string"
+      },
+      "pings": {
+        "items": {
+          "$ref": "#/components/schemas/ProbePing"
+        },
+        "type": "array"
+      },
+      "region": {
+        "example": "🇭🇰",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "online",
+          "offline",
+          "unknown"
+        ],
+        "example": "online",
+        "type": "string"
+      },
+      "trafficLimit": {
+        "example": 107374182400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficUsed": {
+        "example": 3000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "uptime": {
+        "example": 86400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "virtualization": {
+        "example": "kvm",
+        "type": "string"
+      }
+    },
+    "required": [
+      "arch",
+      "cpu",
+      "cpuCores",
+      "diskTotal",
+      "diskUsed",
+      "id",
+      "linked",
+      "load1",
+      "load15",
+      "load5",
+      "memTotal",
+      "memUsed",
+      "name",
+      "netIn",
+      "netOut",
+      "netTotalDown",
+      "netTotalUp",
+      "nodeId",
+      "nodeName",
+      "os",
+      "pings",
+      "region",
+      "status",
+      "trafficLimit",
+      "trafficUsed",
+      "updatedAt",
+      "uptime",
+      "virtualization"
+    ],
+    "type": "object"
+  },
+  "ProbeSettings": {
+    "description": "ProbeSettings says where the panel reads server status from (a Lite monitor\non its own host) and which public status page the admin page links to.",
+    "properties": {
+      "publicUrl": {
+        "example": "https://probe.example.com",
+        "type": "string"
+      },
+      "url": {
+        "example": "http://127.0.0.1:27777",
+        "type": "string"
+      }
+    },
+    "required": [
+      "publicUrl",
+      "url"
     ],
     "type": "object"
   },

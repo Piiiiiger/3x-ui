@@ -64,6 +64,7 @@ func migrationModels() []any {
 		&model.ClientDailyTraffic{},
 		&model.ClientTrafficMark{},
 		&model.ClientPortalLogin{},
+		&model.ProbeLink{},
 	}
 }
 

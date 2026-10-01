@@ -1097,6 +1097,140 @@ export const EXAMPLES: Record<string, unknown> = {
     "trafficResetDay": 1,
     "updatedAt": 1735689600000
   },
+  "PortalProbe": {
+    "enabled": true,
+    "fetchedAt": 1735689600000,
+    "servers": [
+      {
+        "cpu": 12.5,
+        "diskTotal": 42949672960,
+        "diskUsed": 8589934592,
+        "id": 2,
+        "load1": 0.31,
+        "load15": 0.18,
+        "load5": 0.22,
+        "memTotal": 2147483648,
+        "memUsed": 858993459,
+        "name": "Hong Kong",
+        "netIn": 5678,
+        "netOut": 1234,
+        "netTotalDown": 2000000,
+        "netTotalUp": 1000000,
+        "pings": [
+          {
+            "id": 2,
+            "latency": 31,
+            "loss": 0.4,
+            "name": "China Telecom"
+          }
+        ],
+        "region": "🇭🇰",
+        "status": "online",
+        "updatedAt": 1735689600000,
+        "uptime": 86400
+      }
+    ],
+    "stale": false
+  },
+  "PortalProbeServer": {
+    "cpu": 12.5,
+    "diskTotal": 42949672960,
+    "diskUsed": 8589934592,
+    "id": 2,
+    "load1": 0.31,
+    "load15": 0.18,
+    "load5": 0.22,
+    "memTotal": 2147483648,
+    "memUsed": 858993459,
+    "name": "Hong Kong",
+    "netIn": 5678,
+    "netOut": 1234,
+    "netTotalDown": 2000000,
+    "netTotalUp": 1000000,
+    "pings": [
+      {
+        "id": 2,
+        "latency": 31,
+        "loss": 0.4,
+        "name": "China Telecom"
+      }
+    ],
+    "region": "🇭🇰",
+    "status": "online",
+    "updatedAt": 1735689600000,
+    "uptime": 86400
+  },
+  "ProbeLinkInput": {
+    "nodeId": 2,
+    "serverId": "00000000-0000-4000-8000-000000000001"
+  },
+  "ProbeLinkView": {
+    "address": "203.0.113.7",
+    "nodeId": 2,
+    "nodeName": "edge-hk",
+    "serverId": "00000000-0000-4000-8000-000000000001",
+    "serverName": "hk-1"
+  },
+  "ProbeLinksInput": {
+    "links": [
+      {
+        "nodeId": 2,
+        "serverId": "00000000-0000-4000-8000-000000000001"
+      }
+    ]
+  },
+  "ProbeOverview": {
+    "configured": true,
+    "error": "",
+    "fetchedAt": 1735689600000,
+    "publicUrl": "https://probe.example.com",
+    "servers": [
+      {
+        "arch": "amd64",
+        "cpu": 12.5,
+        "cpuCores": 2,
+        "diskTotal": 42949672960,
+        "diskUsed": 8589934592,
+        "id": "00000000-0000-4000-8000-000000000001",
+        "linked": true,
+        "load1": 0.31,
+        "load15": 0.18,
+        "load5": 0.22,
+        "memTotal": 2147483648,
+        "memUsed": 858993459,
+        "name": "hk-1",
+        "netIn": 5678,
+        "netOut": 1234,
+        "netTotalDown": 2000000,
+        "netTotalUp": 1000000,
+        "nodeId": 2,
+        "nodeName": "edge-hk",
+        "os": "Debian GNU/Linux 13 (trixie)",
+        "pings": [
+          {
+            "id": 2,
+            "latency": 31,
+            "loss": 0.4,
+            "name": "China Telecom"
+          }
+        ],
+        "region": "🇭🇰",
+        "status": "online",
+        "trafficLimit": 107374182400,
+        "trafficUsed": 3000000,
+        "updatedAt": 1735689600000,
+        "uptime": 86400,
+        "virtualization": "kvm"
+      }
+    ],
+    "stale": false
+  },
+  "ProbePing": {
+    "id": 2,
+    "latency": 31,
+    "loss": 0.4,
+    "name": "China Telecom"
+  },
   "ProbeResultUI": {
     "cpuPct": 12.5,
     "error": "",
@@ -1108,6 +1242,47 @@ export const EXAMPLES: Record<string, unknown> = {
     "xrayError": "",
     "xrayState": "",
     "xrayVersion": "25.10.31"
+  },
+  "ProbeServer": {
+    "arch": "amd64",
+    "cpu": 12.5,
+    "cpuCores": 2,
+    "diskTotal": 42949672960,
+    "diskUsed": 8589934592,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "linked": true,
+    "load1": 0.31,
+    "load15": 0.18,
+    "load5": 0.22,
+    "memTotal": 2147483648,
+    "memUsed": 858993459,
+    "name": "hk-1",
+    "netIn": 5678,
+    "netOut": 1234,
+    "netTotalDown": 2000000,
+    "netTotalUp": 1000000,
+    "nodeId": 2,
+    "nodeName": "edge-hk",
+    "os": "Debian GNU/Linux 13 (trixie)",
+    "pings": [
+      {
+        "id": 2,
+        "latency": 31,
+        "loss": 0.4,
+        "name": "China Telecom"
+      }
+    ],
+    "region": "🇭🇰",
+    "status": "online",
+    "trafficLimit": 107374182400,
+    "trafficUsed": 3000000,
+    "updatedAt": 1735689600000,
+    "uptime": 86400,
+    "virtualization": "kvm"
+  },
+  "ProbeSettings": {
+    "publicUrl": "https://probe.example.com",
+    "url": "http://127.0.0.1:27777"
   },
   "RealityScanResult": {
     "alpn": "h2",

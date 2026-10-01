@@ -1017,6 +1017,68 @@ export interface PlanSummary {
   updatedAt: number;
 }
 
+export interface PortalProbe {
+  enabled: boolean;
+  fetchedAt: number;
+  servers: PortalProbeServer[];
+  stale: boolean;
+}
+
+export interface PortalProbeServer {
+  cpu: number;
+  diskTotal: number;
+  diskUsed: number;
+  id: number;
+  load1: number;
+  load15: number;
+  load5: number;
+  memTotal: number;
+  memUsed: number;
+  name: string;
+  netIn: number;
+  netOut: number;
+  netTotalDown: number;
+  netTotalUp: number;
+  pings: ProbePing[];
+  region: string;
+  status: string;
+  updatedAt: number;
+  uptime: number;
+}
+
+export interface ProbeLinkInput {
+  nodeId: number;
+  serverId: string;
+}
+
+export interface ProbeLinkView {
+  address: string;
+  nodeId: number;
+  nodeName: string;
+  serverId: string;
+  serverName: string;
+}
+
+export interface ProbeLinksInput {
+  links: ProbeLinkInput[];
+}
+
+export interface ProbeOverview {
+  configured: boolean;
+  error: string;
+  fetchedAt: number;
+  publicUrl: string;
+  servers: ProbeServer[];
+  stale: boolean;
+}
+
+export interface ProbePing {
+  id: number;
+  latency: number;
+  loss: number;
+  name: string;
+}
+
 export interface ProbeResultUI {
   cpuPct: number;
   error: string;
@@ -1028,6 +1090,42 @@ export interface ProbeResultUI {
   xrayError: string;
   xrayState: string;
   xrayVersion: string;
+}
+
+export interface ProbeServer {
+  arch: string;
+  cpu: number;
+  cpuCores: number;
+  diskTotal: number;
+  diskUsed: number;
+  id: string;
+  linked: boolean;
+  load1: number;
+  load15: number;
+  load5: number;
+  memTotal: number;
+  memUsed: number;
+  name: string;
+  netIn: number;
+  netOut: number;
+  netTotalDown: number;
+  netTotalUp: number;
+  nodeId: number;
+  nodeName: string;
+  os: string;
+  pings: ProbePing[];
+  region: string;
+  status: string;
+  trafficLimit: number;
+  trafficUsed: number;
+  updatedAt: number;
+  uptime: number;
+  virtualization: string;
+}
+
+export interface ProbeSettings {
+  publicUrl: string;
+  url: string;
 }
 
 export interface RealityScanResult {

@@ -88,6 +88,7 @@ type SUBController struct {
 	settingService  service.SettingService
 	portalService   service.ClientPortalService
 	statsService    service.TrafficStatsService
+	probeService    service.ProbeService
 	portalLimiter   *loginlimit.Limiter
 	portalUserCap   *loginlimit.Limiter
 
@@ -348,6 +349,7 @@ func (a *SUBController) initRouter(g *gin.RouterGroup) {
 	gLink.HEAD(":subid/hwid-status", a.hwidStatus)
 	gLink.GET("portal", a.portalPage)
 	gLink.GET("portal/data", a.portalData)
+	gLink.GET("portal/probe", a.portalProbe)
 	gLink.POST("portal/login", a.portalLogin)
 	gLink.POST("portal/logout", a.portalLogout)
 	if a.jsonEnabled {
