@@ -107,7 +107,9 @@ require (
 	github.com/vishvananda/netlink v1.3.1 // indirect
 	github.com/vishvananda/netns v0.0.5 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
-	github.com/xtls/reality v0.0.0-20260921001439-3c98159dee38 // indirect
+	// Keep at the version xray-core pins: XTLS Vision reads REALITY's connection
+	// internals through unsafe (internal/agent TestCore_ServesVisionOverReality).
+	github.com/xtls/reality v0.0.0-20260908062103-8cdf7bf9c7f0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.9.1 // indirect
 	go4.org/netipx v0.0.0-20260823151212-3075585bcbeb // indirect
