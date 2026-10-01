@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Menu, Popover, Space } from 'antd';
 import {
@@ -18,9 +19,17 @@ interface SubHeaderProps {
   email: string;
   lang: string;
   onLangChange: (lang: string) => void;
+  extra?: ReactNode;
 }
 
-export default function SubHeader({ title, sId, email, lang, onLangChange }: SubHeaderProps) {
+export default function SubHeader({
+  title,
+  sId,
+  email,
+  lang,
+  onLangChange,
+  extra,
+}: SubHeaderProps) {
   const { t } = useTranslation();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
 
@@ -104,6 +113,7 @@ export default function SubHeader({ title, sId, email, lang, onLangChange }: Sub
             icon={<TranslationOutlined />}
           />
         </Popover>
+        {extra}
       </div>
     </header>
   );

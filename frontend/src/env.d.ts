@@ -31,6 +31,7 @@ interface Window {
   X_UI_CUR_VER?: string;
   X_UI_DB_TYPE?: string;
   __SUB_PAGE_DATA__?: SubPageData;
+  __SUB_PORTAL__?: { base: string };
 }
 
 declare module 'persian-calendar-suite' {

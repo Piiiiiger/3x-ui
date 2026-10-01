@@ -465,6 +465,11 @@ export interface ClientPageResponse {
   total: number;
 }
 
+export interface ClientPortalStatus {
+  enabled: boolean;
+  updatedAt: number;
+}
+
 export interface ClientRecord {
   adTag: string;
   allowedIPs: string;

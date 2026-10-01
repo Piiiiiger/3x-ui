@@ -105,7 +105,24 @@
     "support": "Hỗ trợ",
     "qrTitle": "Quét. Nhập. Kết nối.",
     "qrHint": "Quét bằng ứng dụng khách. Không chia sẻ mã này cho người khác.",
-    "saveQr": "Lưu QR"
+    "saveQr": "Lưu QR",
+    "portal": {
+      "title": "Đăng nhập",
+      "intro": "Đăng nhập để xem gói, mức sử dụng và liên kết đăng ký của bạn.",
+      "username": "Tên đăng nhập",
+      "password": "Mật khẩu",
+      "signIn": "Đăng nhập",
+      "signOut": "Đăng xuất",
+      "required": "Bắt buộc",
+      "invalid": "Sai tên đăng nhập hoặc mật khẩu",
+      "blocked": "Thử quá nhiều lần. Hãy thử lại sau 15 phút.",
+      "failed": "Hiện chưa thể đăng nhập. Hãy thử lại sau.",
+      "plan": "Gói của tôi",
+      "usage": "{days} ngày gần nhất",
+      "usageTotal": "Tổng {size}",
+      "noSubscription": "Tài khoản của bạn chưa có máy chủ. Hãy liên hệ quản trị viên.",
+      "loadFailed": "Không tải được thông tin của bạn. Hãy thử lại sau."
+    }
   },
   "menu": {
     "theme": "Chủ đề",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Số lần gia hạn đã dùng",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Nhập thẻ hex 32 ký tự để đặt hoặc 'none' để xóa kênh tài trợ trên MTProto.",
-      "intro": "Tất cả khách hàng trên các inbound, kèm lưu lượng, hạn dùng và liên kết đăng ký."
+      "intro": "Tất cả khách hàng trên các inbound, kèm lưu lượng, hạn dùng và liên kết đăng ký.",
+      "portal": {
+        "title": "Đăng nhập cổng",
+        "intro": "Khi có mật khẩu, khách hàng có thể đăng nhập cổng bằng tên của mình để xem gói, mức sử dụng và liên kết đăng ký.",
+        "statusOn": "Đang bật · mật khẩu đặt lúc {time}",
+        "statusOff": "Đang tắt",
+        "url": "Địa chỉ cổng",
+        "newPassword": "Mật khẩu mới",
+        "passwordHint": "Từ 6 đến 72 ký tự. Đổi mật khẩu sẽ đăng xuất khách hàng trên mọi thiết bị.",
+        "passwordLength": "Hãy dùng từ 6 đến 72 ký tự",
+        "save": "Lưu mật khẩu",
+        "savedToast": "Đã lưu mật khẩu cổng",
+        "handout": "Gửi thông tin này cho khách hàng:",
+        "copyLogin": "Sao chép thông tin đăng nhập",
+        "loginText": "Cổng: {url}\nTên đăng nhập: {username}\nMật khẩu: {password}",
+        "revoke": "Tắt đăng nhập",
+        "revokeConfirm": "Tắt đăng nhập cổng cho {email}? Các phiên đang mở sẽ kết thúc ngay.",
+        "revoked": "Đã tắt đăng nhập cổng",
+        "subDisabled": "Máy chủ đăng ký đang tắt nên khách hàng không mở được cổng. Hãy bật trong Cài đặt → Đăng ký."
+      }
     },
     "groups": {
       "name": "Tên",

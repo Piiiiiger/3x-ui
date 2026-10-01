@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Card, ConfigProvider, Layout, Tabs, message } from 'antd';
+import { Alert, Tabs, message } from 'antd';
 import type { TabsProps } from 'antd';
 import {
   AppstoreOutlined,
@@ -10,86 +11,78 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 
-import { ClipboardManager, LanguageManager } from '@/utils';
+import { ClipboardManager } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
-import { useTheme } from '@/hooks/useTheme';
 import SubAppsTab from './SubAppsTab';
 import SubConfigsTab from './SubConfigsTab';
 import SubHeader from './SubHeader';
 import SubHero from './SubHero';
 import SubLinksTab from './SubLinksTab';
+import SubShell, { useSubLanguage } from './SubShell';
 import { buildSubApps, daysUntil, detectPlatform, resolveSubStatus } from './subPageModel';
 import './SubPage.css';
 
-const subData = window.__SUB_PAGE_DATA__ || {};
+// buildSubView derives what the page shows from the server's page data.
+function buildSubView(subData: SubPageData, loadedAt: number) {
+  const sId = subData.sId || '';
+  const subUrl = subData.subUrl || '';
+  const subTitle = subData.subTitle || '';
+  const linkEmails: string[] = Array.isArray(subData.emails) ? subData.emails : [];
+  const totalByte = Number(subData.totalByte || 0);
+  const usedByte =
+    Number(subData.usedByte || 0) ||
+    Number(subData.downloadByte || 0) + Number(subData.uploadByte || 0);
+  const expireMs = Number(subData.expire || 0) * 1000;
+  return {
+    sId,
+    subUrl,
+    subJsonUrl: subData.subJsonUrl || '',
+    subClashUrl: subData.subClashUrl || '',
+    subTitle,
+    subSupportUrl: subData.subSupportUrl || '',
+    updateHours: Number(subData.subUpdates || 0),
+    announce: subData.announce || '',
+    links: Array.isArray(subData.links) ? subData.links : [],
+    clientEmail: [...new Set(linkEmails.filter(Boolean))].join(', '),
+    heroData: {
+      status: resolveSubStatus(
+        { enabled: !!subData.enabled, usedByte, totalByte, expireMs },
+        loadedAt,
+      ),
+      daysLeft: daysUntil(expireMs, loadedAt),
+      usedByte,
+      totalByte,
+      expireMs,
+      lastOnlineMs: Number(subData.lastOnline || 0),
+      download: subData.download || '0',
+      upload: subData.upload || '0',
+      used: subData.used || '0',
+      total: subData.total || '∞',
+      remained: subData.remained || '',
+      datepicker: subData.datepicker || 'gregorian',
+    },
+    apps: buildSubApps({ subUrl, sId, subTitle }),
+  };
+}
 
-const sId = subData.sId || '';
-const subUrl = subData.subUrl || '';
-const subJsonUrl = subData.subJsonUrl || '';
-const subClashUrl = subData.subClashUrl || '';
-const subTitle = subData.subTitle || '';
-const subSupportUrl = subData.subSupportUrl || '';
-const updateHours = Number(subData.subUpdates || 0);
-const announce = subData.announce || '';
-const links: string[] = Array.isArray(subData.links) ? subData.links : [];
-const linkEmails: string[] = Array.isArray(subData.emails) ? subData.emails : [];
-const totalByte = Number(subData.totalByte || 0);
-const usedByte =
-  Number(subData.usedByte || 0) ||
-  Number(subData.downloadByte || 0) + Number(subData.uploadByte || 0);
-const expireMs = Number(subData.expire || 0) * 1000;
-const clientEmail = [...new Set(linkEmails.filter(Boolean))].join(', ');
-const loadedAt = Date.now();
+interface SubPageProps {
+  data: SubPageData;
+  // The portal adds its sign-out button to the toolbar and its cards below the usage.
+  headerExtra?: ReactNode;
+  children?: ReactNode;
+}
 
-const heroData = {
-  status: resolveSubStatus({ enabled: !!subData.enabled, usedByte, totalByte, expireMs }, loadedAt),
-  daysLeft: daysUntil(expireMs, loadedAt),
-  usedByte,
-  totalByte,
-  expireMs,
-  lastOnlineMs: Number(subData.lastOnline || 0),
-  download: subData.download || '0',
-  upload: subData.upload || '0',
-  used: subData.used || '0',
-  total: subData.total || '∞',
-  remained: subData.remained || '',
-  datepicker: subData.datepicker || 'gregorian',
-};
-
-const apps = buildSubApps({ subUrl, sId, subTitle });
-const initialPlatform = detectPlatform(navigator.userAgent);
-const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
-
-// The sub page pins the AA-safe coral shades (deeper than the panel's decorative
-// coral in light mode) so its text-heavy controls stay readable. Mirrored in SubPage.css.
-const ACCENT = {
-  light: {
-    primary: '#b5482d',
-    hover: '#c25236',
-    active: '#a4432d',
-    rail: 'rgba(217, 119, 87, 0.16)',
-  },
-  dark: {
-    primary: '#f18c6e',
-    hover: '#f7b5a3',
-    active: '#d97757',
-    rail: 'rgba(241, 140, 110, 0.18)',
-  },
-};
-
-export default function SubPage() {
+export default function SubPage({ data, headerExtra, children }: SubPageProps) {
   const { t } = useTranslation();
-  const { isDark, isUltra, antdThemeConfig } = useTheme();
+  const [loadedAt] = useState(() => Date.now());
+  const [initialPlatform] = useState(() => detectPlatform(navigator.userAgent));
+  const view = useMemo(() => buildSubView(data, loadedAt), [data, loadedAt]);
+  const { subUrl, subJsonUrl, subClashUrl, links, apps } = view;
   const [messageApi, messageContextHolder] = message.useMessage();
   useEffect(() => {
     setMessageInstance(messageApi);
   }, [messageApi]);
-  const [lang, setLang] = useState<string>(() => LanguageManager.getLanguage('subscription'));
-
-  const onLangChange = useCallback((next: string) => {
-    setLang(next);
-    LanguageManager.setLanguage(next, 'subscription');
-  }, []);
+  const { lang, onLangChange } = useSubLanguage();
 
   const copy = useCallback(
     async (value: string, toast?: string) => {
@@ -143,74 +136,41 @@ export default function SubPage() {
       });
     }
     return items;
-  }, [t, copy, open]);
-
-  const direction = RTL_LANGUAGES.has(lang) ? 'rtl' : 'ltr';
-  const pageClass = ['subscription-page', isDark && 'is-dark', isUltra && 'is-ultra']
-    .filter(Boolean)
-    .join(' ');
-
-  const themeConfig = useMemo(() => {
-    const accent = isDark ? ACCENT.dark : ACCENT.light;
-    const primary = {
-      colorPrimary: accent.primary,
-      colorPrimaryHover: accent.hover,
-      colorPrimaryActive: accent.active,
-    };
-    return {
-      ...antdThemeConfig,
-      token: {
-        ...antdThemeConfig.token,
-        ...primary,
-        colorLink: accent.primary,
-        colorInfo: accent.primary,
-      },
-      components: {
-        ...antdThemeConfig.components,
-        Button: { ...antdThemeConfig.components?.Button, ...primary },
-        Progress: { ...antdThemeConfig.components?.Progress, remainingColor: accent.rail },
-      },
-    };
-  }, [antdThemeConfig, isDark]);
+  }, [t, copy, open, subUrl, subJsonUrl, subClashUrl, links, apps, initialPlatform]);
 
   return (
-    <ConfigProvider theme={themeConfig} direction={direction}>
+    <SubShell lang={lang}>
       {messageContextHolder}
-      <Layout className={pageClass} dir={direction}>
-        <div className="sub-aurora" aria-hidden="true">
-          <span className="sub-aurora-grid" />
-        </div>
-        <Layout.Content className="sub-content">
-          <Card className="sub-card">
-            <SubHeader
-              title={subTitle}
-              sId={sId}
-              email={clientEmail}
-              lang={lang}
-              onLangChange={onLangChange}
-            />
-            {announce && <Alert type="info" showIcon title={announce} className="sub-announce" />}
-            <SubHero {...heroData} lang={lang} />
-            {tabs.length > 0 && <Tabs className="sub-tabs" tabBarGutter={24} items={tabs} />}
-            {(updateHours > 0 || subSupportUrl) && (
-              <footer className="sub-footer">
-                {updateHours > 0 && (
-                  <span>
-                    <ClockCircleOutlined />
-                    {t('subscription.updateInterval', { hours: updateHours })}
-                  </span>
-                )}
-                {subSupportUrl && (
-                  <a href={subSupportUrl} target="_blank" rel="noopener noreferrer">
-                    <CustomerServiceOutlined />
-                    {t('subscription.support')}
-                  </a>
-                )}
-              </footer>
-            )}
-          </Card>
-        </Layout.Content>
-      </Layout>
-    </ConfigProvider>
+      <SubHeader
+        title={view.subTitle}
+        sId={view.sId}
+        email={view.clientEmail}
+        lang={lang}
+        onLangChange={onLangChange}
+        extra={headerExtra}
+      />
+      {view.announce && (
+        <Alert type="info" showIcon title={view.announce} className="sub-announce" />
+      )}
+      <SubHero {...view.heroData} lang={lang} />
+      {children}
+      {tabs.length > 0 && <Tabs className="sub-tabs" tabBarGutter={24} items={tabs} />}
+      {(view.updateHours > 0 || view.subSupportUrl) && (
+        <footer className="sub-footer">
+          {view.updateHours > 0 && (
+            <span>
+              <ClockCircleOutlined />
+              {t('subscription.updateInterval', { hours: view.updateHours })}
+            </span>
+          )}
+          {view.subSupportUrl && (
+            <a href={view.subSupportUrl} target="_blank" rel="noopener noreferrer">
+              <CustomerServiceOutlined />
+              {t('subscription.support')}
+            </a>
+          )}
+        </footer>
+      )}
+    </SubShell>
   );
 }

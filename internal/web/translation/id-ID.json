@@ -105,7 +105,24 @@
     "support": "Dukungan",
     "qrTitle": "Pindai. Impor. Terhubung.",
     "qrHint": "Pindai dengan aplikasi klien Anda. Jaga kerahasiaan kode ini.",
-    "saveQr": "Simpan QR"
+    "saveQr": "Simpan QR",
+    "portal": {
+      "title": "Masuk",
+      "intro": "Masuk untuk melihat paket, pemakaian, dan tautan langgananmu.",
+      "username": "Nama pengguna",
+      "password": "Kata sandi",
+      "signIn": "Masuk",
+      "signOut": "Keluar",
+      "required": "Wajib diisi",
+      "invalid": "Nama pengguna atau kata sandi salah",
+      "blocked": "Terlalu banyak percobaan. Coba lagi dalam 15 menit.",
+      "failed": "Saat ini tidak bisa masuk. Coba lagi nanti.",
+      "plan": "Paket saya",
+      "usage": "{days} hari terakhir",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Akunmu belum punya server. Hubungi administrator.",
+      "loadFailed": "Datamu tidak dapat dimuat. Coba lagi nanti."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Perpanjangan terpakai",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto.",
-      "intro": "Semua klien di seluruh inbound Anda, dengan trafik, masa berlaku, dan tautan langganan."
+      "intro": "Semua klien di seluruh inbound Anda, dengan trafik, masa berlaku, dan tautan langganan.",
+      "portal": {
+        "title": "Login portal",
+        "intro": "Dengan kata sandi, klien bisa masuk ke portal dengan nama penggunanya dan melihat paket, pemakaian, serta tautan langganan.",
+        "statusOn": "Aktif · kata sandi diatur {time}",
+        "statusOff": "Nonaktif",
+        "url": "Alamat portal",
+        "newPassword": "Kata sandi baru",
+        "passwordHint": "6 sampai 72 karakter. Menggantinya mengeluarkan klien dari semua perangkat.",
+        "passwordLength": "Gunakan 6 sampai 72 karakter",
+        "save": "Simpan kata sandi",
+        "savedToast": "Kata sandi portal disimpan",
+        "handout": "Kirim data berikut ke klien:",
+        "copyLogin": "Salin data login",
+        "loginText": "Portal: {url}\nNama pengguna: {username}\nKata sandi: {password}",
+        "revoke": "Matikan login",
+        "revokeConfirm": "Matikan login portal untuk {email}? Sesi yang terbuka langsung berakhir.",
+        "revoked": "Login portal dimatikan",
+        "subDisabled": "Server langganan sedang mati, jadi klien tidak bisa membuka portal. Nyalakan di Pengaturan → Langganan."
+      }
     },
     "groups": {
       "name": "Nama",

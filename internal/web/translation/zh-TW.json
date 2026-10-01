@@ -105,7 +105,24 @@
     "support": "支援",
     "qrTitle": "掃描。匯入。連線。",
     "qrHint": "使用用戶端應用程式掃描。請勿外洩此 QR 碼。",
-    "saveQr": "儲存 QR 碼"
+    "saveQr": "儲存 QR 碼",
+    "portal": {
+      "title": "使用者登入",
+      "intro": "登入後可以查看你的方案、用量和訂閱連結。",
+      "username": "使用者名稱",
+      "password": "密碼",
+      "signIn": "登入",
+      "signOut": "登出",
+      "required": "必填",
+      "invalid": "使用者名稱或密碼錯誤",
+      "blocked": "嘗試次數過多，請 15 分鐘後再試",
+      "failed": "暫時無法登入，請稍後再試",
+      "plan": "我的方案",
+      "usage": "近 {days} 天用量",
+      "usageTotal": "合計 {size}",
+      "noSubscription": "你的帳號暫時沒有可用線路，請聯絡管理員。",
+      "loadFailed": "暫時無法載入你的資訊，請稍後再試。"
+    }
   },
   "menu": {
     "theme": "主題",
@@ -984,7 +1001,26 @@
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
-      "intro": "所有入站下的客戶端，包含流量、到期時間與訂閱連結。"
+      "intro": "所有入站下的客戶端，包含流量、到期時間與訂閱連結。",
+      "portal": {
+        "title": "入口網站登入",
+        "intro": "設定密碼後，使用者可以用自己的使用者名稱登入入口網站，查看方案、用量和訂閱連結。",
+        "statusOn": "已開通 · 密碼設定於 {time}",
+        "statusOff": "未開通",
+        "url": "入口網站位址",
+        "newPassword": "新密碼",
+        "passwordHint": "6–72 個字元。更換密碼會讓該使用者在所有裝置上登出。",
+        "passwordLength": "請輸入 6–72 個字元",
+        "save": "儲存密碼",
+        "savedToast": "已儲存入口網站密碼",
+        "handout": "把下面的登入資訊傳給使用者：",
+        "copyLogin": "複製登入資訊",
+        "loginText": "入口網站：{url}\n使用者名稱：{username}\n密碼：{password}",
+        "revoke": "關閉登入",
+        "revokeConfirm": "關閉 {email} 的入口網站登入？已登入的裝置會立即登出。",
+        "revoked": "已關閉入口網站登入",
+        "subDisabled": "訂閱服務未開啟，使用者暫時無法開啟入口網站。請先在 設定 → 訂閱 中開啟。"
+      }
     },
     "groups": {
       "name": "名稱",

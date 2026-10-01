@@ -105,7 +105,24 @@
     "support": "Soporte",
     "qrTitle": "Escanea. Importa. Conéctate.",
     "qrHint": "Escanéalo con tu aplicación cliente. Mantén este código en privado.",
-    "saveQr": "Guardar QR"
+    "saveQr": "Guardar QR",
+    "portal": {
+      "title": "Iniciar sesión",
+      "intro": "Inicia sesión para ver tu plan, tu consumo y tus enlaces de suscripción.",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "signIn": "Iniciar sesión",
+      "signOut": "Cerrar sesión",
+      "required": "Obligatorio",
+      "invalid": "Usuario o contraseña incorrectos",
+      "blocked": "Demasiados intentos. Vuelve a intentarlo en 15 minutos.",
+      "failed": "Ahora no es posible iniciar sesión. Inténtalo más tarde.",
+      "plan": "Mi plan",
+      "usage": "Últimos {days} días",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Tu cuenta aún no tiene servidores. Contacta con el administrador.",
+      "loadFailed": "No se pudieron cargar tus datos. Inténtalo más tarde."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Renovaciones usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto.",
-      "intro": "Todos los clientes de tus entradas, con tráfico, caducidad y enlaces de suscripción."
+      "intro": "Todos los clientes de tus entradas, con tráfico, caducidad y enlaces de suscripción.",
+      "portal": {
+        "title": "Acceso al portal",
+        "intro": "Con una contraseña, el cliente puede entrar al portal con su usuario y ver su plan, su consumo y sus enlaces de suscripción.",
+        "statusOn": "Activado · contraseña definida {time}",
+        "statusOff": "Desactivado",
+        "url": "Dirección del portal",
+        "newPassword": "Nueva contraseña",
+        "passwordHint": "De 6 a 72 caracteres. Cambiarla cierra la sesión del cliente en todos sus dispositivos.",
+        "passwordLength": "Usa de 6 a 72 caracteres",
+        "save": "Guardar contraseña",
+        "savedToast": "Contraseña del portal guardada",
+        "handout": "Envía estos datos al cliente:",
+        "copyLogin": "Copiar datos de acceso",
+        "loginText": "Portal: {url}\nUsuario: {username}\nContraseña: {password}",
+        "revoke": "Desactivar acceso",
+        "revokeConfirm": "¿Desactivar el acceso al portal de {email}? Sus sesiones abiertas terminan de inmediato.",
+        "revoked": "Acceso al portal desactivado",
+        "subDisabled": "El servidor de suscripciones está apagado, así que el cliente no puede abrir el portal. Actívalo en Ajustes → Suscripción."
+      }
     },
     "groups": {
       "name": "Nombre",

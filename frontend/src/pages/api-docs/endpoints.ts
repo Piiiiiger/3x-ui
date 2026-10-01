@@ -1312,6 +1312,31 @@ export const sections: readonly Section[] = [
         response: '{\n  "success": true\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/clients/:email/portal',
+        summary:
+          'Whether the client can sign in to the subscription server portal ({subPath}portal), and when its password was last set.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientPortalStatus',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/:email/portal',
+        summary:
+          'Set or replace the client portal password (6 to 72 bytes, stored as a bcrypt hash). Replacing it signs out the client portal sessions.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        body: '{\n  "password": "a-long-passphrase"\n}',
+        responseSchema: 'ClientPortalStatus',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/:email/portal/clear',
+        summary:
+          'Remove the client portal password: the client can no longer sign in and open sessions end.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientPortalStatus',
+      },
+      {
         method: 'POST',
         path: '/panel/api/clients/resetAllTraffics',
         summary:

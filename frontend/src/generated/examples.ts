@@ -506,6 +506,10 @@ export const EXAMPLES: Record<string, unknown> = {
     },
     "total": 2000
   },
+  "ClientPortalStatus": {
+    "enabled": true,
+    "updatedAt": 1735689600000
+  },
   "ClientRecord": {
     "adTag": "",
     "allowedIPs": "",

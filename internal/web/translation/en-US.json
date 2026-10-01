@@ -105,7 +105,24 @@
     "support": "Support",
     "qrTitle": "Scan. Import. Connect.",
     "qrHint": "Scan with your client app. Keep this code private.",
-    "saveQr": "Save QR"
+    "saveQr": "Save QR",
+    "portal": {
+      "title": "Sign in",
+      "intro": "Sign in to see your plan, usage and subscription links.",
+      "username": "Username",
+      "password": "Password",
+      "signIn": "Sign in",
+      "signOut": "Sign out",
+      "required": "Required",
+      "invalid": "Wrong username or password",
+      "blocked": "Too many attempts. Try again in 15 minutes.",
+      "failed": "Signing in is not possible right now. Try again later.",
+      "plan": "My plan",
+      "usage": "Last {days} days",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Your account has no servers yet. Contact the administrator.",
+      "loadFailed": "Your details could not be loaded. Try again later."
+    }
   },
   "menu": {
     "theme": "Theme",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Renewals used",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds.",
-      "intro": "Every client across your inbounds, with traffic, expiry and subscription links."
+      "intro": "Every client across your inbounds, with traffic, expiry and subscription links.",
+      "portal": {
+        "title": "Portal login",
+        "intro": "With a password, the client can sign in to the portal with their username and see their plan, usage and subscription links.",
+        "statusOn": "On · password set {time}",
+        "statusOff": "Off",
+        "url": "Portal address",
+        "newPassword": "New password",
+        "passwordHint": "6 to 72 characters. Changing it signs the client out everywhere.",
+        "passwordLength": "Use 6 to 72 characters",
+        "save": "Save password",
+        "savedToast": "Portal password saved",
+        "handout": "Send these details to the client:",
+        "copyLogin": "Copy login details",
+        "loginText": "Portal: {url}\nUsername: {username}\nPassword: {password}",
+        "revoke": "Turn off login",
+        "revokeConfirm": "Turn off portal login for {email}? Their open sessions end at once.",
+        "revoked": "Portal login turned off",
+        "subDisabled": "The subscription server is off, so the client cannot open the portal. Turn it on in Settings → Subscription."
+      }
     },
     "groups": {
       "name": "Name",

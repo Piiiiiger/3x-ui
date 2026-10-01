@@ -197,6 +197,11 @@ func (s *TrafficStatsService) Overview(now time.Time, days int) (*TrafficOvervie
 	return ov, nil
 }
 
+// ClientDaily lists one client's traffic for the last days, ending on the day of now.
+func (s *TrafficStatsService) ClientDaily(email string, now time.Time, days int) ([]TrafficDay, error) {
+	return dailyTraffic(database.GetDB().Where("email = ?", email), now, days)
+}
+
 func dailyTraffic(db *gorm.DB, now time.Time, days int) ([]TrafficDay, error) {
 	if days < 1 {
 		days = 1

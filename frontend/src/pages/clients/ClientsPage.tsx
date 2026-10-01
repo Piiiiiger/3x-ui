@@ -38,6 +38,7 @@ import {
   FieldTimeOutlined,
   FilterOutlined,
   InfoCircleOutlined,
+  KeyOutlined,
   LinkOutlined,
   MinusCircleOutlined,
   MoreOutlined,
@@ -94,6 +95,7 @@ const ClientBulkAddModal = lazy(() => import('./ClientBulkAddModal'));
 const ClientBulkAdjustModal = lazy(() => import('./ClientBulkAdjustModal'));
 const FilterDrawer = lazy(() => import('./FilterDrawer'));
 const SubLinksModal = lazy(() => import('./SubLinksModal'));
+const ClientPortalModal = lazy(() => import('./ClientPortalModal'));
 const BulkAddToGroupModal = lazy(() => import('./BulkAddToGroupModal'));
 const BulkAttachInboundsModal = lazy(() => import('./BulkAttachInboundsModal'));
 const BulkDetachInboundsModal = lazy(() => import('./BulkDetachInboundsModal'));
@@ -412,6 +414,8 @@ export default function ClientsPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoClient, setInfoClient] = useState<ClientRecord | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
+  const [portalEmail, setPortalEmail] = useState<string | null>(null);
+  const onPortal = useCallback((email: string) => setPortalEmail(email), []);
   const [qrClient, setQrClient] = useState<ClientRecord | null>(null);
   const [viewingTunnelAllowedIPs, setViewingTunnelAllowedIPs] = useState<Record<number, string>>(
     {},
@@ -1115,11 +1119,12 @@ export default function ClientsPage() {
       {
         title: t('pages.clients.actions'),
         key: 'actions',
-        width: 200,
+        width: 236,
         render: (_v, record) => (
           <ClientRowActions
             email={record.email}
             onShowQr={onShowQr}
+            onPortal={onPortal}
             onShowInfo={onShowInfo}
             onResetTraffic={onResetTraffic}
             onEdit={onEdit}
@@ -1934,6 +1939,15 @@ export default function ClientsPage() {
                                               onClick: () => onShowQr(row.email),
                                             },
                                             {
+                                              key: 'portal',
+                                              label: (
+                                                <>
+                                                  <KeyOutlined /> {t('pages.clients.portal.title')}
+                                                </>
+                                              ),
+                                              onClick: () => onPortal(row.email),
+                                            },
+                                            {
                                               key: 'reset',
                                               label: (
                                                 <>
@@ -2075,6 +2089,15 @@ export default function ClientsPage() {
               }
               return null;
             }}
+          />
+        </LazyMount>
+        <LazyMount when={portalEmail !== null}>
+          <ClientPortalModal
+            email={portalEmail}
+            portalUrl={
+              subSettings.enable && subSettings.subURI ? `${subSettings.subURI}portal` : ''
+            }
+            onClose={() => setPortalEmail(null)}
           />
         </LazyMount>
         <LazyMount when={subLinksOpen}>

@@ -492,6 +492,12 @@ export const ClientPageResponseSchema = z.object({
 });
 export type ClientPageResponse = z.infer<typeof ClientPageResponseSchema>;
 
+export const ClientPortalStatusSchema = z.object({
+  enabled: z.boolean(),
+  updatedAt: z.number().int(),
+});
+export type ClientPortalStatus = z.infer<typeof ClientPortalStatusSchema>;
+
 export const ClientRecordSchema = z.object({
   adTag: z.string(),
   allowedIPs: z.string(),

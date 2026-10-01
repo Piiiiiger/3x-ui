@@ -105,7 +105,24 @@
     "support": "Destek",
     "qrTitle": "Tara. İçe aktar. Bağlan.",
     "qrHint": "İstemci uygulamanızla tarayın. Bu kodu kimseyle paylaşmayın.",
-    "saveQr": "QR'ı kaydet"
+    "saveQr": "QR'ı kaydet",
+    "portal": {
+      "title": "Giriş",
+      "intro": "Paketini, kullanımını ve abonelik bağlantılarını görmek için giriş yap.",
+      "username": "Kullanıcı adı",
+      "password": "Parola",
+      "signIn": "Giriş yap",
+      "signOut": "Çıkış yap",
+      "required": "Zorunlu",
+      "invalid": "Kullanıcı adı veya parola yanlış",
+      "blocked": "Çok fazla deneme. 15 dakika sonra tekrar dene.",
+      "failed": "Şu anda giriş yapılamıyor. Daha sonra tekrar dene.",
+      "plan": "Paketim",
+      "usage": "Son {days} gün",
+      "usageTotal": "Toplam {size}",
+      "noSubscription": "Hesabında henüz sunucu yok. Yöneticiyle iletişime geç.",
+      "loadFailed": "Bilgilerin yüklenemedi. Daha sonra tekrar dene."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Kullanılan yenileme",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
-      "intro": "Tüm gelen bağlantılardaki kullanıcılar; trafik, bitiş tarihi ve abonelik bağlantılarıyla."
+      "intro": "Tüm gelen bağlantılardaki kullanıcılar; trafik, bitiş tarihi ve abonelik bağlantılarıyla.",
+      "portal": {
+        "title": "Portal girişi",
+        "intro": "Parola verildiğinde kullanıcı kendi adıyla portala girip paketini, kullanımını ve abonelik bağlantılarını görebilir.",
+        "statusOn": "Açık · parola {time} tarihinde ayarlandı",
+        "statusOff": "Kapalı",
+        "url": "Portal adresi",
+        "newPassword": "Yeni parola",
+        "passwordHint": "6 ile 72 karakter. Parolayı değiştirmek kullanıcının tüm cihazlardaki oturumunu kapatır.",
+        "passwordLength": "6 ile 72 karakter girin",
+        "save": "Parolayı kaydet",
+        "savedToast": "Portal parolası kaydedildi",
+        "handout": "Bu bilgileri kullanıcıya gönder:",
+        "copyLogin": "Giriş bilgilerini kopyala",
+        "loginText": "Portal: {url}\nKullanıcı adı: {username}\nParola: {password}",
+        "revoke": "Girişi kapat",
+        "revokeConfirm": "{email} için portal girişi kapatılsın mı? Açık oturumlar hemen sona erer.",
+        "revoked": "Portal girişi kapatıldı",
+        "subDisabled": "Abonelik sunucusu kapalı, bu yüzden kullanıcı portalı açamaz. Ayarlar → Abonelik bölümünden açın."
+      }
     },
     "groups": {
       "name": "İsim",

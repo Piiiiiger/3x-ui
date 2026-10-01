@@ -33,7 +33,8 @@ import type { PlanSummary } from '@/generated/zod';
 import type { PlanFormValues } from '@/schemas/plan';
 import AssignPlanModal from './AssignPlanModal';
 import PlanFormModal from './PlanFormModal';
-import { useInboundChoices, usePlanText } from './planText';
+import { usePlanText } from '@/lib/plans/planText';
+import { useInboundChoices } from './planText';
 import './PlansPage.css';
 
 export default function PlansPage() {

@@ -96,6 +96,7 @@ func run(root, outDir string) error {
 				"PlanInput",
 				"PlanSummary",
 				"TrafficOverview",
+				"ClientPortalStatus",
 				"TrafficDay",
 				"AttentionClient",
 				"HappLinkResult",

@@ -105,7 +105,24 @@
     "support": "Suporte",
     "qrTitle": "Escaneie. Importe. Conecte.",
     "qrHint": "Escaneie com seu aplicativo cliente. Mantenha este código em sigilo.",
-    "saveQr": "Salvar QR"
+    "saveQr": "Salvar QR",
+    "portal": {
+      "title": "Entrar",
+      "intro": "Entre para ver seu plano, seu consumo e seus links de assinatura.",
+      "username": "Usuário",
+      "password": "Senha",
+      "signIn": "Entrar",
+      "signOut": "Sair",
+      "required": "Obrigatório",
+      "invalid": "Usuário ou senha incorretos",
+      "blocked": "Muitas tentativas. Tente novamente em 15 minutos.",
+      "failed": "Não é possível entrar agora. Tente mais tarde.",
+      "plan": "Meu plano",
+      "usage": "Últimos {days} dias",
+      "usageTotal": "Total {size}",
+      "noSubscription": "Sua conta ainda não tem servidores. Fale com o administrador.",
+      "loadFailed": "Não foi possível carregar seus dados. Tente mais tarde."
+    }
   },
   "menu": {
     "theme": "Tema",
@@ -984,7 +1001,26 @@
       "renewsUsed": "Renovações usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto.",
-      "intro": "Todos os clientes das suas entradas, com tráfego, validade e links de assinatura."
+      "intro": "Todos os clientes das suas entradas, com tráfego, validade e links de assinatura.",
+      "portal": {
+        "title": "Acesso ao portal",
+        "intro": "Com uma senha, o cliente pode entrar no portal com o próprio usuário e ver o plano, o consumo e os links de assinatura.",
+        "statusOn": "Ativado · senha definida {time}",
+        "statusOff": "Desativado",
+        "url": "Endereço do portal",
+        "newPassword": "Nova senha",
+        "passwordHint": "De 6 a 72 caracteres. Trocar a senha encerra a sessão do cliente em todos os dispositivos.",
+        "passwordLength": "Use de 6 a 72 caracteres",
+        "save": "Salvar senha",
+        "savedToast": "Senha do portal salva",
+        "handout": "Envie estes dados ao cliente:",
+        "copyLogin": "Copiar dados de acesso",
+        "loginText": "Portal: {url}\nUsuário: {username}\nSenha: {password}",
+        "revoke": "Desativar acesso",
+        "revokeConfirm": "Desativar o acesso ao portal de {email}? As sessões abertas terminam na hora.",
+        "revoked": "Acesso ao portal desativado",
+        "subDisabled": "O servidor de assinaturas está desligado, então o cliente não consegue abrir o portal. Ative-o em Configurações → Assinatura."
+      }
     },
     "groups": {
       "name": "Nome",
