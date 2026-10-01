@@ -89,3 +89,70 @@ func TestOutbox_SurvivesARestart(t *testing.T) {
 		t.Fatal("a fresh install must report under a new instance")
 	}
 }
+
+// panelModel applies each (instance, seq) once, as AddAgentTraffic does.
+type panelModel struct {
+	instance string
+	lastSeq  int64
+	counted  map[string]int64
+}
+
+func (p *panelModel) drain(o *outbox) {
+	for r := o.next(); r != nil; r = o.next() {
+		if r.Instance != p.instance || r.Seq > p.lastSeq {
+			p.instance, p.lastSeq = r.Instance, r.Seq
+			for _, c := range r.Clients {
+				p.counted[c.Name] += c.Up
+			}
+		}
+		o.ack(r.Instance, r.Seq)
+	}
+}
+
+// After a restart the panel may already hold the last report the agent built;
+// usage counted while the panel was unreachable must not ride on that number.
+func TestOutbox_UsageAfterARestartIsCountedOnce(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "outbox.json")
+	panel := &panelModel{counted: map[string]int64{}}
+	o, err := openOutbox(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.add(nil, counters("alice", 10, 0))
+	panel.drain(o)
+
+	restarted, err := openOutbox(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restarted.add(nil, counters("alice", 5, 0))
+	panel.drain(restarted)
+
+	if got := panel.counted["alice"]; got != 15 {
+		t.Fatalf("panel counted %d bytes for alice, want 15 (10 before the restart, 5 after)", got)
+	}
+}
+
+// The panel applied the report but the agent restarted before the ack arrived.
+func TestOutbox_UsageAfterALostAckIsCountedOnce(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "outbox.json")
+	panel := &panelModel{counted: map[string]int64{}}
+	o, err := openOutbox(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.add(nil, counters("alice", 10, 0))
+	r := o.next()
+	panel.instance, panel.lastSeq, panel.counted["alice"] = r.Instance, r.Seq, 10
+
+	restarted, err := openOutbox(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restarted.add(nil, counters("alice", 5, 0))
+	panel.drain(restarted)
+
+	if got := panel.counted["alice"]; got != 15 {
+		t.Fatalf("panel counted %d bytes for alice, want 15 (10 before the restart, 5 after)", got)
+	}
+}

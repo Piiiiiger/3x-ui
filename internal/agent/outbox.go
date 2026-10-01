@@ -13,8 +13,8 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 )
 
-// outbox holds traffic until the panel acks it. Only add saves: the saved state
-// rebuilds any later report with the same number and usage, so a crash only resends.
+// outbox holds traffic until the panel acks it. It is saved whenever usage is added
+// or numbered, so a restart may resend a report but never renumbers its usage.
 type outbox struct {
 	mu   sync.Mutex
 	path string
@@ -95,6 +95,7 @@ func (o *outbox) next() *agentproto.Traffic {
 		Clients:  drain(o.data.Clients),
 	}
 	o.data.NextSeq++
+	o.persist()
 	return o.data.InFlight
 }
 
