@@ -550,6 +550,19 @@ func (s *InboundService) GetAllInbounds() ([]*model.Inbound, error) {
 	return inbounds, nil
 }
 
+// GetNodeInbounds loads one node's inbounds the way GetAllInbounds does, with
+// each inbound's client stats topped up from sibling inbounds.
+func (s *InboundService) GetNodeInbounds(nodeID int) ([]*model.Inbound, error) {
+	db := database.GetDB()
+	var inbounds []*model.Inbound
+	err := db.Model(model.Inbound{}).Preload("ClientStats").Where("node_id = ?", nodeID).Order("id ASC").Find(&inbounds).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	s.enrichClientStats(db, inbounds)
+	return inbounds, nil
+}
+
 func (s *InboundService) GetInboundsByTrafficReset(period string) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound

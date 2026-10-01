@@ -793,6 +793,15 @@ type Node struct {
 	InboundTags         []string `json:"inboundTags" form:"inboundTags" gorm:"serializer:json;column:inbound_tags"`
 	OutboundTag         string   `json:"outboundTag" form:"outboundTag" gorm:"column:outbound_tag"`
 
+	// Kind is NodeKindPanel (a 3x-ui this panel calls) or NodeKindAgent (a
+	// pigger-agent that dials in and runs only Xray; this panel owns its state).
+	Kind            string `json:"kind" form:"kind" gorm:"column:kind;default:panel" example:"panel"`
+	AgentSecretHash string `json:"-" form:"-" gorm:"column:agent_secret_hash;index"`
+	// AgentInstance and AgentReportSeq identify the last traffic report applied,
+	// so a report the agent resends after a lost ack is counted once.
+	AgentInstance  string `json:"-" form:"-" gorm:"column:agent_instance"`
+	AgentReportSeq int64  `json:"-" form:"-" gorm:"column:agent_report_seq;default:0"`
+
 	// Guid is the remote panel's stable self-identifier (its panelGuid),
 	// learned from each heartbeat. It is the globally stable node identity used
 	// to attribute online clients/inbounds to the physical node across a chain
@@ -845,6 +854,14 @@ type Node struct {
 	CreatedAt int64 `json:"createdAt" gorm:"autoCreateTime:milli" example:"1700000000"`
 	UpdatedAt int64 `json:"updatedAt" gorm:"autoUpdateTime:milli" example:"1700000000"`
 }
+
+const (
+	NodeKindPanel = "panel"
+	NodeKindAgent = "agent"
+)
+
+// IsAgent reports whether the node is a pigger-agent rather than a 3x-ui panel.
+func (n *Node) IsAgent() bool { return n != nil && n.Kind == NodeKindAgent }
 
 // NodeSummary is the read-only identity of a node as published one hop up: the
 // view a panel exposes about the nodes it directly manages, so a master can

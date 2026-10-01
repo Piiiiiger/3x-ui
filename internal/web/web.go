@@ -259,6 +259,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)
+	controller.NewAgentController(g)
 
 	// Initialize WebSocket hub
 	s.wsHub = websocket.NewHub()
@@ -309,6 +310,7 @@ const (
 	cadenceRemoteRouting = "@every 5m"
 	cadenceXrayLogPrune  = "@every 10m"
 	cadenceCheckHash     = "@every 2m"
+	cadenceAgentSync     = "@every 5s"
 	// cpu.Percent samples over a full minute (blocking), so a finer cadence just
 	// stacks overlapping samplers; subscribers rate-limit alerts to 1/min anyway.
 	cadenceCPUAlarm    = "@every 1m"
@@ -357,6 +359,10 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 	_, _ = s.cron.AddJob(cadenceNodeHeartbeat, job.NewNodeHeartbeatJob())
 
 	_, _ = s.cron.AddJob(cadenceNodeTraffic, job.NewNodeTrafficSyncJob())
+
+	agentSync := job.NewAgentSyncJob()
+	_, _ = s.cron.AddJob(cadenceAgentSync, agentSync)
+	go agentSync.WatchNudges(s.ctx)
 
 	// Outbound subscription auto-refresh (respects per-sub updateInterval)
 	_, _ = s.cron.AddJob(cadenceOutboundSub, job.NewOutboundSubscriptionJob())
@@ -577,6 +583,17 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 		SetNeedRestart: func() { s.xrayService.SetToNeedRestart() },
 	}))
 	runtime.GetManager().SetNodeEgressResolver(&s.settingService)
+	// A panel-only restart keeps the hub: agent sockets outlive the HTTP server
+	// that accepted them.
+	if runtime.GetAgentHub() == nil {
+		runtime.SetAgentHub(runtime.NewAgentHub())
+	}
+	agentService := &service.AgentService{}
+	runtime.GetAgentHub().SetHandlers(runtime.AgentHandlers{
+		Traffic: agentService.HandleTraffic,
+		Status:  agentService.HandleStatus,
+		Gone:    agentService.HandleGone,
+	})
 	// Supply the master client certificate for nodes in mtls mode. Issued lazily
 	// from the node CA on first use; runtime stays free of a service import.
 	runtime.SetMasterClientCertProvider(func() (tls.Certificate, error) {

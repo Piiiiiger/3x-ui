@@ -26,6 +26,19 @@
       }
     },
     "schemas": {
+      "AgentSecretView": {
+        "description": "AgentSecretView carries a freshly minted agent secret; it is shown only once.",
+        "properties": {
+          "secret": {
+            "example": "q3vE0mXo1c8lYk2Rr9tW4uZp6aSd7fGh8jKl0zXcVbN",
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret"
+        ],
+        "type": "object"
+      },
       "AllSetting": {
         "properties": {
           "datepicker": {
@@ -3653,6 +3666,11 @@
             },
             "type": "array"
           },
+          "kind": {
+            "description": "Kind is NodeKindPanel (a 3x-ui this panel calls) or NodeKindAgent (a\npigger-agent that dials in and runs only Xray; this panel owns its state).",
+            "example": "panel",
+            "type": "string"
+          },
           "lastError": {
             "type": "string"
           },
@@ -3776,6 +3794,7 @@
           "inboundCount",
           "inboundSyncMode",
           "inboundTags",
+          "kind",
           "lastError",
           "lastHeartbeat",
           "latencyMs",
@@ -3838,6 +3857,13 @@
             },
             "type": "array"
           },
+          "kind": {
+            "enum": [
+              "panel",
+              "agent"
+            ],
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3880,6 +3906,7 @@
           "id",
           "inboundSyncMode",
           "inboundTags",
+          "kind",
           "name",
           "outboundTag",
           "pinnedCertSha256",
@@ -3971,6 +3998,10 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "kind": {
+            "example": "panel",
+            "type": "string"
           },
           "lastError": {
             "type": "string"
@@ -4085,6 +4116,7 @@
           "inboundCount",
           "inboundSyncMode",
           "inboundTags",
+          "kind",
           "lastError",
           "lastHeartbeat",
           "latencyMs",
@@ -11552,6 +11584,7 @@
                       "inboundTags": [
                         "in-443-tcp"
                       ],
+                      "kind": "panel",
                       "lastError": "",
                       "lastHeartbeat": 1700000000,
                       "latencyMs": 42,
@@ -11753,6 +11786,7 @@
                     "inboundTags": [
                       "in-443-tcp"
                     ],
+                    "kind": "panel",
                     "lastError": "",
                     "lastHeartbeat": 1700000000,
                     "latencyMs": 42,
@@ -11837,7 +11871,7 @@
         "tags": [
           "Nodes"
         ],
-        "summary": "Register a new remote node. Provide its URL, write-only apiToken, and optional remark / allowPrivateAddress flag. Responses expose hasApiToken only.",
+        "summary": "Register a new node. kind \"panel\" (default) is a remote 3x-ui reached at its URL with a write-only apiToken; kind \"agent\" is a pigger-agent that dials in, so only name, remark, address (its public address) and enable apply, and its secret comes from nodes/agentSecret. Responses expose hasApiToken only.",
         "operationId": "post_panel_api_nodes_add",
         "requestBody": {
           "required": true,
@@ -11848,6 +11882,7 @@
               },
               "example": {
                 "name": "de-fra-1",
+                "kind": "panel",
                 "remark": "",
                 "scheme": "https",
                 "address": "node1.example.com",
@@ -11903,6 +11938,7 @@
                     "inboundTags": [
                       "in-443-tcp"
                     ],
+                    "kind": "panel",
                     "lastError": "",
                     "lastHeartbeat": 1700000000,
                     "latencyMs": 42,
@@ -12363,6 +12399,55 @@
                       "error": "node is offline"
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/agentSecret/{id}": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Mint a new secret for an agent node and return it once; only its hash is stored. The old secret stops working at once and the agent connected with it is dropped. Panel nodes have no agent secret and are refused.",
+        "operationId": "post_panel_api_nodes_agentSecret_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AgentSecretView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "secret": "q3vE0mXo1c8lYk2Rr9tW4uZp6aSd7fGh8jKl0zXcVbN"
+                  }
                 }
               }
             }
@@ -17412,6 +17497,7 @@
                   "inboundTags": [
                     "in-443-tcp"
                   ],
+                  "kind": "panel",
                   "lastError": "",
                   "lastHeartbeat": 1700000000,
                   "latencyMs": 42,

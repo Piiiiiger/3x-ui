@@ -254,6 +254,33 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	return xrayConfig, nil
 }
 
+// GetAgentXrayConfig builds the whole config an agent node runs: the shared
+// template plus that node's enabled inbounds, without the panel's own bridges.
+func (s *XrayService) GetAgentXrayConfig(nodeID int) (*xray.Config, error) {
+	xrayConfig, err := s.templateXrayConfig()
+	if err != nil {
+		return nil, err
+	}
+	inbounds, err := s.inboundService.GetNodeInbounds(nodeID)
+	if err != nil {
+		return nil, err
+	}
+	for _, inbound := range inbounds {
+		if !inbound.Enable {
+			continue
+		}
+		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC {
+			continue
+		}
+		inboundConfig, err := s.buildInboundConfig(inbound)
+		if err != nil {
+			return nil, err
+		}
+		xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *inboundConfig)
+	}
+	return xrayConfig, nil
+}
+
 // templateXrayConfig parses the stored Xray template and applies the fixes every
 // generated config needs: API and stats services, log paths, legacy keys.
 func (s *XrayService) templateXrayConfig() (*xray.Config, error) {

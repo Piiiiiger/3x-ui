@@ -9,6 +9,10 @@ export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
+export interface AgentSecretView {
+  secret: string;
+}
+
 export interface AllSetting {
   datepicker: string;
   discordAdminIds: string;
@@ -845,6 +849,7 @@ export interface Node {
   inboundCount: number;
   inboundSyncMode: string;
   inboundTags: string[];
+  kind: string;
   lastError: string;
   lastHeartbeat: number;
   latencyMs: number;
@@ -880,6 +885,7 @@ export interface NodeMutationRequest {
   id: number;
   inboundSyncMode: string;
   inboundTags: string[];
+  kind: string;
   name: string;
   outboundTag: string;
   pinnedCertSha256: string;
@@ -908,6 +914,7 @@ export interface NodeView {
   inboundCount: number;
   inboundSyncMode: string;
   inboundTags: string[];
+  kind: string;
   lastError: string;
   lastHeartbeat: number;
   latencyMs: number;

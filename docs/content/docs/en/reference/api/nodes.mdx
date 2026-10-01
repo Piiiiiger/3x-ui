@@ -37,10 +37,12 @@ _openapi:
         panel.
       url: '#fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel'
     - depth: 2
-      title: Register a new remote node. Provide its URL, write-only apiToken, and
-        optional remark / allowPrivateAddress flag. Responses expose hasApiToken
-        only.
-      url: '#register-a-new-remote-node-provide-its-url-write-only-apitoken-and-optional-remark--allowprivateaddress-flag-responses-expose-hasapitoken-only'
+      title: Register a new node. kind "panel" (default) is a remote 3x-ui reached at
+        its URL with a write-only apiToken; kind "agent" is a pigger-agent that
+        dials in, so only name, remark, address (its public address) and enable
+        apply, and its secret comes from nodes/agentSecret. Responses expose
+        hasApiToken only.
+      url: '#register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-is-a-pigger-agent-that-dials-in-so-only-name-remark-address-its-public-address-and-enable-apply-and-its-secret-comes-from-nodesagentsecret-responses-expose-hasapitoken-only'
     - depth: 2
       title: 'Replace a node’s connection details. apiToken is write-only: omit it or
         send an empty string to keep the stored token; set clearApiToken=true to
@@ -77,6 +79,11 @@ _openapi:
         latest stable release. Returns a per-node result list.'
       url: '#trigger-the-official-panel-self-updater-on-each-given-node-downloads-the-latest-release-and-restarts-only-enabled-online-nodes-are-updated-offlinedisabled-ones-are-reported-as-skipped-set-dev-true-to-move-the-nodes-to-the-rolling-per-commit-dev-channel-instead-of-the-latest-stable-release-returns-a-per-node-result-list'
     - depth: 2
+      title: Mint a new secret for an agent node and return it once; only its hash is
+        stored. The old secret stops working at once and the agent connected
+        with it is dropped. Panel nodes have no agent secret and are refused.
+      url: '#mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused'
+    - depth: 2
       title: Aggregated metric history for a node — same shape as /server/history,
         scoped to one node.
       url: '#aggregated-metric-history-for-a-node--same-shape-as-serverhistory-scoped-to-one-node'
@@ -105,10 +112,12 @@ _openapi:
           node-assigned inbound gets paths that exist on the node, not the
           central panel.
         id: fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel
-      - content: Register a new remote node. Provide its URL, write-only apiToken, and
-          optional remark / allowPrivateAddress flag. Responses expose
-          hasApiToken only.
-        id: register-a-new-remote-node-provide-its-url-write-only-apitoken-and-optional-remark--allowprivateaddress-flag-responses-expose-hasapitoken-only
+      - content: Register a new node. kind "panel" (default) is a remote 3x-ui reached
+          at its URL with a write-only apiToken; kind "agent" is a pigger-agent
+          that dials in, so only name, remark, address (its public address) and
+          enable apply, and its secret comes from nodes/agentSecret. Responses
+          expose hasApiToken only.
+        id: register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-is-a-pigger-agent-that-dials-in-so-only-name-remark-address-its-public-address-and-enable-apply-and-its-secret-comes-from-nodesagentsecret-responses-expose-hasapitoken-only
       - content: 'Replace a node’s connection details. apiToken is write-only: omit it
           or send an empty string to keep the stored token; set
           clearApiToken=true to clear it.'
@@ -136,6 +145,11 @@ _openapi:
           true to move the nodes to the rolling per-commit dev channel instead
           of the latest stable release. Returns a per-node result list.'
         id: trigger-the-official-panel-self-updater-on-each-given-node-downloads-the-latest-release-and-restarts-only-enabled-online-nodes-are-updated-offlinedisabled-ones-are-reported-as-skipped-set-dev-true-to-move-the-nodes-to-the-rolling-per-commit-dev-channel-instead-of-the-latest-stable-release-returns-a-per-node-result-list
+      - content: Mint a new secret for an agent node and return it once; only its hash
+          is stored. The old secret stops working at once and the agent
+          connected with it is dropped. Panel nodes have no agent secret and are
+          refused.
+        id: mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused
       - content: Aggregated metric history for a node — same shape as /server/history,
           scoped to one node.
         id: aggregated-metric-history-for-a-node--same-shape-as-serverhistory-scoped-to-one-node
@@ -151,7 +165,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/agentSecret/{id}","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
     </>
   );
 }

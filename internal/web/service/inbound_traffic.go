@@ -26,12 +26,53 @@ import (
 const depletedClientsClause = "reset = 0 and reset_day = 0 and reset_weekday = 0 and ((total > 0 and up + down >= total) or (expiry_time > 0 and expiry_time <= ?))"
 
 func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (needRestart bool, clientsDisabled bool, err error) {
+	return s.commitTraffic(func(tx *gorm.DB) error {
+		if err := s.addInboundTraffic(tx, inboundTraffics); err != nil {
+			return err
+		}
+		return s.addClientTraffic(tx, clientTraffics)
+	})
+}
+
+// errAgentReportSeen rolls back a report whose usage was already counted.
+var errAgentReportSeen = errors.New("agent traffic report already applied")
+
+// AddAgentTraffic counts an agent's report at most once: its (instance, seq) is
+// recorded in the same transaction as the usage it carries.
+func (s *InboundService) AddAgentTraffic(nodeID int, instance string, seq int64, inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (bool, error) {
+	_, _, err := s.commitTraffic(func(tx *gorm.DB) error {
+		res := tx.Model(&model.Node{}).
+			Where("id = ? AND (COALESCE(agent_instance, '') <> ? OR agent_report_seq < ?)", nodeID, instance, seq).
+			Updates(map[string]any{"agent_instance": instance, "agent_report_seq": seq})
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return errAgentReportSeen
+		}
+		if err := s.addNodeInboundTraffic(tx, nodeID, inboundTraffics); err != nil {
+			return err
+		}
+		if err := s.addClientTraffic(tx, clientTraffics); err != nil {
+			return err
+		}
+		return addNodeClientTraffic(tx, nodeID, clientTraffics)
+	})
+	if errors.Is(err, errAgentReportSeen) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
+// commitTraffic stores one batch of usage through store, then runs the renewal
+// and quota maintenance every traffic source shares.
+func (s *InboundService) commitTraffic(store func(tx *gorm.DB) error) (needRestart bool, clientsDisabled bool, err error) {
 	var disabledNodeIDs []int
 	var remotePlans []trafficInboundUpdatePlan
 	var renewed []string
 	err = submitTrafficWrite(func() error {
 		var inner error
-		needRestart, clientsDisabled, disabledNodeIDs, remotePlans, renewed, inner = s.addTrafficLocked(inboundTraffics, clientTraffics)
+		needRestart, clientsDisabled, disabledNodeIDs, remotePlans, renewed, inner = s.addTrafficLocked(store)
 		return inner
 	})
 	if err != nil {
@@ -46,16 +87,11 @@ func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraff
 	return
 }
 
-func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (bool, bool, []int, []trafficInboundUpdatePlan, []string, error) {
+func (s *InboundService) addTrafficLocked(store func(tx *gorm.DB) error) (bool, bool, []int, []trafficInboundUpdatePlan, []string, error) {
 	db := database.GetDB()
 	// Commit durable traffic before best-effort lifecycle maintenance so helper
 	// failures cannot discard usage already reported by Xray.
-	if err := db.Transaction(func(tx *gorm.DB) error {
-		if err := s.addInboundTraffic(tx, inboundTraffics); err != nil {
-			return err
-		}
-		return s.addClientTraffic(tx, clientTraffics)
-	}); err != nil {
+	if err := db.Transaction(store); err != nil {
 		return false, false, nil, nil, nil, err
 	}
 
@@ -124,6 +160,41 @@ func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic
 			if err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// addNodeInboundTraffic adds an agent's inbound counters, matching only the
+// inbounds that agent hosts.
+func (s *InboundService) addNodeInboundTraffic(tx *gorm.DB, nodeID int, traffics []*xray.Traffic) error {
+	for _, traffic := range traffics {
+		if traffic == nil || !traffic.IsInbound {
+			continue
+		}
+		if err := tx.Model(&model.Inbound{}).Where("tag = ? AND node_id = ?", traffic.Tag, nodeID).
+			Updates(map[string]any{
+				"up":   gorm.Expr(database.ClampedAddExpr("up"), traffic.Up),
+				"down": gorm.Expr(database.ClampedAddExpr("down"), traffic.Down),
+			}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// addNodeClientTraffic grows each client's usage on one agent, which the
+// per-server breakdown reads.
+func addNodeClientTraffic(tx *gorm.DB, nodeID int, traffics []*xray.ClientTraffic) error {
+	upsert := fmt.Sprintf(`INSERT INTO node_client_traffics (node_id, email, up, down) VALUES (?, ?, ?, ?)
+		ON CONFLICT (node_id, email) DO UPDATE SET up = %s, down = %s`,
+		database.ClampedAddExpr("node_client_traffics.up"), database.ClampedAddExpr("node_client_traffics.down"))
+	for _, t := range traffics {
+		if t == nil || (t.Up == 0 && t.Down == 0) {
+			continue
+		}
+		if err := tx.Exec(upsert, nodeID, t.Email, t.Up, t.Down, t.Up, t.Down).Error; err != nil {
+			return err
 		}
 	}
 	return nil

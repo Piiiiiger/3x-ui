@@ -1736,8 +1736,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/nodes/add',
         summary:
-          'Register a new remote node. Provide its URL, write-only apiToken, and optional remark / allowPrivateAddress flag. Responses expose hasApiToken only.',
-        body: '{\n  "name": "de-fra-1",\n  "remark": "",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef...",\n  "clearApiToken": false,\n  "enable": true,\n  "allowPrivateAddress": false\n}',
+          'Register a new node. kind "panel" (default) is a remote 3x-ui reached at its URL with a write-only apiToken; kind "agent" is a pigger-agent that dials in, so only name, remark, address (its public address) and enable apply, and its secret comes from nodes/agentSecret. Responses expose hasApiToken only.',
+        body: '{\n  "name": "de-fra-1",\n  "kind": "panel",\n  "remark": "",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef...",\n  "clearApiToken": false,\n  "enable": true,\n  "allowPrivateAddress": false\n}',
         responseSchema: 'NodeView',
       },
       {
@@ -1800,6 +1800,14 @@ export const sections: readonly Section[] = [
         body: '{\n  "ids": [1, 2, 3],\n  "dev": false\n}',
         response:
           '{\n  "success": true,\n  "obj": [\n    { "id": 1, "name": "de-1", "ok": true },\n    { "id": 2, "name": "fr-1", "ok": false, "error": "node is offline" }\n  ]\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/agentSecret/:id',
+        summary:
+          'Mint a new secret for an agent node and return it once; only its hash is stored. The old secret stops working at once and the agent connected with it is dropped. Panel nodes have no agent secret and are refused.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node ID.' }],
+        responseSchema: 'AgentSecretView',
       },
       {
         method: 'GET',

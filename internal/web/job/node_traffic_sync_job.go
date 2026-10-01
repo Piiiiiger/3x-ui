@@ -116,7 +116,7 @@ func (j *NodeTrafficSyncJob) Run() {
 	var activeMu sync.Mutex
 	var activeEmails []string
 	for _, n := range nodes {
-		if !n.Enable || n.Status != "online" {
+		if !n.Enable || n.Status != "online" || n.IsAgent() {
 			continue
 		}
 		wg.Add(1)
