@@ -36,6 +36,17 @@ const (
 	TUIC        Protocol = "tuic"
 )
 
+// SubscriptionProtocols are the inbound protocols a subscription emits links
+// for; plain strings so the list binds as a SQL IN argument on every driver.
+func SubscriptionProtocols() []string {
+	listed := []Protocol{VMESS, VLESS, Trojan, Shadowsocks, Hysteria, WireGuard, AmneziaWG, MTProto, TUIC}
+	names := make([]string, len(listed))
+	for i, protocol := range listed {
+		names[i] = string(protocol)
+	}
+	return names
+}
+
 // User represents a user account in the 3x-ui panel.
 type User struct {
 	Id         int    `json:"id" gorm:"primaryKey;autoIncrement"`
