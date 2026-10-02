@@ -42,7 +42,7 @@ const TEMPLATES = [
   },
   {
     id: 5,
-    name: 'pigger_v3',
+    name: 'beta_v3',
     isDefault: false,
     kind: 'yaml',
     size: 10,
@@ -95,7 +95,7 @@ describe('PlanFormModal', () => {
     );
 
     await screen.findByText('Default (alpha_v3)');
-    chooseSelectOption(screen.getByLabelText('Rule template').id, 'pigger_v3');
+    chooseSelectOption(screen.getByLabelText('Rule template').id, 'beta_v3');
     save();
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));

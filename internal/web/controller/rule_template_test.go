@@ -48,7 +48,7 @@ func callRuleTemplates(t *testing.T, engine *gin.Engine, method, path string, bo
 
 func TestRuleTemplateAPI_SavesListsAndMovesTheDefault(t *testing.T) {
 	engine := newRuleTemplateEngine(t)
-	created := callRuleTemplates(t, engine, http.MethodPost, "/add", service.RuleTemplateInput{Name: "pigger_v3", Content: "MATCH,DIRECT"})
+	created := callRuleTemplates(t, engine, http.MethodPost, "/add", service.RuleTemplateInput{Name: "beta_v3", Content: "MATCH,DIRECT"})
 	var tpl struct{ Id int }
 	if err := json.Unmarshal(created.Obj, &tpl); err != nil || !created.Success || tpl.Id == 0 {
 		t.Fatalf("add: %+v (err %v)", created, err)

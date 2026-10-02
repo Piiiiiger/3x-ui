@@ -112,14 +112,14 @@ describe('RulesPage', () => {
     await screen.findByText('alpha_v3');
     fireEvent.click(screen.getByRole('button', { name: /New template/ }));
     const dialog = await screen.findByRole('dialog');
-    fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'pigger_v3' } });
+    fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'beta_v3' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() =>
       expect(postStub).toHaveBeenCalledWith(
         '/panel/api/ruleTemplates/add',
         expect.objectContaining({
-          name: 'pigger_v3',
+          name: 'beta_v3',
           content: expect.stringContaining('__PROXY_NODES__'),
         }),
         expect.anything(),
