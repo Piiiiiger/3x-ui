@@ -526,6 +526,7 @@ export interface ClientSlim {
   inboundIds: number[];
   limitHwid: number;
   limitIp: number;
+  nextReset: number;
   planId?: number;
   reset: number;
   resetDay: number;
@@ -563,6 +564,8 @@ export interface ClientsSummary {
   deactiveCount: number;
   depleted: string[];
   depletedCount: number;
+  exhaustedCount: number;
+  expiredCount: number;
   expiring: string[];
   expiringCount: number;
   online: string[];

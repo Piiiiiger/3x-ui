@@ -977,7 +977,8 @@
         "delDepleted": "{count} klien habis dihapus",
         "delOrphans": "{count} klien tanpa inbound dihapus",
         "imported": "{count} klien diimpor",
-        "importedMixed": "{ok} diimpor, {failed} dilewati"
+        "importedMixed": "{ok} diimpor, {failed} dilewati",
+        "commentSaved": "Komentar disimpan"
       },
       "renewMax": "Maksimum perpanjangan",
       "renewMaxDesc": "Berapa kali perpanjangan otomatis boleh berjalan sebelum klien dibiarkan kedaluwarsa. 0 berarti tanpa batas. Mengejar beberapa periode yang terlewat menghabiskan satu perpanjangan per periode.",

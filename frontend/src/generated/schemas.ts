@@ -2164,6 +2164,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "nextReset": {
+        "description": "NextReset is when the usage next returns to zero (its reset cycle or an\nauto-renewal), in Unix ms; 0 when nothing is scheduled.",
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
       "planId": {
         "example": 1,
         "type": "integer"
@@ -2215,6 +2221,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "inboundIds",
       "limitHwid",
       "limitIp",
+      "nextReset",
       "reset",
       "resetDay",
       "resetMax",
@@ -2359,6 +2366,15 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "exhaustedCount": {
+        "description": "ExhaustedCount and ExpiredCount split DepletedCount by cause; a client out\nof both quota and time counts in each.",
+        "example": 0,
+        "type": "integer"
+      },
+      "expiredCount": {
+        "example": 0,
+        "type": "integer"
+      },
       "expiring": {
         "example": [],
         "items": {
@@ -2394,6 +2410,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "deactiveCount",
       "depleted",
       "depletedCount",
+      "exhaustedCount",
+      "expiredCount",
       "expiring",
       "expiringCount",
       "online",

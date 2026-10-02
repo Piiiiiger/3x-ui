@@ -977,7 +977,8 @@
         "delDepleted": "{count} clientes agotados eliminados",
         "delOrphans": "{count} clientes sin entrante eliminados",
         "imported": "{count} clientes importados",
-        "importedMixed": "{ok} importados, {failed} omitidos"
+        "importedMixed": "{ok} importados, {failed} omitidos",
+        "commentSaved": "Comentario guardado"
       },
       "renewMax": "Renovaciones máximas",
       "renewMaxDesc": "Cuántas veces puede activarse la renovación automática antes de dejar que el cliente caduque. 0 significa sin límite. Recuperar varios periodos perdidos consume una renovación por periodo.",

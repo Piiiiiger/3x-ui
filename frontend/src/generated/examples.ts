@@ -455,6 +455,7 @@ export const EXAMPLES: Record<string, unknown> = {
         ],
         "limitHwid": 0,
         "limitIp": 0,
+        "nextReset": 1735689600000,
         "planId": 1,
         "reset": 0,
         "resetDay": 0,
@@ -476,6 +477,8 @@ export const EXAMPLES: Record<string, unknown> = {
       "deactiveCount": 150,
       "depleted": [],
       "depletedCount": 0,
+      "exhaustedCount": 0,
+      "expiredCount": 0,
       "expiring": [],
       "expiringCount": 0,
       "online": [
@@ -559,6 +562,7 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limitHwid": 0,
     "limitIp": 0,
+    "nextReset": 1735689600000,
     "planId": 1,
     "reset": 0,
     "resetDay": 0,
@@ -596,6 +600,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "deactiveCount": 150,
     "depleted": [],
     "depletedCount": 0,
+    "exhaustedCount": 0,
+    "expiredCount": 0,
     "expiring": [],
     "expiringCount": 0,
     "online": [

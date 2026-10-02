@@ -155,6 +155,16 @@ func TestListPagedFilters(t *testing.T) {
 			want:   []string{"charlie@x", "delta@x", "foxtrot@x"},
 		},
 		{
+			name:   "exhausted bucket is the quota half of depleted",
+			params: ClientPageParams{PageSize: 50, Filter: "exhausted"},
+			want:   []string{"charlie@x"},
+		},
+		{
+			name:   "expired bucket is the expiry half of depleted",
+			params: ClientPageParams{PageSize: 50, Filter: "expired"},
+			want:   []string{"delta@x", "foxtrot@x"},
+		},
+		{
 			name:   "deactive bucket leaves a disabled client that ran out to depleted",
 			params: ClientPageParams{PageSize: 50, Filter: "deactive"},
 			want:   []string{"echo@x"},
@@ -456,6 +466,9 @@ func TestListPagedSummary(t *testing.T) {
 		if s.Active != 6 {
 			t.Fatalf("active = %d, want 6", s.Active)
 		}
+		if s.ExhaustedCount != 1 || s.ExpiredCount != 2 {
+			t.Fatalf("exhausted/expired = %d/%d, want 1/2", s.ExhaustedCount, s.ExpiredCount)
+		}
 	})
 
 	t.Run("every client lands in exactly one counter", func(t *testing.T) {
@@ -465,7 +478,10 @@ func TestListPagedSummary(t *testing.T) {
 	})
 
 	t.Run("clicking a stat card filters to exactly the clients it counts", func(t *testing.T) {
-		cards := map[string]int{"active": s.Active, "depleted": s.DepletedCount, "expiring": s.ExpiringCount, "deactive": s.DeactiveCount}
+		cards := map[string]int{
+			"active": s.Active, "depleted": s.DepletedCount, "expiring": s.ExpiringCount, "deactive": s.DeactiveCount,
+			"exhausted": s.ExhaustedCount, "expired": s.ExpiredCount,
+		}
 		for bucket, count := range cards {
 			page, err := svc.ListPaged(inboundSvc, settingSvc, ClientPageParams{PageSize: 50, Filter: bucket})
 			if err != nil {
@@ -617,5 +633,65 @@ func TestListPagedEmptyPanel(t *testing.T) {
 	}
 	if resp.Summary.Active != 0 || resp.Summary.DepletedCount != 0 {
 		t.Fatalf("summary = %+v, want zeroed counters", resp.Summary)
+	}
+}
+
+func TestListPagedSearchMatchesThePlanName(t *testing.T) {
+	svc, inboundSvc, settingSvc := setupPagingServices(t)
+	seedPagingClients(t)
+	db := database.GetDB()
+	plan := model.Plan{Name: "Gold_Tier 100G"}
+	if err := db.Create(&plan).Error; err != nil {
+		t.Fatalf("create plan: %v", err)
+	}
+	if err := db.Model(&model.ClientRecord{}).Where("email IN ?", []string{"bravo@x", "golf@x"}).
+		Update("plan_id", plan.Id).Error; err != nil {
+		t.Fatalf("put clients on the plan: %v", err)
+	}
+
+	for _, search := range []string{"gold", "GOLD_TIER"} {
+		resp, err := svc.ListPaged(inboundSvc, settingSvc, ClientPageParams{PageSize: 50, Search: search})
+		if err != nil {
+			t.Fatalf("ListPaged(%q): %v", search, err)
+		}
+		if got, want := pagedEmails(resp.Items), []string{"bravo@x", "golf@x"}; !slices.Equal(got, want) {
+			t.Fatalf("search %q = %v, want the plan's members %v", search, got, want)
+		}
+	}
+}
+
+// The renewal view shows when each client's usage next goes back to zero, in the
+// panel's time zone, the one the reset cron runs in.
+func TestListPagedReportsTheNextReset(t *testing.T) {
+	svc, inboundSvc, settingSvc := setupPagingServices(t)
+	if err := settingSvc.setString("timeLocation", "Asia/Shanghai"); err != nil {
+		t.Fatalf("set timeLocation: %v", err)
+	}
+	db := database.GetDB()
+	for _, rec := range []model.ClientRecord{
+		{Email: "cycle@x", Enable: true, TrafficReset: "monthly", TrafficResetDay: 22},
+		{Email: "never@x", Enable: true, TrafficReset: "never"},
+	} {
+		if err := db.Create(&rec).Error; err != nil {
+			t.Fatalf("create %s: %v", rec.Email, err)
+		}
+	}
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	now := time.Now()
+
+	resp, err := svc.ListPaged(inboundSvc, settingSvc, ClientPageParams{PageSize: 50})
+	if err != nil {
+		t.Fatalf("ListPaged: %v", err)
+	}
+	next := map[string]int64{}
+	for _, it := range resp.Items {
+		next[it.Email] = it.NextReset
+	}
+	at := time.UnixMilli(next["cycle@x"]).In(loc)
+	if at.Day() != 22 || at.Hour() != 0 || at.Minute() != 0 || !at.After(now) || at.Sub(now) > 32*24*time.Hour {
+		t.Fatalf("monthly-22 client resets at %v, want the next 22nd at 00:00 Shanghai time", at)
+	}
+	if next["never@x"] != 0 {
+		t.Fatalf("never-reset client reports a reset at %d, want 0", next["never@x"])
 	}
 }

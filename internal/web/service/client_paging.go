@@ -34,6 +34,9 @@ type ClientSlim struct {
 	Traffic      *xray.ClientTraffic `json:"traffic,omitempty"`
 	CreatedAt    int64               `json:"createdAt" example:"1735000000000"`
 	UpdatedAt    int64               `json:"updatedAt" example:"1735100000000"`
+	// NextReset is when the usage next returns to zero (its reset cycle or an
+	// auto-renewal), in Unix ms; 0 when nothing is scheduled.
+	NextReset int64 `json:"nextReset" example:"1735689600000"`
 }
 
 // ClientPageParams are the query params accepted by /panel/api/clients/list/paged.
@@ -83,16 +86,20 @@ type ClientPageResponse struct {
 // popovers without shipping the full client array. The counters are exact;
 // the lists stop at clientSummaryEmailCap entries and only back the popovers.
 type ClientsSummary struct {
-	Total         int      `json:"total" example:"2000"`
-	Active        int      `json:"active" example:"1850"`
-	OnlineCount   int      `json:"onlineCount" example:"1"`
-	DepletedCount int      `json:"depletedCount" example:"0"`
-	ExpiringCount int      `json:"expiringCount" example:"0"`
-	DeactiveCount int      `json:"deactiveCount" example:"150"`
-	Online        []string `json:"online" example:"[\"alice@example.com\"]"`
-	Depleted      []string `json:"depleted" example:"[]"`
-	Expiring      []string `json:"expiring" example:"[]"`
-	Deactive      []string `json:"deactive" example:"[\"bob@example.com\"]"`
+	Total         int `json:"total" example:"2000"`
+	Active        int `json:"active" example:"1850"`
+	OnlineCount   int `json:"onlineCount" example:"1"`
+	DepletedCount int `json:"depletedCount" example:"0"`
+	ExpiringCount int `json:"expiringCount" example:"0"`
+	DeactiveCount int `json:"deactiveCount" example:"150"`
+	// ExhaustedCount and ExpiredCount split DepletedCount by cause; a client out
+	// of both quota and time counts in each.
+	ExhaustedCount int      `json:"exhaustedCount" example:"0"`
+	ExpiredCount   int      `json:"expiredCount" example:"0"`
+	Online         []string `json:"online" example:"[\"alice@example.com\"]"`
+	Depleted       []string `json:"depleted" example:"[]"`
+	Expiring       []string `json:"expiring" example:"[]"`
+	Deactive       []string `json:"deactive" example:"[\"bob@example.com\"]"`
 }
 
 const (
@@ -118,7 +125,8 @@ const clientSearchCond = `(LOWER(c.email) LIKE ? ESCAPE '\'
 	OR LOWER(COALESCE(c.uuid, '')) LIKE ? ESCAPE '\'
 	OR LOWER(COALESCE(c.password, '')) LIKE ? ESCAPE '\'
 	OR LOWER(COALESCE(c.auth, '')) LIKE ? ESCAPE '\'
-	OR (COALESCE(c.tg_id, 0) <> 0 AND CAST(c.tg_id AS TEXT) LIKE ? ESCAPE '\'))`
+	OR (COALESCE(c.tg_id, 0) <> 0 AND CAST(c.tg_id AS TEXT) LIKE ? ESCAPE '\')
+	OR COALESCE(c.plan_id, 0) IN (SELECT p.id FROM plans p WHERE LOWER(p.name) LIKE ? ESCAPE '\'))`
 
 // clientQuery builds the statements behind the clients page: a clients row
 // joined to its traffic counters, plus the expressions every bucket predicate
@@ -127,12 +135,14 @@ const clientSearchCond = `(LOWER(c.email) LIKE ? ESCAPE '\'
 // memory cost ~200ms per request at 20k clients on a page that polls every
 // 5 seconds, which is what made the table feel stuck on large panels.
 type clientQuery struct {
-	db               *gorm.DB
-	joins            []clientQueryJoin
-	upExpr           string
-	downExpr         string
-	usedExpr         string
-	nowMs            int64
+	db       *gorm.DB
+	joins    []clientQueryJoin
+	upExpr   string
+	downExpr string
+	usedExpr string
+	nowMs    int64
+	// loc is the panel's time zone, the one the reset cron runs in.
+	loc              *time.Location
 	expireDiffMs     int64
 	trafficDiffBytes int64
 }
@@ -183,8 +193,15 @@ func (q clientQuery) from() *gorm.DB {
 }
 
 func (q clientQuery) depletedExpr() string {
-	return "((c.total_gb > 0 AND " + q.usedExpr + " >= c.total_gb)" +
-		" OR (c.expiry_time > 0 AND c.expiry_time <= " + sqlInt(q.nowMs) + "))"
+	return "(" + q.exhaustedExpr() + " OR " + q.expiredExpr() + ")"
+}
+
+func (q clientQuery) exhaustedExpr() string {
+	return "(c.total_gb > 0 AND " + q.usedExpr + " >= c.total_gb)"
+}
+
+func (q clientQuery) expiredExpr() string {
+	return "(c.expiry_time > 0 AND c.expiry_time <= " + sqlInt(q.nowMs) + ")"
 }
 
 func (q clientQuery) nearDepletionExpr() string {
@@ -219,7 +236,7 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 
 	if needle := strings.ToLower(strings.TrimSpace(params.Search)); needle != "" {
 		pattern := "%" + escapeLikeLiteral(needle) + "%"
-		where(clientSearchCond, pattern, pattern, pattern, pattern, pattern, pattern, pattern)
+		where(clientSearchCond, pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern)
 	}
 	if protocols := parseCSVStrings(params.Protocol); len(protocols) > 0 {
 		where("EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id"+
@@ -284,6 +301,10 @@ func (q clientQuery) bucketCond(buckets, onlines []string) (string, []any) {
 			conds = append(conds, q.deactiveExpr())
 		case "depleted":
 			conds = append(conds, q.depletedExpr())
+		case "exhausted":
+			conds = append(conds, q.exhaustedExpr())
+		case "expired":
+			conds = append(conds, q.expiredExpr())
 		case "expiring":
 			conds = append(conds, q.expiringExpr())
 		case "online":
@@ -365,6 +386,12 @@ func (s *ClientService) ListPaged(inboundSvc *InboundService, settingSvc *Settin
 
 	onlines := inboundSvc.GetOnlineClients()
 	q := newClientQuery(db, time.Now().UnixMilli(), expireDiffMs, trafficDiffBytes)
+	q.loc = time.Local
+	if settingSvc != nil {
+		if loc, err := settingSvc.GetTimeLocation(); err == nil {
+			q.loc = loc
+		}
+	}
 
 	var total int64
 	if err := db.Model(&model.ClientRecord{}).Count(&total).Error; err != nil {
@@ -452,17 +479,29 @@ func (q clientQuery) pageRows(params ClientPageParams, onlines []string, offset,
 		}
 	}
 
+	loc := q.loc
+	if loc == nil {
+		loc = time.Local
+	}
+	now := time.UnixMilli(q.nowMs).In(loc)
 	items := make([]ClientSlim, 0, len(ids))
 	for _, id := range ids {
 		rec := byId[id]
 		if rec == nil {
 			continue
 		}
-		items = append(items, toClientSlim(ClientWithAttachments{
+		traffic := trafficByEmail[rec.Email]
+		item := toClientSlim(ClientWithAttachments{
 			ClientRecord: *rec,
 			InboundIds:   attachments[rec.Id],
-			Traffic:      trafficByEmail[rec.Email],
-		}))
+			Traffic:      traffic,
+		})
+		resetCount := 0
+		if traffic != nil {
+			resetCount = traffic.ResetCount
+		}
+		item.NextReset = nextClientReset(*rec, resetCount, now)
+		items = append(items, item)
 	}
 	return items, nil
 }
@@ -477,10 +516,12 @@ func (q clientQuery) summary(onlines []string, total int) (ClientsSummary, error
 	}
 
 	var counts struct {
-		Active   int64
-		Depleted int64
-		Expiring int64
-		Deactive int64
+		Active    int64
+		Depleted  int64
+		Expiring  int64
+		Deactive  int64
+		Exhausted int64
+		Expired   int64
 	}
 	// SUM over an empty table yields NULL, which not every driver scans into an
 	// int; COALESCE keeps a panel with no clients from erroring out.
@@ -488,7 +529,9 @@ func (q clientQuery) summary(onlines []string, total int) (ClientsSummary, error
 		"COALESCE(SUM(CASE WHEN " + q.activeExpr() + " THEN 1 ELSE 0 END), 0) AS active," +
 			" COALESCE(SUM(CASE WHEN " + q.depletedExpr() + " THEN 1 ELSE 0 END), 0) AS depleted," +
 			" COALESCE(SUM(CASE WHEN " + q.expiringExpr() + " THEN 1 ELSE 0 END), 0) AS expiring," +
-			" COALESCE(SUM(CASE WHEN " + q.deactiveExpr() + " THEN 1 ELSE 0 END), 0) AS deactive",
+			" COALESCE(SUM(CASE WHEN " + q.deactiveExpr() + " THEN 1 ELSE 0 END), 0) AS deactive," +
+			" COALESCE(SUM(CASE WHEN " + q.exhaustedExpr() + " THEN 1 ELSE 0 END), 0) AS exhausted," +
+			" COALESCE(SUM(CASE WHEN " + q.expiredExpr() + " THEN 1 ELSE 0 END), 0) AS expired",
 	).Scan(&counts).Error; err != nil {
 		return s, err
 	}
@@ -496,6 +539,8 @@ func (q clientQuery) summary(onlines []string, total int) (ClientsSummary, error
 	s.DepletedCount = int(counts.Depleted)
 	s.ExpiringCount = int(counts.Expiring)
 	s.DeactiveCount = int(counts.Deactive)
+	s.ExhaustedCount = int(counts.Exhausted)
+	s.ExpiredCount = int(counts.Expired)
 
 	buckets := []struct {
 		cond  string

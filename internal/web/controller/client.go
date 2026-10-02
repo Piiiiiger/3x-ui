@@ -67,6 +67,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/:email/attach", a.attach)
 	g.POST("/:email/detach", a.detach)
 	g.POST("/:email/externalLinks", a.setExternalLinks)
+	g.POST("/:email/comment", a.setComment)
 	a.initPortalRoutes(g)
 	g.GET("/export", a.export)
 	g.POST("/import", a.importClients)
@@ -301,6 +302,29 @@ func (a *ClientController) attach(c *gin.Context) {
 		return
 	}
 	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundClientAddSuccess"), pendingNodeObj(a.inboundService.AnyNodePending(body.InboundIds)), nil)
+}
+
+// setComment edits only the remark, which the clients table changes in place.
+func (a *ClientController) setComment(c *gin.Context) {
+	var body struct {
+		Comment string `json:"comment"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	needRestart, err := a.clientService.SetComment(&a.inboundService, c.Param("email"), body.Comment)
+	if needRestart {
+		a.xrayService.SetToNeedRestart()
+	}
+	if needRestart || err == nil {
+		notifyClientsChanged()
+	}
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.clients.toasts.commentSaved"), nil)
 }
 
 func (a *ClientController) setExternalLinks(c *gin.Context) {

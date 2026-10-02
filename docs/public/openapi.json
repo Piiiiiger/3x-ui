@@ -2190,6 +2190,12 @@
             "example": 0,
             "type": "integer"
           },
+          "nextReset": {
+            "description": "NextReset is when the usage next returns to zero (its reset cycle or an\nauto-renewal), in Unix ms; 0 when nothing is scheduled.",
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
           "planId": {
             "example": 1,
             "type": "integer"
@@ -2241,6 +2247,7 @@
           "inboundIds",
           "limitHwid",
           "limitIp",
+          "nextReset",
           "reset",
           "resetDay",
           "resetMax",
@@ -2385,6 +2392,15 @@
             "example": 0,
             "type": "integer"
           },
+          "exhaustedCount": {
+            "description": "ExhaustedCount and ExpiredCount split DepletedCount by cause; a client out\nof both quota and time counts in each.",
+            "example": 0,
+            "type": "integer"
+          },
+          "expiredCount": {
+            "example": 0,
+            "type": "integer"
+          },
           "expiring": {
             "example": [],
             "items": {
@@ -2420,6 +2436,8 @@
           "deactiveCount",
           "depleted",
           "depletedCount",
+          "exhaustedCount",
+          "expiredCount",
           "expiring",
           "expiringCount",
           "online",
@@ -9285,7 +9303,7 @@
             "name": "search",
             "in": "query",
             "required": false,
-            "description": "Case-insensitive substring match on email, subId, comment, UUID, password, auth or Telegram ID.",
+            "description": "Case-insensitive substring match on email, subId, comment, UUID, password, auth, Telegram ID or the name of the client's plan.",
             "schema": {
               "type": "string"
             }
@@ -9294,7 +9312,7 @@
             "name": "filter",
             "in": "query",
             "required": false,
-            "description": "CSV status buckets: online, active, deactive, depleted or expiring. Values are ORed.",
+            "description": "CSV status buckets: online, active, deactive, depleted, expiring, exhausted (quota used up) or expired (past its expiry). depleted is exhausted or expired. Values are ORed.",
             "schema": {
               "type": "string"
             }
@@ -9471,6 +9489,7 @@
                         ],
                         "limitHwid": 0,
                         "limitIp": 0,
+                        "nextReset": 1735689600000,
                         "planId": 1,
                         "reset": 0,
                         "resetDay": 0,
@@ -9492,6 +9511,8 @@
                       "deactiveCount": 150,
                       "depleted": [],
                       "depletedCount": 0,
+                      "exhaustedCount": 0,
+                      "expiredCount": 0,
                       "expiring": [],
                       "expiringCount": 0,
                       "online": [
@@ -10101,6 +10122,73 @@
                 },
                 "example": {
                   "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/{email}/comment": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set a client's remark and change nothing else. The remark is trimmed; an empty one clears it.",
+        "operationId": "post_panel_api_clients_email_comment",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email (unique identifier).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "description": "The new remark."
+                  }
+                },
+                "required": [
+                  "comment"
+                ]
+              },
+              "example": {
+                "comment": "Pays on the 5th"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Remark saved"
                 }
               }
             }

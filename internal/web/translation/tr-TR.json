@@ -977,7 +977,8 @@
         "delDepleted": "{count} tükenmiş kullanıcı silindi",
         "delOrphans": "{count} bağsız kullanıcı silindi",
         "imported": "{count} kullanıcı içe aktarıldı",
-        "importedMixed": "{ok} içe aktarıldı, {failed} atlandı"
+        "importedMixed": "{ok} içe aktarıldı, {failed} atlandı",
+        "commentSaved": "Yorum kaydedildi"
       },
       "renewMax": "En fazla yenileme",
       "renewMaxDesc": "İstemcinin süresi dolmaya bırakılmadan önce otomatik yenilemenin kaç kez çalışabileceği. 0 sınırsız demektir. Kaçırılan birden fazla dönemi telafi etmek, dönem başına bir yenileme harcar.",

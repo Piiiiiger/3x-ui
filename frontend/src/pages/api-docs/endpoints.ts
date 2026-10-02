@@ -965,14 +965,14 @@ export const sections: readonly Section[] = [
             name: 'search',
             in: 'query',
             type: 'string',
-            desc: 'Case-insensitive substring match on email, subId, comment, UUID, password, auth or Telegram ID.',
+            desc: "Case-insensitive substring match on email, subId, comment, UUID, password, auth, Telegram ID or the name of the client's plan.",
             optional: true,
           },
           {
             name: 'filter',
             in: 'query',
             type: 'string',
-            desc: 'CSV status buckets: online, active, deactive, depleted or expiring. Values are ORed.',
+            desc: 'CSV status buckets: online, active, deactive, depleted, expiring, exhausted (quota used up) or expired (past its expiry). depleted is exhausted or expired. Values are ORed.',
             optional: true,
           },
           {
@@ -1257,6 +1257,18 @@ export const sections: readonly Section[] = [
         ],
         body: '{\n  "externalLinks": [\n    { "kind": "link", "value": "vless://uuid@host:443?...#srv", "remark": "DE", "enable": true, "expiryTime": 0 },\n    { "kind": "subscription", "value": "https://provider.example/sub/abc", "remark": "Provider", "enable": false, "expiryTime": 1767225600000, "namePrefix": "[zjh] " }\n  ]\n}',
         response: '{\n  "success": true\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/:email/comment',
+        summary:
+          "Set a client's remark and change nothing else. The remark is trimmed; an empty one clears it.",
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email (unique identifier).' },
+          { name: 'comment', in: 'body', type: 'string', desc: 'The new remark.' },
+        ],
+        body: '{\n  "comment": "Pays on the 5th"\n}',
+        response: '{\n  "success": true,\n  "msg": "Remark saved"\n}',
       },
       {
         method: 'GET',

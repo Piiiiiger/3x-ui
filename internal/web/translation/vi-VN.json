@@ -977,7 +977,8 @@
         "delDepleted": "Đã xóa {count} khách hàng hết hạn mức",
         "delOrphans": "Đã xóa {count} khách hàng không gắn inbound",
         "imported": "Đã nhập {count} khách hàng",
-        "importedMixed": "Đã nhập {ok}, bỏ qua {failed}"
+        "importedMixed": "Đã nhập {ok}, bỏ qua {failed}",
+        "commentSaved": "Đã lưu ghi chú"
       },
       "renewMax": "Số lần gia hạn tối đa",
       "renewMaxDesc": "Gia hạn tự động được phép chạy bao nhiêu lần trước khi để khách hàng hết hạn. 0 nghĩa là không giới hạn. Bù lại nhiều kỳ đã bỏ lỡ sẽ tiêu tốn một lần gia hạn cho mỗi kỳ.",
