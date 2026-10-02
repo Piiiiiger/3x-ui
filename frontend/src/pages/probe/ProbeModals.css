@@ -1,17 +1,4 @@
-.probe-page-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.probe-page .probe-card-footer .ant-tag {
-  margin: 0;
-}
-
-.probe-page .probe-card-footer .probe-card-meter {
-  margin-top: 10px;
-}
-
+/* Shared by the probe's two modals on the hosts page. */
 .probe-link-host {
   display: inline-flex;
   flex-direction: column;

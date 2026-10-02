@@ -1,0 +1,65 @@
+.hosts-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 妙妙屋X's 服务管理 bar: actions on the left, the online and offline counts on the right. */
+.hosts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.hosts-toolbar-counters {
+  display: flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.hosts-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: 6px;
+  background: var(--ant-color-bg-container);
+  font-size: 13px;
+}
+
+.hosts-counter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.hosts-counter-dot.is-online {
+  background: var(--ant-color-success);
+}
+
+.hosts-counter-dot.is-offline {
+  background: var(--ant-color-error);
+}
+
+.hosts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.hosts-section-head h4.ant-typography {
+  margin: 0 0 2px;
+}
+
+.nodes-page .probe-card-footer .probe-card-meter {
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .hosts-toolbar-counters {
+    margin-inline-start: 0;
+  }
+}

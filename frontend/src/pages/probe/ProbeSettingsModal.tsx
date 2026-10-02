@@ -9,6 +9,7 @@ import { useProbeSettingsQuery } from '@/api/queries/useProbeSettingsQuery';
 import type { ProbeSettings } from '@/generated/zod';
 import { ProbeSettingsFormSchema, type ProbeSettingsFormValues } from '@/schemas/probe';
 import { useOpenings } from './useOpenings';
+import './ProbeModals.css';
 
 const LITE_URL_EXAMPLE = 'http://127.0.0.1:27777';
 

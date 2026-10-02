@@ -1,0 +1,140 @@
+/* Hosts as 妙妙屋X's 服务管理 cards: one size in every cell, with each section
+   at the same height whether it has figures or a placeholder. */
+.host-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .host-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .host-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+.host-card {
+  height: 100%;
+}
+
+.host-card > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.host-card.is-disabled .host-card-head,
+.host-card.is-disabled .host-card-tags {
+  opacity: 0.6;
+}
+
+.host-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.host-card-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ant-color-text-quaternary);
+}
+
+.host-card-dot.is-online {
+  background: var(--ant-color-success);
+}
+
+.host-card-dot.is-offline {
+  background: var(--ant-color-error);
+}
+
+.host-card-dot.is-issue {
+  background: #722ed1;
+}
+
+.host-card-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-card-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.host-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.host-card-tags .ant-tag {
+  margin: 0;
+}
+
+.host-card-fact {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.host-card-address {
+  min-height: 18px;
+  overflow: hidden;
+  color: var(--ant-color-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-card .probe-card-facts {
+  margin-block: 0;
+}
+
+/* Room for three routes, the usual Lite set, so a card without pings keeps its size. */
+.host-card-network {
+  min-height: 104px;
+}
+
+.host-card-network .probe-card-network {
+  margin-block-start: 0;
+}
+
+.host-card-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 104px;
+  border: 1px dashed var(--ant-color-border);
+  border-radius: 6px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+}
+
+.host-card-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+}

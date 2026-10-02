@@ -158,7 +158,8 @@ function PingRoute({ ping }: { ping: ProbeCardPing }) {
   );
 }
 
-function NetworkQuality({ pings }: { pings: ProbeCardPing[] }) {
+// Exported for the hosts page, whose cards show the same hour of pings.
+export function NetworkQuality({ pings }: { pings: ProbeCardPing[] }) {
   const { t } = useTranslation();
   return (
     <div className="probe-card-network">

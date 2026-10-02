@@ -25,7 +25,6 @@ import {
   MoonOutlined,
   PlusOutlined,
   ProfileOutlined,
-  RadarChartOutlined,
   ReloadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -349,12 +348,6 @@ export default function CommandPalette() {
         icon: <DashboardOutlined />,
       },
       {
-        path: '/probe',
-        title: t('menu.probe'),
-        keywords: ['probe', 'monitor', 'servers', 'status', 'load', 'latency', 'ping', '探针'],
-        icon: <RadarChartOutlined />,
-      },
-      {
         path: '/inbounds',
         title: t('menu.inbounds'),
         keywords: [
@@ -391,7 +384,19 @@ export default function CommandPalette() {
       {
         path: '/nodes',
         title: t('menu.nodes'),
-        keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],
+        keywords: [
+          'nodes',
+          'servers',
+          'cluster',
+          'remote nodes',
+          'probe',
+          'monitor',
+          'load',
+          'latency',
+          'ping',
+          '主机',
+          '探针',
+        ],
         icon: <ClusterOutlined />,
       },
       {

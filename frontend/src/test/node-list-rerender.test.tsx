@@ -51,14 +51,13 @@ describe('NodeList re-render', () => {
       latestVersion: '3.0.1',
       selectedIds: [] as number[],
       onSelectionChange: noop,
-      onAdd: noop,
-      onMtls: noop,
+      showAddress: false,
+      onShowAddressChange: noop,
       onEdit: noop,
       onDelete: noop,
       onProbe: noop,
       onToggleEnable: noop,
       onUpdateNode: noop,
-      onUpdateSelected: noop,
     };
     const view = render(<NodeList {...props} />, { wrapper });
     expect(updateChecks.count).toBeGreaterThan(0);

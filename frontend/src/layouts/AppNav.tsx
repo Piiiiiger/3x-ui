@@ -29,7 +29,6 @@ import {
   MoonFilled,
   MoonOutlined,
   ProfileOutlined,
-  RadarChartOutlined,
   ReadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -64,7 +63,6 @@ const MORE_PAGES = new Set(['/api-docs', '/sponsors']);
 
 type IconName =
   | 'dashboard'
-  | 'probe'
   | 'inbound'
   | 'team'
   | 'plans'
@@ -78,7 +76,6 @@ type IconName =
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
-  probe: RadarChartOutlined,
   inbound: ImportOutlined,
   team: TeamOutlined,
   plans: ProfileOutlined,
@@ -124,12 +121,11 @@ export default function AppNav() {
     () => [
       { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
       // Second on purpose: the bar folds the items that do not fit from the end.
-      { key: '/probe', icon: 'probe', title: t('menu.probe') },
+      { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/rules', icon: 'rules', title: t('menu.rules') },
-      { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
       { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },

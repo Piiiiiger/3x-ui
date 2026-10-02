@@ -1,11 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { Spin } from 'antd';
 
 import PanelLayout from '@/layouts/PanelLayout';
 
 const IndexPage = lazy(() => import('@/pages/index/IndexPage'));
-const ProbePage = lazy(() => import('@/pages/probe/ProbePage'));
 const InboundsPage = lazy(() => import('@/pages/inbounds/InboundsPage'));
 const ClientsPage = lazy(() => import('@/pages/clients/ClientsPage'));
 const PlansPage = lazy(() => import('@/pages/plans/PlansPage'));
@@ -44,7 +43,8 @@ const routes: RouteObject[] = [
     element: <PanelLayout />,
     children: [
       { index: true, element: withSuspense(<IndexPage />) },
-      { path: 'probe', element: withSuspense(<ProbePage />) },
+      // The probe's servers moved onto the hosts page; old links and bookmarks follow them.
+      { path: 'probe', element: <Navigate to="/nodes" replace /> },
       { path: 'inbounds', element: withSuspense(<InboundsPage />) },
       { path: 'clients', element: withSuspense(<ClientsPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },

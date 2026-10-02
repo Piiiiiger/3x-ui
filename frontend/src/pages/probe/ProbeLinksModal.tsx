@@ -10,6 +10,7 @@ import { useProbeMutations } from '@/api/queries/useProbeMutations';
 import type { ProbeLinkView, ProbeServer } from '@/generated/zod';
 import { probeHostLabel } from './probeHostLabel';
 import { useOpenings } from './useOpenings';
+import './ProbeModals.css';
 
 interface LinksFormValues {
   rows: { nodeId: number; serverId: string }[];

@@ -22,14 +22,13 @@ function renderList(
         isMobile={false}
         selectedIds={[]}
         onSelectionChange={noop}
-        onAdd={noop}
-        onMtls={noop}
+        showAddress={false}
+        onShowAddressChange={noop}
         onEdit={noop}
         onDelete={noop}
         onProbe={noop}
         onToggleEnable={noop}
         onUpdateNode={noop}
-        onUpdateSelected={noop}
       />
     </MemoryRouter>,
   );

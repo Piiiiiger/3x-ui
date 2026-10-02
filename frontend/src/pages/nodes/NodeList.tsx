@@ -15,14 +15,13 @@ import {
   EyeOutlined,
   InfoCircleOutlined,
   MoreOutlined,
-  PlusOutlined,
   RightOutlined,
-  SafetyCertificateOutlined,
   TeamOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 
 import NodeHistoryPanel from './NodeHistoryPanel';
+import { useRelativeTime } from './relativeTime';
 import { HostNodeChips, type HostNode } from './HostNodeChips';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { isPanelUpdateAvailable } from '@/lib/panel-version';
@@ -36,16 +35,16 @@ interface NodeListProps {
   loading?: boolean;
   isMobile?: boolean;
   latestVersion?: string;
+  /** The page's 隐藏 IP switch, which the address column's eye also flips. */
+  showAddress: boolean;
+  onShowAddressChange: (show: boolean) => void;
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
-  onAdd: () => void;
-  onMtls: () => void;
   onEdit: (node: NodeRecord) => void;
   onDelete: (node: NodeRecord) => void;
   onProbe: (node: NodeRecord) => void;
   onToggleEnable: (node: NodeRecord, next: boolean) => void;
   onUpdateNode: (node: NodeRecord) => void;
-  onUpdateSelected: () => void;
 }
 
 // An agent has no panel to update; it is upgraded by replacing its binary.
@@ -150,45 +149,25 @@ function formatUptime(secs?: number): string {
   return `${mins}m`;
 }
 
-// Stable per language: the columns memo depends on it, and a fresh function each
-// render rebuilt every column, re-rendering all rows on each heartbeat push.
-function useRelativeTime() {
-  const { t } = useTranslation();
-  return useMemo(
-    () => (unixSeconds?: number) => {
-      if (!unixSeconds) return t('pages.nodes.never');
-      const diffSec = Math.max(0, Math.floor(Date.now() / 1000 - unixSeconds));
-      if (diffSec < 5) return t('pages.nodes.justNow');
-      if (diffSec < 60) return `${diffSec}s`;
-      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m`;
-      if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h`;
-      return `${Math.floor(diffSec / 86400)}d`;
-    },
-    [t],
-  );
-}
-
 export default function NodeList({
   nodes,
   nodesByHost,
   loading = false,
   isMobile = false,
   latestVersion = '',
+  showAddress,
+  onShowAddressChange,
   selectedIds,
   onSelectionChange,
-  onAdd,
-  onMtls,
   onEdit,
   onDelete,
   onProbe,
   onToggleEnable,
   onUpdateNode,
-  onUpdateSelected,
 }: NodeListProps) {
   const { t } = useTranslation();
   const relativeTime = useRelativeTime();
 
-  const [showAddress, setShowAddress] = useState(false);
   const [statsNode, setStatsNode] = useState<NodeRow | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
@@ -378,8 +357,8 @@ export default function NodeList({
                   role="button"
                   tabIndex={0}
                   aria-label={t('pages.index.toggleIpVisibility')}
-                  onClick={() => setShowAddress(false)}
-                  onKeyDown={activateOnKey(() => setShowAddress(false))}
+                  onClick={() => onShowAddressChange(false)}
+                  onKeyDown={activateOnKey(() => onShowAddressChange(false))}
                 />
               ) : (
                 <EyeInvisibleOutlined
@@ -387,8 +366,8 @@ export default function NodeList({
                   role="button"
                   tabIndex={0}
                   aria-label={t('pages.index.toggleIpVisibility')}
-                  onClick={() => setShowAddress(true)}
-                  onKeyDown={activateOnKey(() => setShowAddress(true))}
+                  onClick={() => onShowAddressChange(true)}
+                  onKeyDown={activateOnKey(() => onShowAddressChange(true))}
                 />
               )}
             </Tooltip>
@@ -562,6 +541,7 @@ export default function NodeList({
       onEdit,
       onDelete,
       onUpdateNode,
+      onShowAddressChange,
       nameByGuid,
       nodesByHost,
     ],
@@ -610,20 +590,6 @@ export default function NodeList({
 
   return (
     <Card size="small" hoverable>
-      <div className="toolbar">
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-          {t('pages.nodes.addNode')}
-        </Button>
-        <Button icon={<SafetyCertificateOutlined />} onClick={onMtls}>
-          {t('pages.nodes.mtls.title')}
-        </Button>
-        {selectedIds.length > 0 && (
-          <Button icon={<CloudDownloadOutlined />} onClick={onUpdateSelected}>
-            {t('pages.nodes.updateSelected', { count: selectedIds.length })}
-          </Button>
-        )}
-      </div>
-
       {isMobile ? (
         <>
           <div className="node-cards">
@@ -795,8 +761,8 @@ export default function NodeList({
                         role="button"
                         tabIndex={0}
                         aria-label={t('pages.index.toggleIpVisibility')}
-                        onClick={() => setShowAddress(false)}
-                        onKeyDown={activateOnKey(() => setShowAddress(false))}
+                        onClick={() => onShowAddressChange(false)}
+                        onKeyDown={activateOnKey(() => onShowAddressChange(false))}
                       />
                     ) : (
                       <EyeInvisibleOutlined
@@ -804,8 +770,8 @@ export default function NodeList({
                         role="button"
                         tabIndex={0}
                         aria-label={t('pages.index.toggleIpVisibility')}
-                        onClick={() => setShowAddress(true)}
-                        onKeyDown={activateOnKey(() => setShowAddress(true))}
+                        onClick={() => onShowAddressChange(true)}
+                        onKeyDown={activateOnKey(() => onShowAddressChange(true))}
                       />
                     )}
                   </Tooltip>

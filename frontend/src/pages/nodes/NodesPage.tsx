@@ -4,25 +4,28 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   Button,
-  Card,
   Checkbox,
-  Col,
   ConfigProvider,
   Input,
   Layout,
   Modal,
   Result,
-  Row,
+  Segmented,
   Spin,
-  Statistic,
   Typography,
   message,
 } from 'antd';
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CloudServerOutlined,
-  ThunderboltOutlined,
+  AppstoreOutlined,
+  CloudDownloadOutlined,
+  ExportOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  LinkOutlined,
+  PlusOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
 
 import { useTheme } from '@/hooks/useTheme';
@@ -30,15 +33,45 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
+import { useProbeQuery } from '@/api/queries/useProbeQuery';
+import { useStatusQuery } from '@/api/queries/useStatusQuery';
+import type { ProbeServer } from '@/generated/zod';
 import AppNav from '@/layouts/AppNav';
 import { PageHeader } from '@/components/ui';
+import ProbeLinksModal from '@/pages/probe/ProbeLinksModal';
+import ProbeSettingsModal from '@/pages/probe/ProbeSettingsModal';
 import NodeList from './NodeList';
+import HostCard from './HostCard';
+import MonitorOnlySection from './MonitorOnlySection';
 import { LocalPanelCard, nodesByHostOf } from './HostNodeChips';
+import { localHostView, remoteHostView, type HostView } from './hostView';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import NodeFormModal from './NodeFormModal';
 import { setMessageInstance } from '@/utils/messageBus';
-import { HttpUtil } from '@/utils';
+import { HttpUtil, TimeFormatter } from '@/utils';
 import type { PanelUpdateInfo } from './local-panel/PanelUpdateModal';
+import './HostCard.css';
+import './NodesPage.css';
+
+type HostsView = 'grid' | 'list';
+const VIEW_KEY = 'hosts-view';
+const ADDRESS_KEY = 'hosts-show-address';
+
+function readStored(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function store(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // A remembered choice is a convenience; private windows may refuse storage.
+  }
+}
 
 // Confirm-dialog body that lets the operator pick the stable or dev channel for
 // a node panel update. Reports changes via onChange so the imperative
@@ -70,6 +103,7 @@ function UpdateChannelChoice({ onChange }: { onChange: (dev: boolean) => void })
   );
 }
 
+/** 主机: the panel's hosts as 妙妙屋X's 服务管理 cards, with the probe's figures on them. */
 export default function NodesPage() {
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -83,6 +117,13 @@ export default function NodesPage() {
   const { nodes, loading, fetched, fetchError, refetch, totals } = useNodesQuery();
   const { data: inboundOptions } = useInboundOptions();
   const nodesByHost = useMemo(() => nodesByHostOf(inboundOptions ?? []), [inboundOptions]);
+  const {
+    overview,
+    loading: probeLoading,
+    fetchError: probeError,
+    refetch: refetchProbe,
+  } = useProbeQuery();
+  const { status } = useStatusQuery();
   const {
     create,
     update,
@@ -105,14 +146,59 @@ export default function NodesPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const [view, setView] = useState<HostsView>(() =>
+    readStored(VIEW_KEY) === 'list' ? 'list' : 'grid',
+  );
+  const [showAddress, setShowAddress] = useState(() => readStored(ADDRESS_KEY) === 'true');
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [formNode, setFormNode] = useState<NodeRecord | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [linksOpen, setLinksOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [mtlsOpen, setMtlsOpen] = useState(false);
   const [trustCa, setTrustCa] = useState('');
   const [copyingCa, setCopyingCa] = useState(false);
   const [savingTrustCa, setSavingTrustCa] = useState(false);
+
+  const changeView = useCallback((next: HostsView) => {
+    setView(next);
+    store(VIEW_KEY, next);
+  }, []);
+
+  const changeShowAddress = useCallback((next: boolean) => {
+    setShowAddress(next);
+    store(ADDRESS_KEY, String(next));
+  }, []);
+
+  const probeServers = useMemo(() => overview?.servers ?? [], [overview]);
+  // Lite failing with nothing kept from before leaves its server list unknown.
+  const probeUnreadable = !!overview?.error && probeServers.length === 0;
+  const probeByHost = useMemo(() => {
+    const byHost = new Map<number, ProbeServer>();
+    for (const server of probeServers) if (server.linked) byHost.set(server.nodeId, server);
+    return byHost;
+  }, [probeServers]);
+  const monitorOnly = useMemo(() => probeServers.filter((s) => !s.linked), [probeServers]);
+
+  const hosts = useMemo<HostView[]>(
+    () => [
+      localHostView(
+        status,
+        probeByHost.get(0),
+        nodesByHost.get(0) ?? [],
+        t('pages.inbounds.localPanel'),
+      ),
+      ...nodes.map((node) =>
+        remoteHostView(
+          node,
+          node.transitive ? undefined : probeByHost.get(node.id),
+          node.transitive ? [] : (nodesByHost.get(node.id) ?? []),
+        ),
+      ),
+    ],
+    [status, probeByHost, nodesByHost, nodes, t],
+  );
 
   const onCopyNodeCa = useCallback(async () => {
     setCopyingCa(true);
@@ -212,6 +298,47 @@ export default function NodesPage() {
     [setEnable],
   );
 
+  const nodeOf = useCallback(
+    (host: HostView) => nodes.find((node) => node.id === host.nodeId && !node.transitive),
+    [nodes],
+  );
+
+  const onEditHost = useCallback(
+    (host: HostView) => {
+      const node = nodeOf(host);
+      if (node) onEdit(node);
+    },
+    [nodeOf, onEdit],
+  );
+
+  const onSetHostEnable = useCallback(
+    (host: HostView, enable: boolean) => {
+      const node = nodeOf(host);
+      if (node) onToggleEnable(node, enable);
+    },
+    [nodeOf, onToggleEnable],
+  );
+
+  const onRestartXray = useCallback(
+    (host: HostView) => {
+      modal.confirm({
+        title: t('pages.nodes.restartXrayConfirm', { name: host.name }),
+        content: t('pages.nodes.restartXrayHint'),
+        okText: t('pages.nodes.restartXray'),
+        cancelText: t('cancel'),
+        onOk: async () => {
+          await HttpUtil.post(
+            host.nodeId === null
+              ? '/panel/api/server/restartXrayService'
+              : `/panel/api/nodes/restartXray/${host.nodeId}`,
+          );
+          refetch();
+        },
+      });
+    },
+    [modal, t, refetch],
+  );
+
   const devRef = useRef(false);
 
   const runUpdate = useCallback(
@@ -287,6 +414,122 @@ export default function NodesPage() {
     return classes.join(' ');
   }, [isDark, isUltra]);
 
+  const settingsButton = (
+    <Button icon={<SettingOutlined />} onClick={() => setSettingsOpen(true)}>
+      {t('pages.probe.settingsTitle')}
+    </Button>
+  );
+
+  function probeNotice() {
+    if (overview && !overview.configured) {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          title={t('pages.probe.notConfigured')}
+          description={t('pages.probe.notConfiguredHint')}
+          action={settingsButton}
+        />
+      );
+    }
+    if (probeUnreadable) {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          title={t('pages.probe.unreadable')}
+          description={overview?.error}
+        />
+      );
+    }
+    if (overview && (overview.stale || probeError)) {
+      return (
+        <Alert
+          type="warning"
+          showIcon
+          title={t('pages.probe.staleData', {
+            time: TimeFormatter.formatClock(overview.fetchedAt / 1000),
+          })}
+          description={overview.error || probeError}
+        />
+      );
+    }
+    if (!overview && probeError) {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          title={probeError}
+          action={
+            <Button loading={probeLoading} onClick={() => refetchProbe()}>
+              {t('refresh')}
+            </Button>
+          }
+        />
+      );
+    }
+    return null;
+  }
+
+  const toolbar = (
+    <div className="hosts-toolbar">
+      <Segmented<HostsView>
+        value={view}
+        onChange={changeView}
+        options={[
+          { value: 'grid', icon: <AppstoreOutlined />, title: t('pages.plans.viewGrid') },
+          { value: 'list', icon: <UnorderedListOutlined />, title: t('pages.plans.viewList') },
+        ]}
+      />
+      <Button
+        icon={showAddress ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        onClick={() => changeShowAddress(!showAddress)}
+      >
+        {showAddress ? t('pages.nodes.hideIp') : t('pages.nodes.showIp')}
+      </Button>
+      <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+        {t('pages.nodes.addNode')}
+      </Button>
+      {/* Without a Lite address there is no server to link a host to. */}
+      <Button
+        icon={<LinkOutlined />}
+        disabled={!overview?.configured}
+        onClick={() => setLinksOpen(true)}
+      >
+        {t('pages.probe.linkNodes')}
+      </Button>
+      {settingsButton}
+      {overview?.publicUrl && (
+        <Button
+          href={overview.publicUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          icon={<ExportOutlined />}
+        >
+          {t('pages.probe.openPublic')}
+        </Button>
+      )}
+      <Button icon={<SafetyCertificateOutlined />} onClick={() => setMtlsOpen(true)}>
+        {t('pages.nodes.mtls.title')}
+      </Button>
+      {view === 'list' && selectedIds.length > 0 && (
+        <Button icon={<CloudDownloadOutlined />} onClick={onUpdateSelected}>
+          {t('pages.nodes.updateSelected', { count: selectedIds.length })}
+        </Button>
+      )}
+      <span className="hosts-toolbar-counters">
+        <span className="hosts-counter">
+          <span className="hosts-counter-dot is-online" />
+          {t('pages.nodes.onlineNodes')} <strong>{totals.online}</strong>
+        </span>
+        <span className="hosts-counter">
+          <span className="hosts-counter-dot is-offline" />
+          {t('pages.nodes.offlineNodes')} <strong>{totals.offline}</strong>
+        </span>
+      </span>
+    </div>
+  );
+
   return (
     <ConfigProvider theme={antdThemeConfig}>
       {messageContextHolder}
@@ -312,69 +555,45 @@ export default function NodesPage() {
                   }
                 />
               ) : (
-                <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
-                  <Col span={24}>
-                    <Card size="small" hoverable className="summary-card">
-                      <Row gutter={[16, isMobile ? 16 : 12]}>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.totalNodes')}
-                            value={String(totals.total)}
-                            prefix={<CloudServerOutlined />}
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.onlineNodes')}
-                            value={String(totals.online)}
-                            prefix={
-                              <CheckCircleOutlined style={{ color: 'var(--ant-color-success)' }} />
-                            }
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.offlineNodes')}
-                            value={String(totals.offline)}
-                            prefix={
-                              <CloseCircleOutlined style={{ color: 'var(--ant-color-error)' }} />
-                            }
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.avgLatency')}
-                            value={totals.avgLatency > 0 ? `${totals.avgLatency} ms` : '-'}
-                            prefix={<ThunderboltOutlined />}
-                          />
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
-
-                  <Col span={24}>
-                    <LocalPanelCard nodes={nodesByHost.get(0) ?? []} />
-                  </Col>
-                  <Col span={24}>
-                    <NodeList
-                      nodes={nodes}
-                      nodesByHost={nodesByHost}
-                      loading={loading}
-                      isMobile={isMobile}
-                      latestVersion={latestVersion}
-                      selectedIds={selectedIds}
-                      onSelectionChange={setSelectedIds}
-                      onAdd={onAdd}
-                      onMtls={() => setMtlsOpen(true)}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onProbe={onProbe}
-                      onToggleEnable={onToggleEnable}
-                      onUpdateNode={onUpdateNode}
-                      onUpdateSelected={onUpdateSelected}
-                    />
-                  </Col>
-                </Row>
+                <div className="hosts-body">
+                  {toolbar}
+                  {probeNotice()}
+                  {view === 'grid' ? (
+                    <div className="host-grid">
+                      {hosts.map((host) => (
+                        <HostCard
+                          key={host.key}
+                          host={host}
+                          showAddress={showAddress}
+                          onRestartXray={onRestartXray}
+                          onEdit={onEditHost}
+                          onSetEnable={onSetHostEnable}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <LocalPanelCard nodes={nodesByHost.get(0) ?? []} />
+                      <NodeList
+                        nodes={nodes}
+                        nodesByHost={nodesByHost}
+                        loading={loading}
+                        isMobile={isMobile}
+                        latestVersion={latestVersion}
+                        showAddress={showAddress}
+                        onShowAddressChange={changeShowAddress}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onProbe={onProbe}
+                        onToggleEnable={onToggleEnable}
+                        onUpdateNode={onUpdateNode}
+                      />
+                    </>
+                  )}
+                  <MonitorOnlySection servers={monitorOnly} />
+                </div>
               )}
             </Spin>
           </Layout.Content>
@@ -390,6 +609,24 @@ export default function NodesPage() {
           save={onSave}
           mintAgentSecret={mintAgentSecret}
           onOpenChange={setFormOpen}
+        />
+
+        <ProbeLinksModal
+          open={linksOpen}
+          servers={probeUnreadable ? null : probeServers}
+          onClose={() => setLinksOpen(false)}
+          onSaved={() => {
+            setLinksOpen(false);
+            messageApi.success(t('pages.probe.linksSaved'));
+          }}
+        />
+        <ProbeSettingsModal
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onSaved={() => {
+            setSettingsOpen(false);
+            messageApi.success(t('pages.probe.settingsSaved'));
+          }}
         />
 
         <Modal
