@@ -62,6 +62,10 @@ function bars(): HTMLElement[] {
   return screen.queryAllByRole('progressbar');
 }
 
+function lossBars(): HTMLElement[] {
+  return screen.queryAllByRole('img', { name: /Packet loss/ });
+}
+
 describe('ProbeServerCard', () => {
   it('draws an online server with named usage bars, load, uptime, speeds and totals', () => {
     render(<ProbeServerCard server={online()} />);
@@ -175,7 +179,7 @@ describe('ProbeServerCard', () => {
   });
 
   // Lite reports a route with every sample lost as latency -1; it must not read "-1 ms".
-  it('names each ping task with its latency and loss, and a dead route as a timeout', () => {
+  it('lists each ping route with its latency under one heading, and a dead route as a timeout', () => {
     render(
       <ProbeServerCard
         server={online({
@@ -186,11 +190,74 @@ describe('ProbeServerCard', () => {
         })}
       />,
     );
-    const tags = Array.from(document.querySelectorAll('.probe-card .ant-tag')).map(
-      (tag) => tag.textContent,
+    const routes = Array.from(document.querySelectorAll('.probe-card-route')).map((route) => [
+      route.querySelector('.probe-card-route-name')?.textContent,
+      route.querySelector('.probe-card-route-latency')?.textContent,
+    ]);
+
+    expect(screen.getByText('Network quality')).toBeTruthy();
+    expect(screen.getByText('Last hour')).toBeTruthy();
+    expect(routes).toEqual([
+      ['电信', '31 ms'],
+      ['联通', 'timeout'],
+    ]);
+    // The loss has no figure of its own on the card, so the bar has to say it.
+    expect(lossBars().map((bar) => bar.getAttribute('aria-label'))).toEqual([
+      '电信 Packet loss 0.4 %',
+      '联通 Packet loss 100 %',
+    ]);
+  });
+
+  it('leaves the network quality heading out for a server without ping tasks', () => {
+    render(<ProbeServerCard server={online()} />);
+
+    expect(screen.queryByText('Network quality')).toBeNull();
+    expect(lossBars()).toHaveLength(0);
+  });
+
+  // The bar is the share of the hour's pings that came back: full when none was lost.
+  it('fills a route bar with the pings answered, amber under 95 % and red under 80 %', () => {
+    render(
+      <ProbeServerCard
+        server={online({
+          pings: [
+            { id: 1, name: 'a', latency: 20, loss: 5 },
+            { id: 2, name: 'b', latency: 20, loss: 5.5 },
+            { id: 3, name: 'c', latency: 20, loss: 20 },
+            { id: 4, name: 'd', latency: 20, loss: 20.5 },
+            { id: 5, name: 'e', latency: -1, loss: 100 },
+          ],
+        })}
+      />,
+    );
+    const fills = lossBars().map((bar) => bar.firstElementChild as HTMLElement);
+    const warn = 'rgb(250, 173, 20)';
+    const critical = 'rgb(255, 77, 79)';
+
+    expect(fills.map((fill) => fill.style.width)).toEqual(['95%', '94.5%', '80%', '79.5%', '0%']);
+    expect(fills.slice(1, 4).map((fill) => fill.style.background)).toEqual([warn, warn, critical]);
+    expect([warn, critical]).not.toContain(fills[0].style.background);
+  });
+
+  // Lite's own thresholds, so a route has the same colour here as on Lite's page.
+  it.each([
+    [80, 'is-good'],
+    [81, 'is-warn'],
+    [179, 'is-warn'],
+    [180, 'is-bad'],
+    [-1, 'is-bad'],
+  ])('marks a route latency of %i ms as %s', (latency, tone) => {
+    render(
+      <ProbeServerCard
+        server={online({
+          pings: [{ id: 8, name: '电信', latency, loss: latency < 0 ? 100 : 0 }],
+        })}
+      />,
     );
 
-    expect(tags).toEqual(['电信 31 ms · 0.4 %', '联通 timeout · 100 %']);
+    expect(document.querySelector('.probe-card-route-latency')?.className).toBe(
+      `probe-card-route-latency ${tone}`,
+    );
   });
 
   // Lite hands a region set by hand through as a two-letter code, not as a flag.

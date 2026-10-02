@@ -81,6 +81,7 @@ const LIGHT_TOKENS = {
   colorError: '#cf1322',
   colorErrorText: '#cf1322',
   colorSuccessText: '#237804',
+  colorWarningText: '#874d00',
   boxShadow: '0 0 0 1px rgba(137, 110, 96, 0.32), 6px 6px 0 rgba(39, 22, 16, 0.14)',
   boxShadowSecondary: '0 0 0 1px rgba(137, 110, 96, 0.28), 3px 3px 0 rgba(39, 22, 16, 0.12)',
 };

@@ -25,7 +25,7 @@ const online: ProbeCardServer = {
   uptime: 19 * 86400 + 5 * 3600,
   pings: [
     { id: 8, name: '电信', latency: 31, loss: 0.4 },
-    { id: 9, name: '联通', latency: 44, loss: 0 },
+    { id: 9, name: '联通', latency: 126, loss: 8 },
     { id: 10, name: '移动', latency: -1, loss: 100 },
   ],
 };
@@ -65,14 +65,14 @@ const meta = {
     docs: {
       description: {
         component:
-          'One monitored server: its flag and name, one status (online, offline, unknown or unmonitored), and for an online server its CPU, memory and disk bars, load, uptime, speeds, traffic totals and ping tasks. The admin Probe page and the client portal share it, so it fetches nothing and styles itself with theme tokens only. Lay cards out with the `probe-grid` class that ships with it.',
+          'One monitored server: its flag and name, one status (online, offline, unknown or unmonitored), and for an online server its CPU, memory and disk bars, load, uptime, speeds, traffic totals and, under a network quality heading, the latency of each ping route over a bar of the pings answered. The admin Probe page and the client portal share it, so it fetches nothing and styles itself with theme tokens only. Lay cards out with the `probe-grid` class that ships with it.',
       },
     },
   },
   argTypes: {
     server: {
       description:
-        'What to draw. Figures are read only while `status` is `online`. `updatedAt` (unix ms) is the last report of an offline server. A ping `latency` of -1 means no reply in the last hour. `region` is a flag emoji or a two-letter country code.',
+        'What to draw. Figures are read only while `status` is `online`. `updatedAt` (unix ms) is the last report of an offline server. A ping `latency` of -1 means no reply in the last hour; its `loss`, a percentage, is the unfilled part of the bar under it. `region` is a flag emoji or a two-letter country code.',
     },
     subtitle: { description: 'Optional line under the name, e.g. OS and architecture.' },
     footer: {
