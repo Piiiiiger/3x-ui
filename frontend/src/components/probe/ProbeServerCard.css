@@ -3,11 +3,26 @@
 .probe-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  /* Every row as tall as the tallest card, so all cards have one size. */
+  grid-auto-rows: 1fr;
   gap: 16px;
 }
 
 .probe-card.ant-card {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+}
+
+.probe-card.ant-card > .ant-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Takes the height a card has to spare, which keeps the footer on the bottom edge. */
+.probe-card-main {
+  flex: 1;
 }
 
 .probe-card-head {
@@ -29,7 +44,9 @@
   font-weight: 700;
   line-height: 22px;
   color: var(--ant-color-text);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .probe-card-status {
@@ -64,6 +81,15 @@
   margin-inline: 0;
   font-size: 12px;
   color: var(--ant-color-text-tertiary);
+}
+
+.probe-card-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.probe-card-note {
   overflow-wrap: anywhere;
 }
 
@@ -79,9 +105,9 @@
 .probe-card-meter-head,
 .probe-card-meter-name {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0 8px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .probe-card-meter-head {
@@ -90,16 +116,23 @@
 }
 
 .probe-card-meter-label {
+  flex-shrink: 0;
   font-weight: 600;
   color: var(--ant-color-text);
 }
 
+/* The one part of the row that gives way, so a meter is one line in every card. */
 .probe-card-meter-detail {
+  min-width: 0;
+  overflow: hidden;
   color: var(--ant-color-text-tertiary);
   font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .probe-card-meter-value {
+  flex-shrink: 0;
   color: var(--ant-color-text);
   font-variant-numeric: tabular-nums;
 }
@@ -118,15 +151,22 @@
   margin-inline: 0;
 }
 
+.probe-card-facts dt,
+.probe-card-facts dd > bdi {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .probe-card-facts dt {
   font-size: 12px;
   color: var(--ant-color-text-tertiary);
 }
 
+/* One figure to a line, always: side by side, long ones wrapped and short ones did not. */
 .probe-card-facts dd {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 10px;
+  flex-direction: column;
   margin-block: 2px 0;
   margin-inline: 0;
   font-size: 13px;

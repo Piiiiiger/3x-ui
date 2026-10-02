@@ -51,8 +51,8 @@ function systemLine(server: ProbeServer, t: TFunction): string {
 
 function ServerFooter({ server }: { server: ProbeServer }) {
   const { t } = useTranslation();
-  // The usage behind the quota is known only while the server is online.
-  const hasQuota = server.status === 'online' && server.trafficLimit > 0;
+  const limited = server.trafficLimit > 0;
+  const limit = limited ? SizeFormatter.sizeFormat(server.trafficLimit) : t('unlimited');
   return (
     <>
       <Tag icon={server.linked ? <LinkOutlined /> : undefined}>
@@ -61,11 +61,13 @@ function ServerFooter({ server }: { server: ProbeServer }) {
           {server.linked ? probeHostLabel(server, t) : t('pages.probe.notLinked')}
         </span>
       </Tag>
-      {hasQuota && (
+      {/* The usage is known only while the server is online. Without a limit the row
+          stays, so that every card ends alike. */}
+      {server.status === 'online' && (
         <ProbeMeter
           label={t('pages.probe.quota')}
-          percent={(server.trafficUsed / server.trafficLimit) * 100}
-          detail={`${SizeFormatter.sizeFormat(server.trafficUsed)} / ${SizeFormatter.sizeFormat(server.trafficLimit)}`}
+          percent={limited ? (server.trafficUsed / server.trafficLimit) * 100 : null}
+          detail={`${SizeFormatter.sizeFormat(server.trafficUsed)} / ${limit}`}
         />
       )}
     </>

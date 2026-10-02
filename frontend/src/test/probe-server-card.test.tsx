@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import ProbeServerCard, { type ProbeCardServer } from '@/components/probe/ProbeServerCard';
+import ProbeServerCard, {
+  ProbeMeter,
+  type ProbeCardServer,
+} from '@/components/probe/ProbeServerCard';
 
 const GIB = 1024 ** 3;
 const NOON_UTC = Date.UTC(2026, 9, 2, 12, 0, 0);
@@ -257,6 +260,26 @@ describe('ProbeServerCard', () => {
 
     expect(document.querySelector('.probe-card-route-latency')?.className).toBe(
       `probe-card-route-latency ${tone}`,
+    );
+  });
+
+  // Both are cut to one line so that cards line up; the tooltip keeps the rest in reach.
+  it('carries the whole name and system line as tooltips', () => {
+    const system = 'Debian GNU/Linux 13 (trixie) · amd64 · kvm · 1-core';
+    render(<ProbeServerCard server={online()} subtitle={system} />);
+
+    expect(screen.getByText('新加坡-Delta').getAttribute('title')).toBe('新加坡-Delta');
+    expect(screen.getByText(system).getAttribute('title')).toBe(system);
+  });
+
+  // A quota without a limit has nothing to divide by: no figure, and no bar at "0 %".
+  it('draws a meter without a percentage as an empty bar named by its detail', () => {
+    render(<ProbeMeter label="Traffic quota" percent={null} detail="3.00 GB / Unlimited" />);
+    const bar = screen.getByRole('progressbar', { name: 'Traffic quota 3.00 GB / Unlimited' });
+
+    expect(bar.getAttribute('aria-valuenow')).toBe('0');
+    expect(document.querySelector('.probe-card-meter')?.textContent).toBe(
+      'Traffic quota3.00 GB / Unlimited',
     );
   });
 

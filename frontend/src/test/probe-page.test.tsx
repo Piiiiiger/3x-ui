@@ -90,6 +90,7 @@ const hongKong = server({
   diskTotal: 30 * GIB,
   netIn: 1024,
   netOut: 1024,
+  trafficUsed: 3 * GIB,
   linked: true,
   nodeId: 2,
   nodeName: 'edge-hk',
@@ -242,7 +243,15 @@ describe('ProbePage', () => {
     // "none" is what a bare-metal server reports; it is not a kind of virtualization.
     expect(within(hk).getByText('Ubuntu 24.04.3 LTS · arm64 · 2-core')).toBeTruthy();
     expect(within(hk).getByText('edge-hk')).toBeTruthy();
-    expect(within(hk).queryByRole('progressbar', { name: /Traffic quota/ })).toBeNull();
+    // Without a limit the row stays, so every card ends alike: the usage, and an empty bar.
+    expect(
+      within(hk)
+        .getByRole('progressbar', { name: 'Traffic quota 3.00 GB / Unlimited' })
+        .getAttribute('aria-valuenow'),
+    ).toBe('0');
+    expect(hk.querySelector('.probe-card-footer')?.textContent).toBe(
+      'edge-hkTraffic quota3.00 GB / Unlimited',
+    );
 
     expect(within(uk).getByText('Not linked')).toBeTruthy();
     expect(within(uk).queryByText('Local panel')).toBeNull();

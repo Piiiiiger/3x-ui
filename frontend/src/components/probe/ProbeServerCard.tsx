@@ -45,14 +45,16 @@ function answeredColor(percent: number, goodColor: string): string {
 
 interface ProbeMeterProps {
   label: string;
-  percent: number;
+  // null is a share of something without a limit: an empty bar and no figure.
+  percent: number | null;
   detail?: string;
 }
 
 // Exported for the admin page, which adds a quota bar of the same make to the footer.
 export function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
   const { token } = theme.useToken();
-  const value = `${percent.toFixed(1)} %`;
+  const value = percent === null ? undefined : `${percent.toFixed(1)} %`;
+  const share = percent ?? 0;
   return (
     <div className="probe-card-meter">
       <div className="probe-card-meter-head">
@@ -60,14 +62,14 @@ export function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
           <span className="probe-card-meter-label">{label}</span>
           {detail && <bdi className="probe-card-meter-detail">{detail}</bdi>}
         </span>
-        <bdi className="probe-card-meter-value">{value}</bdi>
+        {value && <bdi className="probe-card-meter-value">{value}</bdi>}
       </div>
       <Progress
-        aria-label={`${label} ${value}`}
-        percent={percent}
+        aria-label={[label, value ?? detail].filter(Boolean).join(' ')}
+        percent={share}
         showInfo={false}
         size="small"
-        strokeColor={usageTierColor(percent, token.colorPrimary)}
+        strokeColor={usageTierColor(share, token.colorPrimary)}
       />
     </div>
   );
@@ -201,25 +203,35 @@ export default function ProbeServerCard({ server, subtitle, footer }: ProbeServe
   const { t, i18n } = useTranslation();
   return (
     <Card size="small" className="probe-card">
-      <div className="probe-card-head">
-        {server.region && <span className="probe-card-flag">{regionFlag(server.region)}</span>}
-        <span className="probe-card-name" dir="auto">
-          {server.name}
-        </span>
-        <span className={`probe-card-status is-${server.status}`}>
-          <span className="probe-card-dot" aria-hidden="true" />
-          {t(STATUS_LABEL_KEYS[server.status])}
-        </span>
+      <div className="probe-card-main">
+        <div className="probe-card-head">
+          {server.region && <span className="probe-card-flag">{regionFlag(server.region)}</span>}
+          {/* One line each, so that cards line up: the tooltips carry what is cut off. */}
+          <span className="probe-card-name" dir="auto" title={server.name}>
+            {server.name}
+          </span>
+          <span className={`probe-card-status is-${server.status}`}>
+            <span className="probe-card-dot" aria-hidden="true" />
+            {t(STATUS_LABEL_KEYS[server.status])}
+          </span>
+        </div>
+        {subtitle && (
+          <div
+            className="probe-card-subtitle"
+            title={typeof subtitle === 'string' ? subtitle : undefined}
+          >
+            {subtitle}
+          </div>
+        )}
+        {server.status === 'online' && <OnlineFigures server={server} />}
+        {server.status === 'offline' && server.updatedAt > 0 && (
+          <p className="probe-card-note">
+            {t('pages.probe.lastSeen', {
+              time: IntlUtil.formatDate(server.updatedAt, 'gregorian', i18n.language),
+            })}
+          </p>
+        )}
       </div>
-      {subtitle && <div className="probe-card-subtitle">{subtitle}</div>}
-      {server.status === 'online' && <OnlineFigures server={server} />}
-      {server.status === 'offline' && server.updatedAt > 0 && (
-        <p className="probe-card-note">
-          {t('pages.probe.lastSeen', {
-            time: IntlUtil.formatDate(server.updatedAt, 'gregorian', i18n.language),
-          })}
-        </p>
-      )}
       {footer && <div className="probe-card-footer">{footer}</div>}
     </Card>
   );
