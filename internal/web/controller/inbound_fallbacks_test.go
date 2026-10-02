@@ -17,7 +17,7 @@ import (
 // The inbound form posts a TLS or REALITY master's fallbacks right after the master.
 // They are part of its config on an agent, which got them only on its next sync tick.
 func TestInboundFallbacksReachAnAgentAtOnce(t *testing.T) {
-	newHostTestDB(t)
+	newControllerTestDB(t)
 	prevManager := runtime.GetManager()
 	runtime.SetManager(runtime.NewManager(runtime.LocalDeps{APIPort: func() int { return 0 }, SetNeedRestart: func() {}}))
 	t.Cleanup(func() { runtime.SetManager(prevManager) })

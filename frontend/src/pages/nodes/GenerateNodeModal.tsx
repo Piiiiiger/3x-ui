@@ -16,7 +16,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { FormField } from '@/components/form/rhf';
 import { keys } from '@/api/queryKeys';
-import { useHostsQuery } from '@/api/queries/useHostsQuery';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import { usePlansQuery } from '@/api/queries/usePlansQuery';
 import { buildClonePayload, cloneShareFor, type CloneShare } from '@/lib/xray/inbound-clone';
@@ -68,7 +67,6 @@ export default function GenerateNodeModal({ open, host, onClose }: GenerateNodeM
   const queryClient = useQueryClient();
   const [messageApi, messageContextHolder] = message.useMessage();
   const { data: options, isFetched: optionsFetched } = useInboundOptions();
-  const { hosts: entries } = useHostsQuery();
   const { plans, fetched: plansFetched } = usePlansQuery();
   const methods = useForm<GenerateValues>({ defaultValues: EMPTY });
   const [template, setTemplate] = useState<DBInbound | null>(null);
@@ -81,14 +79,7 @@ export default function GenerateNodeModal({ open, host, onClose }: GenerateNodeM
     [options, host.id],
   );
   const templateOption = useMemo(() => pickTemplate(options ?? [], host.id), [options, host.id]);
-  const nat = useMemo(
-    () =>
-      isNatHost(
-        hostNodes.map((n) => ({ id: n.id, port: n.port ?? 0 })),
-        entries,
-      ),
-    [hostNodes, entries],
-  );
+  const nat = useMemo(() => isNatHost(hostNodes), [hostNodes]);
   const hostShare = useMemo(() => {
     const shares = new Map<number, CloneShare>();
     const first = hostNodes[0];
@@ -172,6 +163,7 @@ export default function GenerateNodeModal({ open, host, onClose }: GenerateNodeM
         ...copy,
         remark: values.name.trim(),
         enable: true,
+        sharePort: values.publicPort ?? 0,
         streamSettings: withRealityTarget(
           copy.streamSettings,
           values.target.trim(),
@@ -180,12 +172,11 @@ export default function GenerateNodeModal({ open, host, onClose }: GenerateNodeM
       };
       const msg = await HttpUtil.post(
         '/panel/api/inbounds/generate',
-        { inbound, planIds: values.planIds, publicPort: values.publicPort ?? 0 },
+        { inbound, planIds: values.planIds },
         { ...JSON_HEADERS, silent: true },
       );
       void queryClient.invalidateQueries({ queryKey: keys.inbounds.root() });
       void queryClient.invalidateQueries({ queryKey: keys.plans.root() });
-      void queryClient.invalidateQueries({ queryKey: keys.hosts.root() });
       if (msg?.success) {
         messageApi.success(t('pages.nodes.generate.done', { host: host.name }));
         onClose();
@@ -246,7 +237,7 @@ export default function GenerateNodeModal({ open, host, onClose }: GenerateNodeM
           <FormField name="target" label={t('pages.nodes.generate.target')} required>
             <Input placeholder="www.example.com:443" />
           </FormField>
-          <FormField name="serverName" label={t('pages.hosts.fields.sni')}>
+          <FormField name="serverName" label={t('pages.nodes.generate.sni')}>
             <Input />
           </FormField>
           <FormField name="planIds" label={t('pages.nodes.generate.plans')}>

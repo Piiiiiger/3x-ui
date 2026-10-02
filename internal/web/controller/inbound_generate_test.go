@@ -18,9 +18,9 @@ import (
 )
 
 // The body nests the inbound because model.Inbound decodes itself: flattened,
-// planIds and publicPort would be dropped without a word.
+// planIds would be dropped without a word, and the public port rides in it.
 func TestInboundGenerateRouteBindsTheWholeRequest(t *testing.T) {
-	newHostTestDB(t)
+	newControllerTestDB(t)
 	prevManager := runtime.GetManager()
 	runtime.SetManager(runtime.NewManager(runtime.LocalDeps{APIPort: func() int { return 0 }, SetNeedRestart: func() {}}))
 	t.Cleanup(func() { runtime.SetManager(prevManager) })
@@ -56,18 +56,17 @@ func TestInboundGenerateRouteBindsTheWholeRequest(t *testing.T) {
 	body := func(publicPort int) map[string]any {
 		return map[string]any{
 			"inbound": map[string]any{
-				"remark": "香港-Edge-2", "enable": true, "port": 81, "protocol": "vless", "nodeId": host.Id,
+				"remark": "香港-Edge-2", "enable": true, "port": 81, "sharePort": publicPort, "protocol": "vless", "nodeId": host.Id,
 				"settings":       map[string]any{"clients": []any{}, "decryption": "none"},
 				"streamSettings": map[string]any{"network": "tcp", "security": "none"},
 				"sniffing":       map[string]any{},
 			},
-			"planIds":    []int{},
-			"publicPort": publicPort,
+			"planIds": []int{},
 		}
 	}
 
 	if reply := postJSON(t, engine, "/panel/api/inbounds/generate", body(70000)); reply.Success || reply.Msg != "request body failed validation" {
-		t.Fatalf("public port 70000: success %v, msg %q, want a validation failure", reply.Success, reply.Msg)
+		t.Fatalf("share port 70000: success %v, msg %q, want a validation failure", reply.Success, reply.Msg)
 	}
 	var inbounds int64
 	database.GetDB().Model(&model.Inbound{}).Count(&inbounds)
@@ -90,8 +89,7 @@ func TestInboundGenerateRouteBindsTheWholeRequest(t *testing.T) {
 	if !stored.Enable || stored.NodeID == nil || *stored.NodeID != host.Id || stored.Port != 81 {
 		t.Fatalf("stored node: enable %v, node %v, port %d; want enabled on agent %d at 81", stored.Enable, stored.NodeID, stored.Port, host.Id)
 	}
-	var entry model.Host
-	if err := database.GetDB().Where("inbound_id = ?", created.Id).First(&entry).Error; err != nil || entry.Port != 20443 {
-		t.Fatalf("entry %+v (err %v): publicPort 20443 never reached the service", entry, err)
+	if stored.SharePort != 20443 {
+		t.Fatalf("stored share port %d: the public port 20443 never reached the service", stored.SharePort)
 	}
 }

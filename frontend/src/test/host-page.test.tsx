@@ -66,12 +66,8 @@ const inbound = (
 
 const INBOUNDS = [
   inbound(1, '洛杉矶-Core', 443, null, '198.51.100.19'),
-  inbound(5, '香港-Edge', 81, 2, '203.0.113.53'),
+  { ...inbound(5, '香港-Edge', 81, 2, '203.0.113.53'), sharePort: 20443 },
   inbound(7, '美国-Edge', 10443, 3, '203.0.113.17'),
-];
-
-const ENTRIES = [
-  { groupId: 'nat', inboundIds: [5], hosts: [':20443'], port: 20443, remark: '香港-Edge' },
 ];
 
 // The setup file stubs HttpUtil for every test; only GET is answered here, and its
@@ -83,7 +79,6 @@ function serve() {
   getStub.mockImplementation(async (url: string) => {
     if (url === '/panel/api/inbounds/list/slim') return new Msg(true, '', INBOUNDS);
     if (url === '/panel/api/nodes/list') return new Msg(true, '', HOSTS);
-    if (url === '/panel/api/hosts/list') return new Msg(true, '', ENTRIES);
     if (url === '/panel/api/inbounds/options') return new Msg(true, '', []);
     if (url === '/panel/api/plans/list') return new Msg(true, '', []);
     return new Msg(true, '', {});

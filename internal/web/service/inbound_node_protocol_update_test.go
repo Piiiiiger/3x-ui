@@ -33,12 +33,12 @@ func TestUpdateInbound_NodeMtprotoShareAddrIsEditable(t *testing.T) {
 		t.Fatalf("nodeID = %v, want %d preserved", updated.NodeID, nodeID)
 	}
 
-	var hosts []model.Host
-	if err := database.GetDB().Where("inbound_id = ?", existing.Id).Find(&hosts).Error; err != nil {
-		t.Fatalf("load hosts: %v", err)
+	var stored model.Inbound
+	if err := database.GetDB().First(&stored, existing.Id).Error; err != nil {
+		t.Fatalf("reload inbound: %v", err)
 	}
-	if len(hosts) != 1 || hosts[0].Address != "new-share.example.com" {
-		t.Fatalf("hosts = %+v, want one new-share.example.com host", hosts)
+	if stored.ShareAddrStrategy != "custom" || stored.ShareAddr != "new-share.example.com" {
+		t.Fatalf("stored share address %s %q, want custom new-share.example.com", stored.ShareAddrStrategy, stored.ShareAddr)
 	}
 }
 

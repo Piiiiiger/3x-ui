@@ -19,7 +19,6 @@ import {
   DiscordOutlined,
   ExportOutlined,
   FileTextOutlined,
-  GlobalOutlined,
   ImportOutlined,
   LoadingOutlined,
   MailOutlined,
@@ -390,12 +389,6 @@ export default function CommandPalette() {
         title: t('menu.nodes'),
         keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],
         icon: <ClusterOutlined />,
-      },
-      {
-        path: '/hosts',
-        title: t('menu.hosts'),
-        keywords: ['hosts', 'sni', 'domains'],
-        icon: <GlobalOutlined />,
       },
       {
         path: '/outbound',

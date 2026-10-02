@@ -20,6 +20,7 @@ export interface DbInboundLike {
   total?: number;
   shareAddrStrategy?: string;
   shareAddr?: string;
+  sharePort?: number;
 }
 
 function fillProtocolSettingsDefaults(
@@ -56,6 +57,7 @@ export function inboundFromDb(raw: DbInboundLike): Inbound {
     total: raw.total ?? 0,
     shareAddrStrategy: raw.shareAddrStrategy ?? 'node',
     shareAddr: raw.shareAddr ?? '',
+    sharePort: raw.sharePort ?? 0,
     settings,
     streamSettings,
     sniffing,

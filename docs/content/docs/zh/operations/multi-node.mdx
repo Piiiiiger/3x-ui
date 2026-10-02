@@ -1,10 +1,10 @@
 ---
-title: 多节点与受管主机
-description: 通过 API 令牌或 mTLS 信任、心跳检测以及针对每个入站的主机覆盖，从一个主控面板统一管理多个 3x-ui 面板并定制订阅。
+title: 多节点
+description: 通过 API 令牌或 mTLS 信任、心跳检测以及 NAT 后节点的公网端口，从一个主控面板统一管理多个 3x-ui 面板。
 icon: Boxes
 ---
 
-3x-ui 可以从单个主控面板管理**多台服务器**，并借助**受管主机**覆盖每个入站在订阅中的通告方式。
+3x-ui 可以从单个主控面板管理**多台服务器**，并以**公网端口**通告位于 NAT 之后的节点。
 
 ## 节点
 
@@ -57,23 +57,13 @@ icon: Boxes
 
 </Steps>
 
-## 受管主机
+## NAT 后的公网端口
 
-**受管主机**是附加到入站上的覆盖端点。在订阅时，每个启用的主机会以其自己的地址、端口、TLS、SNI、主机头、路径等渲染出一条额外的分享链接 / 代理——取代旧的“外部代理”列表。可用于：
-
-- 通过 **CDN**（Cloudflare）以不同的地址/SNI 为入站做前置，
-- 为单个入站通告**多个域名**或按地区划分的端点，
-- 为每个端点调整 ALPN、指纹、ECH 或 mux。
-
-每个主机都有一个备注（支持相同的[模板变量](/docs/config/share-links#remark-template-variables)）、一个启用开关、一个排序顺序，并且可以**从特定订阅格式中排除**或**限定到特定节点**。
-
-<Callout type="info">
-  将地址/端口指向 CDN 的主机让你能够在客户端通过 CDN 边缘连接的同时，保持真实服务器地址的私密性。
-</Callout>
+当 NAT 将另一个公网端口映射到节点上时（NAT VPS 套餐的常见情形），请设置该节点的**公网端口**。分享链接和所有订阅格式随后都会以节点的分享地址加上这个端口进行通告，而 Xray 仍监听节点自身的端口。若客户端直接连接节点自身的端口，保持为 0 即可。
 
 ## 相关内容
 
 <Cards>
   <Card title="出站与路由" href="/docs/operations/outbounds-routing" description="WARP、NordVPN、出站订阅以及路由。" />
-  <Card title="订阅" href="/docs/config/subscription" description="主机如何塑造订阅输出。" />
+  <Card title="订阅" href="/docs/config/subscription" description="分享地址和公网端口如何塑造订阅输出。" />
 </Cards>

@@ -12,7 +12,6 @@
     "xray-settings",
     "subscription-server",
     "subscription-balancers",
-    "hosts",
     "plans",
     "traffic",
     "probe",

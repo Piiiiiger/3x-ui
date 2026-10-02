@@ -10,18 +10,16 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 
 	"gorm.io/gorm"
 )
 
 // GenerateNodeRequest is a new node on one host: the inbound as the add route takes
-// it, the plans whose members get it, and the port NAT exposes it on (0 for none).
+// it (its sharePort is the port NAT exposes), and the plans whose members get it.
 type GenerateNodeRequest struct {
-	Inbound    model.Inbound `json:"inbound"`
-	PlanIds    []int         `json:"planIds" example:"[1,2]"`
-	PublicPort int           `json:"publicPort" example:"20443" validate:"min=0,max=65535"`
+	Inbound model.Inbound `json:"inbound"`
+	PlanIds []int         `json:"planIds" example:"[1,2]"`
 }
 
 // generateApplyTimeout bounds the wait for a host's verdict on a generated node.
@@ -106,15 +104,9 @@ func nextSubSortIndex() (int, error) {
 	return top + 1, err
 }
 
-// attachGeneratedNode adds the NAT entry and the plans' members while the node is
-// still disabled; enabling it adds them live, so no restart is asked for here.
+// attachGeneratedNode adds the plans' members while the node is still disabled;
+// enabling it adds them live, so no restart is asked for here.
 func (s *InboundService) attachGeneratedNode(created *model.Inbound, req *GenerateNodeRequest) error {
-	if req.PublicPort > 0 && req.PublicPort != created.Port {
-		entry := &entity.HostGroup{InboundIds: []int{created.Id}, Port: req.PublicPort, Remark: created.Remark, Security: "same"}
-		if _, err := (&HostService{}).AddHostGroup(entry); err != nil {
-			return err
-		}
-	}
 	_, err := (&PlanService{}).AddInboundToPlans(s, created.Id, req.PlanIds)
 	return err
 }

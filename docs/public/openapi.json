@@ -2537,7 +2537,7 @@
         "type": "object"
       },
       "GenerateNodeRequest": {
-        "description": "GenerateNodeRequest is a new node on one host: the inbound as the add route takes\nit, the plans whose members get it, and the port NAT exposes it on (0 for none).",
+        "description": "GenerateNodeRequest is a new node on one host: the inbound as the add route takes\nit (its sharePort is the port NAT exposes), and the plans whose members get it.",
         "properties": {
           "clientStats": {
             "description": "Client traffic statistics",
@@ -2636,12 +2636,6 @@
             "example": "vless",
             "type": "string"
           },
-          "publicPort": {
-            "example": 20443,
-            "maximum": 65535,
-            "minimum": 0,
-            "type": "integer"
-          },
           "remark": {
             "description": "Human-readable remark",
             "example": "VLESS-443",
@@ -2658,6 +2652,13 @@
               "custom"
             ],
             "type": "string"
+          },
+          "sharePort": {
+            "description": "SharePort is the port links advertise when NAT maps a public port onto this\none; 0 keeps the inbound's own port.",
+            "example": 0,
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
           },
           "sniffing": {},
           "streamSettings": {},
@@ -2712,11 +2713,11 @@
           "planIds",
           "port",
           "protocol",
-          "publicPort",
           "remark",
           "settings",
           "shareAddr",
           "shareAddrStrategy",
+          "sharePort",
           "sniffing",
           "streamSettings",
           "subSortIndex",
@@ -2907,364 +2908,6 @@
         ],
         "type": "object"
       },
-      "Host": {
-        "properties": {
-          "address": {
-            "example": "cdn.example.com",
-            "type": "string"
-          },
-          "allowInsecure": {
-            "type": "boolean"
-          },
-          "alpn": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "cipherSuites": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "echConfigList": {
-            "type": "string"
-          },
-          "excludeFromSubTypes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "finalMask": {
-            "description": "FinalMask is a JSON object of xray finalmask masks (tcp/udp/quicParams),\nmerged into this host's JSON-subscription stream. Empty = no override.",
-            "type": "string"
-          },
-          "fingerprint": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "string"
-          },
-          "hostHeader": {
-            "type": "string"
-          },
-          "id": {
-            "example": 1,
-            "type": "integer"
-          },
-          "inboundId": {
-            "example": 1,
-            "type": "integer"
-          },
-          "isDisabled": {
-            "type": "boolean"
-          },
-          "isHidden": {
-            "type": "boolean"
-          },
-          "keepSniBlank": {
-            "type": "boolean"
-          },
-          "mihomoIpVersion": {
-            "enum": [
-              "dual",
-              "ipv4",
-              "ipv6",
-              "ipv4-prefer",
-              "ipv6-prefer"
-            ],
-            "type": "string"
-          },
-          "mihomoX25519": {
-            "type": "boolean"
-          },
-          "muxParams": {},
-          "nodeGuids": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "overrideSniFromAddress": {
-            "type": "boolean"
-          },
-          "path": {
-            "type": "string"
-          },
-          "pinnedPeerCertSha256": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "port": {
-            "example": 8443,
-            "maximum": 65535,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "remark": {
-            "example": "cdn-front",
-            "maxLength": 256,
-            "type": "string"
-          },
-          "security": {
-            "enum": [
-              "same",
-              "tls",
-              "none",
-              "reality"
-            ],
-            "example": "same",
-            "type": "string"
-          },
-          "serverDescription": {
-            "maxLength": 64,
-            "type": "string"
-          },
-          "shuffleHost": {
-            "type": "boolean"
-          },
-          "sni": {
-            "type": "string"
-          },
-          "sockoptParams": {},
-          "sortOrder": {
-            "type": "integer"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "updatedAt": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "verifyPeerCertByName": {
-            "type": "string"
-          },
-          "vlessRoute": {
-            "description": "Single VLESS route value (0-65535) baked into the subscription UUID's 3rd\ngroup (bytes 6-7), which xray reads via net.PortFromBytes(id[6:8]). Empty = none.",
-            "example": "443",
-            "type": "string"
-          }
-        },
-        "required": [
-          "address",
-          "allowInsecure",
-          "alpn",
-          "cipherSuites",
-          "createdAt",
-          "echConfigList",
-          "excludeFromSubTypes",
-          "finalMask",
-          "fingerprint",
-          "groupId",
-          "hostHeader",
-          "id",
-          "inboundId",
-          "isDisabled",
-          "isHidden",
-          "keepSniBlank",
-          "mihomoIpVersion",
-          "mihomoX25519",
-          "muxParams",
-          "overrideSniFromAddress",
-          "path",
-          "pinnedPeerCertSha256",
-          "port",
-          "remark",
-          "security",
-          "serverDescription",
-          "shuffleHost",
-          "sni",
-          "sockoptParams",
-          "sortOrder",
-          "tags",
-          "updatedAt",
-          "verifyPeerCertByName",
-          "vlessRoute"
-        ],
-        "type": "object"
-      },
-      "HostGroup": {
-        "properties": {
-          "allowInsecure": {
-            "type": "boolean"
-          },
-          "alpn": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "cipherSuites": {
-            "type": "string"
-          },
-          "echConfigList": {
-            "type": "string"
-          },
-          "excludeFromSubTypes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "finalMask": {
-            "type": "string"
-          },
-          "fingerprint": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "string"
-          },
-          "hostHeader": {
-            "type": "string"
-          },
-          "hosts": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "inboundIds": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array"
-          },
-          "isDisabled": {
-            "type": "boolean"
-          },
-          "isHidden": {
-            "type": "boolean"
-          },
-          "keepSniBlank": {
-            "type": "boolean"
-          },
-          "mihomoIpVersion": {
-            "enum": [
-              "dual",
-              "ipv4",
-              "ipv6",
-              "ipv4-prefer",
-              "ipv6-prefer"
-            ],
-            "type": "string"
-          },
-          "mihomoX25519": {
-            "type": "boolean"
-          },
-          "muxParams": {
-            "type": "string"
-          },
-          "nodeGuids": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "overrideSniFromAddress": {
-            "type": "boolean"
-          },
-          "path": {
-            "type": "string"
-          },
-          "pinnedPeerCertSha256": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "port": {
-            "maximum": 65535,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "remark": {
-            "maxLength": 256,
-            "type": "string"
-          },
-          "security": {
-            "enum": [
-              "same",
-              "tls",
-              "none",
-              "reality"
-            ],
-            "type": "string"
-          },
-          "serverDescription": {
-            "maxLength": 64,
-            "type": "string"
-          },
-          "shuffleHost": {
-            "type": "boolean"
-          },
-          "sni": {
-            "type": "string"
-          },
-          "sockoptParams": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "integer"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "verifyPeerCertByName": {
-            "type": "string"
-          },
-          "vlessRoute": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "allowInsecure",
-          "alpn",
-          "cipherSuites",
-          "echConfigList",
-          "excludeFromSubTypes",
-          "finalMask",
-          "fingerprint",
-          "groupId",
-          "hostHeader",
-          "hosts",
-          "inboundIds",
-          "isDisabled",
-          "isHidden",
-          "keepSniBlank",
-          "mihomoIpVersion",
-          "mihomoX25519",
-          "muxParams",
-          "nodeGuids",
-          "overrideSniFromAddress",
-          "path",
-          "pinnedPeerCertSha256",
-          "port",
-          "remark",
-          "security",
-          "serverDescription",
-          "shuffleHost",
-          "sni",
-          "sockoptParams",
-          "sortOrder",
-          "tags",
-          "verifyPeerCertByName",
-          "vlessRoute"
-        ],
-        "type": "object"
-      },
       "HwidSlotStatus": {
         "description": "HwidSlotStatus is the aggregate device-slot view exposed to subscribers:\ncounters only, no hwid value or hash, no email, no device metadata.",
         "properties": {
@@ -3405,6 +3048,13 @@
             ],
             "type": "string"
           },
+          "sharePort": {
+            "description": "SharePort is the port links advertise when NAT maps a public port onto this\none; 0 keeps the inbound's own port.",
+            "example": 0,
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
           "sniffing": {},
           "streamSettings": {},
           "subSortIndex": {
@@ -3461,6 +3111,7 @@
           "settings",
           "shareAddr",
           "shareAddrStrategy",
+          "sharePort",
           "sniffing",
           "streamSettings",
           "subSortIndex",
@@ -3590,6 +3241,10 @@
           },
           "shareAddrStrategy": {
             "type": "string"
+          },
+          "sharePort": {
+            "example": 0,
+            "type": "integer"
           },
           "ssMethod": {
             "type": "string"
@@ -5976,10 +5631,6 @@
       "description": "Manage remote 3x-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes."
     },
     {
-      "name": "Hosts",
-      "description": "Per-inbound override endpoints. Each enabled host renders one extra subscription link/proxy with its own address/port/TLS, superseding the legacy externalProxy array. All endpoints under /panel/api/hosts."
-    },
-    {
       "name": "Plans",
       "description": "Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds."
     },
@@ -6336,6 +5987,7 @@
                       "settings": null,
                       "shareAddr": "",
                       "shareAddrStrategy": "node",
+                      "sharePort": 0,
                       "sniffing": null,
                       "streamSettings": null,
                       "subSortIndex": 1,
@@ -6449,6 +6101,7 @@
                       "security": "",
                       "shareAddr": "",
                       "shareAddrStrategy": "",
+                      "sharePort": 0,
                       "ssMethod": "",
                       "tag": "in-443-tcp",
                       "tlsFlowCapable": true,
@@ -6699,7 +6352,7 @@
         "tags": [
           "Inbounds"
         ],
-        "summary": "Generate a node on the local panel or a connected agent host. The inbound is created disabled; when NAT exposes it on another public port an entry row carries that port; the chosen plans’ members get it without their limits being re-applied. It is enabled only once the host runs it: the local panel must bind the port and take it live, an agent must accept the pushed config. A node the host refuses is left as a disabled row and the message says why; an earlier failure removes it.",
+        "summary": "Generate a node on the local panel or a connected agent host. The inbound is created disabled, with sharePort set when NAT exposes it on another public port; the chosen plans’ members get it without their limits being re-applied. It is enabled only once the host runs it: the local panel must bind the port and take it live, an agent must accept the pushed config. A node the host refuses is left as a disabled row and the message says why; an earlier failure removes it.",
         "operationId": "post_panel_api_inbounds_generate",
         "requestBody": {
           "required": true,
@@ -6713,6 +6366,7 @@
                   "remark": "HK-Edge-2",
                   "enable": true,
                   "port": 81,
+                  "sharePort": 20443,
                   "protocol": "vless",
                   "nodeId": 5,
                   "settings": {
@@ -6728,8 +6382,7 @@
                 "planIds": [
                   1,
                   2
-                ],
-                "publicPort": 20443
+                ]
               }
             }
           }
@@ -12934,903 +12587,6 @@
         }
       }
     },
-    "/panel/api/hosts/list": {
-      "get": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "List every host across all inbounds, grouped by inbound then ordered by sort order.",
-        "operationId": "get_panel_api_hosts_list",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/HostGroup"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "allowInsecure": false,
-                      "alpn": [
-                        ""
-                      ],
-                      "cipherSuites": "",
-                      "echConfigList": "",
-                      "excludeFromSubTypes": [
-                        ""
-                      ],
-                      "finalMask": "",
-                      "fingerprint": "",
-                      "groupId": "",
-                      "hostHeader": "",
-                      "hosts": [
-                        ""
-                      ],
-                      "inboundIds": [
-                        0
-                      ],
-                      "isDisabled": false,
-                      "isHidden": false,
-                      "keepSniBlank": false,
-                      "mihomoIpVersion": "dual",
-                      "mihomoX25519": false,
-                      "muxParams": "",
-                      "nodeGuids": [
-                        ""
-                      ],
-                      "overrideSniFromAddress": false,
-                      "path": "",
-                      "pinnedPeerCertSha256": [
-                        ""
-                      ],
-                      "port": 0,
-                      "remark": "",
-                      "security": "same",
-                      "serverDescription": "",
-                      "shuffleHost": false,
-                      "sni": "",
-                      "sockoptParams": "",
-                      "sortOrder": 0,
-                      "tags": [
-                        ""
-                      ],
-                      "verifyPeerCertByName": "",
-                      "vlessRoute": ""
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/get/{groupId}": {
-      "get": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Fetch a single host group by Group ID.",
-        "operationId": "get_panel_api_hosts_get_groupId",
-        "parameters": [
-          {
-            "name": "groupId",
-            "in": "path",
-            "required": true,
-            "description": "Host Group ID.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/HostGroup"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "allowInsecure": false,
-                    "alpn": [
-                      ""
-                    ],
-                    "cipherSuites": "",
-                    "echConfigList": "",
-                    "excludeFromSubTypes": [
-                      ""
-                    ],
-                    "finalMask": "",
-                    "fingerprint": "",
-                    "groupId": "",
-                    "hostHeader": "",
-                    "hosts": [
-                      ""
-                    ],
-                    "inboundIds": [
-                      0
-                    ],
-                    "isDisabled": false,
-                    "isHidden": false,
-                    "keepSniBlank": false,
-                    "mihomoIpVersion": "dual",
-                    "mihomoX25519": false,
-                    "muxParams": "",
-                    "nodeGuids": [
-                      ""
-                    ],
-                    "overrideSniFromAddress": false,
-                    "path": "",
-                    "pinnedPeerCertSha256": [
-                      ""
-                    ],
-                    "port": 0,
-                    "remark": "",
-                    "security": "same",
-                    "serverDescription": "",
-                    "shuffleHost": false,
-                    "sni": "",
-                    "sockoptParams": "",
-                    "sortOrder": 0,
-                    "tags": [
-                      ""
-                    ],
-                    "verifyPeerCertByName": "",
-                    "vlessRoute": ""
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/byInbound/{inboundId}": {
-      "get": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Fetch one inbound's hosts, grouped by host group.",
-        "operationId": "get_panel_api_hosts_byInbound_inboundId",
-        "parameters": [
-          {
-            "name": "inboundId",
-            "in": "path",
-            "required": true,
-            "description": "Inbound ID.",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/HostGroup"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "allowInsecure": false,
-                      "alpn": [
-                        ""
-                      ],
-                      "cipherSuites": "",
-                      "echConfigList": "",
-                      "excludeFromSubTypes": [
-                        ""
-                      ],
-                      "finalMask": "",
-                      "fingerprint": "",
-                      "groupId": "",
-                      "hostHeader": "",
-                      "hosts": [
-                        ""
-                      ],
-                      "inboundIds": [
-                        0
-                      ],
-                      "isDisabled": false,
-                      "isHidden": false,
-                      "keepSniBlank": false,
-                      "mihomoIpVersion": "dual",
-                      "mihomoX25519": false,
-                      "muxParams": "",
-                      "nodeGuids": [
-                        ""
-                      ],
-                      "overrideSniFromAddress": false,
-                      "path": "",
-                      "pinnedPeerCertSha256": [
-                        ""
-                      ],
-                      "port": 0,
-                      "remark": "",
-                      "security": "same",
-                      "serverDescription": "",
-                      "shuffleHost": false,
-                      "sni": "",
-                      "sockoptParams": "",
-                      "sortOrder": 0,
-                      "tags": [
-                        ""
-                      ],
-                      "verifyPeerCertByName": "",
-                      "vlessRoute": ""
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/tags": {
-      "get": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Distinct, sorted set of tags used across all hosts.",
-        "operationId": "get_panel_api_hosts_tags",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    "CDN",
-                    "EU",
-                    "FAST"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/add": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Create a host group on inbounds.",
-        "operationId": "post_panel_api_hosts_add",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "inboundIds": [
-                  1
-                ],
-                "remark": "cdn-front",
-                "hosts": [
-                  "cdn.example.com"
-                ],
-                "port": 8443,
-                "security": "same",
-                "tags": [
-                  "CDN"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Host"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "address": "cdn.example.com",
-                      "allowInsecure": false,
-                      "alpn": [
-                        ""
-                      ],
-                      "cipherSuites": "",
-                      "createdAt": 0,
-                      "echConfigList": "",
-                      "excludeFromSubTypes": [
-                        ""
-                      ],
-                      "finalMask": "",
-                      "fingerprint": "",
-                      "groupId": "",
-                      "hostHeader": "",
-                      "id": 1,
-                      "inboundId": 1,
-                      "isDisabled": false,
-                      "isHidden": false,
-                      "keepSniBlank": false,
-                      "mihomoIpVersion": "dual",
-                      "mihomoX25519": false,
-                      "muxParams": null,
-                      "nodeGuids": [
-                        ""
-                      ],
-                      "overrideSniFromAddress": false,
-                      "path": "",
-                      "pinnedPeerCertSha256": [
-                        ""
-                      ],
-                      "port": 8443,
-                      "remark": "cdn-front",
-                      "security": "same",
-                      "serverDescription": "",
-                      "shuffleHost": false,
-                      "sni": "",
-                      "sockoptParams": null,
-                      "sortOrder": 0,
-                      "tags": [
-                        ""
-                      ],
-                      "updatedAt": 0,
-                      "verifyPeerCertByName": "",
-                      "vlessRoute": "443"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/update/{groupId}": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Replace a host group’s content.",
-        "operationId": "post_panel_api_hosts_update_groupId",
-        "parameters": [
-          {
-            "name": "groupId",
-            "in": "path",
-            "required": true,
-            "description": "Host Group ID.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "inboundIds": [
-                  1
-                ],
-                "remark": "cdn-front",
-                "hosts": [
-                  "cdn.example.com"
-                ],
-                "port": 8443,
-                "security": "same",
-                "tags": [
-                  "CDN"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Host"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "address": "cdn.example.com",
-                      "allowInsecure": false,
-                      "alpn": [
-                        ""
-                      ],
-                      "cipherSuites": "",
-                      "createdAt": 0,
-                      "echConfigList": "",
-                      "excludeFromSubTypes": [
-                        ""
-                      ],
-                      "finalMask": "",
-                      "fingerprint": "",
-                      "groupId": "",
-                      "hostHeader": "",
-                      "id": 1,
-                      "inboundId": 1,
-                      "isDisabled": false,
-                      "isHidden": false,
-                      "keepSniBlank": false,
-                      "mihomoIpVersion": "dual",
-                      "mihomoX25519": false,
-                      "muxParams": null,
-                      "nodeGuids": [
-                        ""
-                      ],
-                      "overrideSniFromAddress": false,
-                      "path": "",
-                      "pinnedPeerCertSha256": [
-                        ""
-                      ],
-                      "port": 8443,
-                      "remark": "cdn-front",
-                      "security": "same",
-                      "serverDescription": "",
-                      "shuffleHost": false,
-                      "sni": "",
-                      "sockoptParams": null,
-                      "sortOrder": 0,
-                      "tags": [
-                        ""
-                      ],
-                      "updatedAt": 0,
-                      "verifyPeerCertByName": "",
-                      "vlessRoute": "443"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/del/{groupId}": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Delete a host group.",
-        "operationId": "post_panel_api_hosts_del_groupId",
-        "parameters": [
-          {
-            "name": "groupId",
-            "in": "path",
-            "required": true,
-            "description": "Host Group ID.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/setEnable/{groupId}": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Enable or disable a host group.",
-        "operationId": "post_panel_api_hosts_setEnable_groupId",
-        "parameters": [
-          {
-            "name": "groupId",
-            "in": "path",
-            "required": true,
-            "description": "Host Group ID.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "enable": true
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/reorder": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Set host group sort order by the position of each groupId in the array.",
-        "operationId": "post_panel_api_hosts_reorder",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "ids": [
-                  "abc-123",
-                  "def-456"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/bulk/add": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Add a host group to inbounds (same as /add).",
-        "operationId": "post_panel_api_hosts_bulk_add",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "inboundIds": [
-                  1,
-                  2
-                ],
-                "hosts": [
-                  "cdn.example.com",
-                  "cdn2.example.com:443"
-                ],
-                "remark": "Cloudflare CDN",
-                "port": 0,
-                "security": "same",
-                "isDisabled": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Host"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "address": "cdn.example.com",
-                      "allowInsecure": false,
-                      "alpn": [
-                        ""
-                      ],
-                      "cipherSuites": "",
-                      "createdAt": 0,
-                      "echConfigList": "",
-                      "excludeFromSubTypes": [
-                        ""
-                      ],
-                      "finalMask": "",
-                      "fingerprint": "",
-                      "groupId": "",
-                      "hostHeader": "",
-                      "id": 1,
-                      "inboundId": 1,
-                      "isDisabled": false,
-                      "isHidden": false,
-                      "keepSniBlank": false,
-                      "mihomoIpVersion": "dual",
-                      "mihomoX25519": false,
-                      "muxParams": null,
-                      "nodeGuids": [
-                        ""
-                      ],
-                      "overrideSniFromAddress": false,
-                      "path": "",
-                      "pinnedPeerCertSha256": [
-                        ""
-                      ],
-                      "port": 8443,
-                      "remark": "cdn-front",
-                      "security": "same",
-                      "serverDescription": "",
-                      "shuffleHost": false,
-                      "sni": "",
-                      "sockoptParams": null,
-                      "sortOrder": 0,
-                      "tags": [
-                        ""
-                      ],
-                      "updatedAt": 0,
-                      "verifyPeerCertByName": "",
-                      "vlessRoute": "443"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/bulk/setEnable": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Enable or disable many host groups in one call.",
-        "operationId": "post_panel_api_hosts_bulk_setEnable",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "ids": [
-                  "abc-123",
-                  "def-456"
-                ],
-                "enable": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/hosts/bulk/del": {
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Delete many host groups in one call.",
-        "operationId": "post_panel_api_hosts_bulk_del",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "ids": [
-                  "abc-123",
-                  "def-456"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/panel/api/plans/list": {
       "get": {
         "tags": [
@@ -18145,6 +16901,7 @@
                   "settings": null,
                   "shareAddr": "",
                   "shareAddrStrategy": "node",
+                  "sharePort": 0,
                   "sniffing": null,
                   "streamSettings": null,
                   "subSortIndex": 1,

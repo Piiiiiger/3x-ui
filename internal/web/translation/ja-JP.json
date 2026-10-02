@@ -142,7 +142,6 @@
     "apiDocs": "API ドキュメント",
     "donate": "寄付",
     "sponsors": "スポンサー",
-    "hosts": "ホスト",
     "docs": "ドキュメント",
     "openMenu": "メニューを開く",
     "subFormats": "Sub Formats",
@@ -729,7 +728,9 @@
           "listen": "インバウンドのリッスンアドレス",
           "custom": "カスタム"
         },
-        "autoFill": "自動入力"
+        "autoFill": "自動入力",
+        "sharePort": "公開ポート",
+        "sharePortHelp": "NAT が別のポートをこのノードに割り当てているときに利用者が接続するポートです。リンクと購読はこのポートを使います。0 ならノード自身のポートを使います。"
       },
       "info": {
         "mode": "モード",
@@ -1208,7 +1209,8 @@
         "reach": "{count} 人のクライアントがこのインバウンドを受け取ります",
         "noTemplate": "コピーできる VLESS REALITY インバウンドがまだありません。「インバウンドを追加」で最初のものを作成してください。",
         "done": "新しいインバウンドが {host} で動作しています",
-        "hostOffline": "ノードがオフラインです。エージェントが接続してから生成してください。"
+        "hostOffline": "ノードがオフラインです。エージェントが接続してから生成してください。",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1828,7 +1830,48 @@
       "subIncyResolveDnsIp": "DoH サーバー IP",
       "subIncyResolveDnsIpDesc": "ブートストラップ用の DoH サーバー IP。",
       "subIncyGroupRouting": "ルーティング",
-      "intro": "パネルへのアクセス、セキュリティ、通知、サブスクリプションの設定。"
+      "intro": "パネルへのアクセス、セキュリティ、通知、サブスクリプションの設定。",
+      "remarkVars": {
+        "title": "テンプレート変数",
+        "intro": "変数をクリックすると追加されます。サブスクリプション生成時にクライアントごとに置き換えられます。",
+        "preview": "プレビュー",
+        "groups": {
+          "client": "クライアント",
+          "traffic": "トラフィック",
+          "time": "時刻とステータス",
+          "connection": "接続"
+        },
+        "descEMAIL": "クライアントのメール",
+        "descINBOUND": "インバウンド自身の備考（設定名）",
+        "descHOST": "ホストの備考",
+        "descID": "クライアント UUID",
+        "descSHORT_ID": "UUID の最初の 8 文字",
+        "descTELEGRAM_ID": "クライアントの Telegram ID（未設定の場合は空）",
+        "descSUB_ID": "サブスクリプション ID",
+        "descCOMMENT": "クライアントのコメント",
+        "descTRAFFIC_USED": "使用済みトラフィック（人間が読みやすい形式）",
+        "descTRAFFIC_LEFT": "残りトラフィック（無制限の場合は非表示）",
+        "descTRAFFIC_TOTAL": "合計トラフィック（無制限の場合は非表示）",
+        "descTRAFFIC_USED_BYTES": "使用済みトラフィック（バイト）",
+        "descTRAFFIC_LEFT_BYTES": "残りトラフィック（バイト）",
+        "descTRAFFIC_TOTAL_BYTES": "合計トラフィック（バイト）",
+        "descUP": "アップロードトラフィック",
+        "descDOWN": "ダウンロードトラフィック",
+        "descSTATUS": "active / expired / disabled / depleted",
+        "descSTATUS_EMOJI": "絵文字で表したステータス（✅ ⏳ 🚫）",
+        "descDAYS_LEFT": "有効期限までの日数（無制限の場合は非表示）",
+        "descTIME_LEFT": "残り時間（例：12d 4h 30m）",
+        "descUSAGE_PERCENTAGE": "使用済みトラフィックの割合（無制限の場合は非表示）",
+        "descEXPIRE_DATE": "有効期限（YYYY-MM-DD）",
+        "descJALALI_EXPIRE_DATE": "ジャラーリー暦の有効期限（YYYY/MM/DD）",
+        "descEXPIRE_UNIX": "有効期限の Unix タイムスタンプ（秒）",
+        "descCREATED_UNIX": "作成時刻の Unix タイムスタンプ（秒）",
+        "descRESET_DAYS": "トラフィックリセット周期（日数）",
+        "descRESET_DAY": "毎月の更新日",
+        "descPROTOCOL": "インバウンドのプロトコル（VLESS、VMess、Trojan など）",
+        "descTRANSPORT": "トランスポートネットワーク（tcp、ws、grpc など）",
+        "descSECURITY": "トランスポートのセキュリティ（TLS、REALITY、NONE）"
+      }
     },
     "xray": {
       "importRules": "ルールをインポート",
@@ -2337,123 +2380,12 @@
       "routingIntro": "各接続がどのアウトバウンドを通るかを決めるルール。"
     },
     "hosts": {
-      "addHost": "ホストを追加",
-      "editHost": "ホストを編集",
-      "selectInbound": "インバウンドを選択",
-      "selectedCount": "{count} 選択中",
-      "summary": {
-        "total": "合計",
-        "enabled": "有効",
-        "disabled": "無効"
-      },
-      "moveUp": "上へ",
-      "moveDown": "下へ",
-      "bulkEnable": "有効化",
-      "bulkDisable": "無効化",
-      "bulkDelete": "削除",
-      "bulkDeleteConfirm": "選択した {count} 件のホストを削除しますか？",
-      "deleteConfirmTitle": "ホスト「{name}」を削除しますか？",
-      "sections": {
-        "basic": "基本",
-        "security": "セキュリティ",
-        "advanced": "詳細",
-        "general": "一般",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "備考",
-        "serverDescription": "説明",
-        "inbound": "インバウンド",
-        "address": "アドレス",
-        "port": "ポート",
-        "endpoint": "エンドポイント",
-        "enable": "有効化",
-        "actions": "操作",
-        "security": "セキュリティ",
-        "sni": "SNI",
-        "overrideSniFromAddress": "アドレスを SNI として使用",
-        "keepSniBlank": "SNI を空のままにする",
-        "hostHeader": "Host ヘッダー",
-        "path": "パス",
-        "alpn": "ALPN",
-        "fingerprint": "Fingerprint",
-        "pins": "ピン留め証明書 SHA-256",
-        "verifyPeerCertByName": "名前でピア証明書を検証",
-        "allowInsecure": "安全でない接続を許可",
-        "echConfigList": "ECH config リスト",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "Final Mask",
-        "vlessRoute": "VLESS ルート",
-        "mihomoIpVersion": "IP バージョン",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "ホストをシャッフル",
-        "tags": "タグ",
-        "nodeGuids": "ノード",
-        "excludeFromSubTypes": "形式から除外",
-        "inheritAddress": "アドレス継承"
+        "allowInsecure": "安全でない接続を許可"
       },
       "hints": {
-        "address": "空欄にするとインバウンド自身のアドレスを継承します。",
-        "port": "0 にするとインバウンドのポートを継承します。",
-        "tags": "エンドユーザーには表示されません。RAW サブスクリプションでのみ送信されます。大文字、数字、_ と : のみ使用できます。",
-        "nodeGuids": "このホストから解決されたノードを選択します。視覚的な割り当てのみです。",
-        "serverDescription": "備考の下に表示される任意のメモ。",
-        "allowInsecure": "TLS 証明書の検証をスキップします（allowInsecure / skip-cert-verify）。",
-        "vlessRoute": "UUID に埋め込まれる単一の VLESS ルート値（0〜65535）。例: 443。なしの場合は空欄にします。",
-        "remark": "このホストのプレーンなラベル。インバウンド自身に備考がない場合にのみ設定名として表示されます。"
-      },
-      "remarkVars": {
-        "title": "テンプレート変数",
-        "intro": "変数をクリックすると追加されます。サブスクリプション生成時にクライアントごとに置き換えられます。",
-        "preview": "プレビュー",
-        "groups": {
-          "client": "クライアント",
-          "traffic": "トラフィック",
-          "time": "時刻とステータス",
-          "connection": "接続"
-        },
-        "descEMAIL": "クライアントのメール",
-        "descINBOUND": "インバウンド自身の備考（設定名）",
-        "descHOST": "ホストの備考",
-        "descID": "クライアント UUID",
-        "descSHORT_ID": "UUID の最初の 8 文字",
-        "descTELEGRAM_ID": "クライアントの Telegram ID（未設定の場合は空）",
-        "descSUB_ID": "サブスクリプション ID",
-        "descCOMMENT": "クライアントのコメント",
-        "descTRAFFIC_USED": "使用済みトラフィック（人間が読みやすい形式）",
-        "descTRAFFIC_LEFT": "残りトラフィック（無制限の場合は非表示）",
-        "descTRAFFIC_TOTAL": "合計トラフィック（無制限の場合は非表示）",
-        "descTRAFFIC_USED_BYTES": "使用済みトラフィック（バイト）",
-        "descTRAFFIC_LEFT_BYTES": "残りトラフィック（バイト）",
-        "descTRAFFIC_TOTAL_BYTES": "合計トラフィック（バイト）",
-        "descUP": "アップロードトラフィック",
-        "descDOWN": "ダウンロードトラフィック",
-        "descSTATUS": "active / expired / disabled / depleted",
-        "descSTATUS_EMOJI": "絵文字で表したステータス（✅ ⏳ 🚫）",
-        "descDAYS_LEFT": "有効期限までの日数（無制限の場合は非表示）",
-        "descTIME_LEFT": "残り時間（例：12d 4h 30m）",
-        "descUSAGE_PERCENTAGE": "使用済みトラフィックの割合（無制限の場合は非表示）",
-        "descEXPIRE_DATE": "有効期限（YYYY-MM-DD）",
-        "descJALALI_EXPIRE_DATE": "ジャラーリー暦の有効期限（YYYY/MM/DD）",
-        "descEXPIRE_UNIX": "有効期限の Unix タイムスタンプ（秒）",
-        "descCREATED_UNIX": "作成時刻の Unix タイムスタンプ（秒）",
-        "descRESET_DAYS": "トラフィックリセット周期（日数）",
-        "descRESET_DAY": "毎月の更新日",
-        "descPROTOCOL": "インバウンドのプロトコル（VLESS、VMess、Trojan など）",
-        "descTRANSPORT": "トランスポートネットワーク（tcp、ws、grpc など）",
-        "descSECURITY": "トランスポートのセキュリティ（TLS、REALITY、NONE）"
-      },
-      "toasts": {
-        "list": "ホストの読み込みに失敗しました",
-        "obtain": "ホストの読み込みに失敗しました",
-        "add": "ホストを追加",
-        "update": "ホストを更新",
-        "delete": "ホストを削除",
-        "badTag": "無効なタグ",
-        "badVlessRoute": "0〜65535 の単一の数値を入力してください"
-      },
-      "intro": "共有リンクとサブスクリプションが各インバウンドに配布するアドレスと TLS 設定。"
+        "allowInsecure": "TLS 証明書の検証をスキップします（allowInsecure / skip-cert-verify）。"
+      }
     },
     "sponsors": {
       "title": "スポンサー",

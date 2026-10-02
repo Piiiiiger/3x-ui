@@ -142,7 +142,6 @@
     "apiDocs": "API 文档",
     "donate": "捐赠",
     "sponsors": "赞助商",
-    "hosts": "入口",
     "docs": "文档",
     "openMenu": "打开菜单",
     "subFormats": "Sub Formats",
@@ -729,7 +728,9 @@
           "custom": "自定义"
         },
         "verifyPeerCertByName": "按名称验证对端证书",
-        "autoFill": "自动填充"
+        "autoFill": "自动填充",
+        "sharePort": "公网端口",
+        "sharePortHelp": "NAT 把另一个端口映射到本节点时，用户实际连接的端口。链接和订阅会使用它；填 0 则使用节点自身的端口。"
       },
       "info": {
         "mode": "模式",
@@ -1208,7 +1209,8 @@
         "reach": "{count} 个用户将获得此节点",
         "noTemplate": "还没有可参照的 VLESS REALITY 节点，请用“添加入站”建立第一个。",
         "done": "新节点已在 {host} 上运行",
-        "hostOffline": "主机离线，请在其 agent 连接后再生成节点。"
+        "hostOffline": "主机离线，请在其 agent 连接后再生成节点。",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1828,7 +1830,48 @@
       "subIncyResolveDnsIp": "DoH 服务器 IP",
       "subIncyResolveDnsIpDesc": "用于引导的 DoH 服务器 IP。",
       "subIncyGroupRouting": "路由",
-      "intro": "面板访问、安全、通知与订阅相关设置。"
+      "intro": "面板访问、安全、通知与订阅相关设置。",
+      "remarkVars": {
+        "title": "模板变量",
+        "intro": "点击变量即可添加。生成订阅时会按客户端逐一替换。",
+        "preview": "预览",
+        "groups": {
+          "client": "客户端",
+          "traffic": "流量",
+          "time": "时间与状态",
+          "connection": "连接"
+        },
+        "descEMAIL": "客户端邮箱",
+        "descINBOUND": "入站本身的备注（配置名称）",
+        "descHOST": "入口备注",
+        "descID": "客户端 UUID",
+        "descSHORT_ID": "UUID 的前 8 个字符",
+        "descTELEGRAM_ID": "客户端的 Telegram ID（未设置则为空）",
+        "descSUB_ID": "订阅 ID",
+        "descCOMMENT": "客户端备注",
+        "descTRAFFIC_USED": "已用流量（易读格式）",
+        "descTRAFFIC_LEFT": "剩余流量（无限制时隐藏）",
+        "descTRAFFIC_TOTAL": "总流量（无限制时隐藏）",
+        "descTRAFFIC_USED_BYTES": "已用流量（字节）",
+        "descTRAFFIC_LEFT_BYTES": "剩余流量（字节）",
+        "descTRAFFIC_TOTAL_BYTES": "总流量（字节）",
+        "descUP": "上传流量",
+        "descDOWN": "下载流量",
+        "descSTATUS": "active / expired / disabled / depleted",
+        "descSTATUS_EMOJI": "以表情符号显示状态（✅ ⏳ 🚫）",
+        "descDAYS_LEFT": "距到期天数（无限制时隐藏）",
+        "descTIME_LEFT": "剩余时间（例如 12d 4h 30m）",
+        "descUSAGE_PERCENTAGE": "已用流量百分比（无限制时隐藏）",
+        "descEXPIRE_DATE": "到期日期（YYYY-MM-DD）",
+        "descJALALI_EXPIRE_DATE": "Jalali（波斯）历的到期日期（YYYY/MM/DD）",
+        "descEXPIRE_UNIX": "到期时间的 Unix 时间戳（秒）",
+        "descCREATED_UNIX": "创建时间的 Unix 时间戳（秒）",
+        "descRESET_DAYS": "流量重置周期（天）",
+        "descRESET_DAY": "按月续期的日期",
+        "descPROTOCOL": "入站协议（VLESS、VMess、Trojan……）",
+        "descTRANSPORT": "传输网络（tcp、ws、grpc……）",
+        "descSECURITY": "传输安全（TLS、REALITY、NONE）"
+      }
     },
     "xray": {
       "importRules": "导入规则",
@@ -2337,123 +2380,12 @@
       "routingIntro": "决定每条连接走哪个出站的规则。"
     },
     "hosts": {
-      "addHost": "添加入口",
-      "editHost": "编辑入口",
-      "selectInbound": "选择一个入站",
-      "selectedCount": "已选 {count} 项",
-      "summary": {
-        "total": "总计",
-        "enabled": "已启用",
-        "disabled": "已禁用"
-      },
-      "moveUp": "上移",
-      "moveDown": "下移",
-      "bulkEnable": "启用",
-      "bulkDisable": "禁用",
-      "bulkDelete": "删除",
-      "bulkDeleteConfirm": "删除选中的 {count} 个入口？",
-      "deleteConfirmTitle": "删除入口 \"{name}\"？",
-      "sections": {
-        "basic": "基本",
-        "security": "安全",
-        "advanced": "高级",
-        "general": "常规",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "备注",
-        "serverDescription": "描述",
-        "inbound": "入站",
-        "address": "地址",
-        "port": "端口",
-        "endpoint": "端点",
-        "enable": "启用",
-        "actions": "操作",
-        "security": "安全",
-        "sni": "SNI",
-        "overrideSniFromAddress": "使用地址作为 SNI",
-        "keepSniBlank": "保持 SNI 为空",
-        "hostHeader": "Host 头",
-        "path": "路径",
-        "alpn": "ALPN",
-        "fingerprint": "指纹",
-        "pins": "固定证书 SHA-256",
-        "verifyPeerCertByName": "按名称验证对端证书",
-        "allowInsecure": "允许不安全连接",
-        "echConfigList": "ECH 配置列表",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "Final Mask",
-        "vlessRoute": "VLESS 路由",
-        "mihomoIpVersion": "IP 版本",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "随机打乱 Host",
-        "tags": "标签",
-        "nodeGuids": "主机",
-        "excludeFromSubTypes": "从格式中排除",
-        "inheritAddress": "继承地址"
+        "allowInsecure": "允许不安全连接"
       },
       "hints": {
-        "address": "留空则继承入站自身的地址。",
-        "port": "填 0 则继承入站的端口。",
-        "tags": "对终端用户不可见；仅随 RAW 订阅发送。只能包含大写字母、数字、_ 和 :。",
-        "nodeGuids": "选择此入口解析到的主机。仅用于可视化关联。",
-        "serverDescription": "可选备注，显示在备注下方。",
-        "allowInsecure": "跳过 TLS 证书验证（allowInsecure / skip-cert-verify）。",
-        "vlessRoute": "嵌入 UUID 的单个 VLESS 路由值（0-65535），例如 443。留空表示不路由。",
-        "remark": "此入口的纯文本标签。仅当入站没有自己的备注时，才作为配置名称显示。"
-      },
-      "remarkVars": {
-        "title": "模板变量",
-        "intro": "点击变量即可添加。生成订阅时会按客户端逐一替换。",
-        "preview": "预览",
-        "groups": {
-          "client": "客户端",
-          "traffic": "流量",
-          "time": "时间与状态",
-          "connection": "连接"
-        },
-        "descEMAIL": "客户端邮箱",
-        "descINBOUND": "入站本身的备注（配置名称）",
-        "descHOST": "入口备注",
-        "descID": "客户端 UUID",
-        "descSHORT_ID": "UUID 的前 8 个字符",
-        "descTELEGRAM_ID": "客户端的 Telegram ID（未设置则为空）",
-        "descSUB_ID": "订阅 ID",
-        "descCOMMENT": "客户端备注",
-        "descTRAFFIC_USED": "已用流量（易读格式）",
-        "descTRAFFIC_LEFT": "剩余流量（无限制时隐藏）",
-        "descTRAFFIC_TOTAL": "总流量（无限制时隐藏）",
-        "descTRAFFIC_USED_BYTES": "已用流量（字节）",
-        "descTRAFFIC_LEFT_BYTES": "剩余流量（字节）",
-        "descTRAFFIC_TOTAL_BYTES": "总流量（字节）",
-        "descUP": "上传流量",
-        "descDOWN": "下载流量",
-        "descSTATUS": "active / expired / disabled / depleted",
-        "descSTATUS_EMOJI": "以表情符号显示状态（✅ ⏳ 🚫）",
-        "descDAYS_LEFT": "距到期天数（无限制时隐藏）",
-        "descTIME_LEFT": "剩余时间（例如 12d 4h 30m）",
-        "descUSAGE_PERCENTAGE": "已用流量百分比（无限制时隐藏）",
-        "descEXPIRE_DATE": "到期日期（YYYY-MM-DD）",
-        "descJALALI_EXPIRE_DATE": "Jalali（波斯）历的到期日期（YYYY/MM/DD）",
-        "descEXPIRE_UNIX": "到期时间的 Unix 时间戳（秒）",
-        "descCREATED_UNIX": "创建时间的 Unix 时间戳（秒）",
-        "descRESET_DAYS": "流量重置周期（天）",
-        "descRESET_DAY": "按月续期的日期",
-        "descPROTOCOL": "入站协议（VLESS、VMess、Trojan……）",
-        "descTRANSPORT": "传输网络（tcp、ws、grpc……）",
-        "descSECURITY": "传输安全（TLS、REALITY、NONE）"
-      },
-      "toasts": {
-        "list": "加载入口失败",
-        "obtain": "加载入口失败",
-        "add": "添加入口",
-        "update": "更新入口",
-        "delete": "删除入口",
-        "badTag": "无效的标签",
-        "badVlessRoute": "请输入 0 到 65535 之间的单个数字"
-      },
-      "intro": "为每个入站设置分享链接和订阅下发的地址与 TLS 参数。"
+        "allowInsecure": "跳过 TLS 证书验证（allowInsecure / skip-cert-verify）。"
+      }
     },
     "sponsors": {
       "title": "赞助商",

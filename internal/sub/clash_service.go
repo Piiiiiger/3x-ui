@@ -72,9 +72,7 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 			continue
 		}
 		subReq.projectThroughFallbackMaster(inbound)
-		if hostEps := subReq.hostEndpoints(inbound, "clash"); len(hostEps) > 0 {
-			injectExternalProxy(inbound, hostEps)
-		}
+		inbound = subReq.withPublicPort(inbound)
 		for _, client := range clients {
 			if client.Enable {
 				hasEnabledClient = true
@@ -374,7 +372,6 @@ func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound,
 		}}
 	}
 	delete(stream, "externalProxy")
-	network, _ := stream["network"].(string)
 
 	proxies := make([]map[string]any, 0, len(externalProxies))
 	for _, ep := range externalProxies {
@@ -382,9 +379,6 @@ func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound,
 		if !ok {
 			continue
 		}
-		// Expand the host's {{VAR}} remark template for this client (no-op for
-		// the synthetic/legacy entry) before it becomes the proxy name.
-		subReq.renderHostRemark(inbound, client, extPrxy, network)
 		workingInbound := *inbound
 		// A Clash "server" is a bare host, not a URI authority, and the custom
 		// share address stores IPv6 literals bracketed.
@@ -413,15 +407,9 @@ func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound,
 		if hasExternalProxy {
 			applyExternalProxyTLSToStream(extPrxy, workingStream, security)
 		}
-		applyHostStreamOverrides(extPrxy, workingStream)
 
 		proxy := s.buildProxy(subReq, &workingInbound, client, workingStream, extPrxy)
 		if len(proxy) > 0 {
-			// Host-only mihomo knob: ip-version is a top-level proxy field, set
-			// last so it cannot be clobbered. Absent for legacy externalProxy.
-			if v, _ := extPrxy["mihomoIpVersion"].(string); v != "" {
-				proxy["ip-version"] = v
-			}
 			proxies = append(proxies, proxy)
 		}
 	}
@@ -464,7 +452,7 @@ func (s *SubClashService) buildProxy(subReq *SubService, inbound *model.Inbound,
 		proxy["cipher"] = normalizeVmessSecurity(client.Security)
 	case model.VLESS:
 		proxy["type"] = "vless"
-		proxy["uuid"] = applyVlessRoute(client.ID, hostVlessRoute(ep))
+		proxy["uuid"] = client.ID
 		inboundSettings := subReq.linkSettings(inbound)
 		streamSecurity, _ := stream["security"].(string)
 		if client.Flow != "" && !inbound.DisableFlow && vlessFlowAllowed(network, streamSecurity, inboundSettings) {

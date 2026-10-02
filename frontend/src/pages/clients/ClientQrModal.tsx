@@ -23,7 +23,6 @@ import {
 } from './amneziawgConfig';
 import { buildTuicClientConfig, findTuicInbound, isTuicClient } from './tuicConfig';
 import { tunnelConfigEndpoints, tunnelEndpointLabel } from './tunnelEndpoints';
-import type { HostRecord } from '@/schemas/api/host';
 
 interface SubSettings {
   enable: boolean;
@@ -40,11 +39,8 @@ interface ClientQrModalProps {
   inboundsById: Record<number, InboundOption>;
   tunnelAllowedIPs?: Record<number, string>;
   subSettings?: SubSettings;
-  hosts?: HostRecord[];
   onOpenChange: (open: boolean) => void;
 }
-
-const NO_HOSTS: HostRecord[] = [];
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -232,7 +228,6 @@ function ClientQrModalContent({
   inboundsById,
   tunnelAllowedIPs,
   subSettings = DEFAULT_SUB,
-  hosts = NO_HOSTS,
   onOpenChange,
 }: ClientQrModalProps) {
   const { t } = useTranslation();
@@ -337,14 +332,14 @@ function ClientQrModalContent({
     return wgInbounds
       .flatMap((ib) => {
         const address = tunnelAllowedIPs?.[ib.id] ?? '';
-        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+        return tunnelConfigEndpoints(ib, host, publicHost).map((ep) => ({
           inbound: ib,
           endpoint: tunnelEndpointLabel(ep),
           text: buildWireguardClientConfig(client, ib, host, publicHost, address, ep),
         }));
       })
       .filter((c) => !!c.text);
-  }, [client, wgInbounds, tunnelAllowedIPs, subSettings.publicHost, hosts]);
+  }, [client, wgInbounds, tunnelAllowedIPs, subSettings.publicHost]);
 
   const awgInbounds = useMemo(
     () => findAmneziaWGInbounds(client, inboundsById),
@@ -357,25 +352,25 @@ function ClientQrModalContent({
     return awgInbounds
       .flatMap((ib) => {
         const address = tunnelAllowedIPs?.[ib.id] ?? '';
-        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+        return tunnelConfigEndpoints(ib, host, publicHost).map((ep) => ({
           inbound: ib,
           endpoint: tunnelEndpointLabel(ep),
           text: buildAmneziaWGClientConfig(client, ib, host, publicHost, address, ep),
         }));
       })
       .filter((c) => !!c.text);
-  }, [client, awgInbounds, tunnelAllowedIPs, subSettings.publicHost, hosts]);
+  }, [client, awgInbounds, tunnelAllowedIPs, subSettings.publicHost]);
 
   const tuicInbound = useMemo(() => findTuicInbound(client, inboundsById), [client, inboundsById]);
   const tuicConfigs = useMemo(() => {
     if (!client || !tuicInbound || !isTuicClient(client)) return [];
     const host = window.location.hostname;
     const publicHost = subSettings.publicHost ?? '';
-    return tunnelConfigEndpoints(tuicInbound, hosts, host, publicHost, 'clash').map((ep) => ({
+    return tunnelConfigEndpoints(tuicInbound, host, publicHost).map((ep) => ({
       endpoint: tunnelEndpointLabel(ep),
       text: buildTuicClientConfig(client, tuicInbound, host, publicHost, ep),
     }));
-  }, [client, tuicInbound, subSettings.publicHost, hosts]);
+  }, [client, tuicInbound, subSettings.publicHost]);
 
   const hasAnything =
     !!subLink ||

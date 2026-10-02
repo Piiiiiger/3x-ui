@@ -612,11 +612,11 @@ export interface GenerateNodeRequest {
   planIds: number[];
   port: number;
   protocol: Protocol;
-  publicPort: number;
   remark: string;
   settings: unknown;
   shareAddr: string;
   shareAddrStrategy: string;
+  sharePort: number;
   sniffing: unknown;
   streamSettings: unknown;
   subSortIndex: number;
@@ -673,79 +673,6 @@ export interface HistoryOfSeeders {
   seederName: string;
 }
 
-export interface Host {
-  address: string;
-  allowInsecure: boolean;
-  alpn: string[];
-  cipherSuites: string;
-  createdAt: number;
-  echConfigList: string;
-  excludeFromSubTypes: string[];
-  finalMask: string;
-  fingerprint: string;
-  groupId: string;
-  hostHeader: string;
-  id: number;
-  inboundId: number;
-  isDisabled: boolean;
-  isHidden: boolean;
-  keepSniBlank: boolean;
-  mihomoIpVersion: string;
-  mihomoX25519: boolean;
-  muxParams: unknown;
-  nodeGuids?: string[];
-  overrideSniFromAddress: boolean;
-  path: string;
-  pinnedPeerCertSha256: string[];
-  port: number;
-  remark: string;
-  security: string;
-  serverDescription: string;
-  shuffleHost: boolean;
-  sni: string;
-  sockoptParams: unknown;
-  sortOrder: number;
-  tags: string[];
-  updatedAt: number;
-  verifyPeerCertByName: string;
-  vlessRoute: string;
-}
-
-export interface HostGroup {
-  allowInsecure: boolean;
-  alpn: string[];
-  cipherSuites: string;
-  echConfigList: string;
-  excludeFromSubTypes: string[];
-  finalMask: string;
-  fingerprint: string;
-  groupId: string;
-  hostHeader: string;
-  hosts: string[];
-  inboundIds: number[];
-  isDisabled: boolean;
-  isHidden: boolean;
-  keepSniBlank: boolean;
-  mihomoIpVersion: string;
-  mihomoX25519: boolean;
-  muxParams: string;
-  nodeGuids: string[];
-  overrideSniFromAddress: boolean;
-  path: string;
-  pinnedPeerCertSha256: string[];
-  port: number;
-  remark: string;
-  security: string;
-  serverDescription: string;
-  shuffleHost: boolean;
-  sni: string;
-  sockoptParams: string;
-  sortOrder: number;
-  tags: string[];
-  verifyPeerCertByName: string;
-  vlessRoute: string;
-}
-
 export interface HwidSlotStatus {
   active: boolean;
   full: boolean;
@@ -773,6 +700,7 @@ export interface Inbound {
   settings: unknown;
   shareAddr: string;
   shareAddrStrategy: string;
+  sharePort: number;
   sniffing: unknown;
   streamSettings: unknown;
   subSortIndex: number;
@@ -816,6 +744,7 @@ export interface InboundOption {
   security?: string;
   shareAddr?: string;
   shareAddrStrategy?: string;
+  sharePort?: number;
   ssMethod: string;
   tag: string;
   tlsFlowCapable: boolean;

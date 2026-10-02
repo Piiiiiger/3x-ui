@@ -60,11 +60,6 @@ func normalizeInboundShareAddress(inbound *model.Inbound) {
 	if inbound == nil {
 		return
 	}
-	if inbound.Protocol == model.MTProto {
-		inbound.ShareAddrStrategy = "listen"
-		inbound.ShareAddr = ""
-		return
-	}
 	inbound.ShareAddrStrategy = normalizeInboundShareAddrStrategy(inbound.ShareAddrStrategy)
 	if addr, err := normalizeInboundShareHost(inbound.ShareAddr); err == nil {
 		inbound.ShareAddr = addr
@@ -77,10 +72,8 @@ func normalizeInboundShareAddressStrict(inbound *model.Inbound) error {
 	if inbound == nil {
 		return nil
 	}
-	if inbound.Protocol == model.MTProto {
-		inbound.ShareAddrStrategy = "listen"
-		inbound.ShareAddr = ""
-		return nil
+	if inbound.SharePort < 0 || inbound.SharePort > 65535 {
+		return common.NewErrorf("public port %d is out of range: use 1-65535, or 0 for the inbound's own port", inbound.SharePort)
 	}
 	inbound.ShareAddrStrategy = normalizeInboundShareAddrStrategy(inbound.ShareAddrStrategy)
 	addr, err := normalizeInboundShareHost(inbound.ShareAddr)
@@ -124,17 +117,6 @@ func normalizeInboundShareHost(raw string) (string, error) {
 		return "", err
 	}
 	return host, nil
-}
-
-func legacyMtprotoShareAddr(inbound *model.Inbound) string {
-	if inbound == nil || inbound.Protocol != model.MTProto || strings.TrimSpace(inbound.ShareAddrStrategy) != "custom" {
-		return ""
-	}
-	addr, err := normalizeInboundShareHost(inbound.ShareAddr)
-	if err != nil {
-		return ""
-	}
-	return addr
 }
 
 func normalizeInboundShareAddressColumns(tx *gorm.DB) error {
@@ -360,6 +342,7 @@ type InboundOption struct {
 	Listen            string `json:"listen,omitempty"`
 	ShareAddr         string `json:"shareAddr,omitempty"`
 	ShareAddrStrategy string `json:"shareAddrStrategy,omitempty"`
+	SharePort         int    `json:"sharePort,omitempty" example:"0"`
 }
 
 func (s *InboundService) GetInboundOptions(userId int) ([]InboundOption, error) {
@@ -376,12 +359,13 @@ func (s *InboundService) GetInboundOptions(userId int) ([]InboundOption, error) 
 		Listen            string `gorm:"column:listen"`
 		ShareAddr         string `gorm:"column:share_addr"`
 		ShareAddrStrategy string `gorm:"column:share_addr_strategy"`
+		SharePort         int    `gorm:"column:share_port"`
 		NodeId            *int   `gorm:"column:node_id"`
 		NodeAddress       string `gorm:"column:node_address"`
 		DisableFlow       bool   `gorm:"column:disable_flow"`
 	}
 	err := db.Table("inbounds").
-		Select("inbounds.id, inbounds.remark, inbounds.tag, inbounds.protocol, inbounds.port, inbounds.enable, inbounds.stream_settings, inbounds.settings, inbounds.listen, inbounds.share_addr, inbounds.share_addr_strategy, inbounds.node_id, COALESCE(nodes.address, '') AS node_address, inbounds.disable_flow").
+		Select("inbounds.id, inbounds.remark, inbounds.tag, inbounds.protocol, inbounds.port, inbounds.enable, inbounds.stream_settings, inbounds.settings, inbounds.listen, inbounds.share_addr, inbounds.share_addr_strategy, inbounds.share_port, inbounds.node_id, COALESCE(nodes.address, '') AS node_address, inbounds.disable_flow").
 		Joins("LEFT JOIN nodes ON nodes.id = inbounds.node_id").
 		Where("inbounds.user_id = ?", userId).
 		Order("inbounds.id ASC").
@@ -419,6 +403,7 @@ func (s *InboundService) GetInboundOptions(userId int) ([]InboundOption, error) 
 			Listen:            r.Listen,
 			ShareAddr:         r.ShareAddr,
 			ShareAddrStrategy: shareAddrStrategy,
+			SharePort:         r.SharePort,
 		})
 	}
 	return out, nil
@@ -1106,7 +1091,6 @@ func (s *InboundService) normalizeMtprotoXrayPort(inbound *model.Inbound, oldSet
 // Returns the created inbound, whether Xray needs restart, and any error.
 func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, bool, error) {
 	inbound.Id = 0
-	legacyShareAddr := legacyMtprotoShareAddr(inbound)
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
@@ -1316,12 +1300,6 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 		if err := s.clientService.SyncInbound(tx, inbound.Id, clients); err != nil {
 			return err
 		}
-		if _, err := database.CreateHostsFromExternalProxy(tx, inbound.Id, inbound.StreamSettings); err != nil {
-			return err
-		}
-		if err := database.CreateHostFromMtprotoCustomShareAddr(tx, inbound.Id, legacyShareAddr); err != nil {
-			return err
-		}
 		if inbound.NodeID != nil {
 			nodeID := *inbound.NodeID
 			if err := (&NodeService{}).EnsureInboundTagAllowedTx(tx, nodeID, inbound.Tag); err != nil {
@@ -1453,9 +1431,6 @@ func (s *InboundService) delInbound(id int) (bool, func(), error) {
 			return err
 		}
 		if err := tx.Delete(model.Inbound{}, id).Error; err != nil {
-			return err
-		}
-		if err := tx.Where("inbound_id = ?", id).Delete(&model.Host{}).Error; err != nil {
 			return err
 		}
 		if err := tx.Where("inbound_id = ?", id).Delete(&model.PlanInbound{}).Error; err != nil {
@@ -1744,7 +1719,6 @@ func (s *InboundService) validateUpdatedInboundClients(inbound *model.Inbound) e
 }
 
 func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, bool, error) {
-	legacyShareAddr := legacyMtprotoShareAddr(inbound)
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
@@ -1928,15 +1902,14 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 			normalizeInboundShareAddress(oldInbound)
 			inbound.ShareAddrStrategy = oldInbound.ShareAddrStrategy
 			inbound.ShareAddr = oldInbound.ShareAddr
+			inbound.SharePort = oldInbound.SharePort
 		} else {
 			if err := normalizeInboundShareAddressStrict(inbound); err != nil {
 				return err
 			}
 			oldInbound.ShareAddrStrategy = inbound.ShareAddrStrategy
 			oldInbound.ShareAddr = inbound.ShareAddr
-			if err := database.CreateHostFromMtprotoCustomShareAddr(tx, inbound.Id, legacyShareAddr); err != nil {
-				return err
-			}
+			oldInbound.SharePort = inbound.SharePort
 		}
 		if oldTagWasAuto && inbound.Tag == tag {
 			inbound.Tag = ""

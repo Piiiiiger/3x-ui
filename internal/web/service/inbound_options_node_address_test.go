@@ -40,6 +40,7 @@ func TestGetInboundOptions_NodeAddress(t *testing.T) {
 		Settings:          `{"clients":[]}`,
 		ShareAddrStrategy: "custom",
 		ShareAddr:         "vpn.example.com",
+		SharePort:         20443,
 	}
 	if err := database.GetDB().Create(nodeInbound).Error; err != nil {
 		t.Fatalf("create node inbound: %v", err)
@@ -85,5 +86,9 @@ func TestGetInboundOptions_NodeAddress(t *testing.T) {
 	}
 	if local.ShareAddr != "vpn.example.com" {
 		t.Fatalf("local inbound ShareAddr = %q, want vpn.example.com", local.ShareAddr)
+	}
+	// Tunnel configs on the clients page advertise the public port like links do.
+	if local.SharePort != 20443 {
+		t.Fatalf("local inbound SharePort = %d, want 20443", local.SharePort)
 	}
 }

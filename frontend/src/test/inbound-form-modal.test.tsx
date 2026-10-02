@@ -167,7 +167,8 @@ describe('InboundFormModal', () => {
     expect((shareAddrInput as HTMLInputElement).value).toBe('edge.example.test');
   });
 
-  it('uses Hosts instead of showing the custom share address fields for MTProto', async () => {
+  // MTProto's public address once lived in an entry; it now sits on the node like any other's.
+  it("keeps an MTProto inbound's custom share address and its public port", async () => {
     renderWithProviders(
       <InboundFormModal
         open
@@ -186,6 +187,7 @@ describe('InboundFormModal', () => {
             nodeId: null,
             shareAddrStrategy: 'custom',
             shareAddr: 'proxy.example.test',
+            sharePort: 20443,
           })
         }
         dbInbounds={[]}
@@ -198,8 +200,11 @@ describe('InboundFormModal', () => {
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    expect(fieldLabels()).not.toContain('Share address strategy');
-    expect(screen.queryByDisplayValue('proxy.example.test')).toBeNull();
+    expect(fieldLabels()).toEqual(
+      expect.arrayContaining(['Share address strategy', 'Public port']),
+    );
+    expect(await screen.findByDisplayValue('proxy.example.test')).toBeTruthy();
+    expect(await screen.findByDisplayValue('20443')).toBeTruthy();
   });
 
   it('keeps the persisted node share strategy through the nodes-loading race (#5375)', async () => {

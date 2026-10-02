@@ -1,11 +1,11 @@
 ---
-title: Multi-node & Managed Hosts
-description: Manage multiple 3x-ui panels from one master, with API-token or mTLS trust, heartbeats, and per-inbound host overrides for subscriptions.
+title: Multi-node
+description: Manage multiple 3x-ui panels from one master, with API-token or mTLS trust, heartbeats, and public ports for nodes behind NAT.
 icon: Boxes
 ---
 
-3x-ui can manage **multiple servers** from a single master panel, and override
-how each inbound is advertised in subscriptions with **managed hosts**.
+3x-ui can manage **multiple servers** from a single master panel, and advertise a
+node behind NAT on its **public port**.
 
 ## Nodes
 
@@ -68,30 +68,17 @@ certificate instead of an API token.
 
 </Steps>
 
-## Managed hosts
+## Public port behind NAT
 
-A **managed host** is an override endpoint attached to an inbound. At
-subscription time, each enabled host renders an additional share link / proxy
-with its own address, port, TLS, SNI, host header, path, and more — superseding
-the older "external proxy" list. Use them to:
-
-- front an inbound through a **CDN** (Cloudflare) with a different address/SNI,
-- advertise **multiple domains** or per-region endpoints for one inbound,
-- tweak ALPN, fingerprint, ECH, or mux per endpoint.
-
-Each host has a remark (which supports the same
-[template variables](/docs/config/share-links#remark-template-variables)), an
-enable toggle, a sort order, and can be **excluded from specific subscription
-formats** or **scoped to specific nodes**.
-
-<Callout type="info">
-  Hosts whose address/port point at a CDN let you keep the real server address
-  private while clients connect through the CDN edge.
-</Callout>
+When NAT maps a different public port onto a node (a common setup on NAT VPS
+plans), set the node's **public port**. Share links and every subscription format
+then advertise that port with the node's share address, while Xray keeps
+listening on the node's own port. Leave it at 0 when people connect to the
+node's own port.
 
 ## Related
 
 <Cards>
   <Card title="Outbounds & routing" href="/docs/operations/outbounds-routing" description="WARP, NordVPN, outbound subscriptions, and routing." />
-  <Card title="Subscription" href="/docs/config/subscription" description="How hosts shape subscription output." />
+  <Card title="Subscription" href="/docs/config/subscription" description="How share addresses and public ports shape subscription output." />
 </Cards>

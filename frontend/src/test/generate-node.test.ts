@@ -8,7 +8,6 @@ import {
   withRealityTarget,
 } from '@/pages/nodes/generateNode';
 import type { PlanSummary } from '@/generated/zod';
-import type { HostRecord } from '@/schemas/api/host';
 import type { InboundOption } from '@/schemas/client';
 
 describe('uniqueNodeName', () => {
@@ -60,23 +59,15 @@ describe('pretickedPlans', () => {
 });
 
 describe('isNatHost', () => {
-  const natNode = [{ id: 5, port: 81 }];
-  const entry = (extra: Partial<HostRecord>): HostRecord => ({
-    groupId: 'g',
-    inboundIds: [5],
-    hosts: [':20443'],
-    ...extra,
+  // 生成节点 asks for a public port on hosts whose nodes already advertise one.
+  it('spots a node of the host advertising another public port', () => {
+    expect(isNatHost([{ port: 81 }, { port: 82, sharePort: 20443 }])).toBe(true);
   });
 
-  it('spots an entry that moves a node of the host to another public port', () => {
-    expect(isNatHost(natNode, [entry({ port: 20443 })])).toBe(true);
-  });
-
-  it('ignores entries that keep the port, are disabled, or belong elsewhere', () => {
-    expect(isNatHost(natNode, [])).toBe(false);
-    expect(isNatHost(natNode, [entry({ hosts: ['cdn.example.com'], port: 81 })])).toBe(false);
-    expect(isNatHost(natNode, [entry({ port: 20443, isDisabled: true })])).toBe(false);
-    expect(isNatHost(natNode, [entry({ port: 20443, inboundIds: [7] })])).toBe(false);
+  it('ignores nodes without a public port or with their own port as it', () => {
+    expect(isNatHost([])).toBe(false);
+    expect(isNatHost([{ port: 81 }, { port: 443, sharePort: 0 }])).toBe(false);
+    expect(isNatHost([{ port: 81, sharePort: 81 }])).toBe(false);
   });
 });
 

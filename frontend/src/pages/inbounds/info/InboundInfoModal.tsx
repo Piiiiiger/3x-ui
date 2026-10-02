@@ -17,7 +17,7 @@ import {
   preferPublicHost,
 } from '@/lib/xray/inbound-link';
 import { inboundFromDb } from '@/lib/xray/inbound-from-db';
-import { withHostEndpoints } from '@/lib/hosts/host-link';
+import { withPublicPort } from '@/lib/xray/public-port';
 
 import {
   buildInboundInfo,
@@ -31,8 +31,6 @@ import {
 import type { ClientSetting, ClientStats, InboundInfo, InboundInfoModalProps } from './types';
 import './InboundInfoModal.css';
 
-const EMPTY_HOSTS: NonNullable<InboundInfoModalProps['hosts']> = [];
-
 export default function InboundInfoModal({
   open,
   onClose,
@@ -44,7 +42,6 @@ export default function InboundInfoModal({
   tgBotEnable = false,
   nodeAddress = '',
   subSettings,
-  hosts = EMPTY_HOSTS,
   lastOnlineMap = {},
 }: InboundInfoModalProps) {
   const { t } = useTranslation();
@@ -115,7 +112,6 @@ export default function InboundInfoModal({
     clientIndex: typeof clientIndex;
     nodeAddress: typeof nodeAddress;
     subSettings: typeof subSettings;
-    hosts: typeof hosts;
     ipLimitEnable: typeof ipLimitEnable;
   } | null>(null);
   if (
@@ -126,10 +122,9 @@ export default function InboundInfoModal({
       syncedProps.clientIndex !== clientIndex ||
       syncedProps.nodeAddress !== nodeAddress ||
       syncedProps.subSettings !== subSettings ||
-      syncedProps.hosts !== hosts ||
       syncedProps.ipLimitEnable !== ipLimitEnable)
   ) {
-    setSyncedProps({ dbInbound, clientIndex, nodeAddress, subSettings, hosts, ipLimitEnable });
+    setSyncedProps({ dbInbound, clientIndex, nodeAddress, subSettings, ipLimitEnable });
     const info = buildInboundInfo(dbInbound);
     setInbound(info);
     setActiveTab(info.clients.length > 0 ? 'client' : 'inbound');
@@ -146,13 +141,7 @@ export default function InboundInfoModal({
       window.location.hostname,
       subSettings?.publicHost ?? '',
     );
-    const inboundForLinks = withHostEndpoints(
-      inboundFromDb(dbInbound),
-      dbInbound.id,
-      hosts,
-      nodeAddress,
-      fallbackHostname,
-    );
+    const inboundForLinks = withPublicPort(inboundFromDb(dbInbound), nodeAddress, fallbackHostname);
     if (info.protocol === Protocols.WIREGUARD) {
       setWireguardConfigs(
         genWireguardPeerConfigs({

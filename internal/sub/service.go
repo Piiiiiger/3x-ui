@@ -492,20 +492,13 @@ func (s *SubService) getSubs(subId string) ([]string, []string, int64, xray.Clie
 			continue
 		}
 		s.projectThroughFallbackMaster(inbound)
-		// Host overrides apply AFTER fallback projection so a host's
-		// address/TLS wins over the projected master stream.
-		hostEps := s.hostEndpoints(inbound, "raw")
+		// The public port applies after fallback projection, onto the projected stream.
+		inbound = s.withPublicPort(inbound)
 		for _, client := range clients {
 			if client.Enable {
 				hasEnabledClient = true
 			}
-			var link string
-			if len(hostEps) > 0 {
-				link = s.linkFromHosts(inbound, client, hostEps)
-			} else {
-				link = s.GetLink(inbound, client.Email)
-			}
-			result = append(result, link)
+			result = append(result, s.GetLink(inbound, client.Email))
 			emails = append(emails, client.Email)
 			seenEmails[client.Email] = struct{}{}
 		}
@@ -549,13 +542,8 @@ func (s *SubService) getSubs(subId string) ([]string, []string, int64, xray.Clie
 	return result, emails, lastOnline, traffic, nil
 }
 
-// inboundLinks builds the share links for every distinct client of one inbound
-// the same way getSubs does — managed Host endpoints win over the plain link so
-// {{HOST}} and per-host variants render — but across all clients rather than a
-// single subId. Resolves clients via clientsForLinkExport so UUID-bearing
-// protocols match the running Xray config (#6436) while WireGuard/AmneziaWG
-// keep per-inbound tunnel identity from settings. Dedups by email (#5134).
-// Backs the panel's "Export all inbound links" and matches client/QR pages.
+// inboundLinks builds the share links of every distinct client of one inbound the way
+// getSubs does (#6436, deduped by email per #5134), for "Export all inbound links".
 func (s *SubService) inboundLinks(inbound *model.Inbound) []string {
 	clients, err := s.clientsForLinkExport(inbound)
 	if err != nil {
@@ -563,7 +551,7 @@ func (s *SubService) inboundLinks(inbound *model.Inbound) []string {
 	}
 	s.primeLinkClients(inbound.Id, clients, true)
 	s.projectThroughFallbackMaster(inbound)
-	hostEps := s.hostEndpoints(inbound, "raw")
+	inbound = s.withPublicPort(inbound)
 	var out []string
 	seen := make(map[string]struct{}, len(clients))
 	for _, client := range clients {
@@ -572,13 +560,7 @@ func (s *SubService) inboundLinks(inbound *model.Inbound) []string {
 			continue
 		}
 		seen[key] = struct{}{}
-		var link string
-		if len(hostEps) > 0 {
-			link = s.linkFromHosts(inbound, client, hostEps)
-		} else {
-			link = s.GetLink(inbound, client.Email)
-		}
-		out = append(out, splitLinkLines(link)...)
+		out = append(out, splitLinkLines(s.GetLink(inbound, client.Email))...)
 	}
 	return out
 }
@@ -1255,7 +1237,7 @@ func (s *SubService) genVlessLink(inbound *model.Inbound, email string) string {
 			params,
 			security,
 			func(ep map[string]any, dest string, port int) string {
-				return fmt.Sprintf("vless://%s@%s", applyVlessRoute(uuid, hostVlessRoute(ep)), joinHostPort(dest, port))
+				return fmt.Sprintf("vless://%s@%s", uuid, joinHostPort(dest, port))
 			},
 			func(ep map[string]any) string {
 				return s.endpointRemark(inbound, email, ep, streamNetwork)

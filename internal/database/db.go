@@ -78,7 +78,6 @@ func allModels() []any {
 		&model.ClientHwid{},
 		&model.ClientExternalLink{},
 		&model.InboundFallback{},
-		&model.Host{},
 		&model.NodeClientTraffic{},
 		&model.NodeClientIp{},
 		&model.ClientGlobalTraffic{},
@@ -145,9 +144,6 @@ func initModels() error {
 	if err := dropLegacyInboundPortUnique(); err != nil {
 		return err
 	}
-	if err := migrateHostVerifyPeerCertByNameColumn(); err != nil {
-		return err
-	}
 	if err := normalizeApiTokenCreatedAtSeconds(); err != nil {
 		return err
 	}
@@ -158,9 +154,6 @@ func initModels() error {
 		return err
 	}
 	if err := pruneOrphanedClientInbounds(); err != nil {
-		return err
-	}
-	if err := pruneOrphanedHosts(); err != nil {
 		return err
 	}
 	if err := normalizeInboundSubSortIndex(); err != nil {
@@ -206,6 +199,9 @@ func initModels() error {
 		return err
 	}
 	if err := dropClientGroups(); err != nil {
+		return err
+	}
+	if err := moveHostsOntoInbounds(); err != nil {
 		return err
 	}
 	if IsPostgres() {
@@ -410,6 +406,58 @@ func migrateClientPlanColumn() error {
 	return db.Exec("UPDATE clients SET plan_id = 0 WHERE plan_id IS NULL").Error
 }
 
+// moveHostsOntoInbounds retires entries (the hosts table): an inbound's first enabled
+// row becomes its share port and share address, so its links keep their target.
+func moveHostsOntoInbounds() error {
+	if !db.Migrator().HasTable("hosts") {
+		return nil
+	}
+	var rows []struct {
+		InboundID int
+		Address   string
+		Port      int
+	}
+	if err := db.Raw("SELECT inbound_id, COALESCE(address, '') AS address, COALESCE(port, 0) AS port FROM hosts " +
+		"WHERE is_disabled IS NOT TRUE ORDER BY inbound_id, sort_order, id").Scan(&rows).Error; err != nil {
+		return err
+	}
+	return db.Transaction(func(tx *gorm.DB) error {
+		moved := make(map[int]bool, len(rows))
+		for _, row := range rows {
+			if moved[row.InboundID] {
+				continue
+			}
+			moved[row.InboundID] = true
+			var inbound model.Inbound
+			if err := tx.First(&inbound, row.InboundID).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					continue
+				}
+				return err
+			}
+			updates := map[string]any{}
+			if row.Port > 0 && row.Port != inbound.Port {
+				updates["share_port"] = row.Port
+			}
+			addr := strings.TrimSpace(row.Address)
+			if addr != "" && (inbound.ShareAddrStrategy != "custom" || inbound.ShareAddr != addr) {
+				updates["share_addr_strategy"] = "custom"
+				updates["share_addr"] = addr
+			}
+			if len(updates) == 0 {
+				continue
+			}
+			if err := tx.Model(&model.Inbound{}).Where("id = ?", inbound.Id).Updates(updates).Error; err != nil {
+				return err
+			}
+		}
+		if len(moved) > 0 {
+			log.Printf("Moved the entries of %d inbound(s) onto the inbounds themselves", len(moved))
+		}
+		return tx.Migrator().DropTable("hosts")
+	})
+}
+
 // dropClientGroups removes what client groups left behind once Pigger dropped
 // them: their table, and the clients column with its index.
 func dropClientGroups() error {
@@ -439,105 +487,6 @@ func migrateClientEmailLowerIndex() error {
 		return nil
 	}
 	return db.Exec("CREATE INDEX IF NOT EXISTS idx_clients_email_lower ON clients (LOWER(email))").Error
-}
-
-func migrateHostVerifyPeerCertByNameColumn() error {
-	if !db.Migrator().HasColumn(&model.Host{}, "verify_peer_cert_by_name") {
-		return nil
-	}
-	if IsPostgres() {
-
-		var dataType string
-		if err := db.Raw(
-			`SELECT data_type FROM information_schema.columns WHERE table_name = 'hosts' AND column_name = 'verify_peer_cert_by_name'`,
-		).Scan(&dataType).Error; err != nil {
-			return err
-		}
-		if dataType != "boolean" {
-			return nil
-		}
-		if err := db.Exec(`ALTER TABLE hosts ALTER COLUMN verify_peer_cert_by_name DROP DEFAULT`).Error; err != nil {
-			return err
-		}
-		return db.Exec(`ALTER TABLE hosts ALTER COLUMN verify_peer_cert_by_name TYPE text USING ''`).Error
-	}
-
-	return db.Exec(`UPDATE hosts SET verify_peer_cert_by_name = '' WHERE verify_peer_cert_by_name IS NULL OR typeof(verify_peer_cert_by_name) <> 'text'`).Error
-}
-
-func seedHostsFromExternalProxy() error {
-	var history []string
-	if err := db.Model(&model.HistoryOfSeeders{}).Pluck("seeder_name", &history).Error; err != nil {
-		return err
-	}
-	if slices.Contains(history, "HostsFromExternalProxy") {
-		return nil
-	}
-
-	var inbounds []model.Inbound
-	if err := db.Find(&inbounds).Error; err != nil {
-		return err
-	}
-
-	return db.Transaction(func(tx *gorm.DB) error {
-		for _, inbound := range inbounds {
-			if _, err := CreateHostsFromExternalProxy(tx, inbound.Id, inbound.StreamSettings); err != nil {
-				return err
-			}
-		}
-		return tx.Create(&model.HistoryOfSeeders{SeederName: "HostsFromExternalProxy"}).Error
-	})
-}
-
-func seedMtprotoCustomShareAddrToHosts() error {
-	const seederName = "MtprotoCustomShareAddrToHosts"
-	var count int64
-	if err := db.Model(&model.HistoryOfSeeders{}).Where("seeder_name = ?", seederName).Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
-		return nil
-	}
-
-	return db.Transaction(func(tx *gorm.DB) error {
-		var inbounds []model.Inbound
-		if err := tx.Where("protocol = ? AND TRIM(COALESCE(share_addr_strategy, '')) = ?", string(model.MTProto), "custom").Find(&inbounds).Error; err != nil {
-			return err
-		}
-		for _, inbound := range inbounds {
-			if err := CreateHostFromMtprotoCustomShareAddr(tx, inbound.Id, inbound.ShareAddr); err != nil {
-				return err
-			}
-			if err := tx.Model(&model.Inbound{}).Where("id = ?", inbound.Id).Updates(map[string]any{
-				"share_addr_strategy": "listen",
-				"share_addr":          "",
-			}).Error; err != nil {
-				return err
-			}
-		}
-		return tx.Create(&model.HistoryOfSeeders{SeederName: seederName}).Error
-	})
-}
-
-func CreateHostFromMtprotoCustomShareAddr(tx *gorm.DB, inboundId int, rawAddress string) error {
-	address := strings.TrimPrefix(strings.TrimSuffix(strings.TrimSpace(rawAddress), "]"), "[")
-	if address == "" {
-		return nil
-	}
-	var sameAddress []model.Host
-	if err := tx.Where("inbound_id = ? AND address = ? AND is_disabled = ?", inboundId, address, false).
-		Find(&sameAddress).Error; err != nil {
-		return err
-	}
-	for _, host := range sameAddress {
-		if !slices.Contains(host.ExcludeFromSubTypes, "raw") {
-			return nil
-		}
-	}
-	return tx.Create(&model.Host{
-		GroupId: random.NumLower(16), InboundId: inboundId,
-		Remark: address, Address: address, Security: "same",
-	}).Error
 }
 
 func seedWireguardPeersToClients() error {
@@ -831,113 +780,6 @@ func mtprotoInboundClientEmail(remark string, used map[string]struct{}) string {
 		}
 		candidate = email + "-" + strconv.Itoa(n)
 	}
-}
-
-// CreateHostsFromExternalProxy parses a legacy streamSettings.externalProxy array
-// and inserts one Host row per entry on tx, returning the number of rows created.
-// It is the shared core of both the one-time seedHostsFromExternalProxy startup
-// migration and the inbound-import path: an inbound exported from a build that
-// predated the hosts table carries its external proxies inline in
-// streamSettings.externalProxy, and the startup migration is gated off after its
-// first run, so a freshly imported inbound must be converted here instead. Blank
-// or malformed streamSettings, or one without externalProxy entries, is a no-op.
-func CreateHostsFromExternalProxy(tx *gorm.DB, inboundId int, streamSettings string) (int, error) {
-	if strings.TrimSpace(streamSettings) == "" {
-		return 0, nil
-	}
-	var stream map[string]any
-	if err := json.Unmarshal([]byte(streamSettings), &stream); err != nil {
-		return 0, nil
-	}
-	eps, ok := stream["externalProxy"].([]any)
-	if !ok || len(eps) == 0 {
-		return 0, nil
-	}
-	created := 0
-	for i, raw := range eps {
-		ep, ok := raw.(map[string]any)
-		if !ok {
-			continue
-		}
-		if err := tx.Create(externalProxyEntryToHost(inboundId, i, ep)).Error; err != nil {
-			return created, err
-		}
-		created++
-	}
-	return created, nil
-}
-
-func externalProxyEntryToHost(inboundId, index int, ep map[string]any) *model.Host {
-	security, _ := ep["forceTls"].(string)
-	switch security {
-	case "same", "tls", "none":
-	default:
-		security = "same"
-	}
-	dest, _ := ep["dest"].(string)
-	port := 0
-	if p, ok := ep["port"].(float64); ok {
-		port = int(p)
-	}
-	remark, _ := ep["remark"].(string)
-	if strings.TrimSpace(remark) == "" {
-		remark = "imported " + strconv.Itoa(index+1)
-	}
-	if len(remark) > 256 {
-		remark = remark[:256]
-	}
-	sni, _ := ep["sni"].(string)
-	fingerprint, _ := ep["fingerprint"].(string)
-	ech, _ := ep["echConfigList"].(string)
-	return &model.Host{
-		GroupId:              random.NumLower(16),
-		InboundId:            inboundId,
-		SortOrder:            index,
-		Remark:               remark,
-		Address:              dest,
-		Port:                 port,
-		Security:             security,
-		Sni:                  sni,
-		Fingerprint:          fingerprint,
-		Alpn:                 anyToNonEmptyStrings(ep["alpn"]),
-		PinnedPeerCertSha256: anyToNonEmptyStrings(ep["pinnedPeerCertSha256"]),
-		EchConfigList:        ech,
-	}
-}
-
-func anyToNonEmptyStrings(v any) []string {
-	switch t := v.(type) {
-	case []any:
-		out := make([]string, 0, len(t))
-		for _, e := range t {
-			if s, ok := e.(string); ok && s != "" {
-				out = append(out, s)
-			}
-		}
-		return out
-	case []string:
-		out := make([]string, 0, len(t))
-		for _, s := range t {
-			if s != "" {
-				out = append(out, s)
-			}
-		}
-		return out
-	default:
-		return nil
-	}
-}
-
-func pruneOrphanedHosts() error {
-	res := db.Exec("DELETE FROM hosts WHERE inbound_id NOT IN (SELECT id FROM inbounds)")
-	if res.Error != nil {
-		log.Printf("Error pruning orphaned hosts rows: %v", res.Error)
-		return res.Error
-	}
-	if res.RowsAffected > 0 {
-		log.Printf("Pruned %d orphaned hosts row(s)", res.RowsAffected)
-	}
-	return nil
 }
 
 func pruneOrphanedClientInbounds() error {
@@ -1463,23 +1305,11 @@ func runSeeders(isUsersEmpty bool) error {
 		}
 	}
 
-	if err := seedHostsFromExternalProxy(); err != nil {
-		return err
-	}
-
-	if err := seedMtprotoCustomShareAddrToHosts(); err != nil {
-		return err
-	}
-
 	if err := resetIpLimitsWithoutFail2ban(); err != nil {
 		return err
 	}
 
 	if err := seedWireguardPeersToClients(); err != nil {
-		return err
-	}
-
-	if err := backfillEmptyHostGroupIds(); err != nil {
 		return err
 	}
 
@@ -1510,29 +1340,6 @@ func seedNodeInboundsAdopted() error {
 		return err
 	}
 	return db.Create(&model.HistoryOfSeeders{SeederName: "NodeInboundsAdopted"}).Error
-}
-
-// backfillEmptyHostGroupIds is idempotent and not seeder-gated: builds that
-// predate group ids on the inbound-import path (and restored backups) can
-// re-introduce hosts rows with an empty group_id, and such rows render as a
-// synthetic fallback_<id> group the update/delete API cannot address, so
-// re-check on every start.
-func backfillEmptyHostGroupIds() error {
-	var hosts []*model.Host
-	if err := db.Where("group_id = '' OR group_id IS NULL").Find(&hosts).Error; err != nil {
-		return err
-	}
-	if len(hosts) == 0 {
-		return nil
-	}
-	return db.Transaction(func(tx *gorm.DB) error {
-		for _, h := range hosts {
-			if err := tx.Model(h).Update("group_id", random.NumLower(16)).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
 }
 
 func resetIpLimitsWithoutFail2ban() error {

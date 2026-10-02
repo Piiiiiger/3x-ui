@@ -65,29 +65,23 @@ func TestGenMtprotoLinkNoSecret(t *testing.T) {
 	}
 }
 
-func TestGetSubsMtprotoUsesHostEndpoint(t *testing.T) {
+func TestGetSubsMtprotoAdvertisesThePublicPort(t *testing.T) {
 	initSubDB(t)
 	db := database.GetDB()
 
 	inbound := &model.Inbound{
-		Listen:   "127.0.0.1",
-		Port:     4060,
-		Protocol: model.MTProto,
-		Enable:   true,
-		Tag:      "mt-public-port",
-		Settings: `{"clients":[{"email":"u@mt","enable":true,"subId":"sub-public-port","secret":"` + mtprotoTestSecret + `"}]}`,
+		Listen:            "127.0.0.1",
+		Port:              4060,
+		Protocol:          model.MTProto,
+		Enable:            true,
+		Tag:               "mt-public-port",
+		ShareAddrStrategy: "custom",
+		ShareAddr:         "proxy.example.com",
+		SharePort:         443,
+		Settings:          `{"clients":[{"email":"u@mt","enable":true,"subId":"sub-public-port","secret":"` + mtprotoTestSecret + `"}]}`,
 	}
 	if err := db.Create(inbound).Error; err != nil {
 		t.Fatalf("create inbound: %v", err)
-	}
-	if err := db.Create(&model.Host{
-		InboundId: inbound.Id,
-		Remark:    "public",
-		Address:   "proxy.example.com",
-		Port:      443,
-		Security:  "same",
-	}).Error; err != nil {
-		t.Fatalf("create host: %v", err)
 	}
 	client := &model.ClientRecord{Email: "u@mt", SubID: "sub-public-port", Enable: true, Secret: mtprotoTestSecret}
 	if err := db.Create(client).Error; err != nil {
@@ -112,7 +106,7 @@ func TestGetSubsMtprotoUsesHostEndpoint(t *testing.T) {
 		t.Fatalf("server = %q, want proxy.example.com", got)
 	}
 	if got := u.Query().Get("port"); got != "443" {
-		t.Fatalf("port = %q, want public host port 443", got)
+		t.Fatalf("port = %q, want the public port 443", got)
 	}
 	clientLinks := NewLinkProvider().LinksForClient("sub.example.com", inbound, client.Email)
 	if len(clientLinks) != 1 {

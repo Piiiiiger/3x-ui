@@ -32,20 +32,9 @@ import { activateOnKey } from '@/utils/a11y';
 
 import { buildRowActionsMenu } from './RowActions';
 import { useInboundColumns } from './useInboundColumns';
-import { buildHostRemarksByInboundId, formatHostRemarksLabel } from './helpers';
 import InboundStatsModal from './InboundStatsModal';
 import type { DBInboundRecord, GeneralAction, InboundListProps, RowAction } from './types';
 import './InboundList.css';
-
-function HostRemarksSuffix({ remarks }: { remarks: string[] }) {
-  if (remarks.length === 0) return null;
-  const { display, full } = formatHostRemarksLabel(remarks);
-  return (
-    <Tooltip title={full}>
-      <span className="inbound-host-remarks"> ({display})</span>
-    </Tooltip>
-  );
-}
 
 export default function InboundList({
   dbInbounds,
@@ -59,7 +48,6 @@ export default function InboundList({
   subEnable,
   nodesById,
   hasActiveNode,
-  hosts,
   onAddInbound,
   onGeneralAction,
   onRowAction,
@@ -101,8 +89,6 @@ export default function InboundList({
     [nodesById, t],
   );
 
-  const hostRemarksByInboundId = useMemo(() => buildHostRemarksByInboundId(hosts), [hosts]);
-
   const visibleInbounds = useMemo(() => {
     let list = dbInbounds;
     if (nodeFilter === 0) list = list.filter((ib) => ib.nodeId == null);
@@ -112,11 +98,9 @@ export default function InboundList({
     return list.filter((ib) => {
       if ((ib.remark || '').toLowerCase().includes(q)) return true;
       if (String(ib.port).includes(q)) return true;
-      if ((ib.protocol || '').toLowerCase().includes(q)) return true;
-      const hostRemarks = hostRemarksByInboundId.get(ib.id) ?? [];
-      return hostRemarks.some((remark) => remark.toLowerCase().includes(q));
+      return (ib.protocol || '').toLowerCase().includes(q);
     });
-  }, [dbInbounds, nodeFilter, searchKey, hostRemarksByInboundId]);
+  }, [dbInbounds, nodeFilter, searchKey]);
 
   const onSwitchEnable = useCallback(async (dbInbound: DBInboundRecord, next: boolean) => {
     const previous = dbInbound.enable;
@@ -132,10 +116,8 @@ export default function InboundList({
   }, []);
 
   const hasAnyRemark = useMemo(
-    () =>
-      dbInbounds.some((i) => typeof i.remark === 'string' && i.remark.trim() !== '') ||
-      dbInbounds.some((i) => (hostRemarksByInboundId.get(i.id)?.length ?? 0) > 0),
-    [dbInbounds, hostRemarksByInboundId],
+    () => dbInbounds.some((i) => typeof i.remark === 'string' && i.remark.trim() !== ''),
+    [dbInbounds],
   );
 
   const hasAnySubSortIndex = useMemo(
@@ -174,7 +156,6 @@ export default function InboundList({
     hasAnySubSortIndex,
     hasActiveNode,
     nodesById,
-    hostRemarksByInboundId,
     clientCount,
     inboundSpeed,
     subEnable,
@@ -320,7 +301,6 @@ export default function InboundList({
                       <span className="card-id">#{record.id}</span>
                       <span className="tag-name">
                         <span className="inbound-remark">{record.remark}</span>
-                        <HostRemarksSuffix remarks={hostRemarksByInboundId.get(record.id) ?? []} />
                       </span>
                       <div className="card-actions">
                         <Tooltip title={t('pages.inbounds.inboundInfo')}>

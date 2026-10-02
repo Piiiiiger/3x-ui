@@ -1,6 +1,4 @@
 import type { PlanSummary } from '@/generated/zod';
-import { hostEndpointsFor } from '@/lib/hosts/host-link';
-import type { HostRecord } from '@/schemas/api/host';
 import type { InboundOption } from '@/schemas/client';
 
 /** A new node's name: the base itself while free, else base-2, base-3 and so on. */
@@ -24,16 +22,9 @@ export function pretickedPlans(plans: PlanSummary[], hostNodeIds: number[]): num
   return plans.filter((p) => hostNodeIds.every((id) => p.inboundIds.includes(id))).map((p) => p.id);
 }
 
-/** Whether an enabled entry moves one of the host's nodes to another public port, as NAT does. */
-export function isNatHost(
-  hostNodes: { id: number; port: number }[],
-  entries: HostRecord[],
-): boolean {
-  return hostNodes.some((node) =>
-    hostEndpointsFor(entries, node.id, node.port, '').some(
-      (endpoint) => endpoint.port !== node.port,
-    ),
-  );
+/** Whether one of the host's nodes advertises another public port, as NAT does. */
+export function isNatHost(hostNodes: { port?: number; sharePort?: number }[]): boolean {
+  return hostNodes.some((node) => (node.sharePort ?? 0) > 0 && node.sharePort !== node.port);
 }
 
 /** The copied stream settings with the chosen REALITY target and server name. */

@@ -148,9 +148,7 @@ func (s *SubJsonService) GetJson(subId string, host string, alwaysReturnArray bo
 			continue
 		}
 		subReq.projectThroughFallbackMaster(inbound)
-		if hostEps := subReq.hostEndpoints(inbound, "json"); len(hostEps) > 0 {
-			injectExternalProxy(inbound, hostEps)
-		}
+		inbound = subReq.withPublicPort(inbound)
 
 		var inboundConfigs []json_util.RawMessage
 		for _, client := range clients {
@@ -603,16 +601,12 @@ func (s *SubJsonService) getConfig(subReq *SubService, inbound *model.Inbound, c
 	}
 
 	delete(stream, "externalProxy")
-	network, _ := stream["network"].(string)
 
 	for _, ep := range externalProxies {
 		extPrxy, ok := ep.(map[string]any)
 		if !ok {
 			continue
 		}
-		// Expand the host's {{VAR}} remark template for this client (no-op for
-		// the synthetic/legacy entry) before it's used as the config remark.
-		subReq.renderHostRemark(inbound, client, extPrxy, network)
 		inbound.Listen, _ = extPrxy["dest"].(string)
 		if port, ok := extPrxy["port"].(float64); ok {
 			inbound.Port = int(port)
@@ -635,18 +629,15 @@ func (s *SubJsonService) getConfig(subReq *SubService, inbound *model.Inbound, c
 		if hasExternalProxy {
 			applyExternalProxyTLSToStream(extPrxy, newStream, security)
 		}
-		applyHostStreamOverrides(extPrxy, newStream)
 		streamSettings, _ := json.MarshalIndent(newStream, "", "  ")
-		hostMux := hostMuxOverride(extPrxy)
 
 		var newOutbounds []json_util.RawMessage
 
 		switch inbound.Protocol {
 		case "vmess":
-			newOutbounds = append(newOutbounds, s.genVnext(inbound, streamSettings, client, jsonMux(mux, hostMux)))
+			newOutbounds = append(newOutbounds, s.genVnext(inbound, streamSettings, client, mux))
 		case "vless":
 			vc := client
-			vc.ID = applyVlessRoute(client.ID, hostVlessRoute(extPrxy))
 			// Same gate the raw link and the Clash proxy apply: a flow left
 			// over from a transport Vision supported produces an outbound
 			// xray refuses to start.
@@ -654,11 +645,11 @@ func (s *SubJsonService) getConfig(subReq *SubService, inbound *model.Inbound, c
 			if vc.Flow != "" && !vlessFlowAllowed(newNetwork, security, subReq.linkSettings(inbound)) {
 				vc.Flow = ""
 			}
-			newOutbounds = append(newOutbounds, s.genVless(subReq, inbound, streamSettings, vc, jsonMux(mux, hostMux)))
+			newOutbounds = append(newOutbounds, s.genVless(subReq, inbound, streamSettings, vc, mux))
 		case "trojan", "shadowsocks":
-			newOutbounds = append(newOutbounds, s.genServer(subReq, inbound, streamSettings, client, jsonMux(mux, hostMux)))
+			newOutbounds = append(newOutbounds, s.genServer(subReq, inbound, streamSettings, client, mux))
 		case "hysteria":
-			newOutbounds = append(newOutbounds, s.genHy(inbound, newStream, client, jsonMux(mux, hostMux)))
+			newOutbounds = append(newOutbounds, s.genHy(inbound, newStream, client, mux))
 		case "wireguard":
 			wgOutbound := s.genWireguard(inbound, client)
 			if wgOutbound == nil {
@@ -810,14 +801,6 @@ func (s *SubJsonService) realityData(rData map[string]any, clientKey string) map
 	}
 
 	return rltyData
-}
-
-// jsonMux picks the per-host mux override when present, else the global mux.
-func jsonMux(global, override string) string {
-	if override != "" {
-		return override
-	}
-	return global
 }
 
 func (s *SubJsonService) genVnext(inbound *model.Inbound, streamSettings json_util.RawMessage, client model.Client, mux string) json_util.RawMessage {

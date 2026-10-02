@@ -8,7 +8,15 @@ import { renderWithProviders } from './test-utils';
 
 const OPTIONS = [
   { id: 1, remark: '洛杉矶-Core', protocol: 'vless', security: 'reality', nodeId: null, port: 443 },
-  { id: 5, remark: '香港-Edge', protocol: 'vless', security: 'reality', nodeId: 2, port: 81 },
+  {
+    id: 5,
+    remark: '香港-Edge',
+    protocol: 'vless',
+    security: 'reality',
+    nodeId: 2,
+    port: 81,
+    sharePort: 20443,
+  },
   {
     id: 7,
     remark: '美国-Edge',
@@ -17,9 +25,6 @@ const OPTIONS = [
     nodeId: 3,
     port: 10443,
   },
-];
-const ENTRIES = [
-  { groupId: 'nat', inboundIds: [5], hosts: [':20443'], port: 20443, remark: '香港-Edge' },
 ];
 const plan = (id: number, name: string, inboundIds: number[], memberCount: number) => ({
   id,
@@ -80,7 +85,6 @@ const setupPost = postStub.getMockImplementation();
 beforeEach(() => {
   getStub.mockImplementation(async (url: string) => {
     if (url === '/panel/api/inbounds/options') return new Msg(true, '', OPTIONS);
-    if (url === '/panel/api/hosts/list') return new Msg(true, '', ENTRIES);
     if (url === '/panel/api/plans/list') return new Msg(true, '', PLANS);
     if (url === '/panel/api/inbounds/freePort/2') return new Msg(true, '', { port: 24567 });
     if (url === '/panel/api/inbounds/get/5') return new Msg(true, '', TEMPLATE);
@@ -146,9 +150,13 @@ describe('GenerateNodeModal', () => {
     ];
     expect(options.headers['Content-Type']).toBe('application/json');
     expect(body.planIds).toEqual([11]);
-    expect(body.publicPort).toBe(29236);
     const inbound = body.inbound as Record<string, unknown>;
-    expect(inbound).toMatchObject({ remark: '香港-Edge-2', port: 24567, nodeId: 2 });
+    expect(inbound).toMatchObject({
+      remark: '香港-Edge-2',
+      port: 24567,
+      sharePort: 29236,
+      nodeId: 2,
+    });
     expect(JSON.parse(inbound.settings as string).clients).toEqual([]);
     const reality = JSON.parse(inbound.streamSettings as string).realitySettings;
     expect(reality).toMatchObject({

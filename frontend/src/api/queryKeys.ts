@@ -8,12 +8,6 @@ export const keys = {
     root: () => ['nodes'] as const,
     list: () => ['nodes', 'list'] as const,
   },
-  hosts: {
-    root: () => ['hosts'] as const,
-    list: () => ['hosts', 'list'] as const,
-    byInbound: (inboundId: number) => ['hosts', 'byInbound', inboundId] as const,
-    tags: () => ['hosts', 'tags'] as const,
-  },
   subBalancers: {
     root: () => ['sub-balancers'] as const,
     list: () => ['sub-balancers', 'list'] as const,

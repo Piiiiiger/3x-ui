@@ -26,7 +26,7 @@ func getReply(t *testing.T, engine *gin.Engine, path string) apiReply {
 // Host 0 is the local panel, which has no node row; asking a node for it would
 // answer "node not found: 0" and the form could never suggest a port there.
 func TestInboundFreePortRouteReadsItsHost(t *testing.T) {
-	newHostTestDB(t)
+	newControllerTestDB(t)
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) {
 		c.Set("I18n", func(_ locale.I18nType, key string, _ ...string) string { return key })

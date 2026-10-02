@@ -142,7 +142,6 @@
     "apiDocs": "API 文件",
     "donate": "捐贈",
     "sponsors": "贊助商",
-    "hosts": "入口",
     "docs": "文件",
     "openMenu": "開啟選單",
     "subFormats": "Sub Formats",
@@ -729,7 +728,9 @@
           "listen": "入站監聽地址",
           "custom": "自訂"
         },
-        "autoFill": "自動填入"
+        "autoFill": "自動填入",
+        "sharePort": "公網連接埠",
+        "sharePortHelp": "NAT 將另一個連接埠對應到本節點時，使用者實際連線的連接埠。連結與訂閱會使用它；填 0 則使用節點自身的連接埠。"
       },
       "info": {
         "mode": "模式",
@@ -1208,7 +1209,8 @@
         "reach": "{count} 位使用者將取得此節點",
         "noTemplate": "還沒有可參照的 VLESS REALITY 節點，請用「新增入站」建立第一個。",
         "done": "新節點已在 {host} 上執行",
-        "hostOffline": "主機離線，請在其 agent 連線後再產生節點。"
+        "hostOffline": "主機離線，請在其 agent 連線後再產生節點。",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1828,7 +1830,48 @@
       "subIncyResolveDnsIp": "DoH 伺服器 IP",
       "subIncyResolveDnsIpDesc": "用於引導的 DoH 伺服器 IP。",
       "subIncyGroupRouting": "路由",
-      "intro": "面板存取、安全、通知與訂閱相關設定。"
+      "intro": "面板存取、安全、通知與訂閱相關設定。",
+      "remarkVars": {
+        "title": "範本變數",
+        "intro": "點擊變數以加入。產生訂閱時會針對每個客戶端進行替換。",
+        "preview": "預覽",
+        "groups": {
+          "client": "客戶端",
+          "traffic": "流量",
+          "time": "時間與狀態",
+          "connection": "連線"
+        },
+        "descEMAIL": "客戶端電子郵件",
+        "descINBOUND": "入站本身的備註（配置名稱）",
+        "descHOST": "入口備註",
+        "descID": "客戶端 UUID",
+        "descSHORT_ID": "UUID 的前 8 個字元",
+        "descTELEGRAM_ID": "客戶端的 Telegram ID（未設定則為空）",
+        "descSUB_ID": "訂閱 ID",
+        "descCOMMENT": "客戶端備註",
+        "descTRAFFIC_USED": "已用流量（易讀格式）",
+        "descTRAFFIC_LEFT": "剩餘流量（無限制時隱藏）",
+        "descTRAFFIC_TOTAL": "總流量（無限制時隱藏）",
+        "descTRAFFIC_USED_BYTES": "已用流量（位元組）",
+        "descTRAFFIC_LEFT_BYTES": "剩餘流量（位元組）",
+        "descTRAFFIC_TOTAL_BYTES": "總流量（位元組）",
+        "descUP": "上傳流量",
+        "descDOWN": "下載流量",
+        "descSTATUS": "active / expired / disabled / depleted",
+        "descSTATUS_EMOJI": "以表情符號表示的狀態（✅ ⏳ 🚫）",
+        "descDAYS_LEFT": "距到期天數（無限制時隱藏）",
+        "descTIME_LEFT": "剩餘時間（例如 12d 4h 30m）",
+        "descUSAGE_PERCENTAGE": "已用流量百分比（無限制時隱藏）",
+        "descEXPIRE_DATE": "到期日期（YYYY-MM-DD）",
+        "descJALALI_EXPIRE_DATE": "Jalali 曆的到期日期（YYYY/MM/DD）",
+        "descEXPIRE_UNIX": "到期時間（Unix 時間戳記，秒）",
+        "descCREATED_UNIX": "建立時間（Unix 時間戳記，秒）",
+        "descRESET_DAYS": "流量重置週期（天）",
+        "descRESET_DAY": "按月續期的日期",
+        "descPROTOCOL": "入站協定（VLESS、VMess、Trojan…）",
+        "descTRANSPORT": "傳輸網路（tcp、ws、grpc…）",
+        "descSECURITY": "傳輸安全（TLS、REALITY、NONE）"
+      }
     },
     "xray": {
       "save": "儲存",
@@ -2337,123 +2380,12 @@
       "routingIntro": "決定每條連線走哪個出站的規則。"
     },
     "hosts": {
-      "addHost": "新增入口",
-      "editHost": "編輯入口",
-      "selectInbound": "選擇一個入站",
-      "selectedCount": "已選 {count} 項",
-      "summary": {
-        "total": "總數",
-        "enabled": "已啟用",
-        "disabled": "已停用"
-      },
-      "moveUp": "上移",
-      "moveDown": "下移",
-      "bulkEnable": "啟用",
-      "bulkDisable": "停用",
-      "bulkDelete": "刪除",
-      "bulkDeleteConfirm": "刪除所選的 {count} 個入口？",
-      "deleteConfirmTitle": "刪除入口「{name}」？",
-      "sections": {
-        "basic": "基本",
-        "security": "安全",
-        "advanced": "進階",
-        "general": "一般",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "備註",
-        "serverDescription": "描述",
-        "inbound": "入站",
-        "address": "地址",
-        "port": "連接埠",
-        "endpoint": "端點",
-        "enable": "啟用",
-        "actions": "操作",
-        "security": "安全",
-        "sni": "SNI",
-        "overrideSniFromAddress": "使用地址作為 SNI",
-        "keepSniBlank": "保持 SNI 留空",
-        "hostHeader": "Host 標頭",
-        "path": "路徑",
-        "alpn": "ALPN",
-        "fingerprint": "指紋",
-        "pins": "釘選憑證 SHA-256",
-        "verifyPeerCertByName": "依名稱驗證對端憑證",
-        "allowInsecure": "允許不安全連線",
-        "echConfigList": "ECH 設定清單",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "Final Mask",
-        "vlessRoute": "VLESS 路由",
-        "mihomoIpVersion": "IP 版本",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "隨機排序 Host",
-        "tags": "標籤",
-        "nodeGuids": "主機",
-        "excludeFromSubTypes": "從格式中排除",
-        "inheritAddress": "繼承地址"
+        "allowInsecure": "允許不安全連線"
       },
       "hints": {
-        "address": "留空以繼承入站本身的地址。",
-        "port": "0 表示繼承入站的連接埠。",
-        "tags": "對終端使用者不可見；僅隨 RAW 訂閱傳送。只能使用大寫字母、數字、_ 和 :。",
-        "nodeGuids": "選擇此入口解析到的主機。僅為視覺上的指派。",
-        "serverDescription": "顯示於備註下方的選填註記。",
-        "allowInsecure": "略過 TLS 憑證驗證（allowInsecure / skip-cert-verify）。",
-        "vlessRoute": "嵌入 UUID 的單一 VLESS 路由值（0-65535），例如 443。留空表示無。",
-        "remark": "此入口的純文字標籤。僅當入站本身沒有備註時，才作為配置名稱顯示。"
-      },
-      "remarkVars": {
-        "title": "範本變數",
-        "intro": "點擊變數以加入。產生訂閱時會針對每個客戶端進行替換。",
-        "preview": "預覽",
-        "groups": {
-          "client": "客戶端",
-          "traffic": "流量",
-          "time": "時間與狀態",
-          "connection": "連線"
-        },
-        "descEMAIL": "客戶端電子郵件",
-        "descINBOUND": "入站本身的備註（配置名稱）",
-        "descHOST": "入口備註",
-        "descID": "客戶端 UUID",
-        "descSHORT_ID": "UUID 的前 8 個字元",
-        "descTELEGRAM_ID": "客戶端的 Telegram ID（未設定則為空）",
-        "descSUB_ID": "訂閱 ID",
-        "descCOMMENT": "客戶端備註",
-        "descTRAFFIC_USED": "已用流量（易讀格式）",
-        "descTRAFFIC_LEFT": "剩餘流量（無限制時隱藏）",
-        "descTRAFFIC_TOTAL": "總流量（無限制時隱藏）",
-        "descTRAFFIC_USED_BYTES": "已用流量（位元組）",
-        "descTRAFFIC_LEFT_BYTES": "剩餘流量（位元組）",
-        "descTRAFFIC_TOTAL_BYTES": "總流量（位元組）",
-        "descUP": "上傳流量",
-        "descDOWN": "下載流量",
-        "descSTATUS": "active / expired / disabled / depleted",
-        "descSTATUS_EMOJI": "以表情符號表示的狀態（✅ ⏳ 🚫）",
-        "descDAYS_LEFT": "距到期天數（無限制時隱藏）",
-        "descTIME_LEFT": "剩餘時間（例如 12d 4h 30m）",
-        "descUSAGE_PERCENTAGE": "已用流量百分比（無限制時隱藏）",
-        "descEXPIRE_DATE": "到期日期（YYYY-MM-DD）",
-        "descJALALI_EXPIRE_DATE": "Jalali 曆的到期日期（YYYY/MM/DD）",
-        "descEXPIRE_UNIX": "到期時間（Unix 時間戳記，秒）",
-        "descCREATED_UNIX": "建立時間（Unix 時間戳記，秒）",
-        "descRESET_DAYS": "流量重置週期（天）",
-        "descRESET_DAY": "按月續期的日期",
-        "descPROTOCOL": "入站協定（VLESS、VMess、Trojan…）",
-        "descTRANSPORT": "傳輸網路（tcp、ws、grpc…）",
-        "descSECURITY": "傳輸安全（TLS、REALITY、NONE）"
-      },
-      "toasts": {
-        "list": "載入入口失敗",
-        "obtain": "載入入口失敗",
-        "add": "新增入口",
-        "update": "更新入口",
-        "delete": "刪除入口",
-        "badTag": "無效的標籤",
-        "badVlessRoute": "請輸入 0 到 65535 之間的單一數字"
-      },
-      "intro": "為每個入站設定分享連結與訂閱提供的位址與 TLS 參數。"
+        "allowInsecure": "略過 TLS 憑證驗證（allowInsecure / skip-cert-verify）。"
+      }
     },
     "sponsors": {
       "title": "贊助商",

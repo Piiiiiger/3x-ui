@@ -31,7 +31,6 @@ import {
   isAmneziaWGClient,
 } from './amneziawgConfig';
 import { tunnelConfigEndpoints, tunnelEndpointLabel } from './tunnelEndpoints';
-import type { HostRecord } from '@/schemas/api/host';
 import './ClientInfoModal.css';
 
 const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
@@ -68,11 +67,8 @@ interface ClientInfoModalProps {
   tunnelAllowedIPs?: Record<number, string>;
   isOnline: boolean;
   subSettings?: SubSettings;
-  hosts?: HostRecord[];
   onOpenChange: (open: boolean) => void;
 }
-
-const NO_HOSTS: HostRecord[] = [];
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -102,7 +98,6 @@ export default function ClientInfoModal({
   tunnelAllowedIPs,
   isOnline,
   subSettings = DEFAULT_SUB,
-  hosts = NO_HOSTS,
   onOpenChange,
 }: ClientInfoModalProps) {
   const { datepicker } = useDatepicker();
@@ -198,14 +193,14 @@ export default function ClientInfoModal({
     return wgInbounds
       .flatMap((ib) => {
         const address = tunnelAllowedIPs?.[ib.id] ?? '';
-        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+        return tunnelConfigEndpoints(ib, host, publicHost).map((ep) => ({
           inbound: ib,
           endpoint: tunnelEndpointLabel(ep),
           text: buildWireguardClientConfig(client, ib, host, publicHost, address, ep),
         }));
       })
       .filter((c) => !!c.text);
-  }, [client, wgInbounds, tunnelAllowedIPs, subSettings?.publicHost, hosts]);
+  }, [client, wgInbounds, tunnelAllowedIPs, subSettings?.publicHost]);
 
   const awgInbounds = useMemo(
     () => findAmneziaWGInbounds(client, inboundsById),
@@ -218,14 +213,14 @@ export default function ClientInfoModal({
     return awgInbounds
       .flatMap((ib) => {
         const address = tunnelAllowedIPs?.[ib.id] ?? '';
-        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+        return tunnelConfigEndpoints(ib, host, publicHost).map((ep) => ({
           inbound: ib,
           endpoint: tunnelEndpointLabel(ep),
           text: buildAmneziaWGClientConfig(client, ib, host, publicHost, address, ep),
         }));
       })
       .filter((c) => !!c.text);
-  }, [client, awgInbounds, tunnelAllowedIPs, subSettings?.publicHost, hosts]);
+  }, [client, awgInbounds, tunnelAllowedIPs, subSettings?.publicHost]);
 
   async function copyValue(text: string) {
     if (!text) return;

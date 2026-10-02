@@ -23,7 +23,6 @@ import {
   shadowsocksNetworkLabel,
   tunnelNetworkLabel,
   mixedNetworkLabel,
-  formatHostRemarksLabel,
 } from './helpers';
 import type { ClientCountEntry, DBInboundRecord, InboundSpeedEntry, RowAction } from './types';
 
@@ -32,7 +31,6 @@ interface UseInboundColumnsParams {
   hasAnySubSortIndex: boolean;
   hasActiveNode: boolean;
   nodesById: Map<number, NodeRecord>;
-  hostRemarksByInboundId: Map<number, string[]>;
   clientCount: Record<number, ClientCountEntry>;
   inboundSpeed: Record<number, InboundSpeedEntry>;
   subEnable: boolean;
@@ -48,7 +46,6 @@ export function useInboundColumns({
   hasAnySubSortIndex,
   hasActiveNode,
   nodesById,
-  hostRemarksByInboundId,
   clientCount,
   inboundSpeed,
   subEnable,
@@ -145,21 +142,7 @@ export function useInboundColumns({
         align: 'center',
         width: 140,
         sorter: (a, b) => compareText(a.remark, b.remark),
-        render: (_, record) => {
-          const hostRemarks = hostRemarksByInboundId.get(record.id) ?? [];
-          if (hostRemarks.length === 0) {
-            return record.remark || null;
-          }
-          const { display, full } = formatHostRemarksLabel(hostRemarks);
-          return (
-            <div className="inbound-remark-cell">
-              <div className="inbound-remark">{record.remark}</div>
-              <Tooltip title={full}>
-                <div className="inbound-host-remarks">({display})</div>
-              </Tooltip>
-            </div>
-          );
-        },
+        render: (_, record) => record.remark || null,
       });
     }
 
@@ -485,7 +468,6 @@ export function useInboundColumns({
     hasAnySubSortIndex,
     hasActiveNode,
     nodesById,
-    hostRemarksByInboundId,
     clientCount,
     inboundSpeed,
     subEnable,

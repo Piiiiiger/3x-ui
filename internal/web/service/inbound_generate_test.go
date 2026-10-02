@@ -57,13 +57,12 @@ func setupGenerate(t *testing.T) generateFixture {
 func nodeRequest(nodeID *int, port, publicPort int, planIds ...int) *GenerateNodeRequest {
 	return &GenerateNodeRequest{
 		Inbound: model.Inbound{
-			Remark: "香港-Edge-2", Enable: true, Port: port, Protocol: model.VLESS, NodeID: nodeID,
+			Remark: "香港-Edge-2", Enable: true, Port: port, SharePort: publicPort, Protocol: model.VLESS, NodeID: nodeID,
 			Settings:       `{"clients":[],"decryption":"none"}`,
 			StreamSettings: `{"network":"tcp","security":"none"}`,
 			Sniffing:       `{}`,
 		},
-		PlanIds:    planIds,
-		PublicPort: publicPort,
+		PlanIds: planIds,
 	}
 }
 
@@ -109,9 +108,6 @@ func TestGenerateNodeOnAnAgentGoesLiveOnceTheAgentRunsIt(t *testing.T) {
 	}
 	if stored.SubSortIndex != f.lastSort+1 {
 		t.Fatalf("sub sort index %d, want %d so the node lists after everyone's existing nodes", stored.SubSortIndex, f.lastSort+1)
-	}
-	if n := countRows(t, &model.Host{}, "inbound_id = ?", created.Id); n != 0 {
-		t.Fatalf("%d entry rows for a node without a public port", n)
 	}
 }
 
@@ -160,43 +156,6 @@ func TestGenerateNodeAnAgentRefusesIsLeftDisabled(t *testing.T) {
 	}
 }
 
-// Behind NAT the port people connect to is not the listen port; the entry row is
-// what puts the public port into their links.
-func TestGenerateNodeBehindNATAddsAnEntryForItsPublicPort(t *testing.T) {
-	for _, tc := range []struct {
-		name       string
-		publicPort int
-		wantRows   int64
-	}{
-		{"public port differs", 20443, 1},
-		{"public port equals the listen port", 81, 0},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			f := setupGenerate(t)
-			hub := useAgentHub(t)
-			connectFakeAgent(t, hub, f.agent.Id, agentproto.Hello{AgentVersion: "v1"}).AnswerApplies(true)
-
-			created, err := (&InboundService{}).GenerateNode(nodeRequest(&f.agent.Id, 81, tc.publicPort))
-			if err != nil {
-				t.Fatalf("generate: %v", err)
-			}
-			if n := countRows(t, &model.Host{}, "inbound_id = ?", created.Id); n != tc.wantRows {
-				t.Fatalf("%d entry rows, want %d", n, tc.wantRows)
-			}
-			if tc.wantRows == 0 {
-				return
-			}
-			var entry model.Host
-			if err := database.GetDB().Where("inbound_id = ?", created.Id).First(&entry).Error; err != nil {
-				t.Fatal(err)
-			}
-			if entry.Address != "" || entry.Port != 20443 || entry.Security != "same" || entry.Remark != created.Remark || entry.IsDisabled {
-				t.Fatalf("entry %+v, want blank address (inherit), port 20443, security same, remark %q, enabled", entry, created.Remark)
-			}
-		})
-	}
-}
-
 func TestGenerateNodeForAnUnknownPlanLeavesNothingBehind(t *testing.T) {
 	f := setupGenerate(t)
 	hub := useAgentHub(t)
@@ -209,9 +168,6 @@ func TestGenerateNodeForAnUnknownPlanLeavesNothingBehind(t *testing.T) {
 	}
 	if n := countRows(t, &model.Inbound{}, "node_id = ?", f.agent.Id); n != 0 {
 		t.Fatalf("%d inbounds left on the agent after a failed generate", n)
-	}
-	if n := countRows(t, &model.Host{}, "1 = 1"); n != 0 {
-		t.Fatalf("%d entry rows left after a failed generate", n)
 	}
 	if got := planInboundIdsOf(t, "alice@gen"); !slices.Equal(got, before) {
 		t.Fatalf("alice's inbounds %v, want them unchanged %v", got, before)

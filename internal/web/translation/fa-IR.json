@@ -142,7 +142,6 @@
     "apiDocs": "مستندات API",
     "donate": "حمایت مالی",
     "sponsors": "اسپانسرها",
-    "hosts": "میزبان‌ها",
     "docs": "مستندات",
     "openMenu": "باز کردن منو",
     "subFormats": "Sub Formats",
@@ -729,7 +728,9 @@
           "listen": "آدرس شنود ورودی",
           "custom": "سفارشی"
         },
-        "autoFill": "تکمیل خودکار"
+        "autoFill": "تکمیل خودکار",
+        "sharePort": "پورت عمومی",
+        "sharePortHelp": "پورتی که کاربران به آن وصل می‌شوند وقتی NAT پورت دیگری را به این نود نگاشت می‌کند. لینک‌ها و اشتراک‌ها از آن استفاده می‌کنند؛ 0 پورت خود نود را نگه می‌دارد."
       },
       "info": {
         "mode": "حالت",
@@ -1208,7 +1209,8 @@
         "reach": "{count} کاربر این ورودی را دریافت می‌کنند",
         "noTemplate": "هنوز ورودی VLESS REALITY برای کپی وجود ندارد؛ اولین را با «افزودن ورودی» بسازید.",
         "done": "ورودی جدید روی {host} اجرا می‌شود",
-        "hostOffline": "نود آفلاین است؛ پس از اتصال ایجنت ورودی را بسازید."
+        "hostOffline": "نود آفلاین است؛ پس از اتصال ایجنت ورودی را بسازید.",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1828,7 +1830,48 @@
       "subIncyResolveDnsIp": "آیپی سرور DoH",
       "subIncyResolveDnsIpDesc": "آیپی سرور DoH برای بوتاسترپ.",
       "subIncyGroupRouting": "مسیریابی",
-      "intro": "دسترسی به پنل، امنیت، اعلان‌ها و تنظیمات اشتراک."
+      "intro": "دسترسی به پنل، امنیت، اعلان‌ها و تنظیمات اشتراک.",
+      "remarkVars": {
+        "title": "متغیرهای قالب",
+        "intro": "برای افزودن یک متغیر روی آن کلیک کنید. هنگام ساخت اشتراک، برای هر کاربر جایگزین می‌شود.",
+        "preview": "پیش‌نمایش",
+        "groups": {
+          "client": "کاربر",
+          "traffic": "ترافیک",
+          "time": "زمان و وضعیت",
+          "connection": "اتصال"
+        },
+        "descEMAIL": "ایمیل کاربر",
+        "descINBOUND": "نام خود اینباند (نام کانفیگ)",
+        "descHOST": "نام میزبان",
+        "descID": "UUID کاربر",
+        "descSHORT_ID": "۸ کاراکتر اول UUID",
+        "descTELEGRAM_ID": "شناسهٔ تلگرام کاربر (در صورت عدم تنظیم خالی)",
+        "descSUB_ID": "شناسهٔ اشتراک",
+        "descCOMMENT": "توضیحات کاربر",
+        "descTRAFFIC_USED": "ترافیک مصرف‌شده (قابل خواندن برای انسان)",
+        "descTRAFFIC_LEFT": "ترافیک باقی‌مانده (در صورت نامحدود بودن پنهان می‌شود)",
+        "descTRAFFIC_TOTAL": "ترافیک کل (در صورت نامحدود بودن پنهان می‌شود)",
+        "descTRAFFIC_USED_BYTES": "ترافیک مصرف‌شده به بایت",
+        "descTRAFFIC_LEFT_BYTES": "ترافیک باقی‌مانده به بایت",
+        "descTRAFFIC_TOTAL_BYTES": "ترافیک کل به بایت",
+        "descUP": "ترافیک آپلود",
+        "descDOWN": "ترافیک دانلود",
+        "descSTATUS": "فعال / منقضی‌شده / غیرفعال / مصرف‌شده",
+        "descSTATUS_EMOJI": "وضعیت به‌صورت ایموجی (✅ ⏳ 🚫)",
+        "descDAYS_LEFT": "روزهای باقی‌مانده تا انقضا (در صورت نامحدود بودن پنهان می‌شود)",
+        "descTIME_LEFT": "زمان باقی‌مانده (مثلاً 12d 4h 30m)",
+        "descUSAGE_PERCENTAGE": "ترافیک مصرف‌شده به درصد (در صورت نامحدود بودن پنهان می‌شود)",
+        "descEXPIRE_DATE": "تاریخ انقضا (YYYY-MM-DD)",
+        "descJALALI_EXPIRE_DATE": "تاریخ انقضا در تقویم جلالی (YYYY/MM/DD)",
+        "descEXPIRE_UNIX": "انقضا به‌صورت مهر زمانی Unix (ثانیه)",
+        "descCREATED_UNIX": "زمان ایجاد به‌صورت مهر زمانی Unix (ثانیه)",
+        "descRESET_DAYS": "دورهٔ بازنشانی ترافیک به روز",
+        "descRESET_DAY": "روز ماه برای تمدید تقویمی",
+        "descPROTOCOL": "پروتکل اینباند (VLESS، VMess، Trojan، …)",
+        "descTRANSPORT": "شبکهٔ انتقال (tcp، ws، grpc، …)",
+        "descSECURITY": "امنیت انتقال (TLS، REALITY، NONE)"
+      }
     },
     "xray": {
       "save": "ذخیره",
@@ -2337,123 +2380,12 @@
       "routingIntro": "قوانینی که تعیین می‌کنند هر اتصال از کدام خروجی عبور کند."
     },
     "hosts": {
-      "addHost": "افزودن میزبان",
-      "editHost": "ویرایش میزبان",
-      "selectInbound": "یک اینباند انتخاب کنید",
-      "selectedCount": "{count} انتخاب‌شده",
-      "summary": {
-        "total": "کل",
-        "enabled": "فعال",
-        "disabled": "غیرفعال"
-      },
-      "moveUp": "انتقال به بالا",
-      "moveDown": "انتقال به پایین",
-      "bulkEnable": "فعال‌سازی",
-      "bulkDisable": "غیرفعال‌سازی",
-      "bulkDelete": "حذف",
-      "bulkDeleteConfirm": "{count} میزبان انتخاب‌شده حذف شود؟",
-      "deleteConfirmTitle": "میزبان «{name}» حذف شود؟",
-      "sections": {
-        "basic": "پایه",
-        "security": "امنیت",
-        "advanced": "پیشرفته",
-        "general": "عمومی",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "نام",
-        "serverDescription": "توضیحات",
-        "inbound": "اینباندها",
-        "address": "آدرس",
-        "port": "پورت",
-        "endpoint": "نقطه پایانی",
-        "enable": "فعال",
-        "actions": "عملیات",
-        "security": "امنیت",
-        "sni": "SNI",
-        "overrideSniFromAddress": "استفاده از آدرس به‌عنوان SNI",
-        "keepSniBlank": "SNI خالی بماند",
-        "hostHeader": "هدر Host",
-        "path": "مسیر",
-        "alpn": "ALPN",
-        "fingerprint": "اثرانگشت",
-        "pins": "SHA-256 پین‌شدهٔ گواهی",
-        "verifyPeerCertByName": "بررسی گواهی همتا بر اساس نام",
-        "allowInsecure": "اجازهٔ اتصال ناامن",
-        "echConfigList": "فهرست پیکربندی ECH",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "ماسک نهایی",
-        "vlessRoute": "مسیر VLESS",
-        "mihomoIpVersion": "نسخه IP",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "درهم‌سازی میزبان",
-        "tags": "برچسب‌ها",
-        "nodeGuids": "نودها",
-        "excludeFromSubTypes": "حذف از فرمت‌ها",
-        "inheritAddress": "ارث‌بری آدرس"
+        "allowInsecure": "اجازهٔ اتصال ناامن"
       },
       "hints": {
-        "address": "برای ارث‌بری آدرس خودِ اینباند خالی بگذارید.",
-        "port": "مقدار ۰ پورت اینباند را به ارث می‌برد.",
-        "tags": "برای کاربران نهایی قابل مشاهده نیست؛ فقط با اشتراک RAW ارسال می‌شود. تنها حروف بزرگ، ارقام، _ و : مجاز است.",
-        "nodeGuids": "نودهایی را که از این میزبان resolve می‌شوند انتخاب کنید. صرفاً انتساب نمایشی است.",
-        "serverDescription": "یادداشت اختیاری که زیر نام نمایش داده می‌شود.",
-        "allowInsecure": "رد کردن بررسی گواهی TLS (allowInsecure / skip-cert-verify).",
-        "vlessRoute": "یک مقدار مسیر VLESS (0 تا 65535) که در UUID جاسازی می‌شود، مثلاً 443. برای هیچ‌کدام خالی بگذارید.",
-        "remark": "یک برچسب ساده برای این میزبان. تنها زمانی به‌عنوان نام کانفیگ نمایش داده می‌شود که اینباند نام مخصوص خود را نداشته باشد."
-      },
-      "remarkVars": {
-        "title": "متغیرهای قالب",
-        "intro": "برای افزودن یک متغیر روی آن کلیک کنید. هنگام ساخت اشتراک، برای هر کاربر جایگزین می‌شود.",
-        "preview": "پیش‌نمایش",
-        "groups": {
-          "client": "کاربر",
-          "traffic": "ترافیک",
-          "time": "زمان و وضعیت",
-          "connection": "اتصال"
-        },
-        "descEMAIL": "ایمیل کاربر",
-        "descINBOUND": "نام خود اینباند (نام کانفیگ)",
-        "descHOST": "نام میزبان",
-        "descID": "UUID کاربر",
-        "descSHORT_ID": "۸ کاراکتر اول UUID",
-        "descTELEGRAM_ID": "شناسهٔ تلگرام کاربر (در صورت عدم تنظیم خالی)",
-        "descSUB_ID": "شناسهٔ اشتراک",
-        "descCOMMENT": "توضیحات کاربر",
-        "descTRAFFIC_USED": "ترافیک مصرف‌شده (قابل خواندن برای انسان)",
-        "descTRAFFIC_LEFT": "ترافیک باقی‌مانده (در صورت نامحدود بودن پنهان می‌شود)",
-        "descTRAFFIC_TOTAL": "ترافیک کل (در صورت نامحدود بودن پنهان می‌شود)",
-        "descTRAFFIC_USED_BYTES": "ترافیک مصرف‌شده به بایت",
-        "descTRAFFIC_LEFT_BYTES": "ترافیک باقی‌مانده به بایت",
-        "descTRAFFIC_TOTAL_BYTES": "ترافیک کل به بایت",
-        "descUP": "ترافیک آپلود",
-        "descDOWN": "ترافیک دانلود",
-        "descSTATUS": "فعال / منقضی‌شده / غیرفعال / مصرف‌شده",
-        "descSTATUS_EMOJI": "وضعیت به‌صورت ایموجی (✅ ⏳ 🚫)",
-        "descDAYS_LEFT": "روزهای باقی‌مانده تا انقضا (در صورت نامحدود بودن پنهان می‌شود)",
-        "descTIME_LEFT": "زمان باقی‌مانده (مثلاً 12d 4h 30m)",
-        "descUSAGE_PERCENTAGE": "ترافیک مصرف‌شده به درصد (در صورت نامحدود بودن پنهان می‌شود)",
-        "descEXPIRE_DATE": "تاریخ انقضا (YYYY-MM-DD)",
-        "descJALALI_EXPIRE_DATE": "تاریخ انقضا در تقویم جلالی (YYYY/MM/DD)",
-        "descEXPIRE_UNIX": "انقضا به‌صورت مهر زمانی Unix (ثانیه)",
-        "descCREATED_UNIX": "زمان ایجاد به‌صورت مهر زمانی Unix (ثانیه)",
-        "descRESET_DAYS": "دورهٔ بازنشانی ترافیک به روز",
-        "descRESET_DAY": "روز ماه برای تمدید تقویمی",
-        "descPROTOCOL": "پروتکل اینباند (VLESS، VMess، Trojan، …)",
-        "descTRANSPORT": "شبکهٔ انتقال (tcp، ws، grpc، …)",
-        "descSECURITY": "امنیت انتقال (TLS، REALITY، NONE)"
-      },
-      "toasts": {
-        "list": "بارگذاری میزبان‌ها ناموفق",
-        "obtain": "بارگذاری میزبان ناموفق",
-        "add": "افزودن میزبان",
-        "update": "به‌روزرسانی میزبان",
-        "delete": "حذف میزبان",
-        "badTag": "برچسب نامعتبر",
-        "badVlessRoute": "یک عدد بین 0 تا 65535 وارد کنید"
-      },
-      "intro": "آدرس‌ها و جزئیات TLS که لینک‌های اشتراک‌گذاری و اشتراک‌ها برای هر ورودی ارائه می‌دهند."
+        "allowInsecure": "رد کردن بررسی گواهی TLS (allowInsecure / skip-cert-verify)."
+      }
     },
     "sponsors": {
       "title": "اسپانسرها",

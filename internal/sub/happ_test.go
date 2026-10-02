@@ -256,21 +256,6 @@ func TestApplyHappHeaders_Aliases(t *testing.T) {
 	}
 }
 
-func TestAppendHappServerDescription(t *testing.T) {
-	desc := "VIP Server"
-	encoded := base64.StdEncoding.EncodeToString([]byte(desc))
-
-	got := appendHappServerDescription("My Node", desc)
-	want := "My Node?serverDescription=" + encoded
-	if got != want {
-		t.Fatalf("appendHappServerDescription = %q, want %q", got, want)
-	}
-
-	if gotEmpty := appendHappServerDescription("My Node", ""); gotEmpty != "My Node" {
-		t.Fatalf("appendHappServerDescription with empty desc = %q, want My Node", gotEmpty)
-	}
-}
-
 func TestAppendQueryAndFragment_PreservesServerDescription(t *testing.T) {
 	desc := "Fast Server"
 	encoded := base64.StdEncoding.EncodeToString([]byte(desc))

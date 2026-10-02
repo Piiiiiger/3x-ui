@@ -157,28 +157,6 @@ function applyFinalMaskToObj(
   if (payload.length > 0) obj.fm = payload;
 }
 
-// A Host entry's own SNI and fingerprint replace the REALITY ones, as the
-// subscription's applyEndpointRealityParams does; legacy entries never do.
-function applyHostRealityParams(
-  externalProxy: ExternalProxyEntry | null | undefined,
-  params: URLSearchParams,
-) {
-  if (!externalProxy?.isHost) return;
-  if (externalProxy.sni) params.set('sni', externalProxy.sni);
-  if (externalProxy.fingerprint) params.set('fp', externalProxy.fingerprint);
-}
-
-// An entry that skips certificate checks says so on any TLS or REALITY link,
-// as the subscription's applyEndpointAllowInsecure does.
-function applyExternalProxyAllowInsecure(
-  externalProxy: ExternalProxyEntry | null | undefined,
-  params: URLSearchParams,
-  security: string | undefined,
-) {
-  if (externalProxy?.allowInsecure && security && security !== 'none')
-    params.set('allowInsecure', '1');
-}
-
 function externalProxyAlpn(value: ExternalProxyEntry['alpn']): string {
   if (Array.isArray(value)) return value.filter(Boolean).join(',');
   return '';
@@ -382,19 +360,6 @@ export interface GenVlessLinkInput {
   externalProxy?: ExternalProxyEntry | null;
 }
 
-// Mirror of the Go applyVlessRoute: bake a single 0-65535 value into the UUID's
-// 3rd group (bytes 6-7), which xray reads as the vless route. Empty/invalid/non-
-// UUID input is returned unchanged.
-export function applyVlessRoute(id: string, route: string | undefined): string {
-  const r = (route ?? '').trim();
-  if (r === '' || !/^\d{1,5}$/.test(r)) return id;
-  const n = Number(r);
-  if (n > 65535) return id;
-  if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id))
-    return id;
-  return id.slice(0, 14) + n.toString(16).padStart(4, '0') + id.slice(18);
-}
-
 // VLESS share link: vless://<uuid>@<host>:<port>?<query>#<remark>. The
 // query carries network type, encryption, network-specific knobs, and
 // security-specific knobs (TLS fingerprint/alpn/sni or Reality
@@ -491,11 +456,9 @@ export function genVlessLink(input: GenVlessLinkInput): string {
       if (reality.settings.mldsa65Verify.length > 0)
         params.set('pqv', reality.settings.mldsa65Verify);
     }
-    applyHostRealityParams(externalProxy, params);
   } else {
     params.set('security', 'none');
   }
-  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   // XTLS Vision flow: TCP over tls/reality (classic) or XHTTP+vlessenc (the
   // VLESS-level encryption stands in for transport TLS). Mirrors the backend's
@@ -512,9 +475,7 @@ export function genVlessLink(input: GenVlessLinkInput): string {
     params.set('flow', flow);
   }
 
-  const url = new URL(
-    `vless://${applyVlessRoute(clientId, externalProxy?.vlessRoute)}@${formatUrlHost(address)}:${port}`,
-  );
+  const url = new URL(`vless://${clientId}@${formatUrlHost(address)}:${port}`);
   for (const [key, value] of params) url.searchParams.set(key, value);
   url.hash = encodeURIComponent(remark);
   return url.toString();
@@ -648,11 +609,9 @@ export function genTrojanLink(input: GenTrojanLinkInput): string {
   } else if (security === 'reality') {
     params.set('security', 'reality');
     writeRealityParams(stream, params, clientKey);
-    applyHostRealityParams(externalProxy, params);
   } else {
     params.set('security', 'none');
   }
-  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   const url = new URL(
     `trojan://${encodeURIComponent(clientPassword)}@${formatUrlHost(address)}:${port}`,
@@ -707,7 +666,6 @@ export function genShadowsocksLink(input: GenShadowsocksLinkInput): string {
     writeTlsParams(stream, params);
     applyExternalProxyTLSParams(externalProxy, params, security);
   }
-  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   // SIP002 clients (v2rayN) ignore type/headerType/host/path and only read
   // `plugin`. Re-encode a TCP http header as obfs-local so they build a

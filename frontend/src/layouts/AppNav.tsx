@@ -20,7 +20,6 @@ import {
   EllipsisOutlined,
   ExportOutlined,
   GithubOutlined,
-  GlobalOutlined,
   HeartOutlined,
   ImportOutlined,
   LogoutOutlined,
@@ -73,7 +72,6 @@ type IconName =
   | 'setting'
   | 'tool'
   | 'cluster'
-  | 'hosts'
   | 'logout'
   | 'sponsors'
   | 'apidocs'
@@ -89,7 +87,6 @@ const iconByName: Record<IconName, ComponentType> = {
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
-  hosts: GlobalOutlined,
   logout: LogoutOutlined,
   sponsors: CrownOutlined,
   apidocs: ApiOutlined,
@@ -135,7 +132,6 @@ export default function AppNav() {
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
-      { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
       { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },
       { key: '/routing', icon: 'routing', title: t('menu.routing') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },

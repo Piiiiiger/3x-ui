@@ -2511,7 +2511,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "GenerateNodeRequest": {
-    "description": "GenerateNodeRequest is a new node on one host: the inbound as the add route takes\nit, the plans whose members get it, and the port NAT exposes it on (0 for none).",
+    "description": "GenerateNodeRequest is a new node on one host: the inbound as the add route takes\nit (its sharePort is the port NAT exposes), and the plans whose members get it.",
     "properties": {
       "clientStats": {
         "description": "Client traffic statistics",
@@ -2610,12 +2610,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "vless",
         "type": "string"
       },
-      "publicPort": {
-        "example": 20443,
-        "maximum": 65535,
-        "minimum": 0,
-        "type": "integer"
-      },
       "remark": {
         "description": "Human-readable remark",
         "example": "VLESS-443",
@@ -2632,6 +2626,13 @@ export const SCHEMAS: Record<string, unknown> = {
           "custom"
         ],
         "type": "string"
+      },
+      "sharePort": {
+        "description": "SharePort is the port links advertise when NAT maps a public port onto this\none; 0 keeps the inbound's own port.",
+        "example": 0,
+        "maximum": 65535,
+        "minimum": 0,
+        "type": "integer"
       },
       "sniffing": {},
       "streamSettings": {},
@@ -2686,11 +2687,11 @@ export const SCHEMAS: Record<string, unknown> = {
       "planIds",
       "port",
       "protocol",
-      "publicPort",
       "remark",
       "settings",
       "shareAddr",
       "shareAddrStrategy",
+      "sharePort",
       "sniffing",
       "streamSettings",
       "subSortIndex",
@@ -2881,364 +2882,6 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
-  "Host": {
-    "properties": {
-      "address": {
-        "example": "cdn.example.com",
-        "type": "string"
-      },
-      "allowInsecure": {
-        "type": "boolean"
-      },
-      "alpn": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "cipherSuites": {
-        "type": "string"
-      },
-      "createdAt": {
-        "format": "int64",
-        "type": "integer"
-      },
-      "echConfigList": {
-        "type": "string"
-      },
-      "excludeFromSubTypes": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "finalMask": {
-        "description": "FinalMask is a JSON object of xray finalmask masks (tcp/udp/quicParams),\nmerged into this host's JSON-subscription stream. Empty = no override.",
-        "type": "string"
-      },
-      "fingerprint": {
-        "type": "string"
-      },
-      "groupId": {
-        "type": "string"
-      },
-      "hostHeader": {
-        "type": "string"
-      },
-      "id": {
-        "example": 1,
-        "type": "integer"
-      },
-      "inboundId": {
-        "example": 1,
-        "type": "integer"
-      },
-      "isDisabled": {
-        "type": "boolean"
-      },
-      "isHidden": {
-        "type": "boolean"
-      },
-      "keepSniBlank": {
-        "type": "boolean"
-      },
-      "mihomoIpVersion": {
-        "enum": [
-          "dual",
-          "ipv4",
-          "ipv6",
-          "ipv4-prefer",
-          "ipv6-prefer"
-        ],
-        "type": "string"
-      },
-      "mihomoX25519": {
-        "type": "boolean"
-      },
-      "muxParams": {},
-      "nodeGuids": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "overrideSniFromAddress": {
-        "type": "boolean"
-      },
-      "path": {
-        "type": "string"
-      },
-      "pinnedPeerCertSha256": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "port": {
-        "example": 8443,
-        "maximum": 65535,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "remark": {
-        "example": "cdn-front",
-        "maxLength": 256,
-        "type": "string"
-      },
-      "security": {
-        "enum": [
-          "same",
-          "tls",
-          "none",
-          "reality"
-        ],
-        "example": "same",
-        "type": "string"
-      },
-      "serverDescription": {
-        "maxLength": 64,
-        "type": "string"
-      },
-      "shuffleHost": {
-        "type": "boolean"
-      },
-      "sni": {
-        "type": "string"
-      },
-      "sockoptParams": {},
-      "sortOrder": {
-        "type": "integer"
-      },
-      "tags": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "updatedAt": {
-        "format": "int64",
-        "type": "integer"
-      },
-      "verifyPeerCertByName": {
-        "type": "string"
-      },
-      "vlessRoute": {
-        "description": "Single VLESS route value (0-65535) baked into the subscription UUID's 3rd\ngroup (bytes 6-7), which xray reads via net.PortFromBytes(id[6:8]). Empty = none.",
-        "example": "443",
-        "type": "string"
-      }
-    },
-    "required": [
-      "address",
-      "allowInsecure",
-      "alpn",
-      "cipherSuites",
-      "createdAt",
-      "echConfigList",
-      "excludeFromSubTypes",
-      "finalMask",
-      "fingerprint",
-      "groupId",
-      "hostHeader",
-      "id",
-      "inboundId",
-      "isDisabled",
-      "isHidden",
-      "keepSniBlank",
-      "mihomoIpVersion",
-      "mihomoX25519",
-      "muxParams",
-      "overrideSniFromAddress",
-      "path",
-      "pinnedPeerCertSha256",
-      "port",
-      "remark",
-      "security",
-      "serverDescription",
-      "shuffleHost",
-      "sni",
-      "sockoptParams",
-      "sortOrder",
-      "tags",
-      "updatedAt",
-      "verifyPeerCertByName",
-      "vlessRoute"
-    ],
-    "type": "object"
-  },
-  "HostGroup": {
-    "properties": {
-      "allowInsecure": {
-        "type": "boolean"
-      },
-      "alpn": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "cipherSuites": {
-        "type": "string"
-      },
-      "echConfigList": {
-        "type": "string"
-      },
-      "excludeFromSubTypes": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "finalMask": {
-        "type": "string"
-      },
-      "fingerprint": {
-        "type": "string"
-      },
-      "groupId": {
-        "type": "string"
-      },
-      "hostHeader": {
-        "type": "string"
-      },
-      "hosts": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "inboundIds": {
-        "items": {
-          "type": "integer"
-        },
-        "type": "array"
-      },
-      "isDisabled": {
-        "type": "boolean"
-      },
-      "isHidden": {
-        "type": "boolean"
-      },
-      "keepSniBlank": {
-        "type": "boolean"
-      },
-      "mihomoIpVersion": {
-        "enum": [
-          "dual",
-          "ipv4",
-          "ipv6",
-          "ipv4-prefer",
-          "ipv6-prefer"
-        ],
-        "type": "string"
-      },
-      "mihomoX25519": {
-        "type": "boolean"
-      },
-      "muxParams": {
-        "type": "string"
-      },
-      "nodeGuids": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "overrideSniFromAddress": {
-        "type": "boolean"
-      },
-      "path": {
-        "type": "string"
-      },
-      "pinnedPeerCertSha256": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "port": {
-        "maximum": 65535,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "remark": {
-        "maxLength": 256,
-        "type": "string"
-      },
-      "security": {
-        "enum": [
-          "same",
-          "tls",
-          "none",
-          "reality"
-        ],
-        "type": "string"
-      },
-      "serverDescription": {
-        "maxLength": 64,
-        "type": "string"
-      },
-      "shuffleHost": {
-        "type": "boolean"
-      },
-      "sni": {
-        "type": "string"
-      },
-      "sockoptParams": {
-        "type": "string"
-      },
-      "sortOrder": {
-        "type": "integer"
-      },
-      "tags": {
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
-      "verifyPeerCertByName": {
-        "type": "string"
-      },
-      "vlessRoute": {
-        "type": "string"
-      }
-    },
-    "required": [
-      "allowInsecure",
-      "alpn",
-      "cipherSuites",
-      "echConfigList",
-      "excludeFromSubTypes",
-      "finalMask",
-      "fingerprint",
-      "groupId",
-      "hostHeader",
-      "hosts",
-      "inboundIds",
-      "isDisabled",
-      "isHidden",
-      "keepSniBlank",
-      "mihomoIpVersion",
-      "mihomoX25519",
-      "muxParams",
-      "nodeGuids",
-      "overrideSniFromAddress",
-      "path",
-      "pinnedPeerCertSha256",
-      "port",
-      "remark",
-      "security",
-      "serverDescription",
-      "shuffleHost",
-      "sni",
-      "sockoptParams",
-      "sortOrder",
-      "tags",
-      "verifyPeerCertByName",
-      "vlessRoute"
-    ],
-    "type": "object"
-  },
   "HwidSlotStatus": {
     "description": "HwidSlotStatus is the aggregate device-slot view exposed to subscribers:\ncounters only, no hwid value or hash, no email, no device metadata.",
     "properties": {
@@ -3379,6 +3022,13 @@ export const SCHEMAS: Record<string, unknown> = {
         ],
         "type": "string"
       },
+      "sharePort": {
+        "description": "SharePort is the port links advertise when NAT maps a public port onto this\none; 0 keeps the inbound's own port.",
+        "example": 0,
+        "maximum": 65535,
+        "minimum": 0,
+        "type": "integer"
+      },
       "sniffing": {},
       "streamSettings": {},
       "subSortIndex": {
@@ -3435,6 +3085,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "settings",
       "shareAddr",
       "shareAddrStrategy",
+      "sharePort",
       "sniffing",
       "streamSettings",
       "subSortIndex",
@@ -3564,6 +3215,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "shareAddrStrategy": {
         "type": "string"
+      },
+      "sharePort": {
+        "example": 0,
+        "type": "integer"
       },
       "ssMethod": {
         "type": "string"

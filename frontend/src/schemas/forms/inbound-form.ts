@@ -80,6 +80,7 @@ export const InboundDbFieldsSchema = z.object({
   nodeId: z.number().int().nullable().optional(),
   shareAddrStrategy: ShareAddrStrategySchema.default('node'),
   shareAddr: z.string().default(''),
+  sharePort: z.number().int().min(0).max(65535).default(0),
   subSortIndex: z.number().int().default(1),
   excludeFromSub: z.boolean().default(false),
   disableFlow: z.boolean().default(false),

@@ -19,7 +19,6 @@ type APIController struct {
 	inboundController     *InboundController
 	serverController      *ServerController
 	nodeController        *NodeController
-	hostController        *HostController
 	settingController     *SettingController
 	xraySettingController *XraySettingController
 	userService           panel.UserService
@@ -196,10 +195,6 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Nodes API — multi-panel management
 	nodes := api.Group("/nodes")
 	a.nodeController = NewNodeController(nodes)
-
-	// Hosts API — per-inbound override endpoints for subscription links
-	hosts := api.Group("/hosts")
-	a.hostController = NewHostController(hosts)
 
 	// Plans API — reusable limit sets stamped onto clients
 	plans := api.Group("/plans")

@@ -26,8 +26,7 @@ import { coerceInboundJsonField, type DBInbound } from '@/models/dbinbound';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
-import { useHostsQuery } from '@/api/queries/useHostsQuery';
-import { publicEndpointsOf, withHostEndpoints } from '@/lib/hosts/host-link';
+import { advertisedEndpoint, endpointLabel, withPublicPort } from '@/lib/xray/public-port';
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
 import type { TextModalTab } from '@/components/feedback/TextModal';
 const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
@@ -108,16 +107,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
   }, [messageApi]);
 
   const { nodes: nodesList, fetched: nodesFetched } = useNodesQuery();
-  // MTProto share links are generated from this list, so an empty one must mean
-  // "no hosts" and not "not loaded yet" — the gate below waits for it.
-  const {
-    hosts,
-    fetched: hostsFetched,
-    fetchError: hostsFetchError,
-    refetch: refetchHosts,
-  } = useHostsQuery();
-  // A background refetch that fails while rows are still cached is not fatal.
-  const hostsError = hosts.length > 0 ? '' : hostsFetchError;
   const nodesById = useMemo(() => {
     const map = new Map<number, ReturnType<typeof useNodesQuery>['nodes'][number]>();
     for (const n of nodesList || []) map.set(n.id, n);
@@ -221,14 +210,16 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
   );
 
   const publicEndpointsFor = useCallback(
-    (ib: { id: number; port: number; nodeId?: number | null } & ShareHostFields) =>
-      publicEndpointsOf(
-        ib,
-        hosts,
-        ib.nodeId == null ? '' : nodesById.get(ib.nodeId)?.address || '',
-        preferPublicHost(window.location.hostname, subSettings.publicHost),
+    (ib: { port: number; sharePort?: number; nodeId?: number | null } & ShareHostFields) => [
+      endpointLabel(
+        advertisedEndpoint(
+          ib,
+          ib.nodeId == null ? '' : nodesById.get(ib.nodeId)?.address || '',
+          preferPublicHost(window.location.hostname, subSettings.publicHost),
+        ),
       ),
-    [hosts, nodesById, subSettings.publicHost],
+    ],
+    [nodesById, subSettings.publicHost],
   );
 
   const infoNodeAddress = useMemo(
@@ -362,13 +353,7 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
       const hostOverride = hostOverrideFor(dbInbound);
       const fallbackHostname = preferPublicHost(window.location.hostname, subSettings.publicHost);
       const genInput = {
-        inbound: withHostEndpoints(
-          inboundFromDb(projected),
-          dbInbound.id,
-          hosts,
-          hostOverride,
-          fallbackHostname,
-        ),
+        inbound: withPublicPort(inboundFromDb(projected), hostOverride, fallbackHostname),
         remark: projected.remark,
         hostOverride,
         fallbackHostname,
@@ -400,7 +385,7 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
         tabs,
       });
     },
-    [checkFallback, hostOverrideFor, hosts, subSettings.publicHost, openText, t],
+    [checkFallback, hostOverrideFor, subSettings.publicHost, openText, t],
   );
 
   const exportInboundClipboard = useCallback(
@@ -747,25 +732,19 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
     <>
       {messageContextHolder}
       {modalContextHolder}
-      <Spin
-        spinning={!fetched || !hostsFetched}
-        delay={200}
-        description={t('loading')}
-        size="large"
-      >
-        {!fetched || !hostsFetched ? (
+      <Spin spinning={!fetched} delay={200} description={t('loading')} size="large">
+        {!fetched ? (
           <div className="loading-spacer" />
-        ) : fetchError || hostsError ? (
+        ) : fetchError ? (
           <Result
             status="error"
             title={t('somethingWentWrong')}
-            subTitle={fetchError || hostsError}
+            subTitle={fetchError}
             extra={
               <Button
                 type="primary"
                 onClick={() => {
                   void refresh();
-                  void refetchHosts();
                 }}
               >
                 {t('refresh')}
@@ -825,7 +804,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
                 scoped={hostScope !== undefined}
                 publicEndpointsOf={hostScope === undefined ? undefined : publicEndpointsFor}
                 toolbarExtra={toolbarExtra}
-                hosts={hosts}
                 onAddInbound={onAddInbound}
                 onGeneralAction={onGeneralAction}
                 onRowAction={({ key, dbInbound }) =>
@@ -862,7 +840,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
           ipLimitEnable={ipLimitEnable}
           tgBotEnable={tgBotEnable}
           subSettings={subSettings}
-          hosts={hosts}
           lastOnlineMap={lastOnlineMap}
           nodeAddress={infoNodeAddress}
         />
@@ -875,7 +852,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
           client={null}
           nodeAddress={qrNodeAddress}
           subSettings={subSettings}
-          hosts={hosts}
         />
       </LazyMount>
       <LazyMount when={attachOpen}>

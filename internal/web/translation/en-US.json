@@ -135,7 +135,6 @@
     "clients": "Clients",
     "plans": "Plans",
     "nodes": "Hosts",
-    "hosts": "Entries",
     "settings": "Panel Settings",
     "xray": "Xray Configs",
     "routing": "Routing",
@@ -730,7 +729,9 @@
           "node": "Host address",
           "listen": "Inbound listen",
           "custom": "Custom"
-        }
+        },
+        "sharePort": "Public port",
+        "sharePortHelp": "The port people connect to when NAT maps another port onto this node. Links and subscriptions advertise it; 0 keeps the node's own port."
       },
       "info": {
         "mode": "Mode",
@@ -1064,123 +1065,12 @@
       "name": "Name"
     },
     "hosts": {
-      "addHost": "Add Entry",
-      "editHost": "Edit Entry",
-      "selectInbound": "Select an inbound",
-      "selectedCount": "{count} selected",
-      "summary": {
-        "total": "Total",
-        "enabled": "Enabled",
-        "disabled": "Disabled"
-      },
-      "moveUp": "Move up",
-      "moveDown": "Move down",
-      "bulkEnable": "Enable",
-      "bulkDisable": "Disable",
-      "bulkDelete": "Delete",
-      "bulkDeleteConfirm": "Delete the {count} selected entries?",
-      "deleteConfirmTitle": "Delete entry \"{name}\"?",
-      "sections": {
-        "basic": "Basic",
-        "security": "Security",
-        "advanced": "Advanced",
-        "general": "General",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "Remark",
-        "serverDescription": "Description",
-        "inbound": "Inbounds",
-        "address": "Address",
-        "port": "Port",
-        "endpoint": "Endpoint",
-        "enable": "Enable",
-        "actions": "Actions",
-        "security": "Security",
-        "sni": "SNI",
-        "overrideSniFromAddress": "Use address as SNI",
-        "keepSniBlank": "Keep SNI blank",
-        "hostHeader": "Host header",
-        "path": "Path",
-        "alpn": "ALPN",
-        "fingerprint": "Fingerprint",
-        "pins": "Pinned cert SHA-256",
-        "verifyPeerCertByName": "Verify peer cert by name",
-        "allowInsecure": "Allow insecure",
-        "echConfigList": "ECH config list",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "Final Mask",
-        "vlessRoute": "VLESS route",
-        "mihomoIpVersion": "IP version",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "Shuffle host",
-        "tags": "Tags",
-        "nodeGuids": "Hosts",
-        "excludeFromSubTypes": "Exclude from formats",
-        "inheritAddress": "Inherits"
+        "allowInsecure": "Allow insecure"
       },
       "hints": {
-        "address": "Leave blank to inherit the inbound's own address.",
-        "port": "0 inherits the inbound's port.",
-        "tags": "Not visible to end users; sent with RAW subscription only. Uppercase letters, digits, _ and : only.",
-        "nodeGuids": "Pick the hosts this entry resolves to. Only visual assignment.",
-        "serverDescription": "Optional note shown under the remark.",
-        "allowInsecure": "Skip TLS certificate verification (allowInsecure / skip-cert-verify).",
-        "vlessRoute": "Single VLESS route value (0-65535) baked into the UUID, e.g. 443. Leave blank for none.",
-        "remark": "A plain label for this entry. Shown as the config name only when the inbound has no remark of its own."
-      },
-      "remarkVars": {
-        "title": "Template Variables",
-        "intro": "Click a variable to add it. It is replaced per client when the subscription is generated.",
-        "preview": "Preview",
-        "groups": {
-          "client": "Client",
-          "traffic": "Traffic",
-          "time": "Time & status",
-          "connection": "Connection"
-        },
-        "descEMAIL": "Client email",
-        "descINBOUND": "Inbound's own remark (the config name)",
-        "descHOST": "Entry remark",
-        "descID": "Client UUID",
-        "descSHORT_ID": "First 8 characters of the UUID",
-        "descTELEGRAM_ID": "Client's Telegram ID (empty if unset)",
-        "descSUB_ID": "Subscription ID",
-        "descCOMMENT": "Client comment",
-        "descTRAFFIC_USED": "Used traffic (human readable)",
-        "descTRAFFIC_LEFT": "Remaining traffic (hidden if unlimited)",
-        "descTRAFFIC_TOTAL": "Total traffic (hidden if unlimited)",
-        "descTRAFFIC_USED_BYTES": "Used traffic in bytes",
-        "descTRAFFIC_LEFT_BYTES": "Remaining traffic in bytes",
-        "descTRAFFIC_TOTAL_BYTES": "Total traffic in bytes",
-        "descUP": "Upload traffic",
-        "descDOWN": "Download traffic",
-        "descSTATUS": "active / expired / disabled / depleted",
-        "descSTATUS_EMOJI": "Status as an emoji (✅ ⏳ 🚫)",
-        "descDAYS_LEFT": "Days until expiry (hidden if unlimited)",
-        "descTIME_LEFT": "Remaining time (e.g. 12d 4h 30m)",
-        "descUSAGE_PERCENTAGE": "Used traffic as a percentage (hidden if unlimited)",
-        "descEXPIRE_DATE": "Expiry date (YYYY-MM-DD)",
-        "descJALALI_EXPIRE_DATE": "Expiry date in the Jalali calendar (YYYY/MM/DD)",
-        "descEXPIRE_UNIX": "Expiry as a Unix timestamp (seconds)",
-        "descCREATED_UNIX": "Creation time as a Unix timestamp (seconds)",
-        "descRESET_DAYS": "Traffic reset period in days",
-        "descRESET_DAY": "Calendar renewal day of the month",
-        "descPROTOCOL": "Inbound protocol (VLESS, VMess, Trojan, …)",
-        "descTRANSPORT": "Transport network (tcp, ws, grpc, …)",
-        "descSECURITY": "Transport security (TLS, REALITY, NONE)"
-      },
-      "toasts": {
-        "list": "Failed to load entries",
-        "obtain": "Failed to load entry",
-        "add": "Entry added successfully",
-        "update": "Entry updated successfully",
-        "delete": "Entry deleted successfully",
-        "badTag": "Invalid tag",
-        "badVlessRoute": "Enter a single number between 0 and 65535"
-      },
-      "intro": "Addresses and TLS details that share links and subscriptions hand out for each inbound."
+        "allowInsecure": "Skip TLS certificate verification (allowInsecure / skip-cert-verify)."
+      }
     },
     "nodes": {
       "addNode": "Add Host",
@@ -1327,7 +1217,8 @@
         "reach": "{count} client(s) will get this node",
         "noTemplate": "There is no VLESS REALITY node to copy yet; set up the first one with Add Inbound.",
         "done": "The new node runs on {host}",
-        "hostOffline": "The host is offline; generate the node once its agent is connected."
+        "hostOffline": "The host is offline; generate the node once its agent is connected.",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1947,7 +1838,48 @@
       "subIncyResolveDnsIp": "DoH server IP",
       "subIncyResolveDnsIpDesc": "IP of the DoH server, used for bootstrap.",
       "subIncyGroupRouting": "Routing",
-      "intro": "Panel access, security, notifications and subscription settings."
+      "intro": "Panel access, security, notifications and subscription settings.",
+      "remarkVars": {
+        "title": "Template Variables",
+        "intro": "Click a variable to add it. It is replaced per client when the subscription is generated.",
+        "preview": "Preview",
+        "groups": {
+          "client": "Client",
+          "traffic": "Traffic",
+          "time": "Time & status",
+          "connection": "Connection"
+        },
+        "descEMAIL": "Client email",
+        "descINBOUND": "Inbound's own remark (the config name)",
+        "descHOST": "Entry remark",
+        "descID": "Client UUID",
+        "descSHORT_ID": "First 8 characters of the UUID",
+        "descTELEGRAM_ID": "Client's Telegram ID (empty if unset)",
+        "descSUB_ID": "Subscription ID",
+        "descCOMMENT": "Client comment",
+        "descTRAFFIC_USED": "Used traffic (human readable)",
+        "descTRAFFIC_LEFT": "Remaining traffic (hidden if unlimited)",
+        "descTRAFFIC_TOTAL": "Total traffic (hidden if unlimited)",
+        "descTRAFFIC_USED_BYTES": "Used traffic in bytes",
+        "descTRAFFIC_LEFT_BYTES": "Remaining traffic in bytes",
+        "descTRAFFIC_TOTAL_BYTES": "Total traffic in bytes",
+        "descUP": "Upload traffic",
+        "descDOWN": "Download traffic",
+        "descSTATUS": "active / expired / disabled / depleted",
+        "descSTATUS_EMOJI": "Status as an emoji (✅ ⏳ 🚫)",
+        "descDAYS_LEFT": "Days until expiry (hidden if unlimited)",
+        "descTIME_LEFT": "Remaining time (e.g. 12d 4h 30m)",
+        "descUSAGE_PERCENTAGE": "Used traffic as a percentage (hidden if unlimited)",
+        "descEXPIRE_DATE": "Expiry date (YYYY-MM-DD)",
+        "descJALALI_EXPIRE_DATE": "Expiry date in the Jalali calendar (YYYY/MM/DD)",
+        "descEXPIRE_UNIX": "Expiry as a Unix timestamp (seconds)",
+        "descCREATED_UNIX": "Creation time as a Unix timestamp (seconds)",
+        "descRESET_DAYS": "Traffic reset period in days",
+        "descRESET_DAY": "Calendar renewal day of the month",
+        "descPROTOCOL": "Inbound protocol (VLESS, VMess, Trojan, …)",
+        "descTRANSPORT": "Transport network (tcp, ws, grpc, …)",
+        "descSECURITY": "Transport security (TLS, REALITY, NONE)"
+      }
     },
     "xray": {
       "save": "Save",

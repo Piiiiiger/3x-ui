@@ -142,7 +142,6 @@
     "apiDocs": "Documentación de la API",
     "donate": "Donar",
     "sponsors": "Patrocinadores",
-    "hosts": "Hosts",
     "docs": "Documentación",
     "openMenu": "Abrir menú",
     "subFormats": "Sub Formats",
@@ -729,7 +728,9 @@
           "listen": "Dirección de escucha del inbound",
           "custom": "Personalizada"
         },
-        "autoFill": "Autocompletar"
+        "autoFill": "Autocompletar",
+        "sharePort": "Puerto público",
+        "sharePortHelp": "El puerto al que se conectan los usuarios cuando el NAT asigna otro puerto a este nodo. Los enlaces y las suscripciones lo anuncian; 0 mantiene el puerto propio del nodo."
       },
       "info": {
         "mode": "Modo",
@@ -1208,7 +1209,8 @@
         "reach": "{count} cliente(s) recibirán esta entrada",
         "noTemplate": "Aún no hay ninguna entrada VLESS REALITY que copiar; crea la primera con Agregar entrada.",
         "done": "La nueva entrada funciona en {host}",
-        "hostOffline": "El nodo está desconectado; genera la entrada cuando su agente se conecte."
+        "hostOffline": "El nodo está desconectado; genera la entrada cuando su agente se conecte.",
+        "sni": "SNI"
       }
     },
     "settings": {
@@ -1828,7 +1830,48 @@
       "subIncyResolveDnsIp": "IP del servidor DoH",
       "subIncyResolveDnsIpDesc": "IP del servidor DoH para el arranque.",
       "subIncyGroupRouting": "Enrutado",
-      "intro": "Acceso al panel, seguridad, notificaciones y ajustes de suscripción."
+      "intro": "Acceso al panel, seguridad, notificaciones y ajustes de suscripción.",
+      "remarkVars": {
+        "title": "Variables de plantilla",
+        "intro": "Haz clic en una variable para añadirla. Se sustituye por cliente al generar la suscripción.",
+        "preview": "Vista previa",
+        "groups": {
+          "client": "Cliente",
+          "traffic": "Tráfico",
+          "time": "Tiempo y estado",
+          "connection": "Conexión"
+        },
+        "descEMAIL": "Email del cliente",
+        "descINBOUND": "Notas del propio inbound (nombre de la configuración)",
+        "descHOST": "Notas del host",
+        "descID": "UUID del cliente",
+        "descSHORT_ID": "Primeros 8 caracteres del UUID",
+        "descTELEGRAM_ID": "ID de Telegram del cliente (vacío si no está definido)",
+        "descSUB_ID": "ID de suscripción",
+        "descCOMMENT": "Comentario del cliente",
+        "descTRAFFIC_USED": "Tráfico usado (legible)",
+        "descTRAFFIC_LEFT": "Tráfico restante (oculto si es ilimitado)",
+        "descTRAFFIC_TOTAL": "Tráfico total (oculto si es ilimitado)",
+        "descTRAFFIC_USED_BYTES": "Tráfico usado en bytes",
+        "descTRAFFIC_LEFT_BYTES": "Tráfico restante en bytes",
+        "descTRAFFIC_TOTAL_BYTES": "Tráfico total en bytes",
+        "descUP": "Tráfico de subida",
+        "descDOWN": "Tráfico de bajada",
+        "descSTATUS": "activo / expirado / deshabilitado / agotado",
+        "descSTATUS_EMOJI": "Estado como emoji (✅ ⏳ 🚫)",
+        "descDAYS_LEFT": "Días hasta la expiración (oculto si es ilimitado)",
+        "descTIME_LEFT": "Tiempo restante (p. ej. 12d 4h 30m)",
+        "descUSAGE_PERCENTAGE": "Tráfico usado en porcentaje (oculto si es ilimitado)",
+        "descEXPIRE_DATE": "Fecha de expiración (AAAA-MM-DD)",
+        "descJALALI_EXPIRE_DATE": "Fecha de expiración en el calendario Jalali (AAAA/MM/DD)",
+        "descEXPIRE_UNIX": "Expiración como marca de tiempo Unix (segundos)",
+        "descCREATED_UNIX": "Hora de creación como marca de tiempo Unix (segundos)",
+        "descRESET_DAYS": "Periodo de reinicio de tráfico en días",
+        "descRESET_DAY": "Día del mes en que se renueva",
+        "descPROTOCOL": "Protocolo del inbound (VLESS, VMess, Trojan, …)",
+        "descTRANSPORT": "Red de transporte (tcp, ws, grpc, …)",
+        "descSECURITY": "Seguridad del transporte (TLS, REALITY, NONE)"
+      }
     },
     "xray": {
       "save": "Guardar configuración",
@@ -2337,123 +2380,12 @@
       "routingIntro": "Reglas que deciden qué salida toma cada conexión."
     },
     "hosts": {
-      "addHost": "Agregar host",
-      "editHost": "Editar host",
-      "selectInbound": "Selecciona un inbound",
-      "selectedCount": "{count} seleccionado(s)",
-      "summary": {
-        "total": "Total",
-        "enabled": "Habilitados",
-        "disabled": "Deshabilitados"
-      },
-      "moveUp": "Subir",
-      "moveDown": "Bajar",
-      "bulkEnable": "Habilitar",
-      "bulkDisable": "Deshabilitar",
-      "bulkDelete": "Eliminar",
-      "bulkDeleteConfirm": "¿Eliminar {count} host(s) seleccionado(s)?",
-      "deleteConfirmTitle": "¿Eliminar el host \"{name}\"?",
-      "sections": {
-        "basic": "Básico",
-        "security": "Seguridad",
-        "advanced": "Avanzado",
-        "general": "General",
-        "clash": "Clash (mihomo)"
-      },
       "fields": {
-        "remark": "Notas",
-        "serverDescription": "Descripción",
-        "inbound": "Inbounds",
-        "address": "Dirección",
-        "port": "Puerto",
-        "endpoint": "Punto final",
-        "enable": "Habilitar",
-        "actions": "Acciones",
-        "security": "Seguridad",
-        "sni": "SNI",
-        "overrideSniFromAddress": "Usar la dirección como SNI",
-        "keepSniBlank": "Dejar el SNI en blanco",
-        "hostHeader": "Cabecera Host",
-        "path": "Ruta",
-        "alpn": "ALPN",
-        "fingerprint": "Fingerprint",
-        "pins": "SHA-256 del cert. fijado",
-        "verifyPeerCertByName": "Verificar cert. del par por nombre",
-        "allowInsecure": "Permitir inseguro",
-        "echConfigList": "Lista de config. ECH",
-        "muxParams": "Mux",
-        "sockoptParams": "Sockopt",
-        "finalMask": "Máscara final",
-        "vlessRoute": "Ruta VLESS",
-        "mihomoIpVersion": "Versión de IP",
-        "mihomoX25519": "Mihomo X25519",
-        "shuffleHost": "Barajar host",
-        "tags": "Etiquetas",
-        "nodeGuids": "Nodos",
-        "excludeFromSubTypes": "Excluir de formatos",
-        "inheritAddress": "Hereda dirección"
+        "allowInsecure": "Permitir inseguro"
       },
       "hints": {
-        "address": "Déjalo en blanco para heredar la dirección propia del inbound.",
-        "port": "0 hereda el puerto del inbound.",
-        "tags": "No visible para los usuarios finales; se envía solo con la suscripción RAW. Solo letras mayúsculas, dígitos, _ y :.",
-        "nodeGuids": "Elige los nodos que se resolvieron desde este host. Solo asignación visual.",
-        "serverDescription": "Nota opcional que se muestra bajo las notas.",
-        "allowInsecure": "Omitir la verificación del certificado TLS (allowInsecure / skip-cert-verify).",
-        "vlessRoute": "Un único valor de ruta VLESS (0-65535) incrustado en el UUID, p. ej. 443. Déjalo en blanco para ninguno.",
-        "remark": "Una etiqueta simple para este host. Se muestra como nombre de la configuración solo cuando el inbound no tiene notas propias."
-      },
-      "remarkVars": {
-        "title": "Variables de plantilla",
-        "intro": "Haz clic en una variable para añadirla. Se sustituye por cliente al generar la suscripción.",
-        "preview": "Vista previa",
-        "groups": {
-          "client": "Cliente",
-          "traffic": "Tráfico",
-          "time": "Tiempo y estado",
-          "connection": "Conexión"
-        },
-        "descEMAIL": "Email del cliente",
-        "descINBOUND": "Notas del propio inbound (nombre de la configuración)",
-        "descHOST": "Notas del host",
-        "descID": "UUID del cliente",
-        "descSHORT_ID": "Primeros 8 caracteres del UUID",
-        "descTELEGRAM_ID": "ID de Telegram del cliente (vacío si no está definido)",
-        "descSUB_ID": "ID de suscripción",
-        "descCOMMENT": "Comentario del cliente",
-        "descTRAFFIC_USED": "Tráfico usado (legible)",
-        "descTRAFFIC_LEFT": "Tráfico restante (oculto si es ilimitado)",
-        "descTRAFFIC_TOTAL": "Tráfico total (oculto si es ilimitado)",
-        "descTRAFFIC_USED_BYTES": "Tráfico usado en bytes",
-        "descTRAFFIC_LEFT_BYTES": "Tráfico restante en bytes",
-        "descTRAFFIC_TOTAL_BYTES": "Tráfico total en bytes",
-        "descUP": "Tráfico de subida",
-        "descDOWN": "Tráfico de bajada",
-        "descSTATUS": "activo / expirado / deshabilitado / agotado",
-        "descSTATUS_EMOJI": "Estado como emoji (✅ ⏳ 🚫)",
-        "descDAYS_LEFT": "Días hasta la expiración (oculto si es ilimitado)",
-        "descTIME_LEFT": "Tiempo restante (p. ej. 12d 4h 30m)",
-        "descUSAGE_PERCENTAGE": "Tráfico usado en porcentaje (oculto si es ilimitado)",
-        "descEXPIRE_DATE": "Fecha de expiración (AAAA-MM-DD)",
-        "descJALALI_EXPIRE_DATE": "Fecha de expiración en el calendario Jalali (AAAA/MM/DD)",
-        "descEXPIRE_UNIX": "Expiración como marca de tiempo Unix (segundos)",
-        "descCREATED_UNIX": "Hora de creación como marca de tiempo Unix (segundos)",
-        "descRESET_DAYS": "Periodo de reinicio de tráfico en días",
-        "descRESET_DAY": "Día del mes en que se renueva",
-        "descPROTOCOL": "Protocolo del inbound (VLESS, VMess, Trojan, …)",
-        "descTRANSPORT": "Red de transporte (tcp, ws, grpc, …)",
-        "descSECURITY": "Seguridad del transporte (TLS, REALITY, NONE)"
-      },
-      "toasts": {
-        "list": "Error al cargar los hosts",
-        "obtain": "Error al cargar el host",
-        "add": "Agregar host",
-        "update": "Actualizar host",
-        "delete": "Eliminar host",
-        "badTag": "Etiqueta no válida",
-        "badVlessRoute": "Introduce un único número entre 0 y 65535"
-      },
-      "intro": "Direcciones y datos TLS que los enlaces y las suscripciones entregan para cada entrada."
+        "allowInsecure": "Omitir la verificación del certificado TLS (allowInsecure / skip-cert-verify)."
+      }
     },
     "sponsors": {
       "title": "Patrocinadores",

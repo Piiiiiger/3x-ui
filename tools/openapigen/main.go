@@ -38,7 +38,6 @@ func run(root, outDir string) error {
 				"ClientRecord",
 				"ClientInbound",
 				"InboundFallback",
-				"Host",
 				"SubBalancer",
 				"Plan",
 				"PlanInbound",
@@ -56,10 +55,6 @@ func run(root, outDir string) error {
 				"InboundClientIps": {
 					{Field: "Ips", Kind: KindAny},
 				},
-				"Host": {
-					{Field: "MuxParams", Kind: KindAny},
-					{Field: "SockoptParams", Kind: KindAny},
-				},
 			},
 		},
 		{
@@ -68,7 +63,6 @@ func run(root, outDir string) error {
 				"Msg",
 				"AllSetting",
 				"AllSettingView",
-				"HostGroup",
 			),
 		},
 		{

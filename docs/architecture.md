@@ -112,8 +112,8 @@ with _behavior_, the bug is almost always in a service file, not a controller.
 End user → GET {subPath}/{subId}   (separate server, internal/sub)
   → internal/sub/controller.go (routes: raw / JSON / Clash variants, feature-flagged)
     → internal/sub/service.go (~2.5k lines — the link/config builder)
-      → reads inbounds+clients+hosts from DB, renders per-protocol share links /
-        Clash YAML / JSON (Host rows can override address/SNI/path per inbound)
+      → reads inbounds+clients from DB, renders per-protocol share links /
+        Clash YAML / JSON (behind NAT, an inbound's public port replaces its own)
 ```
 
 ### 3.3 Background work (cron jobs)
@@ -167,7 +167,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   │   ├── inbound.go      #   /panel/api/inbounds
 │   │   │   ├── client.go       #   /panel/api/clients (CRUD + bulk + ips + onlines)
 │   │   │   ├── node.go         #   /panel/api/nodes   (multi-node management)
-│   │   │   ├── host.go         #   /panel/api/hosts   (per-inbound subscription host overrides)
 │   │   │   ├── server.go       #   /panel/api/server  (status, xray version, certs, logs, DB import/export)
 │   │   │   ├── setting.go      #   /panel/api/setting (settings + API tokens)
 │   │   │   ├── xray_setting.go #   /panel/api/xray    (raw Xray config editor, WARP/Nord/PIA, geodata)
@@ -192,7 +191,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   │   ├── node.go                 # ⭐ NodeService: CRUD, probe, heartbeat, dirty-tracking (~1.1k lines)
 │   │   │   ├── node_mtls.go            # Node mTLS certificate management (master side)
 │   │   │   ├── node_tree.go            # Node hierarchy / descendants
-│   │   │   ├── host.go                 # Host rows (subscription output overrides)
 │   │   │   ├── server.go               # ServerService: status, certs, xray install, DB ops (~2.2k lines)
 │   │   │   ├── setting.go              # SettingService: all panel settings + defaults (~1.3k lines)
 │   │   │   ├── setting_mtls.go         # mTLS settings (node hardening)
@@ -242,9 +240,8 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   ├── clash_service.go   #   Clash/Mihomo YAML format
 │   │   ├── clash_external.go  #   external Clash config integration
 │   │   ├── external_subscription.go / external_config.go  # external sub import/aggregation
-│   │   ├── host_sub.go        #   Host-row overrides applied to subscription output
+│   │   ├── public_port.go     #   NAT public port applied to subscription output
 │   │   ├── endpoint.go        #   subscription endpoint configuration
-│   │   ├── vless_route.go     #   VLESS route shaping
 │   │   ├── remark_vars.go     #   remark variable expansion
 │   │   └── links.go           #   link helpers
 │   │
@@ -269,7 +266,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │       │   ├── inbounds/     #   inbound list + the big inbound form (protocols/security/transport)
 │       │   ├── clients/      #   client management screens
 │       │   ├── nodes/        #   multi-node UI
-│       │   ├── hosts/        #   subscription host-override UI
 │       │   ├── xray/         #   raw Xray config UI (routing, dns, outbounds, balancers, overrides)
 │       │   ├── index/        #   dashboard/home
 │       │   └── settings/, sub/, login/, api-docs/
@@ -383,20 +379,20 @@ Agent bugs: config not reaching the agent → `job/agent_sync_job.go` + `service
 agent shown offline → `runtime/agent_hub.go` + `NodeService.probeAgent`.
 
 **Hosts and the nodes on them.** The UI calls a `model.Node` a host (主机) and the inbounds it
-runs its nodes (节点); a `model.Host` row is an entry (入口) that overrides a link's address,
-port or TLS. `/panel/nodes/:id` (`pages/nodes/HostPage.tsx`, `local` for this panel) shows one
+runs its nodes (节点); behind NAT, an inbound's `SharePort` is the public port its links
+advertise. `/panel/nodes/:id` (`pages/nodes/HostPage.tsx`, `local` for this panel) shows one
 host with the inbounds workspace scoped to it.
 
 - **Generating a node:** `POST inbounds/generate` (`service/inbound_generate.go`) creates the
-  inbound disabled, adds an entry when a NAT public port differs from the listen port, attaches
+  inbound disabled, with a NAT public port as its `SharePort`, attaches
   the chosen plans' members (`PlanService.AddInboundToPlans`, limits untouched), and enables it
   only once the host runs it: the local panel must bind the port and take it live, an agent
   must accept the pushed config under `AgentService.LockAgent`. `inbounds/freePort/:nodeId`
   suggests a port. The page's generator copies a REALITY node with fresh keys
   (`pages/nodes/GenerateNodeModal.tsx`).
 - **Bugs:** a generated node left disabled → the refusal comes from `SyncAgent` (agent) or the
-  local live add (`enableOnLocalPanel`); a NAT link with the wrong port → the entry row and
-  `sub/host_sub.go`.
+  local live add (`enableOnLocalPanel`); a NAT link with the wrong port → the inbound's `SharePort` and
+  `sub/public_port.go`.
 
 ### 5.3 Traffic accounting
 
@@ -463,8 +459,8 @@ Two distinct code paths produce client configs:
   - `util/link/outbound.go`.
 - **Subscription endpoint** (what a client app polls): `internal/sub/service.go` (raw links),
   `internal/sub/json_service.go` (JSON), `internal/sub/clash_service.go` (Clash YAML).
-  **`Host` rows** (`model.Host`, edited under /panel/api/hosts) override address/SNI/path/
-  security per inbound in subscription output — applied in `sub/host_sub.go`.
+  Behind NAT, an inbound's **public port** (`Inbound.SharePort`) replaces its own port in
+  every format — applied in `sub/public_port.go`, mirrored by `lib/xray/public-port.ts`.
 
 Both paths must agree per protocol. A malformed link for a specific protocol/transport combo
 (e.g. XHTTP + Reality) is usually a field-lookup mismatch in **`internal/sub/service.go`** (and
@@ -533,7 +529,6 @@ for AutoMigrate in `internal/database/db.go`.
 | `ClientRecord`                  | Persisted client (`clients`)              | `Email` (unique), `SubID`, `UUID`, `TotalGB`, `ExpiryTime`, `LimitIP`, `Reset`                                                                                     |
 | `ClientInbound`                 | Client↔inbound join                       | many-to-many wiring, `FlowOverride`                                                                                                                                |
 | `ClientExternalLink`            | Extra links attached to a client          | `Kind`, `Value`, `Remark`, `SortIndex`                                                                                                                             |
-| `Host`                          | Subscription host overrides (per inbound) | `Address`, `Port`, `Sni`, `Path`, `Security`, `Fingerprint`, `SortOrder`, visibility/exclusion flags                                                               |
 | `Node`                          | A managed child panel                     | `Guid`, `Address`, `Status`, `TlsVerifyMode`, `PinnedCertSha256`, `ConfigDirty`, version/heartbeat/metric fields                                                   |
 | `NodeClientTraffic`             | Per-node client traffic baseline          | cross-node merge (anti-double-count)                                                                                                                               |
 | `NodePendingReset`              | Client resets a node has not confirmed    | `NodeId`, `Email`, `QueuedAt`; replayed by the node sync, freezes that client's node verdict until delivered                                                       |
@@ -569,7 +564,7 @@ for AutoMigrate in `internal/database/db.go`.
 | Offline node edits **not reconciling** on reconnect                               | `service/inbound_node.go` (`ReconcileNode`, dirty flags)                     | `service/node.go` (`MarkNodeDirty`/`NodeSyncState`)                                                 |
 | **Share link / QR** malformed (per protocol)                                      | `service/client_link.go`, `util/link/outbound.go`                            | `frontend/src/lib/xray/`, `frontend/src/schemas/protocols/`                                         |
 | **Subscription** output wrong (raw/JSON/Clash)                                    | `internal/sub/service.go`                                                    | `sub/json_service.go`, `sub/clash_service.go`, sub golden tests                                     |
-| Subscription **host overrides** not applied                                       | `service/host.go`, `sub/host_sub.go`                                         | model `Host`, `frontend/src/pages/hosts/`                                                           |
+| NAT **public port** missing from links                                            | `sub/public_port.go`, `service/inbound.go`                                   | `Inbound.SharePort`, `frontend/src/lib/xray/public-port.ts`                                         |
 | **External subscription** import/aggregation                                      | `sub/external_subscription.go`, `sub/external_config.go`                     | `sub/clash_external.go`                                                                             |
 | **Settings** not saving / defaults                                                | `service/setting.go`, `controller/setting.go`                                | model `Setting`                                                                                     |
 | **Login / 2FA / sessions / CSRF**                                                 | `controller/index.go`, `service/panel/user.go`, `middleware/`                | `session/`                                                                                          |

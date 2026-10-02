@@ -145,6 +145,7 @@ export const InboundOptionSchema = z
     listen: z.string().optional(),
     shareAddr: z.string().optional(),
     shareAddrStrategy: z.string().optional(),
+    sharePort: z.number().optional(),
   })
   .loose();
 

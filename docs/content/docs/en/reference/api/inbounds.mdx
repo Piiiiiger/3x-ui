@@ -60,13 +60,13 @@ _openapi:
       url: '#create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy'
     - depth: 2
       title: 'Generate a node on the local panel or a connected agent host. The
-        inbound is created disabled; when NAT exposes it on another public port
-        an entry row carries that port; the chosen plans’ members get it without
-        their limits being re-applied. It is enabled only once the host runs it:
-        the local panel must bind the port and take it live, an agent must
-        accept the pushed config. A node the host refuses is left as a disabled
-        row and the message says why; an earlier failure removes it.'
-      url: '#generate-a-node-on-the-local-panel-or-a-connected-agent-host-the-inbound-is-created-disabled-when-nat-exposes-it-on-another-public-port-an-entry-row-carries-that-port-the-chosen-plans-members-get-it-without-their-limits-being-re-applied-it-is-enabled-only-once-the-host-runs-it-the-local-panel-must-bind-the-port-and-take-it-live-an-agent-must-accept-the-pushed-config-a-node-the-host-refuses-is-left-as-a-disabled-row-and-the-message-says-why-an-earlier-failure-removes-it'
+        inbound is created disabled, with sharePort set when NAT exposes it on
+        another public port; the chosen plans’ members get it without their
+        limits being re-applied. It is enabled only once the host runs it: the
+        local panel must bind the port and take it live, an agent must accept
+        the pushed config. A node the host refuses is left as a disabled row and
+        the message says why; an earlier failure removes it.'
+      url: '#generate-a-node-on-the-local-panel-or-a-connected-agent-host-the-inbound-is-created-disabled-with-shareport-set-when-nat-exposes-it-on-another-public-port-the-chosen-plans-members-get-it-without-their-limits-being-re-applied-it-is-enabled-only-once-the-host-runs-it-the-local-panel-must-bind-the-port-and-take-it-live-an-agent-must-accept-the-pushed-config-a-node-the-host-refuses-is-left-as-a-disabled-row-and-the-message-says-why-an-earlier-failure-removes-it'
     - depth: 2
       title: Delete an inbound by ID. Also removes its associated client stats rows.
       url: '#delete-an-inbound-by-id-also-removes-its-associated-client-stats-rows'
@@ -169,14 +169,13 @@ _openapi:
           JSON objects (preferred) or as JSON-encoded strings (legacy).
         id: create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy
       - content: 'Generate a node on the local panel or a connected agent host. The
-          inbound is created disabled; when NAT exposes it on another public
-          port an entry row carries that port; the chosen plans’ members get it
-          without their limits being re-applied. It is enabled only once the
-          host runs it: the local panel must bind the port and take it live, an
-          agent must accept the pushed config. A node the host refuses is left
-          as a disabled row and the message says why; an earlier failure removes
-          it.'
-        id: generate-a-node-on-the-local-panel-or-a-connected-agent-host-the-inbound-is-created-disabled-when-nat-exposes-it-on-another-public-port-an-entry-row-carries-that-port-the-chosen-plans-members-get-it-without-their-limits-being-re-applied-it-is-enabled-only-once-the-host-runs-it-the-local-panel-must-bind-the-port-and-take-it-live-an-agent-must-accept-the-pushed-config-a-node-the-host-refuses-is-left-as-a-disabled-row-and-the-message-says-why-an-earlier-failure-removes-it
+          inbound is created disabled, with sharePort set when NAT exposes it on
+          another public port; the chosen plans’ members get it without their
+          limits being re-applied. It is enabled only once the host runs it: the
+          local panel must bind the port and take it live, an agent must accept
+          the pushed config. A node the host refuses is left as a disabled row
+          and the message says why; an earlier failure removes it.'
+        id: generate-a-node-on-the-local-panel-or-a-connected-agent-host-the-inbound-is-created-disabled-with-shareport-set-when-nat-exposes-it-on-another-public-port-the-chosen-plans-members-get-it-without-their-limits-being-re-applied-it-is-enabled-only-once-the-host-runs-it-the-local-panel-must-bind-the-port-and-take-it-live-an-agent-must-accept-the-pushed-config-a-node-the-host-refuses-is-left-as-a-disabled-row-and-the-message-says-why-an-earlier-failure-removes-it
       - content: Delete an inbound by ID. Also removes its associated client stats rows.
         id: delete-an-inbound-by-id-also-removes-its-associated-client-stats-rows
       - content: Delete many inbounds in one call. Processes the list sequentially;
