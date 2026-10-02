@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Result, Spin } from 'antd';
+import { Alert, Button, Result, Segmented, Spin } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -13,7 +13,26 @@ import SubPage from '../SubPage';
 import SubShell, { useSubLanguage } from '../SubShell';
 import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
+import PortalProbe from './PortalProbe';
 import './Portal.css';
+
+type PortalView = 'overview' | 'probe';
+
+const PROBE_HASH = '#probe';
+
+// The view lives in the address, so that a reload keeps it; the portal has no router.
+function usePortalView(): [PortalView, (next: PortalView) => void] {
+  const [view, setView] = useState<PortalView>(() =>
+    window.location.hash === PROBE_HASH ? 'probe' : 'overview',
+  );
+  const show = useCallback((next: PortalView) => {
+    const { pathname, search } = window.location;
+    // replaceState, because clearing location.hash leaves a bare "#" behind.
+    window.history.replaceState(null, '', pathname + search + (next === 'probe' ? PROBE_HASH : ''));
+    setView(next);
+  }, []);
+  return [view, show];
+}
 
 // null means nobody is signed in; any other failure is an error worth retrying.
 async function fetchPortal(base: string): Promise<PortalData | null> {
@@ -43,6 +62,7 @@ function PortalStatus({ children }: { children: ReactNode }) {
 export default function PortalApp({ base }: { base: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [view, showView] = usePortalView();
   const portal = useQuery({
     queryKey: keys.portal.data(base),
     queryFn: () => fetchPortal(base),
@@ -55,7 +75,16 @@ export default function PortalApp({ base }: { base: string }) {
 
   const signOut = useCallback(async () => {
     await fetch(`${base}/logout`, { method: 'POST', credentials: 'same-origin' }).catch(() => null);
+    // The next person to sign in on this browser must not be shown these servers.
+    queryClient.removeQueries({ queryKey: keys.portal.probes() });
     queryClient.setQueryData(keys.portal.data(base), null);
+  }, [base, queryClient]);
+
+  // Reset rather than invalidate: the signed-in page must leave the screen now. Left
+  // mounted, its probe view would ask the dead session again and restart this very answer.
+  const onSessionEnded = useCallback(() => {
+    queryClient.removeQueries({ queryKey: keys.portal.probes() });
+    void queryClient.resetQueries({ queryKey: keys.portal.data(base) });
   }, [base, queryClient]);
 
   if (portal.isPending) {
@@ -83,6 +112,8 @@ export default function PortalApp({ base }: { base: string }) {
   const data = portal.data;
   if (!data) return <PortalLogin base={base} onSignedIn={onSignedIn} />;
 
+  // The address may still name the probe view of whoever signed in before.
+  const probeOpen = data.probe && view === 'probe';
   return (
     <SubPage
       data={data.page ?? { emails: [data.email], enabled: true }}
@@ -95,6 +126,24 @@ export default function PortalApp({ base }: { base: string }) {
           title={t('subscription.portal.signOut')}
           onClick={signOut}
         />
+      }
+      nav={
+        data.probe && (
+          <Segmented<PortalView>
+            className="portal-views"
+            value={probeOpen ? 'probe' : 'overview'}
+            options={[
+              { value: 'overview', label: t('subscription.portal.viewOverview') },
+              { value: 'probe', label: t('subscription.portal.viewProbe') },
+            ]}
+            onChange={showView}
+          />
+        )
+      }
+      body={
+        probeOpen ? (
+          <PortalProbe base={base} email={data.email} onSessionEnded={onSessionEnded} />
+        ) : undefined
       }
     >
       {!data.page && (

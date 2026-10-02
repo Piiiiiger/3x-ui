@@ -121,7 +121,11 @@
       "usage": "近 {days} 天用量",
       "usageTotal": "合计 {size}",
       "noSubscription": "你的账号暂时没有可用线路，请联系管理员。",
-      "loadFailed": "暂时无法加载你的信息，请稍后再试。"
+      "loadFailed": "暂时无法加载你的信息，请稍后再试。",
+      "viewOverview": "概览",
+      "viewProbe": "探针",
+      "probeUnavailable": "监控暂时不可用",
+      "probeEmpty": "暂时没有可显示的服务器状态。"
     }
   },
   "menu": {

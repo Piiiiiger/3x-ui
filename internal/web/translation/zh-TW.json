@@ -121,7 +121,11 @@
       "usage": "近 {days} 天用量",
       "usageTotal": "合計 {size}",
       "noSubscription": "你的帳號暫時沒有可用線路，請聯絡管理員。",
-      "loadFailed": "暫時無法載入你的資訊，請稍後再試。"
+      "loadFailed": "暫時無法載入你的資訊，請稍後再試。",
+      "viewOverview": "總覽",
+      "viewProbe": "探針",
+      "probeUnavailable": "監控暫時無法使用",
+      "probeEmpty": "暫時沒有可顯示的伺服器狀態。"
     }
   },
   "menu": {

@@ -121,7 +121,11 @@
       "usage": "Últimos {days} dias",
       "usageTotal": "Total {size}",
       "noSubscription": "Sua conta ainda não tem servidores. Fale com o administrador.",
-      "loadFailed": "Não foi possível carregar seus dados. Tente mais tarde."
+      "loadFailed": "Não foi possível carregar seus dados. Tente mais tarde.",
+      "viewOverview": "Visão geral",
+      "viewProbe": "Monitoramento",
+      "probeUnavailable": "O monitoramento está temporariamente indisponível",
+      "probeEmpty": "Ainda não há status de servidores para mostrar."
     }
   },
   "menu": {

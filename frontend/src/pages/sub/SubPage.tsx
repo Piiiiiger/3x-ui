@@ -69,10 +69,14 @@ interface SubPageProps {
   data: SubPageData;
   // The portal adds its sign-out button to the toolbar and its cards below the usage.
   headerExtra?: ReactNode;
+  // The portal's view switch under the header, and a view that takes the place
+  // of everything below it. The subscription page itself passes neither.
+  nav?: ReactNode;
+  body?: ReactNode;
   children?: ReactNode;
 }
 
-export default function SubPage({ data, headerExtra, children }: SubPageProps) {
+export default function SubPage({ data, headerExtra, nav, body, children }: SubPageProps) {
   const { t } = useTranslation();
   const [loadedAt] = useState(() => Date.now());
   const [initialPlatform] = useState(() => detectPlatform(navigator.userAgent));
@@ -149,27 +153,32 @@ export default function SubPage({ data, headerExtra, children }: SubPageProps) {
         onLangChange={onLangChange}
         extra={headerExtra}
       />
-      {view.announce && (
-        <Alert type="info" showIcon title={view.announce} className="sub-announce" />
-      )}
-      <SubHero {...view.heroData} lang={lang} />
-      {children}
-      {tabs.length > 0 && <Tabs className="sub-tabs" tabBarGutter={24} items={tabs} />}
-      {(view.updateHours > 0 || view.subSupportUrl) && (
-        <footer className="sub-footer">
-          {view.updateHours > 0 && (
-            <span>
-              <ClockCircleOutlined />
-              {t('subscription.updateInterval', { hours: view.updateHours })}
-            </span>
+      {nav}
+      {body ?? (
+        <>
+          {view.announce && (
+            <Alert type="info" showIcon title={view.announce} className="sub-announce" />
           )}
-          {view.subSupportUrl && (
-            <a href={view.subSupportUrl} target="_blank" rel="noopener noreferrer">
-              <CustomerServiceOutlined />
-              {t('subscription.support')}
-            </a>
+          <SubHero {...view.heroData} lang={lang} />
+          {children}
+          {tabs.length > 0 && <Tabs className="sub-tabs" tabBarGutter={24} items={tabs} />}
+          {(view.updateHours > 0 || view.subSupportUrl) && (
+            <footer className="sub-footer">
+              {view.updateHours > 0 && (
+                <span>
+                  <ClockCircleOutlined />
+                  {t('subscription.updateInterval', { hours: view.updateHours })}
+                </span>
+              )}
+              {view.subSupportUrl && (
+                <a href={view.subSupportUrl} target="_blank" rel="noopener noreferrer">
+                  <CustomerServiceOutlined />
+                  {t('subscription.support')}
+                </a>
+              )}
+            </footer>
           )}
-        </footer>
+        </>
       )}
     </SubShell>
   );

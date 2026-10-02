@@ -25,6 +25,14 @@
   padding: 48px 0;
 }
 
+.portal-views {
+  margin-bottom: 24px;
+}
+
+.portal-probe .ant-alert {
+  margin-bottom: 16px;
+}
+
 .portal-section {
   margin-top: 24px;
   padding-top: 20px;

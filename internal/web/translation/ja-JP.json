@@ -121,7 +121,11 @@
       "usage": "過去 {days} 日の使用量",
       "usageTotal": "合計 {size}",
       "noSubscription": "まだ利用できるサーバーがありません。管理者にお問い合わせください。",
-      "loadFailed": "情報を読み込めませんでした。しばらくしてからお試しください。"
+      "loadFailed": "情報を読み込めませんでした。しばらくしてからお試しください。",
+      "viewOverview": "概要",
+      "viewProbe": "サーバー監視",
+      "probeUnavailable": "監視は一時的に利用できません",
+      "probeEmpty": "表示できるサーバーの状態はまだありません。"
     }
   },
   "menu": {

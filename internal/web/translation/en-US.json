@@ -121,7 +121,11 @@
       "usage": "Last {days} days",
       "usageTotal": "Total {size}",
       "noSubscription": "Your account has no servers yet. Contact the administrator.",
-      "loadFailed": "Your details could not be loaded. Try again later."
+      "loadFailed": "Your details could not be loaded. Try again later.",
+      "viewOverview": "Overview",
+      "viewProbe": "Probe",
+      "probeUnavailable": "Monitoring is temporarily unavailable",
+      "probeEmpty": "No server status to show yet."
     }
   },
   "menu": {

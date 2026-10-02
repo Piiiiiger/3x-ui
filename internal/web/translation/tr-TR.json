@@ -121,7 +121,11 @@
       "usage": "Son {days} gün",
       "usageTotal": "Toplam {size}",
       "noSubscription": "Hesabında henüz sunucu yok. Yöneticiyle iletişime geç.",
-      "loadFailed": "Bilgilerin yüklenemedi. Daha sonra tekrar dene."
+      "loadFailed": "Bilgilerin yüklenemedi. Daha sonra tekrar dene.",
+      "viewOverview": "Genel bakış",
+      "viewProbe": "İzleme",
+      "probeUnavailable": "İzleme geçici olarak kullanılamıyor",
+      "probeEmpty": "Henüz gösterilecek sunucu durumu yok."
     }
   },
   "menu": {

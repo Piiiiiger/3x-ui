@@ -121,7 +121,11 @@
       "usage": "{days} hari terakhir",
       "usageTotal": "Total {size}",
       "noSubscription": "Akunmu belum punya server. Hubungi administrator.",
-      "loadFailed": "Datamu tidak dapat dimuat. Coba lagi nanti."
+      "loadFailed": "Datamu tidak dapat dimuat. Coba lagi nanti.",
+      "viewOverview": "Ikhtisar",
+      "viewProbe": "Pemantauan",
+      "probeUnavailable": "Pemantauan sementara tidak tersedia",
+      "probeEmpty": "Belum ada status server untuk ditampilkan."
     }
   },
   "menu": {

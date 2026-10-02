@@ -498,9 +498,11 @@ Lite's pages and stores no Lite credential, so it sees Lite's guest view.
   `<subPath>portal/probe` (`sub/portal.go`) goes through `ProbeService.ClientServers`: only
   the hosts behind the client's own subscription inbounds, with whitelisted fields.
 - **Pages:** `frontend/src/pages/probe/` is the admin page at `/panel/probe`: every server,
-  plus the modals that link hosts to servers and set the Lite address. Each server is drawn by
-  `frontend/src/components/probe/ProbeServerCard.tsx`, which fetches nothing and imports
-  nothing panel-only, so that the client portal can draw the same card.
+  plus the modals that link hosts to servers and set the Lite address. The portal's view is
+  `frontend/src/pages/sub/portal/PortalProbe.tsx`, behind the Overview | Probe switch that
+  `PortalApp.tsx` shows when `portal/data` says `probe: true`; the view is kept in the address
+  as `#probe`. Both draw `frontend/src/components/probe/ProbeServerCard.tsx`, which fetches
+  nothing and imports nothing panel-only.
 
 ---
 

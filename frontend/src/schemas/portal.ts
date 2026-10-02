@@ -25,5 +25,7 @@ export const PortalDataSchema = z.object({
   page: z.custom<SubPageData>((value) => typeof value === 'object').nullable(),
   plan: PortalPlanSchema.nullable(),
   daily: z.array(TrafficDaySchema),
+  // Whether to offer the probe view. A server older than that view sends no flag.
+  probe: z.boolean().default(false),
 });
 export type PortalData = z.infer<typeof PortalDataSchema>;

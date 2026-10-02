@@ -121,7 +121,11 @@
       "usage": "{days} ngày gần nhất",
       "usageTotal": "Tổng {size}",
       "noSubscription": "Tài khoản của bạn chưa có máy chủ. Hãy liên hệ quản trị viên.",
-      "loadFailed": "Không tải được thông tin của bạn. Hãy thử lại sau."
+      "loadFailed": "Không tải được thông tin của bạn. Hãy thử lại sau.",
+      "viewOverview": "Tổng quan",
+      "viewProbe": "Giám sát",
+      "probeUnavailable": "Giám sát tạm thời không khả dụng",
+      "probeEmpty": "Chưa có trạng thái máy chủ nào để hiển thị."
     }
   },
   "menu": {

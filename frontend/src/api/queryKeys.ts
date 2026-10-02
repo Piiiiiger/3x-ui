@@ -56,6 +56,10 @@ export const keys = {
   },
   portal: {
     data: (base: string) => ['portal', 'data', base] as const,
+    probes: () => ['portal', 'probe'] as const,
+    // Keyed by client: one browser can sign in a second person, who must never
+    // be handed what the cache holds of the first.
+    probe: (base: string, email: string) => ['portal', 'probe', base, email] as const,
   },
   xray: {
     root: () => ['xray'] as const,
