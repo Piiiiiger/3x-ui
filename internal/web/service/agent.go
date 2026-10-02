@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
@@ -19,6 +20,17 @@ import (
 // agentStatusStaleAfter: agents report every few seconds, so an older status
 // means the agent stopped reporting even if its socket still looks open.
 var agentStatusStaleAfter = 20 * time.Second
+
+// agentPushLocks keeps every caller that pushes to one agent from doing so at once.
+var agentPushLocks sync.Map
+
+// LockAgent holds nodeID's push lock until the returned func is called.
+func (s *AgentService) LockAgent(nodeID int) (unlock func()) {
+	lock, _ := agentPushLocks.LoadOrStore(nodeID, &sync.Mutex{})
+	mu := lock.(*sync.Mutex)
+	mu.Lock()
+	return mu.Unlock
+}
 
 // AgentService joins the panel's data to pigger-agents: the config each one
 // runs, and the usage and state they report back.

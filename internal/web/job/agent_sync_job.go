@@ -19,9 +19,6 @@ const (
 	agentNudgeSettle = 300 * time.Millisecond
 )
 
-// agentSyncLocks keeps the tick and a nudge from pushing to one agent at once.
-var agentSyncLocks sync.Map
-
 // AgentSyncJob keeps every connected agent on the config the panel holds for
 // it, and disconnects agents whose node no longer allows them.
 type AgentSyncJob struct {
@@ -67,9 +64,7 @@ func (j *AgentSyncJob) Run() {
 }
 
 func (j *AgentSyncJob) syncNode(n *model.Node) {
-	lock, _ := agentSyncLocks.LoadOrStore(n.Id, &sync.Mutex{})
-	lock.(*sync.Mutex).Lock()
-	defer lock.(*sync.Mutex).Unlock()
+	defer j.agentService.LockAgent(n.Id)()
 
 	ctx, cancel := context.WithTimeout(context.Background(), agentSyncTimeout)
 	defer cancel()
