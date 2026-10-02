@@ -5,7 +5,6 @@
 .settings-page,
 .nodes-page,
 .probe-page,
-.groups-page,
 .plans-page,
 .rules-page,
 .api-docs-page,
@@ -30,7 +29,6 @@
 .settings-page.is-dark,
 .nodes-page.is-dark,
 .probe-page.is-dark,
-.groups-page.is-dark,
 .plans-page.is-dark,
 .rules-page.is-dark,
 .api-docs-page.is-dark,
@@ -52,7 +50,6 @@
 .settings-page.is-dark.is-ultra,
 .nodes-page.is-dark.is-ultra,
 .probe-page.is-dark.is-ultra,
-.groups-page.is-dark.is-ultra,
 .plans-page.is-dark.is-ultra,
 .rules-page.is-dark.is-ultra,
 .api-docs-page.is-dark.is-ultra,
@@ -73,7 +70,6 @@
 .settings-page::before,
 .nodes-page::before,
 .probe-page::before,
-.groups-page::before,
 .plans-page::before,
 .rules-page::before,
 .api-docs-page::before,
@@ -104,10 +100,8 @@
 .probe-page .ant-layout,
 .nodes-page .ant-layout-content,
 .probe-page .ant-layout-content,
-.groups-page .ant-layout,
 .plans-page .ant-layout,
 .rules-page .ant-layout,
-.groups-page .ant-layout-content,
 .plans-page .ant-layout-content,
 .rules-page .ant-layout-content,
 .api-docs-page .ant-layout,
@@ -122,7 +116,6 @@
 .settings-page .content-shell,
 .nodes-page .content-shell,
 .probe-page .content-shell,
-.groups-page .content-shell,
 .plans-page .content-shell,
 .rules-page .content-shell,
 .api-docs-page .content-shell {
@@ -136,7 +129,6 @@
 .settings-page .content-area,
 .nodes-page .content-area,
 .probe-page .content-area,
-.groups-page .content-area,
 .plans-page .content-area,
 .rules-page .content-area {
   padding: 24px;
@@ -150,7 +142,6 @@
 .settings-page .content-area,
 .nodes-page .content-area,
 .probe-page .content-area,
-.groups-page .content-area,
 .plans-page .content-area,
 .rules-page .content-area,
 .api-docs-page .content-area,
@@ -166,7 +157,6 @@
   .inbounds-page .content-area,
   .nodes-page .content-area,
   .probe-page .content-area,
-  .groups-page .content-area,
   .plans-page .content-area,
   .rules-page .content-area {
     padding: 8px;
@@ -263,7 +253,6 @@ body.dark .ant-dropdown-menu-item-divider {
 .inbounds-page .summary-card,
 .nodes-page .summary-card,
 .probe-page .summary-card,
-.groups-page .summary-card,
 .plans-page .summary-card {
   padding: 16px;
 }
@@ -273,7 +262,6 @@ body.dark .ant-dropdown-menu-item-divider {
   .inbounds-page .summary-card,
   .nodes-page .summary-card,
   .probe-page .summary-card,
-  .groups-page .summary-card,
   .plans-page .summary-card {
     padding: 8px;
   }
