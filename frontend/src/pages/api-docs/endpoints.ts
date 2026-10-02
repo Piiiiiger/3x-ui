@@ -1705,6 +1705,14 @@ export const sections: readonly Section[] = [
         responseSchema: 'AgentSecretView',
       },
       {
+        method: 'POST',
+        path: '/panel/api/nodes/restartXray/:id',
+        summary:
+          "Restart one host's Xray through its runtime: an agent restarts its embedded core, a panel node its own Xray process. Refused for a disabled host.",
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node id.' }],
+        response: '{\n  "success": true,\n  "msg": "Xray restarted"\n}',
+      },
+      {
         method: 'GET',
         path: '/panel/api/nodes/history/:id/:metric/:bucket',
         summary:

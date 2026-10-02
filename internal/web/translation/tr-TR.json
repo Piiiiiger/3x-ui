@@ -1186,7 +1186,8 @@
         "updateResult": "{ok} düğümde güncelleme başlatıldı, {failed} başarısız",
         "updateNoneEligible": "En az bir çevrimiçi ve etkin düğüm seçin",
         "saveMtls": "Düğüm mTLS kaydet",
-        "reloadMtls": "Ana mTLS kimlik bilgilerini yeniden yükle"
+        "reloadMtls": "Ana mTLS kimlik bilgilerini yeniden yükle",
+        "xrayRestarted": "Xray yeniden başlatıldı"
       },
       "tlsVerifyMode": "TLS Doğrulaması",
       "tlsVerifyModeHint": "Panelin düğümün HTTPS sertifikasını nasıl doğrulayacağını belirler. Sabitle veya Atla, kendinden imzalı sertifikalar içindir (yalnızca https düğümleri).",
@@ -1250,7 +1251,8 @@
         "done": "Yeni bağlantı {host} üzerinde çalışıyor",
         "hostOffline": "Düğüm çevrimdışı; ajanı bağlandıktan sonra bağlantıyı oluşturun.",
         "sni": "Toplumsal ve Ulusal Kimlik"
-      }
+      },
+      "restartXray": "Xray'i yeniden başlat"
     },
     "settings": {
       "defaultTag": "Varsayılan",

@@ -1186,7 +1186,8 @@
         "updateResult": "Update triggered on {ok} host(s), {failed} failed",
         "updateNoneEligible": "Select at least one online, enabled host",
         "saveMtls": "Save host mTLS",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray restarted"
       },
       "tlsVerifyMode": "TLS verification",
       "tlsVerifyModeHint": "How the panel validates the host's HTTPS certificate. Pin or Skip are for self-signed certs (https hosts only).",
@@ -1250,7 +1251,8 @@
         "done": "The new node runs on {host}",
         "hostOffline": "The host is offline; generate the node once its agent is connected.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "Restart Xray"
     },
     "settings": {
       "defaultTag": "Default",

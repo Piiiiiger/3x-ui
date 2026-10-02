@@ -43,6 +43,7 @@ func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.POST("/probe/:id", a.probe)
 	g.POST("/updatePanel", a.updatePanel)
 	g.POST("/agentSecret/:id", a.agentSecret)
+	g.POST("/restartXray/:id", a.restartXray)
 	g.GET("/history/:id/:metric/:bucket", a.history)
 	g.POST("/mtls/ca", a.mtlsCa)
 	g.POST("/mtls/trustCA", a.setMtlsTrustCA)
@@ -63,6 +64,20 @@ func (a *NodeController) agentSecret(c *gin.Context) {
 		return
 	}
 	jsonObj(c, service.AgentSecretView{Secret: secret}, nil)
+}
+
+// restartXray restarts one host's Xray from its card on the hosts page.
+func (a *NodeController) restartXray(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.nodeService.RestartXray(id); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.restartXray"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.xrayRestarted"), nil)
 }
 
 // reloadMtlsClient validates the credential currently stored by the master and

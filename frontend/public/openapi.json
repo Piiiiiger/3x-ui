@@ -12760,6 +12760,51 @@
         }
       }
     },
+    "/panel/api/nodes/restartXray/{id}": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Restart one host's Xray through its runtime: an agent restarts its embedded core, a panel node its own Xray process. Refused for a disabled host.",
+        "operationId": "post_panel_api_nodes_restartXray_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Xray restarted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/nodes/history/{id}/{metric}/{bucket}": {
       "get": {
         "tags": [

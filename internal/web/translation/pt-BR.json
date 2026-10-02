@@ -1186,7 +1186,8 @@
         "updateResult": "Atualização iniciada em {ok} nó(s), {failed} falharam",
         "updateNoneEligible": "Selecione pelo menos um nó online e ativo",
         "saveMtls": "Salvar mTLS do nó",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray reiniciado"
       },
       "tlsVerifyMode": "Verificação TLS",
       "tlsVerifyModeHint": "Como o painel valida o certificado HTTPS do nó. Fixar ou Ignorar são para certificados autoassinados (apenas nós https).",
@@ -1250,7 +1251,8 @@
         "done": "A nova entrada roda em {host}",
         "hostOffline": "O nó está offline; gere a entrada quando o agente se conectar.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "Reiniciar Xray"
     },
     "settings": {
       "defaultTag": "Padrão",

@@ -1186,7 +1186,8 @@
         "updateResult": "Оновлення запущено на {ok} вузлах, {failed} не вдалося",
         "updateNoneEligible": "Виберіть принаймні один увімкнений вузол у мережі",
         "saveMtls": "Зберегти mTLS вузла",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray перезапущено"
       },
       "tlsVerifyMode": "Перевірка TLS",
       "tlsVerifyModeHint": "Як панель перевіряє HTTPS-сертифікат вузла. Закріплення або Пропуск — для самопідписаних сертифікатів (лише https-вузли).",
@@ -1250,7 +1251,8 @@
         "done": "Нове вхідне працює на {host}",
         "hostOffline": "Вузол не в мережі; створіть вхідне, коли підключиться його агент.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "Перезапустити Xray"
     },
     "settings": {
       "defaultTag": "Типово",

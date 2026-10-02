@@ -1186,7 +1186,8 @@
         "updateResult": "Actualización iniciada en {ok} nodo(s), {failed} fallaron",
         "updateNoneEligible": "Selecciona al menos un nodo en línea y habilitado",
         "saveMtls": "Guardar mTLS del nodo",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray reiniciado"
       },
       "tlsVerifyMode": "Verificación TLS",
       "tlsVerifyModeHint": "Cómo valida el panel el certificado HTTPS del nodo. Fijar u Omitir son para certificados autofirmados (solo nodos https).",
@@ -1250,7 +1251,8 @@
         "done": "La nueva entrada funciona en {host}",
         "hostOffline": "El nodo está desconectado; genera la entrada cuando su agente se conecte.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "Reiniciar Xray"
     },
     "settings": {
       "defaultTag": "Predeterminado",

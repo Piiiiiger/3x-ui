@@ -1186,7 +1186,8 @@
         "updateResult": "已在 {ok} 個主機上觸發更新，{failed} 個失敗",
         "updateNoneEligible": "請至少選擇一個在線且已啟用的主機",
         "saveMtls": "儲存主機 mTLS",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray 已重新啟動"
       },
       "tlsVerifyMode": "TLS 驗證",
       "tlsVerifyModeHint": "面板如何驗證主機的 HTTPS 憑證。釘選或略過用於自簽憑證（僅 https 主機）。",
@@ -1250,7 +1251,8 @@
         "done": "新節點已在 {host} 上執行",
         "hostOffline": "主機離線，請在其 agent 連線後再產生節點。",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "重新啟動 Xray"
     },
     "settings": {
       "defaultTag": "預設",

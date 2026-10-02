@@ -1186,7 +1186,8 @@
         "updateResult": "已在 {ok} 个主机上触发更新，{failed} 个失败",
         "updateNoneEligible": "请至少选择一个在线且已启用的主机",
         "saveMtls": "保存主机 mTLS",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray 已重启"
       },
       "tlsVerifyMode": "TLS 校验",
       "tlsVerifyModeHint": "面板如何校验主机的 HTTPS 证书。固定或跳过用于自签名证书（仅 https 主机）。",
@@ -1250,7 +1251,8 @@
         "done": "新节点已在 {host} 上运行",
         "hostOffline": "主机离线，请在其 agent 连接后再生成节点。",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "重启 Xray"
     },
     "settings": {
       "defaultTag": "默认",

@@ -1186,7 +1186,8 @@
         "updateResult": "تم بدء التحديث على {ok} عقدة، فشل {failed}",
         "updateNoneEligible": "اختر عقدة واحدة على الأقل متصلة ومفعّلة",
         "saveMtls": "حفظ mTLS النود",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "تمت إعادة تشغيل Xray"
       },
       "tlsVerifyMode": "التحقق من TLS",
       "tlsVerifyModeHint": "كيف يتحقق اللوحة من شهادة HTTPS الخاصة بالعقدة. التثبيت أو التخطّي مخصّصان للشهادات الموقّعة ذاتيًا (عُقد https فقط).",
@@ -1250,7 +1251,8 @@
         "done": "يعمل الوارد الجديد على {host}",
         "hostOffline": "النود غير متصل؛ أنشئ الوارد بعد اتصال الوكيل.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "إعادة تشغيل Xray"
     },
     "settings": {
       "defaultTag": "افتراضي",

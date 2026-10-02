@@ -84,6 +84,11 @@ _openapi:
         with it is dropped. Panel nodes have no agent secret and are refused.
       url: '#mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused'
     - depth: 2
+      title: "Restart one host's Xray through its runtime: an agent restarts its
+        embedded core, a panel node its own Xray process. Refused for a disabled
+        host."
+      url: '#restart-one-hosts-xray-through-its-runtime-an-agent-restarts-its-embedded-core-a-panel-node-its-own-xray-process-refused-for-a-disabled-host'
+    - depth: 2
       title: Aggregated metric history for a node — same shape as /server/history,
         scoped to one node.
       url: '#aggregated-metric-history-for-a-node--same-shape-as-serverhistory-scoped-to-one-node'
@@ -150,6 +155,10 @@ _openapi:
           connected with it is dropped. Panel nodes have no agent secret and are
           refused.
         id: mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused
+      - content: "Restart one host's Xray through its runtime: an agent restarts its
+          embedded core, a panel node its own Xray process. Refused for a
+          disabled host."
+        id: restart-one-hosts-xray-through-its-runtime-an-agent-restarts-its-embedded-core-a-panel-node-its-own-xray-process-refused-for-a-disabled-host
       - content: Aggregated metric history for a node — same shape as /server/history,
           scoped to one node.
         id: aggregated-metric-history-for-a-node--same-shape-as-serverhistory-scoped-to-one-node
@@ -165,7 +174,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/agentSecret/{id}","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/agentSecret/{id}","method":"post"},{"path":"/panel/api/nodes/restartXray/{id}","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
     </>
   );
 }

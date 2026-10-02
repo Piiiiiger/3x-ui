@@ -1186,7 +1186,8 @@
         "updateResult": "{ok} 個のノードで更新を開始、{failed} 個失敗",
         "updateNoneEligible": "オンラインで有効なノードを少なくとも1つ選択してください",
         "saveMtls": "ノード mTLS を保存",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray を再起動しました"
       },
       "tlsVerifyMode": "TLS 検証",
       "tlsVerifyModeHint": "パネルがノードの HTTPS 証明書を検証する方法。ピン留めやスキップは自己署名証明書向け（https ノードのみ）。",
@@ -1250,7 +1251,8 @@
         "done": "新しいインバウンドが {host} で動作しています",
         "hostOffline": "ノードがオフラインです。エージェントが接続してから生成してください。",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "Xray を再起動"
     },
     "settings": {
       "defaultTag": "デフォルト",

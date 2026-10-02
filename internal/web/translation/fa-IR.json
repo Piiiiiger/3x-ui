@@ -1186,7 +1186,8 @@
         "updateResult": "به‌روزرسانی روی {ok} نود آغاز شد، {failed} ناموفق",
         "updateNoneEligible": "حداقل یک نود آنلاین و فعال انتخاب کنید",
         "saveMtls": "ذخیره mTLS نود",
-        "reloadMtls": "Reload master mTLS credential"
+        "reloadMtls": "Reload master mTLS credential",
+        "xrayRestarted": "Xray دوباره راه‌اندازی شد"
       },
       "tlsVerifyMode": "اعتبارسنجی TLS",
       "tlsVerifyModeHint": "اینکه پنل گواهی HTTPS نود را چطور بررسی کند. Pin یا Skip برای گواهی‌های self-signed است (فقط نودهای https).",
@@ -1250,7 +1251,8 @@
         "done": "ورودی جدید روی {host} اجرا می‌شود",
         "hostOffline": "نود آفلاین است؛ پس از اتصال ایجنت ورودی را بسازید.",
         "sni": "SNI"
-      }
+      },
+      "restartXray": "راه‌اندازی دوباره Xray"
     },
     "settings": {
       "defaultTag": "پیش‌فرض",
