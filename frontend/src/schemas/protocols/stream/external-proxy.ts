@@ -27,5 +27,7 @@ export const ExternalProxyEntrySchema = z.object({
   echConfigList: z.string().optional(),
   vlessRoute: z.string().optional(),
   allowInsecure: z.boolean().optional(),
+  // Set on entries built from Hosts, whose SNI and fingerprint also replace REALITY's.
+  isHost: z.boolean().optional(),
 });
 export type ExternalProxyEntry = z.infer<typeof ExternalProxyEntrySchema>;
