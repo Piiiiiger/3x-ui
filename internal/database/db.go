@@ -86,6 +86,8 @@ func allModels() []any {
 		&model.PlanInbound{},
 		&model.ClientDailyTraffic{},
 		&model.ClientTrafficMark{},
+		&model.HostDailyTraffic{},
+		&model.InboundTrafficMark{},
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 	}

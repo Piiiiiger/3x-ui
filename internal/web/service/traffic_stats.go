@@ -1,7 +1,9 @@
 package service
 
 import (
+	"maps"
 	"math"
+	"slices"
 	"time"
 
 	"gorm.io/gorm"
@@ -69,8 +71,8 @@ func counterGrowth(prev, cur int64) int64 {
 	return cur - prev
 }
 
-// RecordDaily adds what each client used since the previous run to the day of
-// now. A client's first sighting only sets its mark: older usage has no day.
+// RecordDaily adds what each client and each host used since the previous run to
+// the day of now. A first sighting only sets a mark: older usage has no day.
 func (s *TrafficStatsService) RecordDaily(now time.Time) error {
 	day := dayNumber(now)
 	return runSerializedTx(func(tx *gorm.DB) error {
@@ -129,9 +131,87 @@ func (s *TrafficStatsService) RecordDaily(now time.Time) error {
 		if err := tx.Exec("DELETE FROM client_traffic_marks WHERE email NOT IN (SELECT email FROM clients)").Error; err != nil {
 			return err
 		}
+		if err := recordHostDaily(tx, day); err != nil {
+			return err
+		}
 		cutoff := dayNumber(now.AddDate(0, 0, -trafficDailyKeepDays))
-		return tx.Where("day < ?", cutoff).Delete(&model.ClientDailyTraffic{}).Error
+		if err := tx.Where("day < ?", cutoff).Delete(&model.ClientDailyTraffic{}).Error; err != nil {
+			return err
+		}
+		return tx.Where("day < ?", cutoff).Delete(&model.HostDailyTraffic{}).Error
 	})
+}
+
+// recordHostDaily credits each inbound's growth since the last run to the host it
+// runs on, node id 0 being the panel itself.
+func recordHostDaily(tx *gorm.DB, day int) error {
+	var counters []struct {
+		Id       int
+		NodeId   int
+		Up, Down int64
+	}
+	if err := tx.Model(&model.Inbound{}).
+		Select("id, COALESCE(node_id, 0) AS node_id, up, down").
+		Scan(&counters).Error; err != nil {
+		return err
+	}
+	var marks []model.InboundTrafficMark
+	if err := tx.Find(&marks).Error; err != nil {
+		return err
+	}
+	lastSeen := make(map[int]model.InboundTrafficMark, len(marks))
+	for _, m := range marks {
+		lastSeen[m.InboundId] = m
+	}
+
+	growth := map[int]*model.HostDailyTraffic{}
+	var moved []model.InboundTrafficMark
+	for _, cur := range counters {
+		prev, seen := lastSeen[cur.Id]
+		if seen && prev.Up == cur.Up && prev.Down == cur.Down {
+			continue
+		}
+		moved = append(moved, model.InboundTrafficMark{InboundId: cur.Id, Up: cur.Up, Down: cur.Down})
+		if !seen {
+			continue
+		}
+		up, down := counterGrowth(prev.Up, cur.Up), counterGrowth(prev.Down, cur.Down)
+		if up == 0 && down == 0 {
+			continue
+		}
+		row := growth[cur.NodeId]
+		if row == nil {
+			row = &model.HostDailyTraffic{NodeId: cur.NodeId, Day: day}
+			growth[cur.NodeId] = row
+		}
+		row.Up += up
+		row.Down += down
+	}
+
+	if len(growth) > 0 {
+		rows := make([]model.HostDailyTraffic, 0, len(growth))
+		for _, nodeID := range slices.Sorted(maps.Keys(growth)) {
+			rows = append(rows, *growth[nodeID])
+		}
+		if err := tx.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "node_id"}, {Name: "day"}},
+			DoUpdates: clause.Assignments(map[string]any{
+				"up":   gorm.Expr("host_daily_traffics.up + excluded.up"),
+				"down": gorm.Expr("host_daily_traffics.down + excluded.down"),
+			}),
+		}).Create(&rows).Error; err != nil {
+			return err
+		}
+	}
+	if len(moved) > 0 {
+		if err := tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "inbound_id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"up", "down"}),
+		}).CreateInBatches(moved, 200).Error; err != nil {
+			return err
+		}
+	}
+	return tx.Exec("DELETE FROM inbound_traffic_marks WHERE inbound_id NOT IN (SELECT id FROM inbounds)").Error
 }
 
 // Overview totals the clients and lists the last days of traffic, the final
