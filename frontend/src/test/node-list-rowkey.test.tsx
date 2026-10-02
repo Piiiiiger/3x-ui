@@ -3,6 +3,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import NodeList from '@/pages/nodes/NodeList';
 import type { NodeRecord } from '@/schemas/node';
 
+import { MemoryRouter } from 'react-router';
+
 import { renderWithProviders } from './test-utils';
 
 const noop = () => {};
@@ -22,20 +24,22 @@ describe('NodeList desktop table row keys', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     renderWithProviders(
-      <NodeList
-        nodes={sampleNodes()}
-        isMobile={false}
-        selectedIds={[]}
-        onSelectionChange={noop}
-        onAdd={noop}
-        onMtls={noop}
-        onEdit={noop}
-        onDelete={noop}
-        onProbe={noop}
-        onToggleEnable={noop}
-        onUpdateNode={noop}
-        onUpdateSelected={noop}
-      />,
+      <MemoryRouter>
+        <NodeList
+          nodes={sampleNodes()}
+          isMobile={false}
+          selectedIds={[]}
+          onSelectionChange={noop}
+          onAdd={noop}
+          onMtls={noop}
+          onEdit={noop}
+          onDelete={noop}
+          onProbe={noop}
+          onToggleEnable={noop}
+          onUpdateNode={noop}
+          onUpdateSelected={noop}
+        />
+      </MemoryRouter>,
     );
 
     const duplicateKeyWarning = errorSpy.mock.calls.some((call) =>

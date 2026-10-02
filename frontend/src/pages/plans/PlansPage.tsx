@@ -64,8 +64,8 @@ export default function PlansPage() {
     setFormOpen(true);
   }
 
-  async function savePlan(values: PlanFormValues, applyToMembers: boolean) {
-    const msg = editing ? await update(editing.id, values, applyToMembers) : await create(values);
+  async function savePlan(values: PlanFormValues, reapplyLimits: boolean) {
+    const msg = editing ? await update(editing.id, values, reapplyLimits) : await create(values);
     if (msg?.success) {
       messageApi.success(t('pages.plans.toasts.saved'));
       setFormOpen(false);

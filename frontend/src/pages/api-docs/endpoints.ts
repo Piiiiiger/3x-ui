@@ -299,12 +299,37 @@ export const sections: readonly Section[] = [
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Inbound ID.' }],
       },
       {
+        method: 'GET',
+        path: '/panel/api/inbounds/freePort/:nodeId',
+        summary:
+          'Suggest a port for a new inbound on a host: one that no inbound there uses for TCP or UDP on any interface and that the Xray template’s own API and metrics listeners leave free. On the local panel the port must also be one this machine can bind, since other programs may hold ports no inbound records.',
+        params: [
+          {
+            name: 'nodeId',
+            in: 'path',
+            type: 'number',
+            desc: 'Node ID, or 0 for the local panel.',
+          },
+        ],
+        responseSchema: 'FreePortView',
+      },
+      {
         method: 'POST',
         path: '/panel/api/inbounds/add',
         summary:
           'Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy).',
         body: inboundBody,
         errorResponse: '{\n  "success": false,\n  "msg": "Port 443 is already in use"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/inbounds/generate',
+        summary:
+          'Generate a node on the local panel or a connected agent host. The inbound is created disabled; when NAT exposes it on another public port an entry row carries that port; the chosen plans’ members get it without their limits being re-applied. It is enabled only once the host runs it: the local panel must bind the port and take it live, an agent must accept the pushed config. A node the host refuses is left as a disabled row and the message says why; an earlier failure removes it.',
+        body: '{\n  "inbound": {\n    "remark": "HK-Edge-2",\n    "enable": true,\n    "port": 81,\n    "protocol": "vless",\n    "nodeId": 5,\n    "settings": { "clients": [], "decryption": "none" },\n    "streamSettings": { "network": "tcp", "security": "reality" },\n    "sniffing": {}\n  },\n  "planIds": [1, 2],\n  "publicPort": 20443\n}',
+        requestSchema: { $ref: '#/components/schemas/GenerateNodeRequest' },
+        errorResponse:
+          '{\n  "success": false,\n  "msg": "the node was left disabled: agent on edge-hk refused its config: listen tcp :81: bind: address already in use"\n}',
       },
       {
         method: 'POST',
@@ -1947,7 +1972,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/update/:id',
         summary:
-          'Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.',
+          'Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
         body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',

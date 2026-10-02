@@ -157,6 +157,28 @@ function applyFinalMaskToObj(
   if (payload.length > 0) obj.fm = payload;
 }
 
+// A Host entry's own SNI and fingerprint replace the REALITY ones, as the
+// subscription's applyEndpointRealityParams does; legacy entries never do.
+function applyHostRealityParams(
+  externalProxy: ExternalProxyEntry | null | undefined,
+  params: URLSearchParams,
+) {
+  if (!externalProxy?.isHost) return;
+  if (externalProxy.sni) params.set('sni', externalProxy.sni);
+  if (externalProxy.fingerprint) params.set('fp', externalProxy.fingerprint);
+}
+
+// An entry that skips certificate checks says so on any TLS or REALITY link,
+// as the subscription's applyEndpointAllowInsecure does.
+function applyExternalProxyAllowInsecure(
+  externalProxy: ExternalProxyEntry | null | undefined,
+  params: URLSearchParams,
+  security: string | undefined,
+) {
+  if (externalProxy?.allowInsecure && security && security !== 'none')
+    params.set('allowInsecure', '1');
+}
+
 function externalProxyAlpn(value: ExternalProxyEntry['alpn']): string {
   if (Array.isArray(value)) return value.filter(Boolean).join(',');
   return '';
@@ -469,9 +491,11 @@ export function genVlessLink(input: GenVlessLinkInput): string {
       if (reality.settings.mldsa65Verify.length > 0)
         params.set('pqv', reality.settings.mldsa65Verify);
     }
+    applyHostRealityParams(externalProxy, params);
   } else {
     params.set('security', 'none');
   }
+  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   // XTLS Vision flow: TCP over tls/reality (classic) or XHTTP+vlessenc (the
   // VLESS-level encryption stands in for transport TLS). Mirrors the backend's
@@ -624,9 +648,11 @@ export function genTrojanLink(input: GenTrojanLinkInput): string {
   } else if (security === 'reality') {
     params.set('security', 'reality');
     writeRealityParams(stream, params, clientKey);
+    applyHostRealityParams(externalProxy, params);
   } else {
     params.set('security', 'none');
   }
+  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   const url = new URL(
     `trojan://${encodeURIComponent(clientPassword)}@${formatUrlHost(address)}:${port}`,
@@ -681,6 +707,7 @@ export function genShadowsocksLink(input: GenShadowsocksLinkInput): string {
     writeTlsParams(stream, params);
     applyExternalProxyTLSParams(externalProxy, params, security);
   }
+  applyExternalProxyAllowInsecure(externalProxy, params, security);
 
   // SIP002 clients (v2rayN) ignore type/headerType/host/path and only read
   // `plugin`. Re-encode a TCP http header as obfs-local so they build a

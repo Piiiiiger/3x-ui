@@ -635,6 +635,43 @@ export const FallbackParentInfoSchema = z.object({
 });
 export type FallbackParentInfo = z.infer<typeof FallbackParentInfoSchema>;
 
+export const FreePortViewSchema = z.object({
+  port: z.number().int(),
+});
+export type FreePortView = z.infer<typeof FreePortViewSchema>;
+
+export const GenerateNodeRequestSchema = z.object({
+  clientStats: z.array(z.lazy(() => ClientTrafficSchema)),
+  disableFlow: z.boolean(),
+  down: z.number().int(),
+  enable: z.boolean(),
+  excludeFromSub: z.boolean(),
+  expiryTime: z.number().int(),
+  fallbackParent: z.lazy(() => FallbackParentInfoSchema).nullable().optional(),
+  id: z.number().int(),
+  lastTrafficResetTime: z.number().int(),
+  listen: z.string(),
+  nodeId: z.number().int().nullable().optional(),
+  originNodeGuid: z.string().optional(),
+  planIds: z.array(z.number().int()),
+  port: z.number().int().min(0).max(65535),
+  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic']),
+  publicPort: z.number().int().min(0).max(65535),
+  remark: z.string(),
+  settings: z.unknown(),
+  shareAddr: z.string(),
+  shareAddrStrategy: z.enum(['node', 'listen', 'custom']),
+  sniffing: z.unknown(),
+  streamSettings: z.unknown(),
+  subSortIndex: z.number().int(),
+  tag: z.string(),
+  total: z.number().int(),
+  trafficReset: z.enum(['never', 'hourly', 'daily', 'weekly', 'monthly']),
+  trafficResetDay: z.number().int().min(1).max(31),
+  up: z.number().int(),
+});
+export type GenerateNodeRequest = z.infer<typeof GenerateNodeRequestSchema>;
+
 export const GeoCategorySchema = z.object({
   attributes: z.array(z.string()),
   code: z.string(),

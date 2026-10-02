@@ -633,6 +633,62 @@ export const EXAMPLES: Record<string, unknown> = {
     "masterId": 0,
     "path": ""
   },
+  "FreePortView": {
+    "port": 34567
+  },
+  "GenerateNodeRequest": {
+    "clientStats": [
+      {
+        "down": 2097152,
+        "email": "user1",
+        "enable": true,
+        "expiryTime": 1735689600000,
+        "id": 14825,
+        "inboundId": 1,
+        "lastOnline": 1735680000000,
+        "lastSubFetch": 1735680000000,
+        "reset": 0,
+        "resetCount": 0,
+        "resetDay": 0,
+        "resetMax": 0,
+        "resetWeekday": 0,
+        "subId": "i7tvdpeffi0hvvf1",
+        "total": 10737418240,
+        "up": 1048576,
+        "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
+      }
+    ],
+    "disableFlow": false,
+    "down": 0,
+    "enable": true,
+    "excludeFromSub": false,
+    "expiryTime": 0,
+    "fallbackParent": null,
+    "id": 1,
+    "lastTrafficResetTime": 0,
+    "listen": "",
+    "nodeId": null,
+    "originNodeGuid": "",
+    "planIds": [
+      1,
+      2
+    ],
+    "port": 443,
+    "protocol": "vless",
+    "publicPort": 20443,
+    "remark": "VLESS-443",
+    "settings": null,
+    "shareAddr": "",
+    "shareAddrStrategy": "node",
+    "sniffing": null,
+    "streamSettings": null,
+    "subSortIndex": 1,
+    "tag": "in-443-tcp",
+    "total": 0,
+    "trafficReset": "never",
+    "trafficResetDay": 1,
+    "up": 0
+  },
   "GeoCategory": {
     "attributes": [
       "ads",

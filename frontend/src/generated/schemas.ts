@@ -2520,6 +2520,211 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "FreePortView": {
+    "description": "FreePortView is a port a new inbound on a host can listen on.",
+    "properties": {
+      "port": {
+        "example": 34567,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "port"
+    ],
+    "type": "object"
+  },
+  "GenerateNodeRequest": {
+    "description": "GenerateNodeRequest is a new node on one host: the inbound as the add route takes\nit, the plans whose members get it, and the port NAT exposes it on (0 for none).",
+    "properties": {
+      "clientStats": {
+        "description": "Client traffic statistics",
+        "items": {
+          "$ref": "#/components/schemas/ClientTraffic"
+        },
+        "type": "array"
+      },
+      "disableFlow": {
+        "example": false,
+        "type": "boolean"
+      },
+      "down": {
+        "description": "Download traffic in bytes",
+        "format": "int64",
+        "type": "integer"
+      },
+      "enable": {
+        "description": "Whether the inbound is enabled",
+        "example": true,
+        "type": "boolean"
+      },
+      "excludeFromSub": {
+        "description": "Whether to omit this inbound from subscription output while keeping it operational",
+        "example": false,
+        "type": "boolean"
+      },
+      "expiryTime": {
+        "description": "Expiration timestamp",
+        "format": "int64",
+        "type": "integer"
+      },
+      "fallbackParent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FallbackParentInfo"
+          }
+        ],
+        "description": "FallbackParent is populated by the API layer when this inbound is\nattached as a fallback child of a VLESS/Trojan TCP-TLS master.\nThe frontend uses it to rewrite client-share links so they advertise\nthe master's externally reachable endpoint instead of the child's\nloopback listen. Not persisted.",
+        "nullable": true
+      },
+      "id": {
+        "description": "Unique identifier",
+        "example": 1,
+        "type": "integer"
+      },
+      "lastTrafficResetTime": {
+        "description": "Last traffic reset timestamp",
+        "format": "int64",
+        "type": "integer"
+      },
+      "listen": {
+        "description": "Xray configuration fields",
+        "type": "string"
+      },
+      "nodeId": {
+        "nullable": true,
+        "type": "integer"
+      },
+      "originNodeGuid": {
+        "description": "OriginNodeGuid is the panelGuid of the node that physically hosts this\ninbound, propagated up across hops (#4983). Empty for an inbound that\nlives on this panel's own xray; set to the originating node's GUID when\nthe inbound was synced from a node (kept as-is across further hops). Lets\nthe master attribute a deeply nested inbound to the real node instead of\nthe intermediate one it was fetched through.",
+        "type": "string"
+      },
+      "planIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "port": {
+        "example": 443,
+        "maximum": 65535,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "protocol": {
+        "enum": [
+          "vmess",
+          "vless",
+          "trojan",
+          "shadowsocks",
+          "wireguard",
+          "hysteria",
+          "http",
+          "mixed",
+          "tunnel",
+          "tun",
+          "mtproto",
+          "amneziawg",
+          "tuic"
+        ],
+        "example": "vless",
+        "type": "string"
+      },
+      "publicPort": {
+        "example": 20443,
+        "maximum": 65535,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "remark": {
+        "description": "Human-readable remark",
+        "example": "VLESS-443",
+        "type": "string"
+      },
+      "settings": {},
+      "shareAddr": {
+        "type": "string"
+      },
+      "shareAddrStrategy": {
+        "enum": [
+          "node",
+          "listen",
+          "custom"
+        ],
+        "type": "string"
+      },
+      "sniffing": {},
+      "streamSettings": {},
+      "subSortIndex": {
+        "description": "Sort order of this inbound's links in subscription output only (lower first; negatives allowed; 0/omitted → 1; ties by id)",
+        "example": 1,
+        "type": "integer"
+      },
+      "tag": {
+        "example": "in-443-tcp",
+        "type": "string"
+      },
+      "total": {
+        "description": "Total traffic limit in bytes",
+        "format": "int64",
+        "type": "integer"
+      },
+      "trafficReset": {
+        "description": "Traffic reset schedule",
+        "enum": [
+          "never",
+          "hourly",
+          "daily",
+          "weekly",
+          "monthly"
+        ],
+        "type": "string"
+      },
+      "trafficResetDay": {
+        "description": "Day of month for monthly traffic resets",
+        "example": 1,
+        "maximum": 31,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "up": {
+        "description": "Upload traffic in bytes",
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "clientStats",
+      "disableFlow",
+      "down",
+      "enable",
+      "excludeFromSub",
+      "expiryTime",
+      "id",
+      "lastTrafficResetTime",
+      "listen",
+      "planIds",
+      "port",
+      "protocol",
+      "publicPort",
+      "remark",
+      "settings",
+      "shareAddr",
+      "shareAddrStrategy",
+      "sniffing",
+      "streamSettings",
+      "subSortIndex",
+      "tag",
+      "total",
+      "trafficReset",
+      "trafficResetDay",
+      "up"
+    ],
+    "type": "object"
+  },
   "GeoCategory": {
     "description": "GeoCategory is one code inside a database, such as geosite's \"google\".",
     "properties": {

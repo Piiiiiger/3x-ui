@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"slices"
 	"strconv"
 	"testing"
@@ -98,7 +99,7 @@ func expectNoApply(t *testing.T, applies <-chan agentproto.Apply) {
 func TestSyncAgent_PushesTheConfigOnlyWhenItChanges(t *testing.T) {
 	setupSettingTestDB(t)
 	hub := useAgentHub(t)
-	n := seedAgentNodeRow(t, "lazycat")
+	n := seedAgentNodeRow(t, "edge-hk")
 	alice := model.Client{Email: "alice", ID: "11111111-1111-1111-1111-111111111111", Enable: true}
 	ib := seedNodeInbound(t, &n.Id, "n1-in-81-tcp", 81, model.VLESS, true, []model.Client{alice})
 	applies := connectFakeAgent(t, hub, n.Id, agentproto.Hello{AgentVersion: "v1"}).AnswerApplies(true)
@@ -127,6 +128,18 @@ func TestSyncAgent_PushesTheConfigOnlyWhenItChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	applyCarries(t, expectApply(t, applies), "n1-in-81-tcp", "alice", "bob")
+}
+
+// A caller waiting for an agent to run a change must not read a missing agent as
+// one that took it; the node would be reported live while no host runs it.
+func TestSyncAgent_ReportsAnAgentThatIsNotConnected(t *testing.T) {
+	setupSettingTestDB(t)
+	useAgentHub(t)
+	n := seedAgentNodeRow(t, "edge-hk")
+
+	if err := (&AgentService{}).SyncAgent(context.Background(), n); !errors.Is(err, runtime.ErrAgentNotConnected) {
+		t.Fatalf("SyncAgent with no agent connected: %v, want runtime.ErrAgentNotConnected", err)
+	}
 }
 
 // A change made while the agent was away marks the node dirty; only an applied
@@ -161,11 +174,11 @@ func TestSyncAgent_ClearsDirtyOnlyWhenTheAgentAccepts(t *testing.T) {
 func TestAgentStatus_ShowsUpUnderTheInboundsGuid(t *testing.T) {
 	setupSettingTestDB(t)
 	useOnlineTestProcess(t)
-	converted := seedAgentNodeRow(t, "lazycat")
+	converted := seedAgentNodeRow(t, "edge-hk")
 	if err := database.GetDB().Model(&model.Node{}).Where("id = ?", converted.Id).Update("guid", "f9713b88").Error; err != nil {
 		t.Fatal(err)
 	}
-	fresh := seedAgentNodeRow(t, "frontier")
+	fresh := seedAgentNodeRow(t, "edge-us")
 	svc := &AgentService{}
 	inbounds := InboundService{}
 
@@ -189,8 +202,8 @@ func TestAgentStatus_ShowsUpUnderTheInboundsGuid(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ips) != 1 || ips[0].IP != "198.51.100.4" || ips[0].Node != "lazycat" {
-		t.Fatalf("alice's IPs = %+v, want 198.51.100.4 labelled lazycat", ips)
+	if len(ips) != 1 || ips[0].IP != "198.51.100.4" || ips[0].Node != "edge-hk" {
+		t.Fatalf("alice's IPs = %+v, want 198.51.100.4 labelled edge-hk", ips)
 	}
 
 	svc.HandleGone(converted.Id)
@@ -202,7 +215,7 @@ func TestAgentStatus_ShowsUpUnderTheInboundsGuid(t *testing.T) {
 func TestProbeAgentNode(t *testing.T) {
 	setupSettingTestDB(t)
 	hub := useAgentHub(t)
-	n := seedAgentNodeRow(t, "lazycat")
+	n := seedAgentNodeRow(t, "edge-hk")
 	nodeSvc := &NodeService{}
 
 	if _, err := nodeSvc.Probe(context.Background(), n); err == nil {

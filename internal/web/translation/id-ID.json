@@ -1085,7 +1085,8 @@
       "servers": "Server",
       "noServers": "Tidak ada server",
       "members": "{count} klien",
-      "applyToMembers": "Perbarui juga {count} klien pada paket ini",
+      "reapplyLimits": "Terapkan ulang juga kuota, batas IP, dan jadwal reset ke {count} klien pada paket ini",
+      "serverChangesApply": "Server yang Anda tambah atau hapus selalu diterapkan ke klien paket ini, dengan atau tanpa opsi ini.",
       "deleteConfirm": "Hapus paket {name}?",
       "deleteBlocked": "Pindahkan dulu {count} kliennya ke paket lain",
       "assign": "Tetapkan paket",
@@ -1244,7 +1245,28 @@
       "agentSecretFailed": "Gagal membuat rahasia agen",
       "agentSecretTitle": "Rahasia agen untuk {name}",
       "agentSecretOnce": "Salin sekarang: rahasia hanya ditampilkan sekali.",
-      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)"
+      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)",
+      "host": {
+        "allHosts": "Semua node",
+        "notFound": "Node ini sudah tidak ada",
+        "publicEndpoint": "Titik akses publik",
+        "nodes": "Inbound"
+      },
+      "generate": {
+        "button": "Buat inbound",
+        "title": "Buat inbound di {host}",
+        "submit": "Buat",
+        "publicPort": "Port publik",
+        "publicPortHint": "Hanya bila penyedia meneruskan port publik lain ke port ini (NAT).",
+        "publicPortNeeded": "Masukkan port publik yang diteruskan penyedia ke inbound ini",
+        "needNameAndPort": "Masukkan nama dan port",
+        "target": "Target REALITY",
+        "plans": "Paket yang mendapat inbound ini",
+        "reach": "{count} klien akan mendapat inbound ini",
+        "noTemplate": "Belum ada inbound VLESS REALITY untuk disalin; buat yang pertama dengan Tambah Inbound.",
+        "done": "Inbound baru berjalan di {host}",
+        "hostOffline": "Node sedang offline; buat inbound setelah agennya terhubung."
+      }
     },
     "settings": {
       "defaultTag": "Bawaan",

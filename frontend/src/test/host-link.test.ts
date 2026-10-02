@@ -1,8 +1,14 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 
-import { hostToExternalProxyEntry, withHostEndpoints } from '@/lib/hosts/host-link';
+import {
+  hostToExternalProxyEntry,
+  publicEndpointsOf,
+  withHostEndpoints,
+} from '@/lib/hosts/host-link';
 import { inboundFromDb } from '@/lib/xray/inbound-from-db';
+import { genAllLinks, getInboundClients } from '@/lib/xray/inbound-link';
+import type { HostRecord } from '@/schemas/api/host';
 
 describe('hostToExternalProxyEntry', () => {
   const base = {
@@ -97,8 +103,8 @@ describe('withHostEndpoints', () => {
       'panel.example.com',
     );
     expect(got.streamSettings?.externalProxy).toEqual([
-      { forceTls: 'same', dest: 'proxy.example.com', port: 443, remark: 'public' },
-      { forceTls: 'same', dest: '2001:db8::1', port: 4060, remark: 'public' },
+      { forceTls: 'same', dest: 'proxy.example.com', port: 443, remark: 'public', isHost: true },
+      { forceTls: 'same', dest: '2001:db8::1', port: 4060, remark: 'public', isHost: true },
     ]);
   });
 
@@ -111,7 +117,7 @@ describe('withHostEndpoints', () => {
       'panel.example.com',
     );
     expect(got.streamSettings?.externalProxy).toEqual([
-      { forceTls: 'same', dest: 'panel.example.com', port: 8443, remark: '' },
+      { forceTls: 'same', dest: 'panel.example.com', port: 8443, remark: '', isHost: true },
     ]);
   });
 
@@ -133,5 +139,154 @@ describe('withHostEndpoints', () => {
       'panel.example.com',
     );
     expect(got).toBe(inbound);
+  });
+});
+
+describe('withHostEndpoints on a VLESS REALITY inbound', () => {
+  // The provider's NAT forwards 20443 to the inbound's port 81.
+  const natNode = inboundFromDb({
+    protocol: 'vless',
+    port: 81,
+    listen: '',
+    settings: {
+      clients: [
+        { id: '11111111-1111-1111-1111-111111111111', email: 'alice', flow: 'xtls-rprx-vision' },
+      ],
+      decryption: 'none',
+    },
+    streamSettings: {
+      network: 'tcp',
+      security: 'reality',
+      realitySettings: {
+        target: 'www.bing.com:443',
+        serverNames: ['www.bing.com'],
+        privateKey: 'priv',
+        shortIds: ['ab12'],
+        settings: { publicKey: 'pub', fingerprint: 'chrome', spiderX: '/' },
+      },
+    },
+    sniffing: {},
+  });
+
+  const linksFor = (records: HostRecord[]) => {
+    const inbound = withHostEndpoints(natNode, 5, records, '203.0.113.53', 'panel.example.com');
+    const [client] = getInboundClients(inbound) ?? [];
+    return genAllLinks({
+      inbound,
+      remark: 'HK',
+      client,
+      hostOverride: '203.0.113.53',
+      fallbackHostname: 'panel.example.com',
+    }).map((entry) => new URL(entry.link));
+  };
+
+  const natEntry = (extra: Partial<HostRecord> = {}): HostRecord => ({
+    groupId: 'nat',
+    inboundIds: [5],
+    hosts: [':20443'],
+    port: 20443,
+    remark: 'HK',
+    security: 'same',
+    ...extra,
+  });
+
+  // The panel's own QR showed :81 here while subscriptions gave :20443, so the
+  // code people scanned from the panel pointed at a port nobody forwards.
+  it("puts an entry's public port into the link and keeps REALITY", () => {
+    const [link] = linksFor([natEntry()]);
+    expect(link.host).toBe('203.0.113.53:20443');
+    expect(link.searchParams.get('security')).toBe('reality');
+    expect(link.searchParams.get('pbk')).toBe('pub');
+    expect(link.searchParams.get('sid')).toBe('ab12');
+    expect(link.searchParams.get('sni')).toBe('www.bing.com');
+  });
+
+  it('drops the REALITY parameters for an entry that forces no TLS', () => {
+    const [link] = linksFor([natEntry({ security: 'none' })]);
+    expect(link.searchParams.get('security')).toBe('none');
+    expect(link.searchParams.get('pbk')).toBeNull();
+    expect(link.searchParams.get('sid')).toBeNull();
+  });
+
+  it("lets an entry's SNI and fingerprint replace the REALITY ones, as subscriptions do", () => {
+    const [link] = linksFor([natEntry({ sni: 'www.microsoft.com', fingerprint: 'firefox' })]);
+    expect(link.searchParams.get('sni')).toBe('www.microsoft.com');
+    expect(link.searchParams.get('fp')).toBe('firefox');
+  });
+
+  it('asks the client to skip certificate checks only for an entry that opts in', () => {
+    expect(linksFor([natEntry({ allowInsecure: true })])[0].searchParams.get('allowInsecure')).toBe(
+      '1',
+    );
+    expect(linksFor([natEntry()])[0].searchParams.get('allowInsecure')).toBeNull();
+    expect(
+      linksFor([natEntry({ allowInsecure: true, security: 'none' })])[0].searchParams.get(
+        'allowInsecure',
+      ),
+    ).toBeNull();
+  });
+
+  // Subscriptions apply a legacy externalProxy entry's SNI to TLS links only, so a
+  // REALITY link keeps the SNI of the target it imitates.
+  it("keeps REALITY's SNI for a legacy externalProxy entry", () => {
+    const legacy = inboundFromDb({
+      ...natNode,
+      streamSettings: {
+        ...natNode.streamSettings,
+        externalProxy: [
+          {
+            forceTls: 'same',
+            dest: 'cdn.example.com',
+            port: 443,
+            remark: '',
+            sni: 'legacy.example.com',
+          },
+        ],
+      },
+    });
+    const [client] = getInboundClients(legacy) ?? [];
+    const [entry] = genAllLinks({ inbound: legacy, client, fallbackHostname: 'panel.example.com' });
+    expect(new URL(entry.link).searchParams.get('sni')).toBe('www.bing.com');
+  });
+
+  it('keeps the inbound address and port when every entry is disabled', () => {
+    const [link] = linksFor([natEntry({ isDisabled: true })]);
+    expect(link.host).toBe('203.0.113.53:81');
+  });
+});
+
+describe('publicEndpointsOf', () => {
+  const natNode = {
+    id: 5,
+    port: 81,
+    listen: '',
+    shareAddrStrategy: 'custom',
+    shareAddr: '203.0.113.53',
+  };
+  const nat: HostRecord = {
+    groupId: 'nat',
+    inboundIds: [5],
+    hosts: [':20443'],
+    port: 20443,
+    remark: 'HK',
+  };
+
+  // What people connect to, not what Xray listens on: behind NAT they differ.
+  it("shows an entry's public port instead of the listen port", () => {
+    expect(publicEndpointsOf(natNode, [nat], '', 'panel.example.com')).toEqual([
+      '203.0.113.53:20443',
+    ]);
+  });
+
+  it('shows the link address and listen port without an enabled entry', () => {
+    expect(publicEndpointsOf(natNode, [], '', 'panel.example.com')).toEqual(['203.0.113.53:81']);
+    expect(
+      publicEndpointsOf(natNode, [{ ...nat, isDisabled: true }], '', 'panel.example.com'),
+    ).toEqual(['203.0.113.53:81']);
+  });
+
+  it('brackets an IPv6 address', () => {
+    const v6 = { ...natNode, shareAddr: '2001:db8::1' };
+    expect(publicEndpointsOf(v6, [], '', 'panel.example.com')).toEqual(['[2001:db8::1]:81']);
   });
 });

@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import CloneInboundModal from '@/pages/inbounds/CloneInboundModal';
-import { HttpUtil } from '@/utils';
+import { HttpUtil, Msg } from '@/utils';
 import { DBInbound } from '@/models/dbinbound';
 import { ThemeProvider } from '@/hooks/useTheme';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
@@ -35,13 +35,19 @@ function sourceInbound() {
   });
 }
 
-function renderModal(onCloned = vi.fn(), onClose = vi.fn()) {
+const SHARES = new Map([
+  [0, { shareAddrStrategy: 'custom', shareAddr: '198.51.100.19' }],
+  [2, { shareAddrStrategy: 'custom', shareAddr: '198.51.100.97' }],
+]);
+
+function renderModal(onCloned = vi.fn(), onClose = vi.fn(), source = sourceInbound()) {
   renderWithProviders(
     <CloneInboundModal
       open
-      dbInbound={sourceInbound()}
+      dbInbound={source}
       nodes={NODES}
       portsInUse={new Map([[2, new Set([443])]])}
+      sharesByHost={SHARES}
       onClose={onClose}
       onCloned={onCloned}
     />,
@@ -167,6 +173,7 @@ describe('CloneInboundModal', () => {
           dbInbound={sourceInbound()}
           nodes={nodes}
           portsInUse={new Map()}
+          sharesByHost={SHARES}
           onClose={() => {}}
           onCloned={() => {}}
         />
@@ -189,6 +196,7 @@ describe('CloneInboundModal', () => {
           dbInbound={sourceInbound()}
           nodes={NODES}
           portsInUse={new Map()}
+          sharesByHost={SHARES}
           onClose={() => {}}
           onCloned={() => {}}
         />
@@ -226,5 +234,71 @@ describe('CloneInboundModal', () => {
     await screen.findByText(/port 23456 \(tcp\) already used/);
     await waitFor(() => expect(onCloned).toHaveBeenCalledTimes(1));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('a REALITY node', () => {
+    function realitySource() {
+      const src = sourceInbound();
+      src.shareAddrStrategy = 'custom';
+      src.shareAddr = '198.51.100.97';
+      src.streamSettings = JSON.stringify({
+        network: 'tcp',
+        security: 'reality',
+        realitySettings: {
+          target: 'www.bing.com:443',
+          serverNames: ['www.bing.com'],
+          privateKey: 'src-priv',
+          shortIds: ['aa'],
+          settings: { publicKey: 'src-pub', spiderX: '/src' },
+        },
+      });
+      return src;
+    }
+
+    const getSpy = vi.mocked(HttpUtil.get);
+    let restore: ReturnType<typeof getSpy.getMockImplementation>;
+    beforeEach(() => {
+      restore = getSpy.getMockImplementation();
+    });
+    afterEach(() => {
+      if (restore) getSpy.mockImplementation(restore);
+    });
+
+    it("gives every copy its own keys and its target host's address", async () => {
+      let issued = 0;
+      getSpy.mockImplementation(async (url: string) => {
+        if (url !== '/panel/api/server/getNewX25519Cert') return new Msg(true, '', {});
+        issued++;
+        return new Msg(true, '', { privateKey: `priv-${issued}`, publicKey: `pub-${issued}` });
+      });
+      renderModal(vi.fn(), vi.fn(), realitySource());
+      openTargetDropdown();
+      clickOption('Local panel');
+
+      clickOk();
+      await waitFor(() => expect(postSpy).toHaveBeenCalledTimes(2));
+
+      const [sameHost, local] = postedBodies().map((b) => ({
+        reality: JSON.parse(b.streamSettings as string).realitySettings,
+        shareAddr: b.shareAddr,
+      }));
+      expect([sameHost.reality.privateKey, local.reality.privateKey]).toEqual(['priv-1', 'priv-2']);
+      expect([sameHost.reality.settings.publicKey, local.reality.settings.publicKey]).toEqual([
+        'pub-1',
+        'pub-2',
+      ]);
+      expect(sameHost.reality.shortIds).not.toEqual(['aa']);
+      expect(local.reality.target).toBe('www.bing.com:443');
+      expect([sameHost.shareAddr, local.shareAddr]).toEqual(['198.51.100.97', '198.51.100.19']);
+    });
+
+    it('posts no copy whose keys could not be made', async () => {
+      getSpy.mockImplementation(async () => new Msg(false, 'xray x25519 failed'));
+      renderModal(vi.fn(), vi.fn(), realitySource());
+
+      clickOk();
+      await waitFor(() => expect(screen.getByText(/xray x25519 failed/)).toBeTruthy());
+      expect(postSpy).not.toHaveBeenCalled();
+    });
   });
 });

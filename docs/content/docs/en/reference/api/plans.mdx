@@ -20,10 +20,11 @@ _openapi:
         even with global Clash routing off; empty inherits them.
       url: '#create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-clashrules-inline-rulesyaml-or-one-https-url-replaces-the-global-clash-rules-in-members-subscriptions-even-with-global-clash-routing-off-empty-inherits-them'
     - depth: 2
-      title: Replace a plan. With applyToMembers, its quota, IP limit, reset schedule
-        and inbounds are re-stamped onto every client on the plan; their expiry
-        and usage are left alone.
-      url: '#replace-a-plan-with-applytomembers-its-quota-ip-limit-reset-schedule-and-inbounds-are-re-stamped-onto-every-client-on-the-plan-their-expiry-and-usage-are-left-alone'
+      title: Replace a plan. Every client on the plan is attached to the inbounds the
+        plan gained and detached from those it lost; their other inbounds stay.
+        With applyToMembers, the plan quota, IP limit and reset schedule are
+        also re-stamped onto them; their expiry and usage are left alone.
+      url: '#replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-quota-ip-limit-and-reset-schedule-are-also-re-stamped-onto-them-their-expiry-and-usage-are-left-alone'
     - depth: 2
       title: Delete a plan. Refused while any client is on it — move or unassign those
         clients first.
@@ -54,10 +55,11 @@ _openapi:
           HTTPS URL) replaces the global Clash rules in members' subscriptions,
           even with global Clash routing off; empty inherits them.
         id: create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-clashrules-inline-rulesyaml-or-one-https-url-replaces-the-global-clash-rules-in-members-subscriptions-even-with-global-clash-routing-off-empty-inherits-them
-      - content: Replace a plan. With applyToMembers, its quota, IP limit, reset
-          schedule and inbounds are re-stamped onto every client on the plan;
-          their expiry and usage are left alone.
-        id: replace-a-plan-with-applytomembers-its-quota-ip-limit-reset-schedule-and-inbounds-are-re-stamped-onto-every-client-on-the-plan-their-expiry-and-usage-are-left-alone
+      - content: Replace a plan. Every client on the plan is attached to the inbounds
+          the plan gained and detached from those it lost; their other inbounds
+          stay. With applyToMembers, the plan quota, IP limit and reset schedule
+          are also re-stamped onto them; their expiry and usage are left alone.
+        id: replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-quota-ip-limit-and-reset-schedule-are-also-re-stamped-onto-them-their-expiry-and-usage-are-left-alone
       - content: Delete a plan. Refused while any client is on it — move or unassign
           those clients first.
         id: delete-a-plan-refused-while-any-client-is-on-it--move-or-unassign-those-clients-first

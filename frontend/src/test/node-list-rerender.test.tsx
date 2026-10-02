@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -29,7 +30,9 @@ describe('NodeList re-render', () => {
     const queryClient = makeTestQueryClient();
     const wrapper = ({ children }: { children: ReactNode }) => (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <MemoryRouter>{children}</MemoryRouter>
+        </ThemeProvider>
       </QueryClientProvider>
     );
     const nodes: NodeRecord[] = [1, 2, 3].map((id) => ({

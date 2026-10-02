@@ -24,7 +24,7 @@ func installAgentHub(t *testing.T) *AgentHub {
 func seedAgentNode(t *testing.T) *model.Node {
 	t.Helper()
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
-	n := &model.Node{Name: "lazycat", Kind: model.NodeKindAgent, Address: "216.236.63.53", Enable: true}
+	n := &model.Node{Name: "edge-hk", Kind: model.NodeKindAgent, Address: "203.0.113.53", Enable: true}
 	if err := database.GetDB().Create(n).Error; err != nil {
 		t.Fatal(err)
 	}

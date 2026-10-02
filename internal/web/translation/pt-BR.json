@@ -1085,7 +1085,8 @@
       "servers": "Servidores",
       "noServers": "Nenhum servidor",
       "members": "{count} cliente(s)",
-      "applyToMembers": "Atualizar também os {count} cliente(s) deste plano",
+      "reapplyLimits": "Reaplicar também a cota, o limite de IP e o ciclo de redefinição aos {count} cliente(s) deste plano",
+      "serverChangesApply": "Servidores adicionados ou removidos sempre chegam aos clientes deste plano, com ou sem esta opção.",
       "deleteConfirm": "Excluir o plano {name}?",
       "deleteBlocked": "Primeiro mova os {count} cliente(s) para outro plano",
       "assign": "Atribuir plano",
@@ -1244,7 +1245,28 @@
       "agentSecretFailed": "Não foi possível criar o segredo do agente",
       "agentSecretTitle": "Segredo do agente de {name}",
       "agentSecretOnce": "Copie agora: o segredo é exibido apenas uma vez.",
-      "agentInstallCommand": "Comando de instalação (execute na pasta com os arquivos do agente)"
+      "agentInstallCommand": "Comando de instalação (execute na pasta com os arquivos do agente)",
+      "host": {
+        "allHosts": "Todos os nós",
+        "notFound": "Este nó não existe mais",
+        "publicEndpoint": "Endereço público",
+        "nodes": "Entradas"
+      },
+      "generate": {
+        "button": "Gerar entrada",
+        "title": "Gerar uma entrada em {host}",
+        "submit": "Gerar",
+        "publicPort": "Porta pública",
+        "publicPortHint": "Somente quando o provedor encaminha outra porta pública para esta (NAT).",
+        "publicPortNeeded": "Informe a porta pública que o provedor encaminha para esta entrada",
+        "needNameAndPort": "Informe um nome e uma porta",
+        "target": "Destino REALITY",
+        "plans": "Planos que recebem esta entrada",
+        "reach": "{count} cliente(s) receberão esta entrada",
+        "noTemplate": "Ainda não há entrada VLESS REALITY para copiar; crie a primeira com Adicionar entrada.",
+        "done": "A nova entrada roda em {host}",
+        "hostOffline": "O nó está offline; gere a entrada quando o agente se conectar."
+      }
     },
     "settings": {
       "defaultTag": "Padrão",

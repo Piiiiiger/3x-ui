@@ -73,6 +73,23 @@ func (s *InboundService) nodePushPlan(ib *model.Inbound) (runtime.Runtime, bool,
 	return rt, true, false, nil
 }
 
+// pushToAgentNode runs push on the runtime of the agent ib lives on, so the agent
+// gets a committed change at once; a panel node gets it from the reconcile.
+func (s *InboundService) pushToAgentNode(ib *model.Inbound, push func(runtime.Runtime) error) error {
+	if ib.NodeID == nil {
+		return nil
+	}
+	agent, err := isAgentNode(database.GetDB(), *ib.NodeID)
+	if err != nil || !agent {
+		return err
+	}
+	rt, ok, _, err := s.nodePushPlan(ib)
+	if err != nil || !ok {
+		return err
+	}
+	return push(rt)
+}
+
 func (s *InboundService) NodeIsPending(nodeID *int) bool {
 	if nodeID == nil {
 		return false

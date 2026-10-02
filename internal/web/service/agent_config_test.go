@@ -76,8 +76,8 @@ func configInboundTags(cfg *xray.Config) []string {
 
 func TestGetAgentXrayConfig_HoldsOnlyThatAgentsEnabledInbounds(t *testing.T) {
 	setupSettingTestDB(t)
-	a := seedAgentNodeRow(t, "lazycat")
-	b := seedAgentNodeRow(t, "frontier")
+	a := seedAgentNodeRow(t, "edge-hk")
+	b := seedAgentNodeRow(t, "edge-us")
 	alice := model.Client{Email: "alice", ID: "11111111-1111-1111-1111-111111111111", Enable: true}
 	bob := model.Client{Email: "bob", ID: "22222222-2222-2222-2222-222222222222", Enable: true}
 
@@ -107,7 +107,7 @@ func TestGetAgentXrayConfig_HoldsOnlyThatAgentsEnabledInbounds(t *testing.T) {
 // a quota hit on the panel's own inbound must still cut the user off an agent.
 func TestGetAgentXrayConfig_DropsAClientDepletedElsewhere(t *testing.T) {
 	setupSettingTestDB(t)
-	a := seedAgentNodeRow(t, "lazycat")
+	a := seedAgentNodeRow(t, "edge-hk")
 	carol := model.Client{Email: "carol", ID: "33333333-3333-3333-3333-333333333333", Enable: true}
 	local := seedNodeInbound(t, nil, "in-443-tcp", 443, model.VLESS, true, []model.Client{carol})
 	seedNodeInbound(t, &a.Id, "n1-in-81-tcp", 81, model.VLESS, true, []model.Client{carol})
@@ -129,7 +129,7 @@ func TestGetAgentXrayConfig_DropsAClientDepletedElsewhere(t *testing.T) {
 // be an open port nobody uses.
 func TestGetAgentXrayConfig_LeavesOutThePanelEgress(t *testing.T) {
 	setupSettingTestDB(t)
-	a := seedAgentNodeRow(t, "lazycat")
+	a := seedAgentNodeRow(t, "edge-hk")
 	seedNodeInbound(t, &a.Id, "n1-in-81-tcp", 81, model.VLESS, true, nil)
 	if err := (&SettingService{}).SetPanelOutbound("direct"); err != nil {
 		t.Fatal(err)

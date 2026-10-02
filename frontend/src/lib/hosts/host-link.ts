@@ -1,7 +1,8 @@
 import type { ExternalProxyEntry } from '@/schemas/protocols/stream/external-proxy';
+import { AlpnSchema, UtlsFingerprintSchema } from '@/schemas/protocols/security/tls';
 import type { HostFormValues, HostRecord } from '@/schemas/api/host';
 import type { Inbound } from '@/schemas/api/inbound';
-import { resolveAddr } from '@/lib/xray/inbound-link';
+import { resolveAddr, resolveShareHost } from '@/lib/xray/inbound-link';
 
 // The subset of a host that affects its share link. Mirrors the fields the
 // backend's hostToExternalProxyMap reads.
@@ -76,9 +77,15 @@ export interface HostEndpoint {
   dest: string;
   port: number;
   remark: string;
+  forceTls: ExternalProxyEntry['forceTls'];
   sni?: string;
   alpn?: string[];
   allowInsecure?: boolean;
+  fingerprint?: string;
+  pinnedPeerCertSha256?: string[];
+  verifyPeerCertByName?: string;
+  echConfigList?: string;
+  vlessRoute?: string;
 }
 
 // hostEndpointsFor mirrors the backend hostEndpoints + hostToExternalProxyMap:
@@ -102,20 +109,29 @@ export function hostEndpointsFor(
     for (const value of record.hosts) {
       const [address, port] = splitAdvertisedHost(value, inboundPort);
       const dest = address || defaultDest;
-      const endpoint: HostEndpoint = { dest, port, remark: record.remark || '' };
+      const endpoint: HostEndpoint = {
+        dest,
+        port,
+        remark: record.remark || '',
+        forceTls:
+          record.security === 'tls' || record.security === 'none' ? record.security : 'same',
+      };
       const sni = record.overrideSniFromAddress ? dest : record.sni;
       if (!record.keepSniBlank && sni) endpoint.sni = sni;
       if (record.alpn && record.alpn.length > 0) endpoint.alpn = record.alpn;
       if (record.allowInsecure) endpoint.allowInsecure = true;
+      if (record.fingerprint) endpoint.fingerprint = record.fingerprint;
+      if (record.pinnedPeerCertSha256 && record.pinnedPeerCertSha256.length > 0) {
+        endpoint.pinnedPeerCertSha256 = record.pinnedPeerCertSha256;
+      }
+      if (record.verifyPeerCertByName) endpoint.verifyPeerCertByName = record.verifyPeerCertByName;
+      if (record.echConfigList) endpoint.echConfigList = record.echConfigList;
+      if (record.vlessRoute) endpoint.vlessRoute = record.vlessRoute;
       endpoints.push(endpoint);
     }
   }
   return endpoints;
 }
-
-// Panel-built links of these protocols read Hosts; the rest still show the
-// inbound's own address on the inbounds page.
-const HOST_LINK_PROTOCOLS: ReadonlySet<string> = new Set(['mtproto', 'wireguard', 'amneziawg']);
 
 export function withHostEndpoints(
   inbound: Inbound,
@@ -124,18 +140,62 @@ export function withHostEndpoints(
   hostOverride: string,
   fallbackHostname: string,
 ): Inbound {
-  if (!HOST_LINK_PROTOCOLS.has(inbound.protocol)) return inbound;
   const defaultDest = resolveAddr(inbound, hostOverride, fallbackHostname);
   const endpoints = hostEndpointsFor(records, inboundId, inbound.port, defaultDest);
   if (endpoints.length === 0) return inbound;
-  const externalProxy: ExternalProxyEntry[] = endpoints.map(({ dest, port, remark }) => ({
-    forceTls: 'same',
-    dest,
-    port,
-    remark,
-  }));
+  const externalProxy = endpoints.map(hostEndpointToEntry);
   return {
     ...inbound,
     streamSettings: { ...inbound.streamSettings, externalProxy },
   } as Inbound;
+}
+
+// The externalProxy entry the share-link generators read for one Host endpoint,
+// with the overrides the subscription applies to it (hostToExternalProxyMap).
+function hostEndpointToEntry(endpoint: HostEndpoint): ExternalProxyEntry {
+  const fingerprint = UtlsFingerprintSchema.safeParse(endpoint.fingerprint);
+  const alpn = (endpoint.alpn ?? []).flatMap((value) => {
+    const parsed = AlpnSchema.safeParse(value);
+    return parsed.success ? [parsed.data] : [];
+  });
+  return {
+    forceTls: endpoint.forceTls,
+    dest: endpoint.dest,
+    port: endpoint.port,
+    remark: endpoint.remark,
+    isHost: true,
+    ...(endpoint.sni ? { sni: endpoint.sni } : {}),
+    ...(fingerprint.success ? { fingerprint: fingerprint.data } : {}),
+    ...(alpn.length > 0 ? { alpn } : {}),
+    ...(endpoint.pinnedPeerCertSha256
+      ? { pinnedPeerCertSha256: endpoint.pinnedPeerCertSha256 }
+      : {}),
+    ...(endpoint.verifyPeerCertByName
+      ? { verifyPeerCertByName: endpoint.verifyPeerCertByName }
+      : {}),
+    ...(endpoint.echConfigList ? { echConfigList: endpoint.echConfigList } : {}),
+    ...(endpoint.vlessRoute ? { vlessRoute: endpoint.vlessRoute } : {}),
+    ...(endpoint.allowInsecure ? { allowInsecure: true } : {}),
+  };
+}
+
+/** The address and port people connect to: an inbound's enabled entries, else its own. */
+export function publicEndpointsOf(
+  inbound: {
+    id: number;
+    port: number;
+    listen?: string;
+    shareAddrStrategy?: string;
+    shareAddr?: string;
+  },
+  records: HostRecord[],
+  nodeAddress: string,
+  fallbackHostname: string,
+): string[] {
+  const dest = resolveShareHost(inbound, nodeAddress, fallbackHostname);
+  const endpoints = hostEndpointsFor(records, inbound.id, inbound.port, dest);
+  const shown = endpoints.length > 0 ? endpoints : [{ dest, port: inbound.port }];
+  return shown.map(({ dest: host, port }) =>
+    host.includes(':') && !host.startsWith('[') ? `[${host}]:${port}` : `${host}:${port}`,
+  );
 }

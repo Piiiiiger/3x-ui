@@ -49,13 +49,13 @@ func TestNodeControllerSavesAgentsWithoutReachingThem(t *testing.T) {
 	engine := newNodeCredentialTestEngine(t)
 
 	reply := postJSON(t, engine, "/panel/api/nodes/add", map[string]any{
-		"name": "lazycat", "kind": "agent", "address": "216.236.63.53", "enable": true,
+		"name": "edge-hk", "kind": "agent", "address": "203.0.113.53", "enable": true,
 	})
 	if !reply.Success {
 		t.Fatalf("add agent node: %s", reply.Msg)
 	}
 	var created model.Node
-	if err := database.GetDB().Where("name = ?", "lazycat").First(&created).Error; err != nil {
+	if err := database.GetDB().Where("name = ?", "edge-hk").First(&created).Error; err != nil {
 		t.Fatal(err)
 	}
 	if !created.IsAgent() {
@@ -63,7 +63,7 @@ func TestNodeControllerSavesAgentsWithoutReachingThem(t *testing.T) {
 	}
 
 	reply = postJSON(t, engine, "/panel/api/nodes/update/"+strconv.Itoa(created.Id), map[string]any{
-		"name": "lazycat", "kind": "agent", "address": "216.236.63.54", "enable": true,
+		"name": "edge-hk", "kind": "agent", "address": "203.0.113.54", "enable": true,
 	})
 	if !reply.Success {
 		t.Fatalf("update agent node: %s", reply.Msg)
@@ -74,12 +74,12 @@ func TestNodeControllerSavesAgentsWithoutReachingThem(t *testing.T) {
 // follow-up reachability probe must not then fail an update that already saved.
 func TestNodeControllerConvertsABridgedPanelNodeToAnAgent(t *testing.T) {
 	engine := newNodeCredentialTestEngine(t)
-	panelNode := &model.Node{Name: "frontier", Scheme: "http", Address: "127.0.0.1", Port: 22606, ApiToken: "tok", Enable: true, OutboundTag: "warp"}
+	panelNode := &model.Node{Name: "edge-us", Scheme: "http", Address: "127.0.0.1", Port: 24006, ApiToken: "tok", Enable: true, OutboundTag: "warp"}
 	if err := database.GetDB().Create(panelNode).Error; err != nil {
 		t.Fatal(err)
 	}
 	reply := postJSON(t, engine, "/panel/api/nodes/update/"+strconv.Itoa(panelNode.Id), map[string]any{
-		"name": "frontier", "kind": "agent", "address": "66.132.239.17", "enable": true,
+		"name": "edge-us", "kind": "agent", "address": "203.0.113.17", "enable": true,
 	})
 	if !reply.Success {
 		t.Fatalf("convert to agent: %s", reply.Msg)
@@ -88,7 +88,7 @@ func TestNodeControllerConvertsABridgedPanelNodeToAnAgent(t *testing.T) {
 
 func TestNodeControllerMintsAgentSecrets(t *testing.T) {
 	engine := newNodeCredentialTestEngine(t)
-	agent := &model.Node{Name: "lazycat", Kind: model.NodeKindAgent, Address: "216.236.63.53", Enable: true}
+	agent := &model.Node{Name: "edge-hk", Kind: model.NodeKindAgent, Address: "203.0.113.53", Enable: true}
 	panelNode := &model.Node{Name: "panel", Scheme: "https", Address: "example.com", Port: 2053, ApiToken: "tok", Enable: true}
 	for _, n := range []*model.Node{agent, panelNode} {
 		if err := database.GetDB().Create(n).Error; err != nil {
@@ -167,7 +167,7 @@ func TestAgentConnectRejectsUnknownSecrets(t *testing.T) {
 
 func TestAgentConnectHandsTheSocketToTheHub(t *testing.T) {
 	srv, hub := agentConnectServer(t)
-	agent := &model.Node{Name: "lazycat", Kind: model.NodeKindAgent, Address: "1.2.3.4", Enable: true}
+	agent := &model.Node{Name: "edge-hk", Kind: model.NodeKindAgent, Address: "1.2.3.4", Enable: true}
 	if err := database.GetDB().Create(agent).Error; err != nil {
 		t.Fatal(err)
 	}

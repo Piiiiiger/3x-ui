@@ -20,8 +20,8 @@ proxies: null
 proxy-groups:
   - name: 🔰 节点选择
     type: select
-    proxies: [__PROXY_NODES__, 🎯 全球直连, 🇸🇬 新加坡（家宽）-Titan]
-  - name: 🇸🇬 新加坡（家宽）-Titan
+    proxies: [__PROXY_NODES__, 🎯 全球直连, 🇸🇬 新加坡（自动）-Edge]
+  - name: 🇸🇬 新加坡（自动）-Edge
     type: url-test
     url: http://www.gstatic.com/generate_204
     interval: 300
@@ -40,7 +40,7 @@ func TestPlanTemplateRendersLikeMMWX(t *testing.T) {
 		return `{"clients":[{"id":"11111111-2222-4333-8444-0000000044` + email[:2] + `","email":"` + email + `","subId":"s1","enable":true}],"decryption":"none"}`
 	}
 	db := database.GetDB()
-	for i, tag := range []string{"洛杉矶-DMIT", "新加坡-Titan"} {
+	for i, tag := range []string{"洛杉矶-Core", "新加坡-Edge"} {
 		email := []string{"81@e", "82@e"}[i]
 		ib := seedTunnelSubInbound(t, model.VLESS, tag, "s1", email, vless(email), 4481+i)
 		if err := db.Model(ib).Update("stream_settings", tcpStream).Error; err != nil {
@@ -79,14 +79,14 @@ func TestPlanTemplateRendersLikeMMWX(t *testing.T) {
 	for _, p := range got.Proxies {
 		names = append(names, p.Name)
 	}
-	assertStrings(t, "proxies", names, []string{"洛杉矶-DMIT", "新加坡-Titan"})
+	assertStrings(t, "proxies", names, []string{"洛杉矶-Core", "新加坡-Edge"})
 	if got.Port != 7890 {
 		t.Fatalf("port = %d, want the template's 7890", got.Port)
 	}
 	want := map[string][]string{
-		"🔰 节点选择":           {"洛杉矶-DMIT", "新加坡-Titan", "🎯 全球直连", "🇸🇬 新加坡（家宽）-Titan"},
-		"🇸🇬 新加坡（家宽）-Titan": {"新加坡-Titan"},
-		"🎯 全球直连":           {"DIRECT", "洛杉矶-DMIT", "新加坡-Titan"},
+		"🔰 节点选择":          {"洛杉矶-Core", "新加坡-Edge", "🎯 全球直连", "🇸🇬 新加坡（自动）-Edge"},
+		"🇸🇬 新加坡（自动）-Edge": {"新加坡-Edge"},
+		"🎯 全球直连":          {"DIRECT", "洛杉矶-Core", "新加坡-Edge"},
 	}
 	if len(got.Groups) != len(want) {
 		t.Fatalf("groups = %+v, want exactly the template's three", got.Groups)
@@ -104,8 +104,8 @@ func TestPlanTemplateRendersLikeMMWX(t *testing.T) {
 // proxies, but keep it when it is all an expired subscription has.
 func TestTemplateGroupsSkipTheInfoNodeUnlessItIsAlone(t *testing.T) {
 	info := map[string]any{"name": "⏳ Expired", "type": "socks5", "server": "127.0.0.1", "port": 1080}
-	node := map[string]any{"name": "洛杉矶-DMIT", "type": "vless", "server": "203.0.113.5", "port": 443}
-	assertStrings(t, "with a node", clashProxyNamesForGroups([]map[string]any{info, node}), []string{"洛杉矶-DMIT"})
+	node := map[string]any{"name": "洛杉矶-Core", "type": "vless", "server": "203.0.113.5", "port": 443}
+	assertStrings(t, "with a node", clashProxyNamesForGroups([]map[string]any{info, node}), []string{"洛杉矶-Core"})
 	assertStrings(t, "alone", clashProxyNamesForGroups([]map[string]any{info}), []string{"⏳ Expired"})
 }
 

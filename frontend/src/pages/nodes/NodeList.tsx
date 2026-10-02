@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { Badge, Button, Card, Dropdown, Modal, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type { BadgeProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -22,6 +23,7 @@ import {
 } from '@ant-design/icons';
 
 import NodeHistoryPanel from './NodeHistoryPanel';
+import { HostNodeChips, type HostNode } from './HostNodeChips';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { isPanelUpdateAvailable } from '@/lib/panel-version';
 import { activateOnKey } from '@/utils/a11y';
@@ -29,6 +31,8 @@ import './NodeList.css';
 
 interface NodeListProps {
   nodes: NodeRecord[];
+  /** Each host's nodes, keyed by node id. */
+  nodesByHost?: Map<number, HostNode[]>;
   loading?: boolean;
   isMobile?: boolean;
   latestVersion?: string;
@@ -166,6 +170,7 @@ function useRelativeTime() {
 
 export default function NodeList({
   nodes,
+  nodesByHost,
   loading = false,
   isMobile = false,
   latestVersion = '',
@@ -337,7 +342,11 @@ export default function NodeList({
               {record.transitive && (
                 <ApartmentOutlined style={{ marginInlineEnd: 6, opacity: 0.6 }} />
               )}
-              {record.name}
+              {record.transitive ? (
+                record.name
+              ) : (
+                <Link to={`/nodes/${record.id}`}>{record.name}</Link>
+              )}
               {record.kind === 'agent' && (
                 <Tag style={{ marginInlineStart: 6 }}>{t('pages.nodes.kindAgent')}</Tag>
               )}
@@ -346,6 +355,18 @@ export default function NodeList({
           </div>
         ),
       },
+      ...(nodesByHost
+        ? [
+            {
+              title: t('pages.nodes.host.nodes'),
+              key: 'hostNodes',
+              render: (_value: unknown, record: NodeRow) =>
+                record.transitive ? null : (
+                  <HostNodeChips nodes={nodesByHost.get(record.id) ?? []} />
+                ),
+            },
+          ]
+        : []),
       {
         title: (
           <span className="address-header">
@@ -542,6 +563,7 @@ export default function NodeList({
       onDelete,
       onUpdateNode,
       nameByGuid,
+      nodesByHost,
     ],
   );
 
@@ -648,7 +670,11 @@ export default function NodeList({
                         onKeyDown={activateOnKey(() => toggleExpanded(record.id))}
                       />
                       <StatusDot status={record.status} xrayState={record.xrayState} />
-                      <span className="node-name">{record.name}</span>
+                      <span className="node-name">
+                        <Link to={`/nodes/${record.id}`} onClick={(e) => e.stopPropagation()}>
+                          {record.name}
+                        </Link>
+                      </span>
                       <div className="card-actions">
                         <Tooltip title={t('info')}>
                           <InfoCircleOutlined

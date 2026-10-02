@@ -40,6 +40,7 @@ interface UseInboundColumnsParams {
   trafficDiff: number;
   onRowAction: (action: { key: RowAction; dbInbound: DBInboundRecord }) => void;
   onSwitchEnable: (dbInbound: DBInboundRecord, next: boolean) => void;
+  publicEndpointsOf?: (dbInbound: DBInboundRecord) => string[];
 }
 
 export function useInboundColumns({
@@ -55,6 +56,7 @@ export function useInboundColumns({
   trafficDiff,
   onRowAction,
   onSwitchEnable,
+  publicEndpointsOf,
 }: UseInboundColumnsParams): TableColumnType<DBInboundRecord>[] {
   const { t } = useTranslation();
   const { datepicker } = useDatepicker();
@@ -205,6 +207,18 @@ export function useInboundColumns({
         width: 80,
         sorter: (a, b) => a.port - b.port,
       },
+      ...(publicEndpointsOf
+        ? [
+            {
+              title: t('pages.nodes.host.publicEndpoint'),
+              key: 'publicEndpoint',
+              align: 'left' as const,
+              width: 200,
+              render: (_: unknown, record: DBInboundRecord) =>
+                publicEndpointsOf(record).map((endpoint) => <div key={endpoint}>{endpoint}</div>),
+            },
+          ]
+        : []),
       {
         title: t('pages.inbounds.protocol'),
         key: 'protocol',
@@ -480,5 +494,6 @@ export function useInboundColumns({
     datepicker,
     onRowAction,
     onSwitchEnable,
+    publicEndpointsOf,
   ]);
 }

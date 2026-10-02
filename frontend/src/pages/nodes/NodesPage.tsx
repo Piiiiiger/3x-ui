@@ -33,6 +33,8 @@ import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import AppNav from '@/layouts/AppNav';
 import { PageHeader } from '@/components/ui';
 import NodeList from './NodeList';
+import { LocalPanelCard, nodesByHostOf } from './HostNodeChips';
+import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import NodeFormModal from './NodeFormModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil } from '@/utils';
@@ -79,6 +81,8 @@ export default function NodesPage() {
   }, [messageApi]);
 
   const { nodes, loading, fetched, fetchError, refetch, totals } = useNodesQuery();
+  const { data: inboundOptions } = useInboundOptions();
+  const nodesByHost = useMemo(() => nodesByHostOf(inboundOptions ?? []), [inboundOptions]);
   const {
     create,
     update,
@@ -349,8 +353,12 @@ export default function NodesPage() {
                   </Col>
 
                   <Col span={24}>
+                    <LocalPanelCard nodes={nodesByHost.get(0) ?? []} />
+                  </Col>
+                  <Col span={24}>
                     <NodeList
                       nodes={nodes}
+                      nodesByHost={nodesByHost}
                       loading={loading}
                       isMobile={isMobile}
                       latestVersion={latestVersion}

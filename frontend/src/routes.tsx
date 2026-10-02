@@ -11,6 +11,7 @@ const ClientsPage = lazy(() => import('@/pages/clients/ClientsPage'));
 const GroupsPage = lazy(() => import('@/pages/groups/GroupsPage'));
 const PlansPage = lazy(() => import('@/pages/plans/PlansPage'));
 const NodesPage = lazy(() => import('@/pages/nodes/NodesPage'));
+const HostPage = lazy(() => import('@/pages/nodes/HostPage'));
 const HostsPage = lazy(() => import('@/pages/hosts/HostsPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
@@ -50,6 +51,7 @@ const routes: RouteObject[] = [
       { path: 'groups', element: withSuspense(<GroupsPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },
       { path: 'nodes', element: withSuspense(<NodesPage />) },
+      { path: 'nodes/:hostId', element: withSuspense(<HostPage />) },
       { path: 'hosts', element: withSuspense(<HostsPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'xray', element: withSuspense(<XrayPage />) },

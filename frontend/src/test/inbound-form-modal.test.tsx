@@ -243,7 +243,7 @@ describe('InboundFormModal', () => {
     // Baseline: nodes already loaded, so the node option is offered and selected.
     render(modal([node], true));
     await flush();
-    expect(strategyItem('Node address')).toBeTruthy();
+    expect(strategyItem('Host address')).toBeTruthy();
     cleanup();
 
     // Race: the modal mounts before /nodes/list resolves (empty placeholder),
@@ -253,8 +253,37 @@ describe('InboundFormModal', () => {
     await flush();
     rerender(modal([node], true));
     await flush();
-    expect(strategyItem('Node address')).toBeTruthy();
+    expect(strategyItem('Host address')).toBeTruthy();
     expect(strategyItem('Inbound listen')).toBeFalsy();
+  });
+
+  // A node added from a host's page belongs to that host; the deploy field must
+  // start there and not let the node slip onto another host.
+  it('starts a new inbound on the preset host and locks the deploy field', async () => {
+    const hosts = [
+      { id: 2, name: 'edge-hk', enable: true, status: 'online' },
+      { id: 3, name: 'edge-us', enable: true, status: 'online' },
+    ] as never[];
+    render(
+      <ThemeProvider>
+        <InboundFormModal
+          open
+          mode="add"
+          dbInbound={null}
+          dbInbounds={[]}
+          availableNodes={hosts}
+          presetHost={2}
+          onClose={() => {}}
+          onSaved={() => {}}
+        />
+      </ThemeProvider>,
+    );
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    const deploy = document.querySelector('.ant-select-content[title="edge-hk"]');
+    expect(deploy).toBeTruthy();
+    expect(deploy?.closest('.ant-select')?.className).toContain('ant-select-disabled');
   });
 
   it('surfaces a Reality validation error and switches to its tab', async () => {

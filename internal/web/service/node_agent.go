@@ -49,6 +49,14 @@ func (s *NodeService) MintAgentSecret(id int) (string, error) {
 	return secret, nil
 }
 
+func isAgentNode(db *gorm.DB, id int) (bool, error) {
+	var n model.Node
+	if err := db.Model(model.Node{}).Select("kind").Where("id = ?", id).First(&n).Error; err != nil {
+		return false, err
+	}
+	return n.IsAgent(), nil
+}
+
 // AgentNodeBySecret is the enabled agent node a connecting agent's secret
 // belongs to.
 func (s *NodeService) AgentNodeBySecret(secret string) (*model.Node, error) {

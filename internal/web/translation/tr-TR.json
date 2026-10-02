@@ -1085,7 +1085,8 @@
       "servers": "Sunucular",
       "noServers": "Sunucu seçilmedi",
       "members": "{count} kullanıcı",
-      "applyToMembers": "Bu paketteki {count} kullanıcıyı da güncelle",
+      "reapplyLimits": "Kota, IP limiti ve sıfırlama takvimini bu paketteki {count} kullanıcıya da yeniden uygula",
+      "serverChangesApply": "Eklediğiniz veya kaldırdığınız sunucular, bu seçenekten bağımsız olarak her zaman bu paketteki kullanıcılara uygulanır.",
       "deleteConfirm": "{name} paketi silinsin mi?",
       "deleteBlocked": "Önce {count} kullanıcısını başka bir pakete taşıyın",
       "assign": "Paket ata",
@@ -1244,7 +1245,28 @@
       "agentSecretFailed": "Ajan anahtarı oluşturulamadı",
       "agentSecretTitle": "{name} için ajan anahtarı",
       "agentSecretOnce": "Şimdi kopyalayın: anahtar yalnızca bir kez gösterilir.",
-      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)"
+      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)",
+      "host": {
+        "allHosts": "Tüm düğümler",
+        "notFound": "Bu düğüm artık yok",
+        "publicEndpoint": "Genel uç nokta",
+        "nodes": "Gelen Bağlantılar"
+      },
+      "generate": {
+        "button": "Bağlantı oluştur",
+        "title": "{host} üzerinde bağlantı oluştur",
+        "submit": "Oluştur",
+        "publicPort": "Genel port",
+        "publicPortHint": "Yalnızca sağlayıcı başka bir genel portu bu porta yönlendiriyorsa (NAT).",
+        "publicPortNeeded": "Sağlayıcının bu bağlantıya yönlendirdiği genel portu girin",
+        "needNameAndPort": "Bir ad ve port girin",
+        "target": "REALITY hedefi",
+        "plans": "Bu bağlantıyı alan planlar",
+        "reach": "{count} istemci bu bağlantıyı alacak",
+        "noTemplate": "Kopyalanacak VLESS REALITY bağlantısı henüz yok; ilkini Gelen Bağlantı Ekle ile kurun.",
+        "done": "Yeni bağlantı {host} üzerinde çalışıyor",
+        "hostOffline": "Düğüm çevrimdışı; ajanı bağlandıktan sonra bağlantıyı oluşturun."
+      }
     },
     "settings": {
       "defaultTag": "Varsayılan",

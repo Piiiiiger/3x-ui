@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -18,9 +19,6 @@ const (
 	// agent gets one push for it instead of several.
 	agentNudgeSettle = 300 * time.Millisecond
 )
-
-// agentSyncLocks keeps the tick and a nudge from pushing to one agent at once.
-var agentSyncLocks sync.Map
 
 // AgentSyncJob keeps every connected agent on the config the panel holds for
 // it, and disconnects agents whose node no longer allows them.
@@ -67,16 +65,15 @@ func (j *AgentSyncJob) Run() {
 }
 
 func (j *AgentSyncJob) syncNode(n *model.Node) {
-	lock, _ := agentSyncLocks.LoadOrStore(n.Id, &sync.Mutex{})
-	lock.(*sync.Mutex).Lock()
-	defer lock.(*sync.Mutex).Unlock()
+	defer j.agentService.LockAgent(n.Id)()
 
 	ctx, cancel := context.WithTimeout(context.Background(), agentSyncTimeout)
 	defer cancel()
 	if err := j.inboundService.DeliverNodeResets(ctx, n.Id, runtime.NewAgentRuntime(n)); err != nil {
 		logger.Warning("agent sync: clear queued resets for", n.Name, "failed:", err)
 	}
-	if err := j.agentService.SyncAgent(ctx, n); err != nil {
+	// An agent that dropped since the tick listed it reconnects and is synced then.
+	if err := j.agentService.SyncAgent(ctx, n); err != nil && !errors.Is(err, runtime.ErrAgentNotConnected) {
 		logger.Warning("agent sync: push config to", n.Name, "failed, retrying next tick:", err)
 	}
 }

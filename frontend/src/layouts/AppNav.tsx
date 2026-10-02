@@ -222,7 +222,9 @@ export default function AppNav() {
       ? `/xray${hash || '#basic'}`
       : pathname === ''
         ? '/'
-        : pathname;
+        : pathname.startsWith('/nodes/')
+          ? '/nodes'
+          : pathname;
   const moreActive = MORE_PAGES.has(selectedKey);
 
   const openSubmenu = settingsActive ? '/settings' : xrayActive ? '/xray' : null;

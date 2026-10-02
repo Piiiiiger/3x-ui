@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
@@ -75,9 +76,11 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.GET("/options", a.getInboundOptions)
 	g.GET("/allLinks", a.getAllInboundLinks)
 	g.GET("/get/:id", a.getInbound)
+	g.GET("/freePort/:nodeId", a.getFreePort)
 	g.GET("/:id/fallbacks", a.getFallbacks)
 
 	g.POST("/add", a.addInbound)
+	g.POST("/generate", a.generateNode)
 	g.POST("/del/:id", a.delInbound)
 	g.POST("/bulkDel", a.bulkDelInbounds)
 	g.POST("/update/:id", a.updateInbound)
@@ -153,6 +156,52 @@ func (a *InboundController) getInbound(c *gin.Context) {
 		return
 	}
 	jsonObj(c, inbound, nil)
+}
+
+// getFreePort suggests a port for a new inbound on a host; node id 0 is the local panel.
+func (a *InboundController) getFreePort(c *gin.Context) {
+	nodeID, err := strconv.Atoi(c.Param("nodeId"))
+	if err == nil && nodeID < 0 {
+		err = common.NewErrorf("node id must not be negative: %d", nodeID)
+	}
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "get"), err)
+		return
+	}
+	var host *int
+	if nodeID > 0 {
+		host = &nodeID
+	}
+	view, err := a.inboundService.FreePort(host)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+		return
+	}
+	jsonObj(c, view, nil)
+}
+
+// generateNode creates a node on a host and enables it once the host runs it; a
+// node the host refused stays as a disabled row, so the lists refresh either way.
+func (a *InboundController) generateNode(c *gin.Context) {
+	req, ok := middleware.BindJSONAndValidate[service.GenerateNodeRequest](c)
+	if !ok {
+		return
+	}
+	user := session.GetLoginUser(c)
+	req.Inbound.UserId = user.Id
+	if req.Inbound.NodeID != nil && *req.Inbound.NodeID == 0 {
+		req.Inbound.NodeID = nil
+	}
+	inbound, err := a.inboundService.GenerateNode(req)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+	} else {
+		jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundCreateSuccess"), inbound, nil)
+	}
+	if inbound != nil {
+		a.broadcastInboundsUpdate(user.Id)
+		notifyClientsChanged()
+	}
 }
 
 // addInbound creates a new inbound configuration.
@@ -493,7 +542,7 @@ func (a *InboundController) setFallbacks(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if err := a.fallbackService.SetByMaster(id, b.Fallbacks); err != nil {
+	if err := a.inboundService.SetFallbacks(id, b.Fallbacks); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}

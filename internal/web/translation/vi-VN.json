@@ -1085,7 +1085,8 @@
       "servers": "Máy chủ",
       "noServers": "Chưa chọn máy chủ",
       "members": "{count} khách hàng",
-      "applyToMembers": "Cập nhật cả {count} khách hàng đang dùng gói này",
+      "reapplyLimits": "Áp dụng lại cả hạn mức lưu lượng, giới hạn IP và lịch đặt lại cho {count} khách hàng đang dùng gói này",
+      "serverChangesApply": "Máy chủ bạn thêm hoặc gỡ luôn được áp dụng cho khách hàng của gói này, dù có chọn tùy chọn này hay không.",
       "deleteConfirm": "Xóa gói {name}?",
       "deleteBlocked": "Hãy chuyển {count} khách hàng của gói sang gói khác trước",
       "assign": "Gán gói",
@@ -1244,7 +1245,28 @@
       "agentSecretFailed": "Không thể tạo khóa bí mật cho agent",
       "agentSecretTitle": "Khóa bí mật agent của {name}",
       "agentSecretOnce": "Hãy sao chép ngay: khóa chỉ hiển thị một lần.",
-      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)"
+      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)",
+      "host": {
+        "allHosts": "Tất cả nút",
+        "notFound": "Nút này không còn tồn tại",
+        "publicEndpoint": "Điểm truy cập công khai",
+        "nodes": "Inbound"
+      },
+      "generate": {
+        "button": "Tạo inbound",
+        "title": "Tạo inbound trên {host}",
+        "submit": "Tạo",
+        "publicPort": "Cổng công khai",
+        "publicPortHint": "Chỉ khi nhà cung cấp chuyển tiếp một cổng công khai khác về cổng này (NAT).",
+        "publicPortNeeded": "Nhập cổng công khai mà nhà cung cấp chuyển tiếp tới inbound này",
+        "needNameAndPort": "Nhập tên và cổng",
+        "target": "Đích REALITY",
+        "plans": "Các gói nhận inbound này",
+        "reach": "{count} khách hàng sẽ nhận inbound này",
+        "noTemplate": "Chưa có inbound VLESS REALITY nào để sao chép; hãy tạo cái đầu tiên bằng Thêm inbound.",
+        "done": "Inbound mới đang chạy trên {host}",
+        "hostOffline": "Nút đang ngoại tuyến; hãy tạo inbound sau khi agent kết nối."
+      }
     },
     "settings": {
       "defaultTag": "Mặc định",

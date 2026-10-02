@@ -26,7 +26,7 @@ export function usePageTitle() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const key = TITLE_KEYS[pathname];
+    const key = TITLE_KEYS[pathname] ?? TITLE_KEYS[`/${pathname.split('/')[1]}`];
     const title = key ? t(key) : PANEL_NAME;
     const host = window.location.hostname;
     document.title = host ? `${host} - ${title}` : title;

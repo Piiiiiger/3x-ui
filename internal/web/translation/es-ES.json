@@ -1085,7 +1085,8 @@
       "servers": "Servidores",
       "noServers": "Sin servidores",
       "members": "{count} cliente(s)",
-      "applyToMembers": "Actualizar también los {count} cliente(s) de este plan",
+      "reapplyLimits": "Volver a aplicar también la cuota, el límite de IP y el calendario de reinicio a los {count} cliente(s) de este plan",
+      "serverChangesApply": "Los servidores que añadas o quites siempre llegan a los clientes de este plan, con o sin esta opción.",
       "deleteConfirm": "¿Eliminar el plan {name}?",
       "deleteBlocked": "Primero mueve sus {count} cliente(s) a otro plan",
       "assign": "Asignar plan",
@@ -1244,7 +1245,28 @@
       "agentSecretFailed": "No se pudo crear el secreto del agente",
       "agentSecretTitle": "Secreto del agente de {name}",
       "agentSecretOnce": "Cópialo ahora: el secreto solo se muestra una vez.",
-      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)"
+      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)",
+      "host": {
+        "allHosts": "Todos los nodos",
+        "notFound": "Este nodo ya no existe",
+        "publicEndpoint": "Punto de acceso público",
+        "nodes": "Entradas"
+      },
+      "generate": {
+        "button": "Generar entrada",
+        "title": "Generar una entrada en {host}",
+        "submit": "Generar",
+        "publicPort": "Puerto público",
+        "publicPortHint": "Solo cuando el proveedor reenvía otro puerto público a este (NAT).",
+        "publicPortNeeded": "Introduce el puerto público que el proveedor reenvía a esta entrada",
+        "needNameAndPort": "Introduce un nombre y un puerto",
+        "target": "Destino REALITY",
+        "plans": "Planes que reciben esta entrada",
+        "reach": "{count} cliente(s) recibirán esta entrada",
+        "noTemplate": "Aún no hay ninguna entrada VLESS REALITY que copiar; crea la primera con Agregar entrada.",
+        "done": "La nueva entrada funciona en {host}",
+        "hostOffline": "El nodo está desconectado; genera la entrada cuando su agente se conecte."
+      }
     },
     "settings": {
       "defaultTag": "Predeterminado",

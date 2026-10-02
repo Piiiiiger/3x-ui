@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -101,31 +102,103 @@ func (s *PlanService) Create(in PlanInput) (*model.Plan, error) {
 	return plan, nil
 }
 
-// Update saves the plan and, when applyToMembers is set, re-stamps its quota,
-// limits, reset schedule and inbounds onto every member without moving expiries.
-func (s *PlanService) Update(inboundSvc *InboundService, id int, in PlanInput, applyToMembers bool) (bool, error) {
-	err := database.GetDB().Transaction(func(tx *gorm.DB) error {
-		var plan model.Plan
-		if err := tx.First(&plan, id).Error; err != nil {
-			return common.NewError("plan not found:", id)
-		}
-		if err := validatePlanInput(tx, id, &in); err != nil {
-			return err
-		}
-		applyPlanInput(&plan, in)
-		if err := tx.Save(&plan).Error; err != nil {
-			return err
-		}
-		return replacePlanInbounds(tx, id, in.InboundIds)
-	})
-	if err != nil || !applyToMembers {
+// Update attaches the plan's members to the inbounds it gains and detaches them from those
+// it loses, then saves the plan; reapplyLimits also re-stamps its limits but not expiries.
+func (s *PlanService) Update(inboundSvc *InboundService, id int, in PlanInput, reapplyLimits bool) (bool, error) {
+	db := database.GetDB()
+	var plan model.Plan
+	if err := db.First(&plan, id).Error; err != nil {
+		return false, common.NewError("plan not found:", id)
+	}
+	if err := validatePlanInput(db, id, &in); err != nil {
+		return false, err
+	}
+	before, err := planInboundIds(db, id)
+	if err != nil {
 		return false, err
 	}
 	members, err := planMemberEmails(id)
 	if err != nil {
 		return false, err
 	}
-	return s.Assign(inboundSvc, members, id, PlanStartKeep, false)
+	applyPlanInput(&plan, in)
+	gained := idsMissingFrom(in.InboundIds, before)
+	lost := idsMissingFrom(before, in.InboundIds)
+	needRestart := false
+	for _, email := range members {
+		nr, err := s.updateMember(inboundSvc, &plan, email, gained, lost, reapplyLimits)
+		needRestart = needRestart || nr
+		if err != nil {
+			return needRestart, err
+		}
+	}
+	// Saved last: a save that fails on a member leaves the plan as it was, so saving
+	// again works out the same gained and lost inbounds and skips members already done.
+	return needRestart, db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&plan).Error; err != nil {
+			return err
+		}
+		return replacePlanInbounds(tx, id, in.InboundIds)
+	})
+}
+
+func (s *PlanService) updateMember(inboundSvc *InboundService, plan *model.Plan, email string, gained, lost []int, reapplyLimits bool) (bool, error) {
+	needRestart := false
+	if reapplyLimits {
+		rec, err := s.clientService.GetRecordByEmail(nil, email)
+		if err != nil {
+			return false, err
+		}
+		if needRestart, err = s.stampPlanLimits(inboundSvc, plan, rec, PlanStartKeep); err != nil {
+			return needRestart, err
+		}
+	}
+	nr, err := s.attachAndDetach(inboundSvc, email, gained, lost)
+	return needRestart || nr, err
+}
+
+// AddInboundToPlans grants the inbound to each plan and attaches it to their members,
+// leaving their limits and other inbounds alone; granting it again changes nothing.
+func (s *PlanService) AddInboundToPlans(inboundSvc *InboundService, inboundId int, planIds []int) (bool, error) {
+	err := database.GetDB().Transaction(func(tx *gorm.DB) error {
+		var known []int
+		if err := tx.Model(&model.Plan{}).Where("id IN ?", planIds).Pluck("id", &known).Error; err != nil {
+			return err
+		}
+		if missing := idsMissingFrom(planIds, known); len(missing) > 0 {
+			return common.NewError("plan not found:", missing)
+		}
+		var inbounds int64
+		if err := tx.Model(&model.Inbound{}).Where("id = ?", inboundId).Count(&inbounds).Error; err != nil {
+			return err
+		}
+		if inbounds == 0 {
+			return common.NewError("inbound not found:", inboundId)
+		}
+		for _, planId := range planIds {
+			row := model.PlanInbound{PlanId: planId, InboundId: inboundId}
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&row).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	members, err := planMemberEmails(planIds...)
+	if err != nil {
+		return false, err
+	}
+	needRestart := false
+	for _, email := range members {
+		nr, err := s.clientService.AttachByEmail(inboundSvc, email, []int{inboundId})
+		needRestart = needRestart || nr
+		if err != nil {
+			return needRestart, err
+		}
+	}
+	return needRestart, nil
 }
 
 func (s *PlanService) Delete(id int) error {
@@ -172,6 +245,33 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 	if err != nil {
 		return false, err
 	}
+	needRestart, err := s.stampPlanLimits(inboundSvc, plan, rec, start)
+	if err != nil {
+		return needRestart, err
+	}
+	current, err := s.clientService.GetInboundIdsForRecord(rec.Id)
+	if err != nil {
+		return needRestart, err
+	}
+	nr, err := s.attachAndDetach(inboundSvc, email, idsMissingFrom(planIds, current), idsMissingFrom(current, planIds))
+	needRestart = needRestart || nr
+	if err != nil {
+		return needRestart, err
+	}
+	if resetTraffic {
+		nr, err := s.clientService.ResetTrafficByEmail(inboundSvc, email)
+		needRestart = needRestart || nr
+		if err != nil {
+			return needRestart, err
+		}
+	}
+	return needRestart, database.GetDB().Model(&model.ClientRecord{}).
+		Where("id = ?", rec.Id).UpdateColumn("plan_id", plan.Id).Error
+}
+
+// stampPlanLimits writes the plan's quota, IP limit and reset schedule onto the
+// client, and its expiry as start says; PlanStartKeep leaves the expiry alone.
+func (s *PlanService) stampPlanLimits(inboundSvc *InboundService, plan *model.Plan, rec *model.ClientRecord, start PlanStart) (bool, error) {
 	client := rec.ToClient()
 	client.TotalGB = plan.TotalGB
 	client.LimitIP = plan.LimitIP
@@ -187,16 +287,11 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 	case PlanStartFirstUse:
 		client.ExpiryTime = -duration
 	}
-	needRestart, err := s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
-	if err != nil {
-		return needRestart, err
-	}
-	current, err := s.clientService.GetInboundIdsForRecord(rec.Id)
-	if err != nil {
-		return needRestart, err
-	}
-	attach := idsMissingFrom(planIds, current)
-	detach := idsMissingFrom(current, planIds)
+	return s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
+}
+
+func (s *PlanService) attachAndDetach(inboundSvc *InboundService, email string, attach, detach []int) (bool, error) {
+	needRestart := false
 	if len(attach) > 0 {
 		nr, err := s.clientService.AttachByEmail(inboundSvc, email, attach)
 		needRestart = needRestart || nr
@@ -211,15 +306,7 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 			return needRestart, err
 		}
 	}
-	if resetTraffic {
-		nr, err := s.clientService.ResetTrafficByEmail(inboundSvc, email)
-		needRestart = needRestart || nr
-		if err != nil {
-			return needRestart, err
-		}
-	}
-	return needRestart, database.GetDB().Model(&model.ClientRecord{}).
-		Where("id = ?", rec.Id).UpdateColumn("plan_id", plan.Id).Error
+	return needRestart, nil
 }
 
 // Unassign drops the plan from each client and leaves its current limits as they are.
@@ -354,10 +441,10 @@ func planInboundIds(db *gorm.DB, planId int) ([]int, error) {
 	return ids, err
 }
 
-func planMemberEmails(planId int) ([]string, error) {
+func planMemberEmails(planIds ...int) ([]string, error) {
 	var emails []string
 	err := database.GetDB().Model(&model.ClientRecord{}).
-		Where("plan_id = ?", planId).Order("id ASC").Pluck("email", &emails).Error
+		Where("plan_id IN ?", planIds).Order("id ASC").Pluck("email", &emails).Error
 	return emails, err
 }
 

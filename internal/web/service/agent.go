@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
@@ -19,6 +20,17 @@ import (
 // agentStatusStaleAfter: agents report every few seconds, so an older status
 // means the agent stopped reporting even if its socket still looks open.
 var agentStatusStaleAfter = 20 * time.Second
+
+// agentPushLocks keeps every caller that pushes to one agent from doing so at once.
+var agentPushLocks sync.Map
+
+// LockAgent holds nodeID's push lock until the returned func is called.
+func (s *AgentService) LockAgent(nodeID int) (unlock func()) {
+	lock, _ := agentPushLocks.LoadOrStore(nodeID, &sync.Mutex{})
+	mu := lock.(*sync.Mutex)
+	mu.Lock()
+	return mu.Unlock
+}
 
 // AgentService joins the panel's data to pigger-agents: the config each one
 // runs, and the usage and state they report back.
@@ -45,15 +57,15 @@ func (s *AgentService) AgentConfig(nodeID int) ([]byte, string, error) {
 }
 
 // SyncAgent pushes a connected agent its config when it runs anything else, then
-// clears the node's dirty flag: the agent now holds every change made before.
+// clears the node's dirty flag; without an agent it is runtime.ErrAgentNotConnected.
 func (s *AgentService) SyncAgent(ctx context.Context, n *model.Node) error {
 	hub := runtime.GetAgentHub()
 	if hub == nil {
-		return nil
+		return runtime.ErrAgentNotConnected
 	}
 	state, ok := hub.Session(n.Id)
 	if !ok {
-		return nil
+		return runtime.ErrAgentNotConnected
 	}
 	_, _, dirty, dirtyAt, err := s.nodeService.NodeSyncState(n.Id)
 	if err != nil {
