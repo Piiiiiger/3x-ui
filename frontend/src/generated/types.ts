@@ -596,6 +596,10 @@ export interface FallbackParentInfo {
   path?: string;
 }
 
+export interface FreePortView {
+  port: number;
+}
+
 export interface GeoCategory {
   attributes: string[];
   code: string;

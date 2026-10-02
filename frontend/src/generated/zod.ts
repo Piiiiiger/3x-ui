@@ -635,6 +635,11 @@ export const FallbackParentInfoSchema = z.object({
 });
 export type FallbackParentInfo = z.infer<typeof FallbackParentInfoSchema>;
 
+export const FreePortViewSchema = z.object({
+  port: z.number().int(),
+});
+export type FreePortView = z.infer<typeof FreePortViewSchema>;
+
 export const GeoCategorySchema = z.object({
   attributes: z.array(z.string()),
   code: z.string(),

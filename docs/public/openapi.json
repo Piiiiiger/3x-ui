@@ -2546,6 +2546,19 @@
         ],
         "type": "object"
       },
+      "FreePortView": {
+        "description": "FreePortView is a port a new inbound on a host can listen on.",
+        "properties": {
+          "port": {
+            "example": 34567,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "port"
+        ],
+        "type": "object"
+      },
       "GeoCategory": {
         "description": "GeoCategory is one code inside a database, such as geosite's \"google\".",
         "properties": {
@@ -6359,6 +6372,55 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/inbounds/freePort/{nodeId}": {
+      "get": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Suggest a port for a new inbound on a host: one that no inbound there uses for TCP or UDP on any interface and that the Xray template’s own API and metrics listeners leave free. On the local panel the port must also be one this machine can bind, since other programs may hold ports no inbound records.",
+        "operationId": "get_panel_api_inbounds_freePort_nodeId",
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "required": true,
+            "description": "Node ID, or 0 for the local panel.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/FreePortView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "port": 34567
                   }
                 }
               }

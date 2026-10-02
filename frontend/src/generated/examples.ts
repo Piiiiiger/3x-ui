@@ -633,6 +633,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "masterId": 0,
     "path": ""
   },
+  "FreePortView": {
+    "port": 34567
+  },
   "GeoCategory": {
     "attributes": [
       "ads",

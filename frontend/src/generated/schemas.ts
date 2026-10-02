@@ -2520,6 +2520,19 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "FreePortView": {
+    "description": "FreePortView is a port a new inbound on a host can listen on.",
+    "properties": {
+      "port": {
+        "example": 34567,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "port"
+    ],
+    "type": "object"
+  },
   "GeoCategory": {
     "description": "GeoCategory is one code inside a database, such as geosite's \"google\".",
     "properties": {

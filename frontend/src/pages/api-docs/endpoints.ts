@@ -299,6 +299,21 @@ export const sections: readonly Section[] = [
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Inbound ID.' }],
       },
       {
+        method: 'GET',
+        path: '/panel/api/inbounds/freePort/:nodeId',
+        summary:
+          'Suggest a port for a new inbound on a host: one that no inbound there uses for TCP or UDP on any interface and that the Xray template’s own API and metrics listeners leave free. On the local panel the port must also be one this machine can bind, since other programs may hold ports no inbound records.',
+        params: [
+          {
+            name: 'nodeId',
+            in: 'path',
+            type: 'number',
+            desc: 'Node ID, or 0 for the local panel.',
+          },
+        ],
+        responseSchema: 'FreePortView',
+      },
+      {
         method: 'POST',
         path: '/panel/api/inbounds/add',
         summary:
