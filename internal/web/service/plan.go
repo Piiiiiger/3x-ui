@@ -172,6 +172,33 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 	if err != nil {
 		return false, err
 	}
+	needRestart, err := s.stampPlanLimits(inboundSvc, plan, rec, start)
+	if err != nil {
+		return needRestart, err
+	}
+	current, err := s.clientService.GetInboundIdsForRecord(rec.Id)
+	if err != nil {
+		return needRestart, err
+	}
+	nr, err := s.attachAndDetach(inboundSvc, email, idsMissingFrom(planIds, current), idsMissingFrom(current, planIds))
+	needRestart = needRestart || nr
+	if err != nil {
+		return needRestart, err
+	}
+	if resetTraffic {
+		nr, err := s.clientService.ResetTrafficByEmail(inboundSvc, email)
+		needRestart = needRestart || nr
+		if err != nil {
+			return needRestart, err
+		}
+	}
+	return needRestart, database.GetDB().Model(&model.ClientRecord{}).
+		Where("id = ?", rec.Id).UpdateColumn("plan_id", plan.Id).Error
+}
+
+// stampPlanLimits writes the plan's quota, IP limit and reset schedule onto the
+// client, and its expiry as start says; PlanStartKeep leaves the expiry alone.
+func (s *PlanService) stampPlanLimits(inboundSvc *InboundService, plan *model.Plan, rec *model.ClientRecord, start PlanStart) (bool, error) {
 	client := rec.ToClient()
 	client.TotalGB = plan.TotalGB
 	client.LimitIP = plan.LimitIP
@@ -187,16 +214,11 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 	case PlanStartFirstUse:
 		client.ExpiryTime = -duration
 	}
-	needRestart, err := s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
-	if err != nil {
-		return needRestart, err
-	}
-	current, err := s.clientService.GetInboundIdsForRecord(rec.Id)
-	if err != nil {
-		return needRestart, err
-	}
-	attach := idsMissingFrom(planIds, current)
-	detach := idsMissingFrom(current, planIds)
+	return s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
+}
+
+func (s *PlanService) attachAndDetach(inboundSvc *InboundService, email string, attach, detach []int) (bool, error) {
+	needRestart := false
 	if len(attach) > 0 {
 		nr, err := s.clientService.AttachByEmail(inboundSvc, email, attach)
 		needRestart = needRestart || nr
@@ -211,15 +233,7 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 			return needRestart, err
 		}
 	}
-	if resetTraffic {
-		nr, err := s.clientService.ResetTrafficByEmail(inboundSvc, email)
-		needRestart = needRestart || nr
-		if err != nil {
-			return needRestart, err
-		}
-	}
-	return needRestart, database.GetDB().Model(&model.ClientRecord{}).
-		Where("id = ?", rec.Id).UpdateColumn("plan_id", plan.Id).Error
+	return needRestart, nil
 }
 
 // Unassign drops the plan from each client and leaves its current limits as they are.
