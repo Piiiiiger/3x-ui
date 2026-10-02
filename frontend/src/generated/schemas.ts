@@ -4736,8 +4736,14 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "ProbePing": {
-    "description": "ProbePing is one ping task of a server over the last hour: latency is the\naverage in ms (-1 when no reply came back at all), loss is a percentage.",
+    "description": "ProbePing is one ping task of a server over the last hour: latency is the\naverage in ms (-1 when no reply came back at all), loss is a percentage.\nBlocks is that hour oldest first, empty when Lite gave no history.",
     "properties": {
+      "blocks": {
+        "items": {
+          "$ref": "#/components/schemas/ProbePingBlock"
+        },
+        "type": "array"
+      },
       "id": {
         "example": 2,
         "type": "integer"
@@ -4756,10 +4762,41 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "blocks",
       "id",
       "latency",
       "loss",
       "name"
+    ],
+    "type": "object"
+  },
+  "ProbePingBlock": {
+    "description": "ProbePingBlock is one span of a ping task's hour, bounded in unix ms: the\nchecks that ran in it and the share of them lost, in percent.",
+    "properties": {
+      "checks": {
+        "example": 5,
+        "type": "integer"
+      },
+      "end": {
+        "example": 1735689900000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "loss": {
+        "example": 20,
+        "type": "number"
+      },
+      "start": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "checks",
+      "end",
+      "loss",
+      "start"
     ],
     "type": "object"
   },

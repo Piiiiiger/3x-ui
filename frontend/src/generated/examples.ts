@@ -1118,6 +1118,14 @@ export const EXAMPLES: Record<string, unknown> = {
         "netTotalUp": 1000000,
         "pings": [
           {
+            "blocks": [
+              {
+                "checks": 5,
+                "end": 1735689900000,
+                "loss": 20,
+                "start": 1735689600000
+              }
+            ],
             "id": 2,
             "latency": 31,
             "loss": 0.4,
@@ -1149,6 +1157,14 @@ export const EXAMPLES: Record<string, unknown> = {
     "netTotalUp": 1000000,
     "pings": [
       {
+        "blocks": [
+          {
+            "checks": 5,
+            "end": 1735689900000,
+            "loss": 20,
+            "start": 1735689600000
+          }
+        ],
         "id": 2,
         "latency": 31,
         "loss": 0.4,
@@ -1208,6 +1224,14 @@ export const EXAMPLES: Record<string, unknown> = {
         "os": "Debian GNU/Linux 13 (trixie)",
         "pings": [
           {
+            "blocks": [
+              {
+                "checks": 5,
+                "end": 1735689900000,
+                "loss": 20,
+                "start": 1735689600000
+              }
+            ],
             "id": 2,
             "latency": 31,
             "loss": 0.4,
@@ -1226,10 +1250,24 @@ export const EXAMPLES: Record<string, unknown> = {
     "stale": false
   },
   "ProbePing": {
+    "blocks": [
+      {
+        "checks": 5,
+        "end": 1735689900000,
+        "loss": 20,
+        "start": 1735689600000
+      }
+    ],
     "id": 2,
     "latency": 31,
     "loss": 0.4,
     "name": "China Telecom"
+  },
+  "ProbePingBlock": {
+    "checks": 5,
+    "end": 1735689900000,
+    "loss": 20,
+    "start": 1735689600000
   },
   "ProbeResultUI": {
     "cpuPct": 12.5,
@@ -1266,6 +1304,14 @@ export const EXAMPLES: Record<string, unknown> = {
     "os": "Debian GNU/Linux 13 (trixie)",
     "pings": [
       {
+        "blocks": [
+          {
+            "checks": 5,
+            "end": 1735689900000,
+            "loss": 20,
+            "start": 1735689600000
+          }
+        ],
         "id": 2,
         "latency": 31,
         "loss": 0.4,

@@ -5,6 +5,7 @@ export type PlanStart = string;
 export type ProcessState = string;
 export type Protocol = string;
 export type addrFamily = number;
+export type liteBlocks = Record<string, Record<number, ProbePingBlock[]>>;
 export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
@@ -1073,10 +1074,18 @@ export interface ProbeOverview {
 }
 
 export interface ProbePing {
+  blocks: ProbePingBlock[];
   id: number;
   latency: number;
   loss: number;
   name: string;
+}
+
+export interface ProbePingBlock {
+  checks: number;
+  end: number;
+  loss: number;
+  start: number;
 }
 
 export interface ProbeResultUI {

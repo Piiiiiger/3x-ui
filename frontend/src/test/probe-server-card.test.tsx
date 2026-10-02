@@ -153,8 +153,8 @@ describe('ProbeServerCard', () => {
       <ProbeServerCard server={online({ cpu: 50, memUsed: 1.7 * GIB, diskUsed: 38 * GIB })} />,
     );
     const fillOf = (name: string) =>
-      screen.getByRole('progressbar', { name }).querySelector<HTMLElement>('.ant-progress-track')
-        ?.style.background;
+      screen.getByRole('progressbar', { name }).querySelector<HTMLElement>('span')?.style
+        .background;
     const warn = 'rgb(250, 173, 20)';
     const critical = 'rgb(255, 77, 79)';
 
@@ -165,7 +165,26 @@ describe('ProbeServerCard', () => {
     const tinted = Array.from(document.querySelectorAll<HTMLElement>('.probe-card [style]')).filter(
       (el) => [warn, critical].some((colour) => (el.getAttribute('style') ?? '').includes(colour)),
     );
-    expect(tinted.map((el) => el.className)).toEqual(['ant-progress-track', 'ant-progress-track']);
+    expect(tinted.length).toBeGreaterThan(0);
+    expect(tinted.filter((el) => el.parentElement?.getAttribute('role') !== 'progressbar')).toEqual(
+      [],
+    );
+  });
+
+  // Empty only at zero and full only at one hundred: any use shows, and 99.6 % is not "full".
+  it.each([
+    [0, 0],
+    [0.3, 1],
+    [50, 15],
+    [99.6, 29],
+    [100, 30],
+  ])('at %s percent a meter fills %i of its thirty blocks', (percent, filled) => {
+    render(<ProbeMeter label="CPU" percent={percent} />);
+    const blocks = Array.from(screen.getByRole('progressbar').querySelectorAll('span'));
+
+    expect(blocks).toHaveLength(30);
+    expect(blocks.map((block) => block.style.background !== '').lastIndexOf(true)).toBe(filled - 1);
+    expect(blocks.filter((block) => block.style.background !== '')).toHaveLength(filled);
   });
 
   // A server that has not sent its totals yet divided by zero.
@@ -187,8 +206,8 @@ describe('ProbeServerCard', () => {
       <ProbeServerCard
         server={online({
           pings: [
-            { id: 8, name: '电信', latency: 31, loss: 0.4 },
-            { id: 9, name: '联通', latency: -1, loss: 100 },
+            { id: 8, name: '电信', latency: 31, loss: 0.4, blocks: [] },
+            { id: 9, name: '联通', latency: -1, loss: 100, blocks: [] },
           ],
         })}
       />,
@@ -211,6 +230,49 @@ describe('ProbeServerCard', () => {
     ]);
   });
 
+  // One block per five minutes of the hour, oldest first, so a lossy spell shows where it was.
+  it('draws the hour of a route as blocks coloured by the loss in each', () => {
+    const start = Date.UTC(2026, 9, 2, 11, 0, 0);
+    const span = 5 * 60_000;
+    const block = (index: number, checks: number, loss: number) => ({
+      start: start + index * span,
+      end: start + (index + 1) * span,
+      checks,
+      loss,
+    });
+    render(
+      <ProbeServerCard
+        server={online({
+          pings: [
+            {
+              id: 8,
+              name: '电信',
+              latency: 31,
+              loss: 12.5,
+              blocks: [
+                block(0, 5, 0),
+                block(1, 5, 5),
+                block(2, 5, 20),
+                block(3, 5, 40),
+                block(4, 0, 0),
+              ],
+            },
+          ],
+        })}
+      />,
+    );
+    const hour = screen.getByRole('img', { name: '电信 Packet loss 12.5 %' });
+    const blocks = Array.from(hour.querySelectorAll('span'));
+    const warn = 'rgb(250, 173, 20)';
+    const critical = 'rgb(255, 77, 79)';
+
+    expect(blocks.map((item) => item.style.background).slice(2)).toEqual([warn, critical, '']);
+    expect(blocks[0].style.background).toBe(blocks[1].style.background);
+    expect(['', warn, critical]).not.toContain(blocks[0].style.background);
+    expect(blocks[2].title).toMatch(/^\d{2}:\d{2}–\d{2}:\d{2} · Packet loss 20 %$/);
+    expect(blocks[4].title).toMatch(/^\d{2}:\d{2}–\d{2}:\d{2} · No checks$/);
+  });
+
   it('leaves the network quality heading out for a server without ping tasks', () => {
     render(<ProbeServerCard server={online()} />);
 
@@ -218,17 +280,17 @@ describe('ProbeServerCard', () => {
     expect(lossBars()).toHaveLength(0);
   });
 
-  // The bar is the share of the hour's pings that came back: full when none was lost.
+  // Without the hour in blocks (an older Lite), one bar of the pings that came back.
   it('fills a route bar with the pings answered, amber under 95 % and red under 80 %', () => {
     render(
       <ProbeServerCard
         server={online({
           pings: [
-            { id: 1, name: 'a', latency: 20, loss: 5 },
-            { id: 2, name: 'b', latency: 20, loss: 5.5 },
-            { id: 3, name: 'c', latency: 20, loss: 20 },
-            { id: 4, name: 'd', latency: 20, loss: 20.5 },
-            { id: 5, name: 'e', latency: -1, loss: 100 },
+            { id: 1, name: 'a', latency: 20, loss: 5, blocks: [] },
+            { id: 2, name: 'b', latency: 20, loss: 5.5, blocks: [] },
+            { id: 3, name: 'c', latency: 20, loss: 20, blocks: [] },
+            { id: 4, name: 'd', latency: 20, loss: 20.5, blocks: [] },
+            { id: 5, name: 'e', latency: -1, loss: 100, blocks: [] },
           ],
         })}
       />,
@@ -253,7 +315,7 @@ describe('ProbeServerCard', () => {
     render(
       <ProbeServerCard
         server={online({
-          pings: [{ id: 8, name: '电信', latency, loss: latency < 0 ? 100 : 0 }],
+          pings: [{ id: 8, name: '电信', latency, loss: latency < 0 ? 100 : 0, blocks: [] }],
         })}
       />,
     );

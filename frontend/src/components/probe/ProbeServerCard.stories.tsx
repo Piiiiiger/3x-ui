@@ -6,6 +6,18 @@ import ProbeServerCard, { ProbeMeter, type ProbeCardServer } from './ProbeServer
 
 const GiB = 1024 ** 3;
 
+// One hour of a ping route in five-minute blocks of five checks; null is a block without checks.
+function hour(losses: (number | null)[]): ProbeCardServer['pings'][number]['blocks'] {
+  const first = 1790938800000;
+  const span = 5 * 60_000;
+  return losses.map((loss, index) => ({
+    start: first + index * span,
+    end: first + (index + 1) * span,
+    checks: loss === null ? 0 : 5,
+    loss: loss ?? 0,
+  }));
+}
+
 const online: ProbeCardServer = {
   name: '新加坡-Delta',
   region: '🇸🇬',
@@ -25,9 +37,21 @@ const online: ProbeCardServer = {
   netTotalDown: 310 * GiB,
   uptime: 19 * 86400 + 5 * 3600,
   pings: [
-    { id: 8, name: '电信', latency: 31, loss: 0.4 },
-    { id: 9, name: '联通', latency: 126, loss: 8 },
-    { id: 10, name: '移动', latency: -1, loss: 100 },
+    {
+      id: 8,
+      name: '电信',
+      latency: 31,
+      loss: 1.7,
+      blocks: hour([0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0]),
+    },
+    {
+      id: 9,
+      name: '联通',
+      latency: 126,
+      loss: 8,
+      blocks: hour([0, 0, 20, 40, 0, 0, 0, null, null, 0, 20, 0]),
+    },
+    { id: 10, name: '移动', latency: -1, loss: 100, blocks: hour(Array(12).fill(100)) },
   ],
 };
 
@@ -66,14 +90,14 @@ const meta = {
     docs: {
       description: {
         component:
-          'One monitored server: its flag and name, one status (online, offline, unknown or unmonitored), and for an online server its CPU, memory and disk bars, load, uptime, speeds, traffic totals and, under a network quality heading, the latency of each ping route over a bar of the pings answered. The admin Probe page and the client portal share it, so it fetches nothing and styles itself with theme tokens only. Lay cards out with the `probe-grid` class that ships with it: every card in the grid then has the same size, with its sections at the same height and its footer on the bottom edge. The name and the subtitle are cut to one line for that, and carry their full text as a tooltip.',
+          'One monitored server: its flag and name, one status (online, offline, unknown or unmonitored), and for an online server its CPU, memory and disk as bars of blocks, load, uptime, speeds, traffic totals and, under a network quality heading, one row per ping route: its name, the last hour in blocks coloured by the packet loss in each, and its latency. The admin Probe page and the client portal share it, so it fetches nothing and styles itself with theme tokens only. Lay cards out with the `probe-grid` class that ships with it: every card in the grid then has the same size, with its sections at the same height and its footer on the bottom edge. The name and the subtitle are cut to one line for that, and carry their full text as a tooltip.',
       },
     },
   },
   argTypes: {
     server: {
       description:
-        'What to draw. Figures are read only while `status` is `online`. `updatedAt` (unix ms) is the last report of an offline server. A ping `latency` of -1 means no reply in the last hour; its `loss`, a percentage, is the unfilled part of the bar under it. `region` is a flag emoji or a two-letter country code.',
+        'What to draw. Figures are read only while `status` is `online`. `updatedAt` (unix ms) is the last report of an offline server. A ping `latency` of -1 means no reply in the last hour and its `loss` is a percentage. Its `blocks` are that hour oldest first, `checks` of 0 marking a span without any; with no blocks at all, one bar of the pings answered is drawn instead. `region` is a flag emoji or a two-letter country code.',
     },
     subtitle: { description: 'Optional line under the name, e.g. OS and architecture.' },
     footer: {
@@ -130,7 +154,15 @@ export const RightToLeft: Story = {
       ...online,
       name: 'تهران ۱',
       region: '🇮🇷',
-      pings: [{ id: 3, name: 'مخابرات', latency: 58, loss: 2.5 }],
+      pings: [
+        {
+          id: 3,
+          name: 'مخابرات',
+          latency: 58,
+          loss: 2.5,
+          blocks: hour([0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0]),
+        },
+      ],
     },
   },
   decorators: [

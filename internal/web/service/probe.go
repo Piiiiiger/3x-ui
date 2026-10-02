@@ -24,6 +24,11 @@ const (
 	// probeFreshFor also applies to a failure, so a hung Lite is not retried by every poll.
 	probeFreshFor = 2 * time.Second
 	probeStaleFor = 90 * time.Second
+	// Pings run once a minute, and their history costs Lite more than the rest of the batch.
+	probeBlocksFreshFor = 30 * time.Second
+
+	probeBlockSpan  = 5 * time.Minute
+	probeBlockCount = 12
 
 	probeServerIdMaxLen = 64
 )
@@ -35,13 +40,24 @@ const (
 	probeStatusUnmonitored = "unmonitored"
 )
 
+// ProbePingBlock is one span of a ping task's hour, bounded in unix ms: the
+// checks that ran in it and the share of them lost, in percent.
+type ProbePingBlock struct {
+	Start  int64   `json:"start" example:"1735689600000"`
+	End    int64   `json:"end" example:"1735689900000"`
+	Checks int     `json:"checks" example:"5"`
+	Loss   float64 `json:"loss" example:"20"`
+}
+
 // ProbePing is one ping task of a server over the last hour: latency is the
 // average in ms (-1 when no reply came back at all), loss is a percentage.
+// Blocks is that hour oldest first, empty when Lite gave no history.
 type ProbePing struct {
-	Id      int     `json:"id" example:"2"`
-	Name    string  `json:"name" example:"China Telecom"`
-	Latency int     `json:"latency" example:"31"`
-	Loss    float64 `json:"loss" example:"0.4"`
+	Id      int              `json:"id" example:"2"`
+	Name    string           `json:"name" example:"China Telecom"`
+	Latency int              `json:"latency" example:"31"`
+	Loss    float64          `json:"loss" example:"0.4"`
+	Blocks  []ProbePingBlock `json:"blocks"`
 }
 
 // ProbeServer is one server of the Lite monitor. Its metrics are zero unless
@@ -151,21 +167,26 @@ type ProbeSnapshot struct {
 	Error     string
 }
 
-// probeFlight is one fetch that every caller arriving meanwhile waits for.
+// probeFlight is one fetch that every caller arriving meanwhile waits for. It
+// reuses the blocks it was given unless askBlocks sends it for new ones.
 type probeFlight struct {
-	url  string
-	done chan struct{}
-	snap ProbeSnapshot
+	url       string
+	done      chan struct{}
+	snap      ProbeSnapshot
+	blocks    liteBlocks
+	askBlocks bool
 }
 
 // probeCache is shared by the panel and the subscription server, which run in
 // one process. It holds the last answer of one Lite address, good or failed.
 var probeCache struct {
 	sync.Mutex
-	url    string
-	snap   ProbeSnapshot
-	at     time.Time
-	flight *probeFlight
+	url      string
+	snap     ProbeSnapshot
+	at       time.Time
+	flight   *probeFlight
+	blocks   liteBlocks
+	blocksAt time.Time
 }
 
 // dropProbeCache also disowns a fetch in the air, so an answer asked for under
@@ -174,6 +195,7 @@ func dropProbeCache() {
 	probeCache.Lock()
 	defer probeCache.Unlock()
 	probeCache.url, probeCache.snap, probeCache.at, probeCache.flight = "", ProbeSnapshot{}, time.Time{}, nil
+	probeCache.blocks, probeCache.blocksAt = nil, time.Time{}
 }
 
 // ProbeService reads server status from a Lite monitor on the panel's host
@@ -215,7 +237,10 @@ func probeSnapshotFrom(ctx context.Context, liteURL string) (ProbeSnapshot, erro
 	}
 	flight := probeCache.flight
 	if flight == nil || flight.url != liteURL {
-		flight = &probeFlight{url: liteURL, done: make(chan struct{})}
+		flight = &probeFlight{url: liteURL, done: make(chan struct{}), askBlocks: true}
+		if probeCache.url == liteURL && probeNow().Sub(probeCache.blocksAt) < probeBlocksFreshFor {
+			flight.blocks, flight.askBlocks = probeCache.blocks, false
+		}
 		probeCache.flight = flight
 		// The fetch outlives the caller that started it: others may be waiting.
 		fetchCtx, timeout := context.WithoutCancel(ctx), probeFetchTimeout
@@ -234,13 +259,14 @@ func (f *probeFlight) run(ctx context.Context, timeout time.Duration) {
 	// Settled in a defer so that even a panic wakes the waiters and frees the slot.
 	err := errLiteUnexpected
 	var servers []ProbeServer
-	defer func() { f.settle(servers, err) }()
-	servers, err = fetchLite(ctx, f.url, timeout)
+	blocks := f.blocks
+	defer func() { f.settle(servers, blocks, err) }()
+	servers, blocks, err = fetchLite(ctx, f.url, timeout, f.blocks, f.askBlocks)
 }
 
 // settle stores the answer unless the cache was dropped or moved to another
 // address meanwhile. A failure keeps the last good servers while they are young.
-func (f *probeFlight) settle(servers []ProbeServer, err error) {
+func (f *probeFlight) settle(servers []ProbeServer, blocks liteBlocks, err error) {
 	now := probeNow()
 	probeCache.Lock()
 	defer probeCache.Unlock()
@@ -255,6 +281,10 @@ func (f *probeFlight) settle(servers []ProbeServer, err error) {
 	}
 	if probeCache.flight == f {
 		probeCache.url, probeCache.snap, probeCache.at, probeCache.flight = f.url, f.snap, now, nil
+		// A Lite without history is not asked again by the next poll either.
+		if f.askBlocks && err == nil {
+			probeCache.blocks, probeCache.blocksAt = blocks, now
+		}
 	}
 }
 

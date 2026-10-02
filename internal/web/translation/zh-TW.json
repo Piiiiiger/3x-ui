@@ -2520,6 +2520,7 @@
       "networkQuality": "網路品質",
       "lastHour": "最近 1 小時",
       "packetLoss": "丟包率 {loss}",
+      "noChecks": "無檢測",
       "intro": "Lite 監控中的所有伺服器，包含負載、流量與延遲。把伺服器關聯到節點後，該節點的使用者就能在入口網站看到它。",
       "openPublic": "開啟公開頁面",
       "linkNodes": "關聯節點",

@@ -67,9 +67,9 @@ func liteTestServers() []ProbeServer {
 			NetTotalUp: 1000000, NetTotalDown: 2000000, Uptime: 86400,
 			TrafficLimit: 1610612736000, TrafficUsed: 3000000,
 			Pings: []ProbePing{
-				{Id: 2, Name: "China Telecom", Latency: 32, Loss: 25},
-				{Id: 7, Name: "Beijing Mobile", Latency: -1, Loss: 100},
-				{Id: 10, Name: "Shanghai Unicom", Latency: 38, Loss: 0.5},
+				{Id: 2, Name: "China Telecom", Latency: 32, Loss: 25, Blocks: []ProbePingBlock{}},
+				{Id: 7, Name: "Beijing Mobile", Latency: -1, Loss: 100, Blocks: []ProbePingBlock{}},
+				{Id: 10, Name: "Shanghai Unicom", Latency: 38, Loss: 0.5, Blocks: []ProbePingBlock{}},
 			},
 		},
 		{
@@ -83,7 +83,27 @@ func liteTestServers() []ProbeServer {
 
 func fetchTestLite(t *testing.T, url string) ([]ProbeServer, error) {
 	t.Helper()
-	return fetchLite(context.Background(), url, 3*time.Second)
+	servers, _, err := fetchLite(context.Background(), url, 3*time.Second, nil, true)
+	return servers, err
+}
+
+// The hour that ends at 19:52:10 for task 2 of srv-online: a point older than
+// the twelve blocks, a gap of forty minutes, and the open point Lite appends.
+const liteTestLossHistory = `{"start":"2026-10-01T18:52:10Z","end":"2026-10-01T19:52:10Z","series":[
+  {"metric_key":"ping.loss","entity_id":"srv-online","tags":{"task_id":"2"},"interval_seconds":300,"points":[
+    {"time":"2026-10-01T18:50:00Z","value":1,"count":3},
+    {"time":"2026-10-01T18:55:00Z","value":0,"count":5},
+    {"time":"2026-10-01T19:00:00Z","value":0.2,"count":5},
+    {"time":"2026-10-01T19:45:00Z","value":1,"count":5},
+    {"time":"2026-10-01T19:50:00Z","value":0.5,"count":2},
+    {"time":"2026-10-01T19:52:10Z","value":null}]},
+  {"metric_key":"ping.latency_ms","entity_id":"srv-online","tags":{"task_id":"7"},"points":[
+    {"time":"2026-10-01T19:50:00Z","value":40,"count":5}]}
+]}`
+
+func lossBlock(hour, minute, checks int, loss float64) ProbePingBlock {
+	start := time.Date(2026, 10, 1, hour, minute, 0, 0, time.UTC)
+	return ProbePingBlock{Start: start.UnixMilli(), End: start.Add(5 * time.Minute).UnixMilli(), Checks: checks, Loss: loss}
 }
 
 func assertProbeServers(t *testing.T, got, want []ProbeServer) {
@@ -100,6 +120,7 @@ func assertProbeServers(t *testing.T, got, want []ProbeServer) {
 
 // One server per status, plus an online one whose report carries no totals:
 // a wrong field, unit, status rule or order shows up as a differing server.
+// This Lite does not know public:queryMetrics, which must cost only the blocks.
 func TestFetchLiteMapsEveryServerStatusAndPing(t *testing.T) {
 	lite := probetest.NewLite(t)
 	lite.Answer(liteTestNodes, liteTestStatuses)
@@ -109,6 +130,27 @@ func TestFetchLiteMapsEveryServerStatusAndPing(t *testing.T) {
 		t.Fatalf("fetch: %v", err)
 	}
 	assertProbeServers(t, got, liteTestServers())
+}
+
+// Twelve blocks of five minutes that end with the running one: a shifted
+// window, a kept old point or a skipped gap shows up as a differing block.
+func TestFetchLiteCutsTheHourOfAPingTaskIntoBlocks(t *testing.T) {
+	lite := probetest.NewLite(t)
+	lite.Answer(liteTestNodes, liteTestStatuses)
+	lite.AnswerMetrics(liteTestLossHistory)
+
+	got, err := fetchTestLite(t, lite.URL)
+	if err != nil {
+		t.Fatalf("fetch: %v", err)
+	}
+	want := liteTestServers()
+	want[2].Pings[0].Blocks = []ProbePingBlock{
+		lossBlock(18, 55, 5, 0), lossBlock(19, 0, 5, 20),
+		lossBlock(19, 5, 0, 0), lossBlock(19, 10, 0, 0), lossBlock(19, 15, 0, 0), lossBlock(19, 20, 0, 0),
+		lossBlock(19, 25, 0, 0), lossBlock(19, 30, 0, 0), lossBlock(19, 35, 0, 0), lossBlock(19, 40, 0, 0),
+		lossBlock(19, 45, 5, 100), lossBlock(19, 50, 2, 50),
+	}
+	assertProbeServers(t, got, want)
 }
 
 // JSON-RPC lets a server answer a batch in any order; taking the first reply
@@ -250,7 +292,7 @@ func TestFetchLiteGivesUpAfterTheTimeout(t *testing.T) {
 	lite.Override(func(_ http.ResponseWriter, r *http.Request) { <-r.Context().Done() })
 
 	started := time.Now()
-	_, err := fetchLite(context.Background(), lite.URL, 50*time.Millisecond)
+	_, _, err := fetchLite(context.Background(), lite.URL, 50*time.Millisecond, nil, true)
 	if err == nil || err.Error() != "Lite did not answer in 50ms" {
 		t.Fatalf("err = %v, want the timeout phrase", err)
 	}

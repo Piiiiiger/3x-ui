@@ -2520,6 +2520,7 @@
       "networkQuality": "Chất lượng mạng",
       "lastHour": "1 giờ qua",
       "packetLoss": "Mất gói tin {loss}",
+      "noChecks": "Không có lần kiểm tra",
       "intro": "Mọi máy chủ mà Lite theo dõi, kèm tải, lưu lượng và độ trễ. Liên kết máy chủ với một nút để khách hàng của nút đó thấy nó trong cổng.",
       "openPublic": "Mở trang công khai",
       "linkNodes": "Liên kết nút",

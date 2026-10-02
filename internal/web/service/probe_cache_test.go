@@ -90,6 +90,35 @@ func awaitRequest(t *testing.T, entered <-chan struct{}) {
 	}
 }
 
+// The history changes once a minute and costs Lite five times the rest of the
+// batch, so it rides along at most every thirty seconds, answered or not.
+func TestProbeSnapshotAsksForTheLossHistoryEveryThirtySeconds(t *testing.T) {
+	s, clock := setupProbe(t)
+	lite := probetest.NewLite(t)
+	lite.Answer(`{"a":{"name":"first"}}`,
+		`{"a":{"time":"2026-10-02T07:59:58Z","online":true,"ping":{"2":{"name":"China Telecom","latest":30,"avg":30,"loss":0}}}}`)
+	useLite(t, s, lite)
+	blocksOf := func() int { return len(snapshotOf(t, s).Servers[0].Pings[0].Blocks) }
+
+	if blocks := blocksOf(); blocks != 0 || lite.Calls("public:queryMetrics") != 1 {
+		t.Fatalf("a Lite without history: %d blocks after %d history calls, want 0 after 1", blocks, lite.Calls("public:queryMetrics"))
+	}
+	lite.AnswerMetrics(`{"end":"2026-10-02T08:00:29Z","series":[{"metric_key":"ping.loss","entity_id":"a","tags":{"task_id":"2"},
+		"points":[{"time":"2026-10-02T08:00:00Z","value":0,"count":1}]}]}`)
+	clock.Advance(28 * time.Second)
+	if blocks := blocksOf(); blocks != 0 || lite.Calls("public:queryMetrics") != 1 || lite.Requests() != 2 {
+		t.Fatalf("after 28s: %d blocks, %d history calls in %d requests, want 0, 1 in 2", blocks, lite.Calls("public:queryMetrics"), lite.Requests())
+	}
+	clock.Advance(2 * time.Second)
+	if blocks := blocksOf(); blocks != 12 || lite.Calls("public:queryMetrics") != 2 {
+		t.Fatalf("after 30s: %d blocks after %d history calls, want 12 after 2", blocks, lite.Calls("public:queryMetrics"))
+	}
+	clock.Advance(2 * time.Second)
+	if blocks := blocksOf(); blocks != 12 || lite.Calls("public:queryMetrics") != 2 || lite.Requests() != 4 {
+		t.Fatalf("2s later: %d blocks, %d history calls in %d requests, want the 12 kept, 2 in 4", blocks, lite.Calls("public:queryMetrics"), lite.Requests())
+	}
+}
+
 // Every open admin page and portal polls; without the cache each poll would be
 // a request to Lite, and with a cache that never expires the page would freeze.
 func TestProbeSnapshotAsksLiteAtMostOnceEveryTwoSeconds(t *testing.T) {

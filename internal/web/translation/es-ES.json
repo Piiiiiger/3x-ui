@@ -2520,6 +2520,7 @@
       "networkQuality": "Calidad de la red",
       "lastHour": "Última hora",
       "packetLoss": "Pérdida de paquetes {loss}",
+      "noChecks": "Sin comprobaciones",
       "intro": "Todos los servidores que vigila Lite, con su carga, tráfico y latencia. Vincula un servidor a un nodo y los clientes de ese nodo lo verán en su portal.",
       "openPublic": "Abrir página pública",
       "linkNodes": "Vincular nodos",

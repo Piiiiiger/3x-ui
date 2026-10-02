@@ -21,6 +21,7 @@ type Lite struct {
 	srv      *httptest.Server
 	mu       sync.Mutex
 	results  map[string]json.RawMessage
+	calls    map[string]int
 	requests int
 	backward bool
 	override http.HandlerFunc
@@ -50,6 +51,21 @@ func (l *Lite) Answer(nodes, statuses string) {
 		"common:getNodes":             json.RawMessage(nodes),
 		"common:getNodesLatestStatus": json.RawMessage(statuses),
 	}
+}
+
+// AnswerMetrics sets the result of public:queryMetrics. A Lite that was never
+// given one answers that method with JSON-RPC error -32601, as an old Lite does.
+func (l *Lite) AnswerMetrics(result string) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.results["public:queryMetrics"] = json.RawMessage(result)
+}
+
+// Calls is how many times method was called, answered or not.
+func (l *Lite) Calls(method string) int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.calls[method]
 }
 
 // Forget removes a method, so calls to it get JSON-RPC error -32601.
@@ -141,6 +157,10 @@ func (l *Lite) handle(w http.ResponseWriter, r *http.Request) {
 
 func (l *Lite) answer(call rpcCall) rpcReply {
 	l.mu.Lock()
+	if l.calls == nil {
+		l.calls = map[string]int{}
+	}
+	l.calls[call.Method]++
 	result, known := l.results[call.Method]
 	l.mu.Unlock()
 	if !known {

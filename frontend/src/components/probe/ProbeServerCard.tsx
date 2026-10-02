@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Progress, theme } from 'antd';
+import { Card, theme } from 'antd';
 
 import type { PortalProbeServer } from '@/generated/zod';
 import { USAGE_CRIT_COLOR, USAGE_WARN_COLOR, usageTierColor } from '@/models/status';
@@ -17,6 +17,8 @@ const LATENCY_GOOD_MAX_MS = 80;
 const LATENCY_BAD_MIN_MS = 180;
 const ANSWERED_GOOD_MIN_PERCENT = 95;
 const ANSWERED_WARN_MIN_PERCENT = 80;
+
+const METER_BLOCKS = 30;
 
 const STATUS_LABEL_KEYS: Record<ProbeCardServer['status'], string> = {
   online: 'online',
@@ -43,6 +45,18 @@ function answeredColor(percent: number, goodColor: string): string {
   return percent >= ANSWERED_WARN_MIN_PERCENT ? USAGE_WARN_COLOR : USAGE_CRIT_COLOR;
 }
 
+// Empty only at zero and full only at one hundred: any use shows a block, and 99 % is not full.
+function filledBlocks(percent: number): number {
+  if (!(percent > 0)) return 0;
+  if (percent >= 100) return METER_BLOCKS;
+  return Math.min(METER_BLOCKS - 1, Math.max(1, Math.round((percent / 100) * METER_BLOCKS)));
+}
+
+function blockRange(block: ProbeCardPing['blocks'][number]): string {
+  const clock = (time: number) => TimeFormatter.formatClock(time / 1000).slice(0, 5);
+  return `${clock(block.start)}–${clock(block.end)}`;
+}
+
 interface ProbeMeterProps {
   label: string;
   // null is a share of something without a limit: an empty bar and no figure.
@@ -55,6 +69,8 @@ export function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
   const { token } = theme.useToken();
   const value = percent === null ? undefined : `${percent.toFixed(1)} %`;
   const share = percent ?? 0;
+  const filled = filledBlocks(share);
+  const color = usageTierColor(share, token.colorPrimary);
   return (
     <div className="probe-card-meter">
       <div className="probe-card-meter-head">
@@ -64,13 +80,18 @@ export function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
         </span>
         {value && <bdi className="probe-card-meter-value">{value}</bdi>}
       </div>
-      <Progress
+      <div
+        className="probe-card-blocks"
+        role="progressbar"
         aria-label={[label, value ?? detail].filter(Boolean).join(' ')}
-        percent={share}
-        showInfo={false}
-        size="small"
-        strokeColor={usageTierColor(share, token.colorPrimary)}
-      />
+        aria-valuenow={share}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        {Array.from({ length: METER_BLOCKS }, (_, index) => (
+          <span key={index} style={index < filled ? { background: color } : undefined} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -98,22 +119,41 @@ function PingRoute({ ping }: { ping: ProbeCardPing }) {
   const { token } = theme.useToken();
   const answered = 100 - ping.loss;
   const loss = t('pages.probe.packetLoss', { loss: formatLoss(ping.loss) });
+  const lossOf = (percent: number) => t('pages.probe.packetLoss', { loss: formatLoss(percent) });
   return (
     <div className="probe-card-route" title={loss}>
-      <div className="probe-card-route-head">
-        <span className="probe-card-route-name" dir="auto">
-          {ping.name}
-        </span>
-        <span className={`probe-card-route-latency is-${latencyTone(ping.latency)}`}>
-          <bdi>{ping.latency < 0 ? t('pages.probe.pingTimeout') : `${ping.latency} ms`}</bdi>
-        </span>
-      </div>
-      {/* The loss has no figure of its own: the bar is the share of pings answered. */}
-      <div className="probe-card-route-bar" role="img" aria-label={`${ping.name} ${loss}`}>
-        <span
-          style={{ width: `${answered}%`, background: answeredColor(answered, token.colorSuccess) }}
-        />
-      </div>
+      <span className="probe-card-route-name" dir="auto">
+        {ping.name}
+      </span>
+      {/* The loss has no figure of its own: the blocks are the hour, oldest first, each
+          coloured by the loss in it. Without them, one bar of the pings answered. */}
+      {ping.blocks.length > 0 ? (
+        <div className="probe-card-blocks" role="img" aria-label={`${ping.name} ${loss}`}>
+          {ping.blocks.map((block) => (
+            <span
+              key={block.start}
+              title={`${blockRange(block)} · ${block.checks > 0 ? lossOf(block.loss) : t('pages.probe.noChecks')}`}
+              style={
+                block.checks > 0
+                  ? { background: answeredColor(100 - block.loss, token.colorSuccess) }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="probe-card-route-bar" role="img" aria-label={`${ping.name} ${loss}`}>
+          <span
+            style={{
+              width: `${answered}%`,
+              background: answeredColor(answered, token.colorSuccess),
+            }}
+          />
+        </div>
+      )}
+      <span className={`probe-card-route-latency is-${latencyTone(ping.latency)}`}>
+        <bdi>{ping.latency < 0 ? t('pages.probe.pingTimeout') : `${ping.latency} ms`}</bdi>
+      </span>
     </div>
   );
 }

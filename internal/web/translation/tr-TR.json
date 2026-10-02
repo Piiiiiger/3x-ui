@@ -2520,6 +2520,7 @@
       "networkQuality": "Ağ kalitesi",
       "lastHour": "Son 1 saat",
       "packetLoss": "Paket kaybı {loss}",
+      "noChecks": "Kontrol yok",
       "intro": "Lite’ın izlediği tüm sunucular; yük, trafik ve gecikme bilgileriyle. Bir sunucuyu bir düğüme bağlayın, o düğümün kullanıcıları onu portalda görsün.",
       "openPublic": "Herkese açık sayfayı aç",
       "linkNodes": "Düğümleri bağla",

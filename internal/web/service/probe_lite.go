@@ -21,10 +21,14 @@ import (
 const (
 	liteRPCPath = "/api/rpc2"
 	// One batch for the static server list and the live status, as Lite's own page asks.
-	liteBatch    = `[{"jsonrpc":"2.0","id":1,"method":"common:getNodes"},{"jsonrpc":"2.0","id":2,"method":"common:getNodesLatestStatus"}]`
-	liteNodesID  = 1
-	liteStatusID = 2
-	liteMaxBody  = 4 << 20
+	liteBatch = `[{"jsonrpc":"2.0","id":1,"method":"common:getNodes"},{"jsonrpc":"2.0","id":2,"method":"common:getNodesLatestStatus"}`
+	// The hour of ping loss of every server, in the five-minute buckets Lite keeps.
+	liteBlocksCall = `,{"jsonrpc":"2.0","id":3,"method":"public:queryMetrics","params":{"metric_keys":["ping.loss"],"hours":1,"downsample":true,"max_points":12,"aggregation":"avg","fill_empty":true}}`
+	liteNodesID    = 1
+	liteStatusID   = 2
+	liteBlocksID   = 3
+	liteLossMetric = "ping.loss"
+	liteMaxBody    = 4 << 20
 )
 
 // Failures are fixed phrases plus a status or code, never bytes Lite sent: the
@@ -109,36 +113,62 @@ type litePing struct {
 	Loss   float64 `json:"loss"`
 }
 
+// liteBlocks is the last hour of every ping task, by server id and task id.
+type liteBlocks map[string]map[int][]ProbePingBlock
+
+type liteMetricPoint struct {
+	Time  time.Time `json:"time"`
+	Value *float64  `json:"value"`
+	Count int       `json:"count"`
+}
+
+type liteMetricSeries struct {
+	MetricKey string            `json:"metric_key"`
+	EntityID  string            `json:"entity_id"`
+	Tags      map[string]string `json:"tags"`
+	Points    []liteMetricPoint `json:"points"`
+}
+
+type liteMetrics struct {
+	End    time.Time          `json:"end"`
+	Series []liteMetricSeries `json:"series"`
+}
+
 // fetchLite reads Lite's guest view: every server it lists, with the latest
-// report of those that reported since Lite started.
-func fetchLite(ctx context.Context, baseURL string, timeout time.Duration) ([]ProbeServer, error) {
+// report of those that reported since Lite started. It draws the ping blocks
+// from known, or with askBlocks from Lite, and returns the ones it used.
+func fetchLite(ctx context.Context, baseURL string, timeout time.Duration, known liteBlocks, askBlocks bool) ([]ProbeServer, liteBlocks, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+liteRPCPath, strings.NewReader(liteBatch))
+	batch := liteBatch + "]"
+	if askBlocks {
+		batch = liteBatch + liteBlocksCall + "]"
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+liteRPCPath, strings.NewReader(batch))
 	if err != nil {
-		return nil, errLiteAddress
+		return nil, known, errLiteAddress
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := liteHTTPClient.Do(req)
 	if err != nil {
-		return nil, liteTransportError(err, timeout)
+		return nil, known, liteTransportError(err, timeout)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, errLitePrivate
+		return nil, known, errLitePrivate
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Lite answered HTTP %d", resp.StatusCode)
+		return nil, known, fmt.Errorf("Lite answered HTTP %d", resp.StatusCode)
 	}
 	// One byte past the cap tells an oversized answer from a truncated one.
 	body, err := io.ReadAll(io.LimitReader(resp.Body, liteMaxBody+1))
 	if err != nil {
-		return nil, liteTransportError(err, timeout)
+		return nil, known, liteTransportError(err, timeout)
 	}
 	if len(body) > liteMaxBody {
-		return nil, errLiteTooLarge
+		return nil, known, errLiteTooLarge
 	}
-	return decodeLiteBatch(body)
+	return decodeLiteBatch(body, known, askBlocks)
 }
 
 func liteTransportError(err error, timeout time.Duration) error {
@@ -152,16 +182,29 @@ func liteTransportError(err error, timeout time.Duration) error {
 	}
 }
 
-func decodeLiteBatch(body []byte) ([]ProbeServer, error) {
+// decodeLiteBatch fails on the server list and the status only: the history is
+// an extra that an older Lite does not have, and then the blocks stay empty.
+func decodeLiteBatch(body []byte, known liteBlocks, askedBlocks bool) ([]ProbeServer, liteBlocks, error) {
 	var replies []liteReply
 	if err := json.Unmarshal(body, &replies); err != nil {
-		return nil, errLiteUnexpected
+		return nil, known, errLiteUnexpected
 	}
 	var nodes map[string]liteNode
 	var statuses map[string]liteStatus
+	blocks := known
+	if askedBlocks {
+		blocks = liteBlocks{}
+	}
 	for _, reply := range replies {
+		if reply.ID == liteBlocksID {
+			var metrics liteMetrics
+			if reply.Error == nil && json.Unmarshal(reply.Result, &metrics) == nil {
+				blocks = mapLiteBlocks(metrics, probeNow())
+			}
+			continue
+		}
 		if reply.Error != nil {
-			return nil, fmt.Errorf("Lite answered JSON-RPC error %d", reply.Error.Code)
+			return nil, known, fmt.Errorf("Lite answered JSON-RPC error %d", reply.Error.Code)
 		}
 		var err error
 		switch reply.ID {
@@ -171,18 +214,53 @@ func decodeLiteBatch(body []byte) ([]ProbeServer, error) {
 			err = json.Unmarshal(reply.Result, &statuses)
 		}
 		if err != nil {
-			return nil, errLiteUnexpected
+			return nil, known, errLiteUnexpected
 		}
 	}
 	if nodes == nil || statuses == nil {
-		return nil, errLiteUnexpected
+		return nil, known, errLiteUnexpected
 	}
-	return mapLiteServers(nodes, statuses), nil
+	return mapLiteServers(nodes, statuses, blocks), blocks, nil
+}
+
+// mapLiteBlocks gives every task the same window, which ends with the running
+// span: a task that went quiet shows empty blocks at the end, not an older hour.
+func mapLiteBlocks(metrics liteMetrics, now time.Time) liteBlocks {
+	end := metrics.End
+	if end.IsZero() {
+		end = now
+	}
+	first := end.Truncate(probeBlockSpan).Add(-(probeBlockCount - 1) * probeBlockSpan)
+	blocks := liteBlocks{}
+	for _, series := range metrics.Series {
+		taskID, err := strconv.Atoi(series.Tags["task_id"])
+		if err != nil || series.MetricKey != liteLossMetric || series.EntityID == "" {
+			continue
+		}
+		hour := make([]ProbePingBlock, probeBlockCount)
+		for i := range hour {
+			start := first.Add(time.Duration(i) * probeBlockSpan)
+			hour[i] = ProbePingBlock{Start: start.UnixMilli(), End: start.Add(probeBlockSpan).UnixMilli()}
+		}
+		for _, point := range series.Points {
+			i := int(point.Time.Sub(first) / probeBlockSpan)
+			if point.Value == nil || point.Count <= 0 || point.Time.Before(first) || i >= probeBlockCount {
+				continue
+			}
+			hour[i].Checks = point.Count
+			hour[i].Loss = math.Round(min(max(*point.Value, 0), 1)*10000) / 100
+		}
+		if blocks[series.EntityID] == nil {
+			blocks[series.EntityID] = map[int][]ProbePingBlock{}
+		}
+		blocks[series.EntityID][taskID] = hour
+	}
+	return blocks
 }
 
 // mapLiteServers orders servers by Lite's weight, then name. A server without
 // a status entry has not reported since Lite started, which is not an outage.
-func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus) []ProbeServer {
+func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus, blocks liteBlocks) []ProbeServer {
 	ids := slices.SortedFunc(maps.Keys(nodes), func(a, b string) int {
 		return cmp.Or(
 			cmp.Compare(nodes[a].Weight, nodes[b].Weight),
@@ -212,7 +290,7 @@ func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus) [
 			}
 			if status.Online {
 				server.Status = probeStatusOnline
-				copyLiteMetrics(&server, node, status)
+				copyLiteMetrics(&server, node, status, blocks[id])
 			}
 		}
 		servers = append(servers, server)
@@ -220,7 +298,7 @@ func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus) [
 	return servers
 }
 
-func copyLiteMetrics(server *ProbeServer, node liteNode, status liteStatus) {
+func copyLiteMetrics(server *ProbeServer, node liteNode, status liteStatus, blocks map[int][]ProbePingBlock) {
 	server.Cpu = status.CPU
 	server.MemUsed = status.RAM
 	server.MemTotal = cmp.Or(status.RAMTotal, node.MemTotal)
@@ -235,7 +313,7 @@ func copyLiteMetrics(server *ProbeServer, node liteNode, status liteStatus) {
 	server.NetTotalDown = status.NetTotalDown
 	server.Uptime = status.Uptime
 	server.TrafficUsed = liteTrafficUsed(node.TrafficLimitType, status.NetTotalUp, status.NetTotalDown)
-	server.Pings = mapLitePings(status.Ping)
+	server.Pings = mapLitePings(status.Ping, blocks)
 }
 
 // liteTrafficUsed counts the way Lite does for the quota: by the limit type,
@@ -257,7 +335,7 @@ func liteTrafficUsed(limitType string, up, down int64) int64 {
 
 // mapLitePings sorts by numeric task id. Lite omits a task without samples in
 // the hour and sends latest -1 with avg 0 when every sample was lost.
-func mapLitePings(stats map[string]litePing) []ProbePing {
+func mapLitePings(stats map[string]litePing, blocks map[int][]ProbePingBlock) []ProbePing {
 	pings := make([]ProbePing, 0, len(stats))
 	for key, stat := range stats {
 		id, err := strconv.Atoi(key)
@@ -268,7 +346,11 @@ func mapLitePings(stats map[string]litePing) []ProbePing {
 		if stat.Latest >= 0 {
 			latency = int(math.Round(stat.Avg))
 		}
-		pings = append(pings, ProbePing{Id: id, Name: stat.Name, Latency: latency, Loss: stat.Loss})
+		hour := blocks[id]
+		if hour == nil {
+			hour = []ProbePingBlock{}
+		}
+		pings = append(pings, ProbePing{Id: id, Name: stat.Name, Latency: latency, Loss: stat.Loss, Blocks: hour})
 	}
 	slices.SortFunc(pings, func(a, b ProbePing) int { return cmp.Compare(a.Id, b.Id) })
 	return pings

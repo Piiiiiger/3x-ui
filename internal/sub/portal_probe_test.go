@@ -131,7 +131,7 @@ func TestPortalProbeSendsOnlyTheClientsHostsAndWhitelistedFields(t *testing.T) {
 	}
 	const wantServer = `{"id":0,"name":"pa","status":"online","region":"🇺🇸","updatedAt":1790927998000,"cpu":11,` +
 		`"memUsed":100,"memTotal":200,"diskUsed":0,"diskTotal":0,"load1":0,"load5":0,"load15":0,"netIn":0,"netOut":0,` +
-		`"netTotalUp":0,"netTotalDown":0,"uptime":50,"pings":[{"id":3,"name":"cn","latency":21,"loss":1.5}]}`
+		`"netTotalUp":0,"netTotalDown":0,"uptime":50,"pings":[{"id":3,"name":"cn","latency":21,"loss":1.5,"blocks":[]}]}`
 	if got := string(body["servers"]); got != "["+wantServer+"]" {
 		t.Fatalf("servers =\n %s\nwant\n [%s]", got, wantServer)
 	}

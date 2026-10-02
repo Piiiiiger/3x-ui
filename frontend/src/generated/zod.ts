@@ -18,6 +18,9 @@ export type Protocol = z.infer<typeof ProtocolSchema>;
 export const addrFamilySchema = z.number().int();
 export type addrFamily = z.infer<typeof addrFamilySchema>;
 
+export const liteBlocksSchema = z.record(z.string(), z.record(z.number().int(), z.array(z.lazy(() => ProbePingBlockSchema))));
+export type liteBlocks = z.infer<typeof liteBlocksSchema>;
+
 export const staticEgressResolverSchema = z.string();
 export type staticEgressResolver = z.infer<typeof staticEgressResolverSchema>;
 
@@ -1147,12 +1150,21 @@ export const ProbeOverviewSchema = z.object({
 export type ProbeOverview = z.infer<typeof ProbeOverviewSchema>;
 
 export const ProbePingSchema = z.object({
+  blocks: z.array(z.lazy(() => ProbePingBlockSchema)),
   id: z.number().int(),
   latency: z.number().int(),
   loss: z.number(),
   name: z.string(),
 });
 export type ProbePing = z.infer<typeof ProbePingSchema>;
+
+export const ProbePingBlockSchema = z.object({
+  checks: z.number().int(),
+  end: z.number().int(),
+  loss: z.number(),
+  start: z.number().int(),
+});
+export type ProbePingBlock = z.infer<typeof ProbePingBlockSchema>;
 
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),

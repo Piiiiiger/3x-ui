@@ -2520,6 +2520,7 @@
       "networkQuality": "网络质量",
       "lastHour": "最近 1 小时",
       "packetLoss": "丢包率 {loss}",
+      "noChecks": "无检测",
       "intro": "Lite 监控中的所有服务器，包括负载、流量和延迟。把服务器关联到节点后，该节点的用户就能在门户里看到它。",
       "openPublic": "打开公开页面",
       "linkNodes": "关联节点",

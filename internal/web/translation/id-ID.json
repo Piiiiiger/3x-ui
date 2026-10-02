@@ -2520,6 +2520,7 @@
       "networkQuality": "Kualitas jaringan",
       "lastHour": "1 jam terakhir",
       "packetLoss": "Kehilangan paket {loss}",
+      "noChecks": "Tidak ada pemeriksaan",
       "intro": "Semua server yang dipantau Lite, beserta beban, trafik, dan latensinya. Tautkan server ke sebuah node, dan klien node itu melihatnya di portal.",
       "openPublic": "Buka halaman publik",
       "linkNodes": "Tautkan node",

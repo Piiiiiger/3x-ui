@@ -122,6 +122,7 @@ func run(root, outDir string) error {
 				"ProbeOverview",
 				"ProbeServer",
 				"ProbePing",
+				"ProbePingBlock",
 				"ProbeLinkView",
 				"ProbeLinkInput",
 				"ProbeLinksInput",

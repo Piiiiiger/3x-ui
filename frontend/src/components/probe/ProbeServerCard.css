@@ -137,10 +137,23 @@
   font-variant-numeric: tabular-nums;
 }
 
-.probe-card-meter .ant-progress {
-  display: block;
-  margin: 0;
-  line-height: 1;
+/* A bar of blocks, for the meters and for the hour of a route alike. An empty
+   block is the track of Ant Design's small Progress. */
+.probe-card-blocks {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+}
+
+.probe-card-blocks > span {
+  flex: 1;
+  min-width: 0;
+  border-radius: 2px;
+  background: var(--ant-color-fill-secondary);
+}
+
+.probe-card-meter .probe-card-blocks {
+  margin-block-start: 5px;
 }
 
 .probe-card-facts {
@@ -204,41 +217,36 @@
   color: var(--ant-color-text-tertiary);
 }
 
-/* Bars sit on the bottom of their row, so a name that wraps leaves them level. */
+/* One row per route on shared columns, the last of a fixed least width: names,
+   blocks and latencies line up between the rows and between the cards. */
 .probe-card-routes {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
-  gap: 10px 16px;
+  grid-template-columns: fit-content(42%) minmax(0, 1fr) minmax(72px, max-content);
+  gap: 8px 12px;
   margin-block-start: 8px;
 }
 
-/* An odd route out takes the whole row instead of leaving half of it empty. */
-.probe-card-route:nth-child(odd):last-child {
+.probe-card-route {
+  display: grid;
   grid-column: 1 / -1;
-}
-
-/* A name too long to share the line keeps it, and the latency drops to the next. */
-.probe-card-route-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 8px;
+  grid-template-columns: subgrid;
+  align-items: center;
 }
 
 .probe-card-route-name {
+  overflow: hidden;
   font-size: 12px;
   color: var(--ant-color-text-secondary);
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* The margin sits on the span, not on its bdi, whose direction is that of its digits. */
 .probe-card-route-latency {
-  margin-inline-start: auto;
   font-size: 18px;
   font-weight: 600;
   line-height: 22px;
   font-variant-numeric: tabular-nums;
+  text-align: end;
   white-space: nowrap;
 }
 
@@ -255,12 +263,11 @@
   color: var(--ant-color-error-text);
 }
 
-/* The track of Ant Design's small Progress, which the usage bars above are. */
+/* The fallback for a route without blocks: one bar, as tall and as round as they are. */
 .probe-card-route-bar {
   height: 6px;
-  margin-block-start: 4px;
   overflow: hidden;
-  border-radius: 100px;
+  border-radius: 2px;
   background: var(--ant-color-fill-secondary);
 }
 

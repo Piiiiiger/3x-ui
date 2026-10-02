@@ -122,7 +122,7 @@ func TestClientServersListsOnlyTheHostsTheClientOwns(t *testing.T) {
 				Id: 0, Name: "洛杉矶-Alpha", Status: "online", Region: "🇺🇸", UpdatedAt: 1790927998000,
 				Cpu: 11, MemUsed: 100, MemTotal: 200, DiskUsed: 300, DiskTotal: 400,
 				Load1: 0.1, Load5: 0.2, Load15: 0.3, NetIn: 10, NetOut: 20, NetTotalUp: 30, NetTotalDown: 40, Uptime: 50,
-				Pings: []ProbePing{{Id: 3, Name: "cn", Latency: 21, Loss: 1.5}},
+				Pings: []ProbePing{{Id: 3, Name: "cn", Latency: 21, Loss: 1.5, Blocks: []ProbePingBlock{}}},
 			},
 			{Id: hk, Name: "香港-Bravo", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
 		},
