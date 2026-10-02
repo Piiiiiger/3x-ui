@@ -135,6 +135,28 @@ export function buildClientPageQuery(p: ClientQueryParams): string {
   return sp.toString();
 }
 
+// Callers pass a fresh object every render; an equal query keeps the previous one
+// so the re-render does not refetch.
+export function sameClientQuery(prev: ClientQueryParams, next: ClientQueryParams): boolean {
+  return (
+    prev.page === next.page &&
+    prev.pageSize === next.pageSize &&
+    (prev.search ?? '') === (next.search ?? '') &&
+    (prev.filter ?? '') === (next.filter ?? '') &&
+    (prev.protocol ?? '') === (next.protocol ?? '') &&
+    (prev.inbound ?? '') === (next.inbound ?? '') &&
+    (prev.sort ?? '') === (next.sort ?? '') &&
+    (prev.order ?? '') === (next.order ?? '') &&
+    (prev.expiryFrom ?? 0) === (next.expiryFrom ?? 0) &&
+    (prev.expiryTo ?? 0) === (next.expiryTo ?? 0) &&
+    (prev.usageFrom ?? 0) === (next.usageFrom ?? 0) &&
+    (prev.usageTo ?? 0) === (next.usageTo ?? 0) &&
+    (prev.autoRenew ?? '') === (next.autoRenew ?? '') &&
+    (prev.hasTgId ?? '') === (next.hasTgId ?? '') &&
+    (prev.hasComment ?? '') === (next.hasComment ?? '')
+  );
+}
+
 async function fetchClientPage(params: ClientQueryParams): Promise<ClientPageResponse> {
   const qs = buildClientPageQuery(params);
   const msg = await HttpUtil.get(`/panel/api/clients/list/paged?${qs}`, undefined, {
@@ -177,32 +199,8 @@ export function useClients(options: UseClientsOptions = {}) {
   // known, and fetching before then cost three sequential requests per load —
   // the first two thrown away (#trace).
   const [query, setQueryState] = useState<ClientQueryParams | null>(null);
-  // setQuery shallow-compares so callers can pass a fresh object every render
-  // (the common React pattern) without triggering a re-fetch when nothing
-  // actually changed.
   const setQuery = useCallback((next: ClientQueryParams) => {
-    setQueryState((prev) => {
-      if (
-        prev &&
-        prev.page === next.page &&
-        prev.pageSize === next.pageSize &&
-        (prev.search ?? '') === (next.search ?? '') &&
-        (prev.filter ?? '') === (next.filter ?? '') &&
-        (prev.protocol ?? '') === (next.protocol ?? '') &&
-        (prev.inbound ?? '') === (next.inbound ?? '') &&
-        (prev.sort ?? '') === (next.sort ?? '') &&
-        (prev.order ?? '') === (next.order ?? '') &&
-        (prev.expiryFrom ?? 0) === (next.expiryFrom ?? 0) &&
-        (prev.expiryTo ?? 0) === (next.expiryTo ?? 0) &&
-        (prev.usageFrom ?? 0) === (next.usageFrom ?? 0) &&
-        (prev.usageTo ?? 0) === (next.usageTo ?? 0) &&
-        (prev.autoRenew ?? '') === (next.autoRenew ?? '') &&
-        (prev.hasTgId ?? '') === (next.hasTgId ?? '') &&
-        (prev.hasComment ?? '') === (next.hasComment ?? '')
-      )
-        return prev;
-      return next;
-    });
+    setQueryState((prev) => (prev && sameClientQuery(prev, next) ? prev : next));
   }, []);
 
   const listQuery = useQuery({
