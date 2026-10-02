@@ -87,6 +87,7 @@ type SUBController struct {
 	clientService   service.ClientService
 	settingService  service.SettingService
 	portalService   service.ClientPortalService
+	codeService     service.ActivationCodeService
 	statsService    service.TrafficStatsService
 	probeService    service.ProbeService
 	portalLimiter   *loginlimit.Limiter
@@ -336,12 +337,16 @@ func (a *SUBController) initRouter(g *gin.RouterGroup) {
 	gLink.GET(":subid", a.subs)
 	gLink.HEAD(":subid", a.subs)
 	gLink.GET(":subid/hwid-status", a.hwidStatus)
+	gLink.GET(":subid/probe", a.subscriptionProbe)
 	gLink.HEAD(":subid/hwid-status", a.hwidStatus)
 	gLink.GET("portal", a.portalPage)
 	gLink.GET("portal/data", a.portalData)
 	gLink.GET("portal/probe", a.portalProbe)
-	gLink.POST("portal/login", a.portalLogin)
+	gLink.POST("portal/login", portalJSON, a.portalLogin)
 	gLink.POST("portal/logout", a.portalLogout)
+	gLink.POST("portal/register", portalJSON, a.portalRegister)
+	gLink.POST("portal/redeem", portalJSON, a.portalRedeem)
+	gLink.POST("portal/admin-login", portalJSON, a.portalAdminLogin)
 	if a.jsonEnabled {
 		gJson := g.Group(a.subJsonPath)
 		gJson.GET(":subid", a.subJsons)
@@ -692,6 +697,7 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 	}
 	subUpdates, _ := a.settingService.GetSubUpdates()
 	updateHours, _ := strconv.Atoi(subUpdates)
+	probeBase, nextReset := a.subscriptionDetails(page.SId)
 
 	return map[string]any{
 		"sId":           page.SId,
@@ -717,6 +723,8 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 		"emails":        page.Emails,
 		"datepicker":    datepicker,
 		"announce":      page.SubAnnounce,
+		"probeBase":     probeBase,
+		"nextReset":     nextReset,
 	}
 }
 

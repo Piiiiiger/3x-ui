@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"crypto/subtle"
 	"net/http"
+	"strings"
 	"text/template"
 	"time"
 
@@ -49,6 +51,35 @@ func (a *IndexController) initRouter(g *gin.RouterGroup) {
 	g.POST("/login", middleware.CSRFMiddleware(), a.login)
 	g.POST("/logout", middleware.CSRFMiddleware(), a.logout)
 	g.POST("/getTwoFactorEnable", middleware.CSRFMiddleware(), a.getTwoFactorEnable)
+	g.POST("/portal-admin", a.portalAdminHandoff)
+}
+
+func (a *IndexController) portalAdminHandoff(c *gin.Context) {
+	c.Header("Cache-Control", "no-store")
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 4096)
+	var form struct {
+		Token string `json:"token"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil || form.Token == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid"})
+		return
+	}
+	bound, err := c.Cookie(service.AdminHandoffCookie)
+	if err != nil || subtle.ConstantTimeCompare([]byte(bound), []byte(form.Token)) != 1 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	user, err := service.TakeAdminHandoff(form.Token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if err := session.SetLoginUser(c, user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server"})
+		return
+	}
+	http.SetCookie(c.Writer, &http.Cookie{Name: service.AdminHandoffCookie, Path: "/", MaxAge: -1, HttpOnly: true, Secure: c.Request.TLS != nil, SameSite: http.SameSiteStrictMode})
+	c.JSON(http.StatusOK, gin.H{"success": true, "redirect": c.GetString("base_path") + "panel/"})
 }
 
 // index handles the root route, redirecting logged-in users to the panel or showing the login page.
@@ -56,6 +87,23 @@ func (a *IndexController) index(c *gin.Context) {
 	if session.IsLogin(c) {
 		c.Header("Cache-Control", "no-store")
 		c.Redirect(http.StatusTemporaryRedirect, c.GetString("base_path")+"panel/")
+		return
+	}
+	if enabled, err := a.settingService.GetTwoFactorEnable(); err == nil && enabled {
+		portal, err := a.settingService.GetSubURI()
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		if portal == "" {
+			portal, err = a.settingService.GetSubPath()
+		}
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Header("Cache-Control", "no-store")
+		c.Redirect(http.StatusTemporaryRedirect, strings.TrimRight(portal, "/")+"/portal")
 		return
 	}
 	serveDistPage(c, "login.html")

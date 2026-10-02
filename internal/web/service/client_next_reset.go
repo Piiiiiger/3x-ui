@@ -3,8 +3,18 @@ package service
 import (
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
+
+func (s *ClientService) NextReset(rec model.ClientRecord, now time.Time) (int64, error) {
+	var traffic xray.ClientTraffic
+	if err := database.GetDB().Select("reset_count").Where("email = ?", rec.Email).Find(&traffic).Error; err != nil {
+		return 0, err
+	}
+	return nextClientReset(rec, traffic.ResetCount, now), nil
+}
 
 // nextClientReset is when a client's usage next returns to zero: its reset cycle
 // or an auto-renewal at expiry, whichever is first; 0 when neither is scheduled.

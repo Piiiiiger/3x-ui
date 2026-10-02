@@ -5,7 +5,7 @@ import 'antd/dist/reset.css';
 import { readyI18n } from '@/i18n/react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
-import SubPage from '@/pages/sub/SubPage';
+import SubscriptionApp from '@/pages/sub/SubscriptionApp';
 import PortalApp from '@/pages/sub/portal/PortalApp';
 
 const messageContainer = document.getElementById('message');
@@ -22,7 +22,7 @@ readyI18n('subscription').then(() => {
           {window.__SUB_PORTAL__ ? (
             <PortalApp base={window.__SUB_PORTAL__.base} />
           ) : (
-            <SubPage data={window.__SUB_PAGE_DATA__ ?? {}} />
+            <SubscriptionApp data={window.__SUB_PAGE_DATA__ ?? {}} />
           )}
         </QueryProvider>
       </ThemeProvider>,

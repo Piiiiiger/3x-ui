@@ -124,7 +124,19 @@
       "viewOverview": "Visão geral",
       "viewProbe": "Monitoramento",
       "probeUnavailable": "O monitoramento está temporariamente indisponível",
-      "probeEmpty": "Ainda não há status de servidores para mostrar."
+      "probeEmpty": "Ainda não há status de servidores para mostrar.",
+      "register": "Cadastrar",
+      "registerIntro": "Crie uma conta com o código de ativação fornecido pelo administrador.",
+      "code": "Código de ativação",
+      "badCode": "O código de ativação é inválido ou já foi usado.",
+      "taken": "Este nome de usuário já está em uso.",
+      "passwordLength": "A senha deve ter entre 6 e 72 bytes.",
+      "redeem": "Usar código de ativação",
+      "activated": "Plano ativado.",
+      "adminSignIn": "Acesso de administrador",
+      "twoFactorCode": "Código do autenticador",
+      "adminRequires2FA": "O acesso de administrador requer autenticação de dois fatores.",
+      "nextReset": "Próxima redefinição de tráfego"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Cartões",
       "viewList": "Lista",
       "actions": "Ações",
-      "reapplyIpLimit": "Aplicar também o limite de IP aos {count} usuário(s) deste plano"
+      "reapplyIpLimit": "Aplicar também o limite de IP aos {count} usuário(s) deste plano",
+      "codes": {
+        "title": "Códigos de ativação",
+        "create": "Gerar códigos",
+        "count": "Quantidade",
+        "days": "Validade em dias",
+        "resetDay": "Dia da redefinição mensal",
+        "unused": "Não usado",
+        "used": "Usado por {user}",
+        "created": "Códigos de ativação gerados",
+        "copyAll": "Copiar códigos não usados",
+        "deleteConfirm": "Excluir este código de ativação?",
+        "zeroHint": "0 significa sem vencimento ou sem redefinição periódica."
+      }
     },
     "nodes": {
       "addNode": "Adicionar nó",

@@ -189,6 +189,8 @@ func (s *PlanService) AddInboundToPlans(inboundSvc *InboundService, inboundId in
 }
 
 func (s *PlanService) Delete(id int) error {
+	activationUseMu.Lock()
+	defer activationUseMu.Unlock()
 	return database.GetDB().Transaction(func(tx *gorm.DB) error {
 		var members int64
 		if err := tx.Model(&model.ClientRecord{}).Where("plan_id = ?", id).Count(&members).Error; err != nil {
@@ -198,6 +200,9 @@ func (s *PlanService) Delete(id int) error {
 			return common.NewErrorf("plan still has %d clients; move them to another plan first", members)
 		}
 		if err := tx.Where("plan_id = ?", id).Delete(&model.PlanInbound{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("plan_id = ?", id).Delete(&model.ActivationCode{}).Error; err != nil {
 			return err
 		}
 		return tx.Delete(&model.Plan{}, id).Error

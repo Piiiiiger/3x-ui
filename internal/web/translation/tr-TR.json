@@ -124,7 +124,19 @@
       "viewOverview": "Genel bakış",
       "viewProbe": "İzleme",
       "probeUnavailable": "İzleme geçici olarak kullanılamıyor",
-      "probeEmpty": "Henüz gösterilecek sunucu durumu yok."
+      "probeEmpty": "Henüz gösterilecek sunucu durumu yok.",
+      "register": "Kayıt ol",
+      "registerIntro": "Yöneticinin verdiği etkinleştirme koduyla hesap oluşturun.",
+      "code": "Etkinleştirme kodu",
+      "badCode": "Etkinleştirme kodu geçersiz veya daha önce kullanılmış.",
+      "taken": "Bu kullanıcı adı zaten kullanılıyor.",
+      "passwordLength": "Parola 6 ile 72 bayt arasında olmalıdır.",
+      "redeem": "Etkinleştirme kodu kullan",
+      "activated": "Paket etkinleştirildi.",
+      "adminSignIn": "Yönetici girişi",
+      "twoFactorCode": "Kimlik doğrulayıcı kodu",
+      "adminRequires2FA": "Yönetici girişi iki faktörlü kimlik doğrulama gerektirir.",
+      "nextReset": "Sonraki trafik sıfırlama"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Kartlar",
       "viewList": "Liste",
       "actions": "İşlemler",
-      "reapplyIpLimit": "IP sınırını bu paketteki {count} kullanıcıya da uygula"
+      "reapplyIpLimit": "IP sınırını bu paketteki {count} kullanıcıya da uygula",
+      "codes": {
+        "title": "Etkinleştirme kodları",
+        "create": "Kod oluştur",
+        "count": "Adet",
+        "days": "Geçerlilik süresi (gün)",
+        "resetDay": "Aylık sıfırlama günü",
+        "unused": "Kullanılmamış",
+        "used": "{user} tarafından kullanıldı",
+        "created": "Etkinleştirme kodları oluşturuldu",
+        "copyAll": "Kullanılmamış kodları kopyala",
+        "deleteConfirm": "Bu etkinleştirme kodu silinsin mi?",
+        "zeroHint": "0, süresiz veya dönemsel sıfırlama yok anlamına gelir."
+      }
     },
     "nodes": {
       "addNode": "Düğüm Ekle",

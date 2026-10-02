@@ -34,6 +34,8 @@ const (
 	portalUserMaxFailures = 10
 	portalUserWindow      = 15 * time.Minute
 	portalAnyAddress      = "*"
+	// Code guesses count per address under one name, so trying names in turn gains nothing.
+	portalCodeGuesses = "*code*"
 )
 
 // portalSession is what the signed cookie carries: who signed in, until when,
@@ -166,6 +168,14 @@ type portalLoginForm struct {
 	Password string `json:"password"`
 }
 
+func portalJSON(c *gin.Context) {
+	if c.ContentType() != "application/json" {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, gin.H{"error": "invalid"})
+		return
+	}
+	c.Next()
+}
+
 func (a *SUBController) portalLogin(c *gin.Context) {
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, portalBodyLimit)
 	var form portalLoginForm
@@ -196,18 +206,116 @@ func (a *SUBController) portalLogin(c *gin.Context) {
 	}
 	a.portalLimiter.RegisterSuccess(ip, form.Username)
 	a.portalUserCap.RegisterSuccess(portalAnyAddress, form.Username)
-	value, err := a.signPortalSession(portalSession{
-		ClientId: client.Id,
-		Expires:  time.Now().Add(portalSessionTTL).Unix(),
-		Tag:      tag,
-	})
-	if err != nil {
+	if err := a.startPortalSession(c, client.Id, tag); err != nil {
 		logger.Warning("portal: could not sign the session:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "server"})
 		return
 	}
-	a.setPortalCookie(c, value, int(portalSessionTTL.Seconds()))
 	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+// startPortalSession signs a session for the client and sets its cookie.
+func (a *SUBController) startPortalSession(c *gin.Context, clientId int, tag string) error {
+	value, err := a.signPortalSession(portalSession{
+		ClientId: clientId,
+		Expires:  time.Now().Add(portalSessionTTL).Unix(),
+		Tag:      tag,
+	})
+	if err != nil {
+		return err
+	}
+	a.setPortalCookie(c, value, int(portalSessionTTL.Seconds()))
+	return nil
+}
+
+type portalRegisterForm struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Code     string `json:"code"`
+}
+
+// portalRegister makes an account from an activation code and signs it in.
+func (a *SUBController) portalRegister(c *gin.Context) {
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, portalBodyLimit)
+	var form portalRegisterForm
+	if err := c.ShouldBindJSON(&form); err != nil || form.Username == "" || form.Password == "" || form.Code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid"})
+		return
+	}
+	ip := a.portalClientIP(c)
+	if _, ok := a.portalLimiter.Allow(ip, portalCodeGuesses); !ok {
+		c.JSON(http.StatusTooManyRequests, gin.H{"success": false, "error": "blocked"})
+		return
+	}
+	client, needRestart, err := a.codeService.Register(&service.InboundService{}, form.Username, form.Password, form.Code)
+	if needRestart {
+		(&service.XrayService{}).SetToNeedRestart()
+	}
+	if !a.answerCodeError(c, ip, err) {
+		return
+	}
+	logger.Infof("portal: %q registered from %s", client.Email, ip)
+	_, tag, err := a.portalService.Authenticate(client.Email, form.Password)
+	if err == nil {
+		err = a.startPortalSession(c, client.Id, tag)
+	}
+	if err != nil {
+		logger.Warning("portal: could not sign the new user in:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "server"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+type portalRedeemForm struct {
+	Code string `json:"code"`
+}
+
+// portalRedeem applies the signed-in person's next code: a renewal or another plan.
+func (a *SUBController) portalRedeem(c *gin.Context) {
+	client, ok := a.portalSessionClient(c)
+	if !ok {
+		return
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, portalBodyLimit)
+	var form portalRedeemForm
+	if err := c.ShouldBindJSON(&form); err != nil || form.Code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid"})
+		return
+	}
+	ip := a.portalClientIP(c)
+	if _, ok := a.portalLimiter.Allow(ip, portalCodeGuesses); !ok {
+		c.JSON(http.StatusTooManyRequests, gin.H{"success": false, "error": "blocked"})
+		return
+	}
+	needRestart, err := a.codeService.Redeem(&service.InboundService{}, client.Email, form.Code)
+	if needRestart {
+		(&service.XrayService{}).SetToNeedRestart()
+	}
+	if !a.answerCodeError(c, ip, err) {
+		return
+	}
+	logger.Infof("portal: %q used an activation code from %s", client.Email, ip)
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+// answerCodeError answers a failed register or redeem and reports whether it went
+// through; a wrong code counts against the address like a wrong password.
+func (a *SUBController) answerCodeError(c *gin.Context, ip string, err error) bool {
+	switch {
+	case err == nil:
+		return true
+	case errors.Is(err, service.ErrActivationCode):
+		a.portalLimiter.RegisterFailure(ip, portalCodeGuesses)
+		logger.Warningf("portal: wrong activation code from %s", ip)
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "code"})
+	case errors.Is(err, service.ErrUsernameTaken):
+		c.JSON(http.StatusConflict, gin.H{"success": false, "error": "taken"})
+	default:
+		logger.Warning("portal: activation code not applied:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid"})
+	}
+	return false
 }
 
 func (a *SUBController) portalLogout(c *gin.Context) {

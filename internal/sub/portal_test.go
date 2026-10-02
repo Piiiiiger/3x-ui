@@ -14,6 +14,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 const portalTestStream = `{"network":"tcp","security":"none"}`
@@ -23,8 +24,17 @@ const portalTestStream = `{"network":"tcp","security":"none"}`
 func seedPortal(t *testing.T) (*gin.Engine, *SUBController) {
 	t.Helper()
 	seedSubDB(t)
-	seedSubInbound(t, "s1", "pa", 4491, 1, portalTestStream)
-	seedSubInbound(t, "s2", "pb", 4492, 1, portalTestStream)
+	for _, seed := range []struct {
+		subId, tag string
+		port       int
+	}{
+		{"s1", "pa", 4491}, {"s2", "pb", 4492},
+	} {
+		ib := seedSubInbound(t, seed.subId, seed.tag, seed.port, 1, portalTestStream)
+		if err := database.GetDB().Create(&xray.ClientTraffic{Email: seed.tag + "@e", InboundId: ib.Id, Enable: true}).Error; err != nil {
+			t.Fatalf("seed portal traffic: %v", err)
+		}
+	}
 	if err := (&service.ClientPortalService{}).SetPassword("pa@e", "alpha-pass"); err != nil {
 		t.Fatalf("set portal password: %v", err)
 	}

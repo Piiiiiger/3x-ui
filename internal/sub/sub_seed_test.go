@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
@@ -24,7 +25,8 @@ func seedSubInbound(t *testing.T, subId, tag string, port, subSortIndex int, str
 	db := database.GetDB()
 	uuid := "11111111-2222-4333-8444-" + fmt.Sprintf("%012d", port)
 	email := tag + "@e"
-	settings := fmt.Sprintf(`{"clients":[{"id":%q,"email":%q,"subId":%q,"enable":true}],"decryption":"none"}`, uuid, email, subId)
+	createdAt := time.Now().UnixMilli()
+	settings := fmt.Sprintf(`{"clients":[{"id":%q,"email":%q,"subId":%q,"enable":true,"created_at":%d}],"decryption":"none"}`, uuid, email, subId, createdAt)
 	ib := &model.Inbound{
 		UserId: 1, Tag: tag, Enable: true, Listen: "203.0.113.5", Port: port,
 		Protocol: model.VLESS, Remark: tag, Settings: settings, StreamSettings: stream,
@@ -33,7 +35,7 @@ func seedSubInbound(t *testing.T, subId, tag string, port, subSortIndex int, str
 	if err := db.Create(ib).Error; err != nil {
 		t.Fatalf("seed inbound %s: %v", tag, err)
 	}
-	client := &model.ClientRecord{Email: email, SubID: subId, UUID: uuid, Enable: true}
+	client := &model.ClientRecord{Email: email, SubID: subId, UUID: uuid, Enable: true, CreatedAt: createdAt}
 	if err := db.Create(client).Error; err != nil {
 		t.Fatalf("seed client %s: %v", email, err)
 	}

@@ -124,7 +124,19 @@
       "viewOverview": "概览",
       "viewProbe": "探针",
       "probeUnavailable": "监控暂时不可用",
-      "probeEmpty": "暂时没有可显示的服务器状态。"
+      "probeEmpty": "暂时没有可显示的服务器状态。",
+      "register": "注册",
+      "registerIntro": "使用管理员提供的激活码创建账户。",
+      "code": "激活码",
+      "badCode": "激活码无效或已被使用。",
+      "taken": "该用户名已被使用。",
+      "passwordLength": "密码长度为 6 至 72 字节。",
+      "redeem": "使用激活码",
+      "activated": "套餐已激活。",
+      "adminSignIn": "管理员登录",
+      "twoFactorCode": "验证器验证码",
+      "adminRequires2FA": "管理员登录需要开启两步验证。",
+      "nextReset": "下次流量重置"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "卡片",
       "viewList": "列表",
       "actions": "操作",
-      "reapplyIpLimit": "同时把 IP 限制应用到此套餐的 {count} 个用户"
+      "reapplyIpLimit": "同时把 IP 限制应用到此套餐的 {count} 个用户",
+      "codes": {
+        "title": "激活码",
+        "create": "生成激活码",
+        "count": "数量",
+        "days": "有效天数",
+        "resetDay": "每月重置日",
+        "unused": "未使用",
+        "used": "由 {user} 使用",
+        "created": "已生成激活码",
+        "copyAll": "复制未使用的激活码",
+        "deleteConfirm": "删除该激活码？",
+        "zeroHint": "0 表示永久有效或不定期重置。"
+      }
     },
     "nodes": {
       "addNode": "添加主机",

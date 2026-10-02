@@ -15,6 +15,7 @@ interface SubHeroProps {
   totalByte: number;
   expireMs: number;
   lastOnlineMs: number;
+  nextReset?: number;
   download: string;
   upload: string;
   used: string;
@@ -45,6 +46,7 @@ export default function SubHero({
   totalByte,
   expireMs,
   lastOnlineMs,
+  nextReset = 0,
   download,
   upload,
   used,
@@ -86,6 +88,14 @@ export default function SubHero({
       value: lastOnlineMs > 0 ? formatDate(lastOnlineMs) : '-',
     },
   ];
+
+  if (nextReset > 0) {
+    stats.push({
+      key: 'reset',
+      label: t('subscription.portal.nextReset'),
+      value: formatDate(nextReset),
+    });
+  }
 
   return (
     <section className={healthy ? 'sub-hero' : 'sub-hero is-alert'}>

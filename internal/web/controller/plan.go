@@ -8,9 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PlanController exposes plans: reusable limit sets that are stamped onto clients.
+// PlanController exposes plans: shared nodes, rule sets, IP limits and activation codes.
 type PlanController struct {
 	planService    service.PlanService
+	codeService    service.ActivationCodeService
 	inboundService service.InboundService
 	xrayService    service.XrayService
 }
@@ -28,6 +29,39 @@ func (a *PlanController) initRouter(g *gin.RouterGroup) {
 	g.POST("/del/:id", a.delete)
 	g.POST("/assign", a.assign)
 	g.POST("/unassign", a.unassign)
+	g.GET("/codes/:id", a.listCodes)
+	g.POST("/codes/add", a.createCodes)
+	g.POST("/codes/del/:id", a.deleteCode)
+}
+
+func (a *PlanController) listCodes(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id < 0 {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), service.ErrActivationCode)
+		return
+	}
+	codes, err := a.codeService.List(id)
+	jsonObj(c, codes, err)
+}
+
+func (a *PlanController) createCodes(c *gin.Context) {
+	var in service.ActivationCodeInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	codes, err := a.codeService.Create(in)
+	jsonObj(c, codes, err)
+}
+
+func (a *PlanController) deleteCode(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err == nil && id > 0 {
+		err = a.codeService.Delete(id)
+	} else {
+		err = service.ErrActivationCode
+	}
+	jsonObj(c, gin.H{"id": id}, err)
 }
 
 type planUpdateRequest struct {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/global"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/discord"
@@ -53,6 +55,40 @@ func TestValidateRegex(t *testing.T) {
 				t.Fatalf("body = %s, want %s", resp.Body.String(), needle)
 			}
 		})
+	}
+}
+
+func TestEnablingTwoFactorRestartsThePanelAfterRemovingItsSecretPath(t *testing.T) {
+	router := newProbeTestEngine(t)
+	NewSettingController(router.Group("/panel/api"))
+	s := &service.SettingService{}
+	if err := s.SetBasePath("/hidden-admin/"); err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.GetAllSettingView()
+	if err != nil {
+		t.Fatal(err)
+	}
+	view.TwoFactorEnable, view.TwoFactorToken = true, "JBSWY3DPEHPK3PXP"
+	restarts := make(chan struct{}, 1)
+	global.SetRestartHook(func() {
+		select {
+		case restarts <- struct{}{}:
+		default:
+		}
+	})
+	t.Cleanup(func() { global.SetRestartHook(func() {}) })
+	reply := postJSON(t, router, "/panel/api/setting/update", view.AllSetting)
+	if !reply.Success {
+		t.Fatalf("enable 2FA: %+v", reply)
+	}
+	if path, _ := s.GetBasePath(); path != "/" {
+		t.Fatalf("new path = %q", path)
+	}
+	select {
+	case <-restarts:
+	case <-time.After(4 * time.Second):
+		t.Fatal("the new path was stored without restarting the panel")
 	}
 }
 

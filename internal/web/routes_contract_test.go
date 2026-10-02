@@ -31,6 +31,7 @@ server, which this engine does not serve.
 
 var contractExtraRoutes = map[string]bool{
 	"POST /login":              true,
+	"POST /portal-admin":       true,
 	"POST /logout":             true,
 	"GET /csrf-token":          true,
 	"POST /getTwoFactorEnable": true,

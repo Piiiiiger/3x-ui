@@ -124,7 +124,19 @@
       "viewOverview": "Resumen",
       "viewProbe": "Monitorización",
       "probeUnavailable": "La monitorización no está disponible por el momento",
-      "probeEmpty": "Aún no hay estado de servidores que mostrar."
+      "probeEmpty": "Aún no hay estado de servidores que mostrar.",
+      "register": "Registrarse",
+      "registerIntro": "Crea una cuenta con el código de activación proporcionado por el administrador.",
+      "code": "Código de activación",
+      "badCode": "El código de activación no es válido o ya se ha usado.",
+      "taken": "Este nombre de usuario ya está en uso.",
+      "passwordLength": "La contraseña debe tener entre 6 y 72 bytes.",
+      "redeem": "Usar código de activación",
+      "activated": "Plan activado.",
+      "adminSignIn": "Acceso de administrador",
+      "twoFactorCode": "Código del autenticador",
+      "adminRequires2FA": "El acceso de administrador requiere autenticación de dos factores.",
+      "nextReset": "Próximo reinicio del tráfico"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Tarjetas",
       "viewList": "Lista",
       "actions": "Acciones",
-      "reapplyIpLimit": "Aplicar también el límite de IP a los {count} usuario(s) de este plan"
+      "reapplyIpLimit": "Aplicar también el límite de IP a los {count} usuario(s) de este plan",
+      "codes": {
+        "title": "Códigos de activación",
+        "create": "Generar códigos",
+        "count": "Cantidad",
+        "days": "Días de validez",
+        "resetDay": "Día de reinicio mensual",
+        "unused": "Sin usar",
+        "used": "Usado por {user}",
+        "created": "Códigos de activación generados",
+        "copyAll": "Copiar códigos sin usar",
+        "deleteConfirm": "¿Eliminar este código de activación?",
+        "zeroHint": "0 significa sin caducidad o sin reinicio periódico."
+      }
     },
     "nodes": {
       "addNode": "Agregar nodo",

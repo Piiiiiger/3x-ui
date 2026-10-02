@@ -26,6 +26,107 @@
       }
     },
     "schemas": {
+      "ActivationCode": {
+        "description": "ActivationCode lets one person register, or a signed-in person renew or change\nplan: it grants a plan with their quota, validity and monthly reset day.",
+        "properties": {
+          "code": {
+            "example": "7KQ3-X9MZ-2F4H-RT8W",
+            "type": "string"
+          },
+          "createdAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "days": {
+            "example": 30,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "type": "integer"
+          },
+          "note": {
+            "example": "for alice",
+            "type": "string"
+          },
+          "planId": {
+            "example": 2,
+            "type": "integer"
+          },
+          "resetDay": {
+            "example": 1,
+            "type": "integer"
+          },
+          "totalGB": {
+            "description": "TotalGB is the quota in bytes, 0 for none; Days 0 never expires; ResetDay 0 never resets.",
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedAt": {
+            "description": "UsedAt is 0 until the code is used; UsedBy is the email of whoever used it.",
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "createdAt",
+          "days",
+          "id",
+          "note",
+          "planId",
+          "resetDay",
+          "totalGB",
+          "usedAt",
+          "usedBy"
+        ],
+        "type": "object"
+      },
+      "ActivationCodeInput": {
+        "description": "ActivationCodeInput asks for count codes for a plan, each granting the same quota\n(bytes, 0 for none), days (0 never expires) and monthly reset day (0 for none).",
+        "properties": {
+          "count": {
+            "example": 5,
+            "type": "integer"
+          },
+          "days": {
+            "example": 30,
+            "type": "integer"
+          },
+          "note": {
+            "example": "March group",
+            "type": "string"
+          },
+          "planId": {
+            "example": 2,
+            "type": "integer"
+          },
+          "resetDay": {
+            "example": 1,
+            "type": "integer"
+          },
+          "totalGB": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "days",
+          "note",
+          "planId",
+          "resetDay",
+          "totalGB"
+        ],
+        "type": "object"
+      },
       "AgentSecretView": {
         "description": "AgentSecretView carries a freshly minted agent secret; it is shown only once.",
         "properties": {
@@ -5771,6 +5872,53 @@
     }
   ],
   "paths": {
+    "/portal-admin": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Exchange the portal administrator login handoff for an admin session. Requires the matching HttpOnly browser cookie, a single-use token less than a minute old, and two-factor authentication still enabled.",
+        "operationId": "post_portal_admin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "token": "one-time-browser-bound-token"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "redirect": "/panel/"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -13357,6 +13505,186 @@
         }
       }
     },
+    "/panel/api/plans/codes/{id}": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "List activation codes for a plan, newest first. Plan id 0 lists every code.",
+        "operationId": "get_panel_api_plans_codes_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Plan id, or 0 for all plans.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActivationCode"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "code": "7KQ3-X9MZ-2F4H-RT8W",
+                      "createdAt": 1735689600000,
+                      "days": 30,
+                      "id": 1,
+                      "note": "for alice",
+                      "planId": 2,
+                      "resetDay": 1,
+                      "totalGB": 107374182400,
+                      "usedAt": 0,
+                      "usedBy": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/codes/add": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days and monthly reset day. Zero means unlimited quota, no expiry or no reset respectively.",
+        "operationId": "post_panel_api_plans_codes_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "planId": 1,
+                "count": 5,
+                "totalGB": 107374182400,
+                "days": 30,
+                "resetDay": 22,
+                "note": "March group"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActivationCode"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "code": "7KQ3-X9MZ-2F4H-RT8W",
+                      "createdAt": 1735689600000,
+                      "days": 30,
+                      "id": 1,
+                      "note": "for alice",
+                      "planId": 2,
+                      "resetDay": 1,
+                      "totalGB": 107374182400,
+                      "usedAt": 0,
+                      "usedBy": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/codes/del/{id}": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Revoke an unused code or delete a used code from the history. A used code never becomes reusable.",
+        "operationId": "post_panel_api_plans_codes_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Code id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/plans/list": {
       "get": {
         "tags": [
@@ -15565,6 +15893,270 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/{subPath}portal/register": {
+      "post": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Register a username and password with a single-use activation code and create a portal session. The code supplies the plan, quota, validity and monthly reset day. Failed requests are limited per address.",
+        "operationId": "post_subPath_portal_register",
+        "parameters": [
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "new-user",
+                "password": "example-password",
+                "code": "ABCD-EFGH-JKLM-NPQR"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{subPath}portal/redeem": {
+      "post": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Redeem an activation code for the signed-in user. Changes the plan, quota and reset day, adds validity from the later of now and expiry, and clears usage. A failed service update can be retried with the same code without granting the days twice.",
+        "operationId": "post_subPath_portal_redeem",
+        "parameters": [
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "code": "ABCD-EFGH-JKLM-NPQR"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{subPath}portal/admin-login": {
+      "post": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Verify administrator credentials and a current authenticator code. Two-factor authentication must be enabled. Returns a browser-bound single-use handoff to POST to the panel portal-admin endpoint within one minute.",
+        "operationId": "post_subPath_portal_admin_login",
+        "parameters": [
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "admin",
+                "password": "example-password",
+                "twoFactorCode": "123456"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "token": "browser-bound-token",
+                  "path": "/portal-admin"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{subPath}{subid}/probe": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return probe information for only the hosts behind this subscription. Uses the portal probe field whitelist and excludes unrelated hosts. Unknown tokens return 404. Responses must not be cached.",
+        "operationId": "get_subPath_subid_probe",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Probe information scoped to the subscription.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "enabled": true,
+                  "fetchedAt": 1735689600000,
+                  "servers": [
+                    {
+                      "cpu": 12.5,
+                      "diskTotal": 42949672960,
+                      "diskUsed": 8589934592,
+                      "id": 2,
+                      "load1": 0.31,
+                      "load15": 0.18,
+                      "load5": 0.22,
+                      "memTotal": 2147483648,
+                      "memUsed": 858993459,
+                      "name": "Hong Kong",
+                      "netIn": 5678,
+                      "netOut": 1234,
+                      "netTotalDown": 2000000,
+                      "netTotalUp": 1000000,
+                      "pings": [
+                        {
+                          "blocks": [
+                            {
+                              "checks": 5,
+                              "end": 1735689900000,
+                              "loss": 20,
+                              "start": 1735689600000
+                            }
+                          ],
+                          "id": 2,
+                          "latency": 31,
+                          "loss": 0.4,
+                          "name": "China Telecom"
+                        }
+                      ],
+                      "region": "🇭🇰",
+                      "status": "online",
+                      "updatedAt": 1735689600000,
+                      "uptime": 86400
+                    }
+                  ],
+                  "stale": false
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/PortalProbe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown subscription token."
           }
         }
       }

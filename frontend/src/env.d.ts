@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 interface SubPageData {
+  probeBase?: string;
+  nextReset?: number;
   sId?: string;
   enabled?: boolean;
   download?: string;

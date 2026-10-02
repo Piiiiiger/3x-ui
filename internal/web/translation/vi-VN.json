@@ -124,7 +124,19 @@
       "viewOverview": "Tổng quan",
       "viewProbe": "Giám sát",
       "probeUnavailable": "Giám sát tạm thời không khả dụng",
-      "probeEmpty": "Chưa có trạng thái máy chủ nào để hiển thị."
+      "probeEmpty": "Chưa có trạng thái máy chủ nào để hiển thị.",
+      "register": "Đăng ký",
+      "registerIntro": "Tạo tài khoản bằng mã kích hoạt do quản trị viên cung cấp.",
+      "code": "Mã kích hoạt",
+      "badCode": "Mã kích hoạt không hợp lệ hoặc đã được sử dụng.",
+      "taken": "Tên người dùng này đã được sử dụng.",
+      "passwordLength": "Mật khẩu phải có độ dài từ 6 đến 72 byte.",
+      "redeem": "Dùng mã kích hoạt",
+      "activated": "Đã kích hoạt gói.",
+      "adminSignIn": "Đăng nhập quản trị viên",
+      "twoFactorCode": "Mã ứng dụng xác thực",
+      "adminRequires2FA": "Quyền truy cập quản trị viên yêu cầu xác thực hai yếu tố.",
+      "nextReset": "Lần đặt lại lưu lượng tiếp theo"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Thẻ",
       "viewList": "Danh sách",
       "actions": "Thao tác",
-      "reapplyIpLimit": "Áp dụng giới hạn IP cho {count} người dùng của gói này"
+      "reapplyIpLimit": "Áp dụng giới hạn IP cho {count} người dùng của gói này",
+      "codes": {
+        "title": "Mã kích hoạt",
+        "create": "Tạo mã",
+        "count": "Số lượng",
+        "days": "Số ngày hiệu lực",
+        "resetDay": "Ngày đặt lại hằng tháng",
+        "unused": "Chưa dùng",
+        "used": "Đã dùng bởi {user}",
+        "created": "Đã tạo mã kích hoạt",
+        "copyAll": "Sao chép mã chưa dùng",
+        "deleteConfirm": "Xóa mã kích hoạt này?",
+        "zeroHint": "0 nghĩa là không hết hạn hoặc không đặt lại định kỳ."
+      }
     },
     "nodes": {
       "addNode": "Thêm nút",

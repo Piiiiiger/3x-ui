@@ -39,6 +39,7 @@ func run(root, outDir string) error {
 				"InboundFallback",
 				"SubBalancer",
 				"Plan",
+				"ActivationCode",
 				"RuleTemplate",
 				"PlanInbound",
 			),
@@ -88,6 +89,7 @@ func run(root, outDir string) error {
 			StructAllow: setOf(
 				"InboundOption",
 				"PlanInput",
+				"ActivationCodeInput",
 				"PlanSummary",
 				"RuleTemplateChange",
 				"RuleTemplateConversion",

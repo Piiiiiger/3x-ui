@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { keys } from '@/api/queryKeys';
 import { PANEL_NAME } from '@/lib/brand';
+import { getMessage } from '@/utils/messageBus';
 import { PortalDataSchema, type PortalData } from '@/schemas/portal';
 import SubHeader from '../SubHeader';
 import SubPage from '../SubPage';
@@ -14,6 +15,7 @@ import SubShell, { useSubLanguage } from '../SubShell';
 import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
+import PortalRedeemModal from './PortalRedeemModal';
 import './Portal.css';
 
 type PortalView = 'overview' | 'probe';
@@ -63,6 +65,7 @@ export default function PortalApp({ base }: { base: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [view, showView] = usePortalView();
+  const [redeeming, setRedeeming] = useState(false);
   const portal = useQuery({
     queryKey: keys.portal.data(base),
     queryFn: () => fetchPortal(base),
@@ -118,14 +121,17 @@ export default function PortalApp({ base }: { base: string }) {
     <SubPage
       data={data.page ?? { emails: [data.email], enabled: true }}
       headerExtra={
-        <Button
-          size="large"
-          className="toolbar-btn"
-          icon={<LogoutOutlined />}
-          aria-label={t('subscription.portal.signOut')}
-          title={t('subscription.portal.signOut')}
-          onClick={signOut}
-        />
+        <>
+          <Button onClick={() => setRedeeming(true)}>{t('subscription.portal.redeem')}</Button>
+          <Button
+            size="large"
+            className="toolbar-btn"
+            icon={<LogoutOutlined />}
+            aria-label={t('subscription.portal.signOut')}
+            title={t('subscription.portal.signOut')}
+            onClick={signOut}
+          />
+        </>
       }
       nav={
         data.probe && (
@@ -150,6 +156,18 @@ export default function PortalApp({ base }: { base: string }) {
         <Alert type="warning" showIcon title={t('subscription.portal.noSubscription')} />
       )}
       {data.plan && <PortalPlanCard plan={data.plan} />}
+      {redeeming && (
+        <PortalRedeemModal
+          base={base}
+          onClose={() => setRedeeming(false)}
+          onSessionEnded={onSessionEnded}
+          onActivated={() => {
+            void getMessage().success(t('subscription.portal.activated'));
+            queryClient.removeQueries({ queryKey: keys.portal.probes() });
+            onSignedIn();
+          }}
+        />
+      )}
       <PortalUsageCard daily={data.daily} />
     </SubPage>
   );

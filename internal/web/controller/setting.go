@@ -128,6 +128,11 @@ func (a *SettingController) updateSetting(c *gin.Context) {
 		return
 	}
 	allSetting := &form.AllSetting
+	oldBasePath, err := a.settingService.GetBasePath()
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifySettings"), err)
+		return
+	}
 	oldTwoFactor, twoFactorErr := a.settingService.GetTwoFactorEnable()
 	oldPanelOutbound, _ := a.settingService.GetPanelOutbound()
 	oldTgEnable, _ := a.settingService.GetTgbotEnabled()
@@ -150,7 +155,7 @@ func (a *SettingController) updateSetting(c *gin.Context) {
 			}
 		}
 	}
-	err := a.settingService.UpdateAllSetting(allSetting, service.SecretClears{
+	err = a.settingService.UpdateAllSetting(allSetting, service.SecretClears{
 		TgBotToken:      form.ClearTgBotToken,
 		LdapPassword:    form.ClearLdapPassword,
 		SmtpPassword:    form.ClearSmtpPassword,
@@ -187,6 +192,9 @@ func (a *SettingController) updateSetting(c *gin.Context) {
 		if discordChanged {
 			reloadDiscordFunc()
 		}
+	}
+	if err == nil && allSetting.TwoFactorEnable && oldBasePath != allSetting.WebBasePath {
+		err = a.panelService.RestartPanel(3 * time.Second)
 	}
 	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifySettings"), err)
 }

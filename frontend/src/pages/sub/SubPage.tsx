@@ -54,6 +54,7 @@ function buildSubView(subData: SubPageData, loadedAt: number) {
       totalByte,
       expireMs,
       lastOnlineMs: Number(subData.lastOnline || 0),
+      nextReset: Number(subData.nextReset || 0),
       download: subData.download || '0',
       upload: subData.upload || '0',
       used: subData.used || '0',
@@ -69,8 +70,7 @@ interface SubPageProps {
   data: SubPageData;
   // The portal adds its sign-out button to the toolbar and its cards below the usage.
   headerExtra?: ReactNode;
-  // The portal's view switch under the header, and a view that takes the place
-  // of everything below it. The subscription page itself passes neither.
+  // A view switch under the header and an optional replacement for the overview.
   nav?: ReactNode;
   body?: ReactNode;
   children?: ReactNode;

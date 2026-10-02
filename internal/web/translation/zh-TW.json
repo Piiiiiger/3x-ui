@@ -124,7 +124,19 @@
       "viewOverview": "總覽",
       "viewProbe": "探針",
       "probeUnavailable": "監控暫時無法使用",
-      "probeEmpty": "暫時沒有可顯示的伺服器狀態。"
+      "probeEmpty": "暫時沒有可顯示的伺服器狀態。",
+      "register": "註冊",
+      "registerIntro": "使用管理員提供的啟用碼建立帳戶。",
+      "code": "啟用碼",
+      "badCode": "啟用碼無效或已被使用。",
+      "taken": "該使用者名稱已被使用。",
+      "passwordLength": "密碼長度須為6至72位元組。",
+      "redeem": "使用啟用碼",
+      "activated": "方案已啟用。",
+      "adminSignIn": "管理員登入",
+      "twoFactorCode": "驗證器驗證碼",
+      "adminRequires2FA": "管理員登入需要啟用雙重驗證。",
+      "nextReset": "下次流量重設"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "卡片",
       "viewList": "清單",
       "actions": "操作",
-      "reapplyIpLimit": "同時將 IP 限制套用到此方案的 {count} 個使用者"
+      "reapplyIpLimit": "同時將 IP 限制套用到此方案的 {count} 個使用者",
+      "codes": {
+        "title": "啟用碼",
+        "create": "產生啟用碼",
+        "count": "數量",
+        "days": "有效天數",
+        "resetDay": "每月重設日",
+        "unused": "未使用",
+        "used": "由 {user} 使用",
+        "created": "已產生啟用碼",
+        "copyAll": "複製未使用的啟用碼",
+        "deleteConfirm": "刪除此啟用碼？",
+        "zeroHint": "0表示永久有效或不定期重設。"
+      }
     },
     "nodes": {
       "addNode": "新增主機",

@@ -12,6 +12,28 @@ _openapi:
     - ./public/openapi.json
   toc:
     - depth: 2
+      title: Register a username and password with a single-use activation code and
+        create a portal session. The code supplies the plan, quota, validity and
+        monthly reset day. Failed requests are limited per address.
+      url: '#register-a-username-and-password-with-a-single-use-activation-code-and-create-a-portal-session-the-code-supplies-the-plan-quota-validity-and-monthly-reset-day-failed-requests-are-limited-per-address'
+    - depth: 2
+      title: Redeem an activation code for the signed-in user. Changes the plan, quota
+        and reset day, adds validity from the later of now and expiry, and
+        clears usage. A failed service update can be retried with the same code
+        without granting the days twice.
+      url: '#redeem-an-activation-code-for-the-signed-in-user-changes-the-plan-quota-and-reset-day-adds-validity-from-the-later-of-now-and-expiry-and-clears-usage-a-failed-service-update-can-be-retried-with-the-same-code-without-granting-the-days-twice'
+    - depth: 2
+      title: Verify administrator credentials and a current authenticator code.
+        Two-factor authentication must be enabled. Returns a browser-bound
+        single-use handoff to POST to the panel portal-admin endpoint within one
+        minute.
+      url: '#verify-administrator-credentials-and-a-current-authenticator-code-two-factor-authentication-must-be-enabled-returns-a-browser-bound-single-use-handoff-to-post-to-the-panel-portal-admin-endpoint-within-one-minute'
+    - depth: 2
+      title: Return probe information for only the hosts behind this subscription.
+        Uses the portal probe field whitelist and excludes unrelated hosts.
+        Unknown tokens return 404. Responses must not be cached.
+      url: '#return-probe-information-for-only-the-hosts-behind-this-subscription-uses-the-portal-probe-field-whitelist-and-excludes-unrelated-hosts-unknown-tokens-return-404-responses-must-not-be-cached'
+    - depth: 2
       title: 'Return base64-encoded subscription links for all enabled clients
         matching the subscription ID. When the request has an Accept: text/html
         header or ?html=1, renders a styled info page instead. With
@@ -54,6 +76,24 @@ _openapi:
       url: '#return-the-clash-subscription-status-and-metadata-headers-without-a-body-registered-only-when-clash-subscriptions-are-enabled'
   structuredData:
     headings:
+      - content: Register a username and password with a single-use activation code and
+          create a portal session. The code supplies the plan, quota, validity
+          and monthly reset day. Failed requests are limited per address.
+        id: register-a-username-and-password-with-a-single-use-activation-code-and-create-a-portal-session-the-code-supplies-the-plan-quota-validity-and-monthly-reset-day-failed-requests-are-limited-per-address
+      - content: Redeem an activation code for the signed-in user. Changes the plan,
+          quota and reset day, adds validity from the later of now and expiry,
+          and clears usage. A failed service update can be retried with the same
+          code without granting the days twice.
+        id: redeem-an-activation-code-for-the-signed-in-user-changes-the-plan-quota-and-reset-day-adds-validity-from-the-later-of-now-and-expiry-and-clears-usage-a-failed-service-update-can-be-retried-with-the-same-code-without-granting-the-days-twice
+      - content: Verify administrator credentials and a current authenticator code.
+          Two-factor authentication must be enabled. Returns a browser-bound
+          single-use handoff to POST to the panel portal-admin endpoint within
+          one minute.
+        id: verify-administrator-credentials-and-a-current-authenticator-code-two-factor-authentication-must-be-enabled-returns-a-browser-bound-single-use-handoff-to-post-to-the-panel-portal-admin-endpoint-within-one-minute
+      - content: Return probe information for only the hosts behind this subscription.
+          Uses the portal probe field whitelist and excludes unrelated hosts.
+          Unknown tokens return 404. Responses must not be cached.
+        id: return-probe-information-for-only-the-hosts-behind-this-subscription-uses-the-portal-probe-field-whitelist-and-excludes-unrelated-hosts-unknown-tokens-return-404-responses-must-not-be-cached
       - content: 'Return base64-encoded subscription links for all enabled clients
           matching the subscription ID. When the request has an Accept:
           text/html header or ?html=1, renders a styled info page instead. With
@@ -104,7 +144,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/{subPath}{subid}","method":"get"},{"path":"/{subPath}{subid}","method":"head"},{"path":"/{subPath}{subid}/hwid-status","method":"get"},{"path":"/{subPath}{subid}/hwid-status","method":"head"},{"path":"/{jsonPath}{subid}","method":"get"},{"path":"/{jsonPath}{subid}","method":"head"},{"path":"/{clashPath}{subid}","method":"get"},{"path":"/{clashPath}{subid}","method":"head"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/{subPath}portal/register","method":"post"},{"path":"/{subPath}portal/redeem","method":"post"},{"path":"/{subPath}portal/admin-login","method":"post"},{"path":"/{subPath}{subid}/probe","method":"get"},{"path":"/{subPath}{subid}","method":"get"},{"path":"/{subPath}{subid}","method":"head"},{"path":"/{subPath}{subid}/hwid-status","method":"get"},{"path":"/{subPath}{subid}/hwid-status","method":"head"},{"path":"/{jsonPath}{subid}","method":"get"},{"path":"/{jsonPath}{subid}","method":"head"},{"path":"/{clashPath}{subid}","method":"get"},{"path":"/{clashPath}{subid}","method":"head"}]} showTitle />
     </>
   );
 }

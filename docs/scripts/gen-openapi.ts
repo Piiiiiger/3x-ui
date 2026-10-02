@@ -20,6 +20,12 @@ await generateFiles({
   per: 'tag',
   beforeWrite(files) {
     for (const file of files) {
+      file.content = file.content
+        .replace(
+          'const { OpenAPIPage } = props.components ?? {};',
+          'const { APIPage, OpenAPIPage } = props.components ?? {};\n  // "APIPage" is the old name from v10, this allows both for backward compatibility\n  const Comp = OpenAPIPage ?? APIPage;',
+        )
+        .replace('<OpenAPIPage ', '<Comp ');
       const slug = basename(file.path).replace(/\.mdx$/, '');
       const title = titleBySlug.get(slug);
       if (title) {

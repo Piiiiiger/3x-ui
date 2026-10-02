@@ -10,6 +10,28 @@ export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
+export interface ActivationCode {
+  code: string;
+  createdAt: number;
+  days: number;
+  id: number;
+  note: string;
+  planId: number;
+  resetDay: number;
+  totalGB: number;
+  usedAt: number;
+  usedBy: string;
+}
+
+export interface ActivationCodeInput {
+  count: number;
+  days: number;
+  note: string;
+  planId: number;
+  resetDay: number;
+  totalGB: number;
+}
+
 export interface AgentSecretView {
   secret: string;
 }

@@ -26,6 +26,11 @@ After changing the port or base path, the panel URL becomes
 `http(s)://<server>:<port><web-base-path>`. You can preset the base path on first
 launch with [`XUI_INIT_WEB_BASE_PATH`](/docs/reference/env-vars).
 
+Enabling two-factor authentication moves the panel base path to `/` and
+automatically restarts the panel after three seconds. Existing sessions are
+invalidated. Sign in through the subscription portal with the administrator
+password and authenticator code. The old path remains until you enable 2FA.
+
 ### TLS
 
 Serving the panel over HTTPS protects your credentials in transit. Either set
@@ -35,7 +40,8 @@ can obtain a Let's Encrypt certificate for you — or terminate TLS at a
 
 <Callout type="warn">
   Never expose the panel over plain HTTP on the public internet. Use TLS, a
-  non-default port, and a long random web base path.
+  non-default port, and two-factor authentication. Keep a long random web base
+  path until you enable 2FA and switch to portal sign-in.
 </Callout>
 
 ## Display

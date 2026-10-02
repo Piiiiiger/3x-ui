@@ -56,6 +56,31 @@ func setupSettingTestDB(t *testing.T) {
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 }
 
+func TestEnablingTwoFactorRemovesTheSecretAdminPath(t *testing.T) {
+	setupSettingTestDB(t)
+	s := &SettingService{}
+	if err := s.SetBasePath("/hidden-admin/"); err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.GetAllSettingView()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.UpdateAllSetting(&view.AllSetting, SecretClears{}); err != nil {
+		t.Fatal(err)
+	}
+	if path, _ := s.GetBasePath(); path != "/hidden-admin/" {
+		t.Fatalf("path before 2FA = %q", path)
+	}
+	view.TwoFactorEnable, view.TwoFactorToken = true, "JBSWY3DPEHPK3PXP"
+	if err := s.UpdateAllSetting(&view.AllSetting, SecretClears{}); err != nil {
+		t.Fatal(err)
+	}
+	if path, _ := s.GetBasePath(); path != "/" {
+		t.Fatalf("path after 2FA = %q, want /", path)
+	}
+}
+
 func TestGetAllSettingViewRedactsSecrets(t *testing.T) {
 	setupSettingTestDB(t)
 	s := &SettingService{}

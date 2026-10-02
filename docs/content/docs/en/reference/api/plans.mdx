@@ -11,6 +11,19 @@ _openapi:
     - ./public/openapi.json
   toc:
     - depth: 2
+      title: List activation codes for a plan, newest first. Plan id 0 lists every
+        code.
+      url: '#list-activation-codes-for-a-plan-newest-first-plan-id-0-lists-every-code'
+    - depth: 2
+      title: Create 1 to 200 single-use activation codes for a plan with nodes. Each
+        grants the quota in bytes, validity in days and monthly reset day. Zero
+        means unlimited quota, no expiry or no reset respectively.
+      url: '#create-1-to-200-single-use-activation-codes-for-a-plan-with-nodes-each-grants-the-quota-in-bytes-validity-in-days-and-monthly-reset-day-zero-means-unlimited-quota-no-expiry-or-no-reset-respectively'
+    - depth: 2
+      title: Revoke an unused code or delete a used code from the history. A used code
+        never becomes reusable.
+      url: '#revoke-an-unused-code-or-delete-a-used-code-from-the-history-a-used-code-never-becomes-reusable'
+    - depth: 2
       title: List every plan with the inbounds it grants and how many clients use it.
       url: '#list-every-plan-with-the-inbounds-it-grants-and-how-many-clients-use-it'
     - depth: 2
@@ -38,6 +51,16 @@ _openapi:
       url: '#take-clients-off-their-plan-their-current-quota-expiry-and-inbounds-stay-as-they-are'
   structuredData:
     headings:
+      - content: List activation codes for a plan, newest first. Plan id 0 lists every
+          code.
+        id: list-activation-codes-for-a-plan-newest-first-plan-id-0-lists-every-code
+      - content: Create 1 to 200 single-use activation codes for a plan with nodes. Each
+          grants the quota in bytes, validity in days and monthly reset day.
+          Zero means unlimited quota, no expiry or no reset respectively.
+        id: create-1-to-200-single-use-activation-codes-for-a-plan-with-nodes-each-grants-the-quota-in-bytes-validity-in-days-and-monthly-reset-day-zero-means-unlimited-quota-no-expiry-or-no-reset-respectively
+      - content: Revoke an unused code or delete a used code from the history. A used
+          code never becomes reusable.
+        id: revoke-an-unused-code-or-delete-a-used-code-from-the-history-a-used-code-never-becomes-reusable
       - content: List every plan with the inbounds it grants and how many clients use
           it.
         id: list-every-plan-with-the-inbounds-it-grants-and-how-many-clients-use-it
@@ -71,7 +94,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/plans/list","method":"get"},{"path":"/panel/api/plans/add","method":"post"},{"path":"/panel/api/plans/update/{id}","method":"post"},{"path":"/panel/api/plans/del/{id}","method":"post"},{"path":"/panel/api/plans/assign","method":"post"},{"path":"/panel/api/plans/unassign","method":"post"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/plans/codes/{id}","method":"get"},{"path":"/panel/api/plans/codes/add","method":"post"},{"path":"/panel/api/plans/codes/del/{id}","method":"post"},{"path":"/panel/api/plans/list","method":"get"},{"path":"/panel/api/plans/add","method":"post"},{"path":"/panel/api/plans/update/{id}","method":"post"},{"path":"/panel/api/plans/del/{id}","method":"post"},{"path":"/panel/api/plans/assign","method":"post"},{"path":"/panel/api/plans/unassign","method":"post"}]} showTitle />
     </>
   );
 }

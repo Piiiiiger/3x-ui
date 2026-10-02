@@ -25,6 +25,7 @@ import {
   EditOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
+  KeyOutlined,
   PlusOutlined,
   SafetyOutlined,
   StarFilled,
@@ -43,6 +44,7 @@ import type { PlanSummary } from '@/generated/zod';
 import type { PlanFormValues } from '@/schemas/plan';
 import AssignPlanModal from './AssignPlanModal';
 import PlanFormModal from './PlanFormModal';
+import ActivationCodesModal from './ActivationCodesModal';
 import { useInboundChoices } from './planText';
 import './PlansPage.css';
 
@@ -92,6 +94,7 @@ export default function PlansPage() {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
   const { plans, fetched, fetchError, loading, refetch } = usePlansQuery();
+  const [codePlan, setCodePlan] = useState<PlanSummary | null>(null);
   const { create, update, remove } = usePlanMutations();
   const { templates } = useRuleTemplatesQuery();
   const { labelOf } = useInboundChoices();
@@ -207,6 +210,9 @@ export default function PlansPage() {
     ) : undefined;
 
   const actionsOf = (plan: PlanSummary) => [
+    <Button key="codes" type="text" icon={<KeyOutlined />} onClick={() => setCodePlan(plan)}>
+      {t('pages.plans.codes.title')}
+    </Button>,
     <Button
       key="assign"
       type="text"
@@ -350,6 +356,7 @@ export default function PlansPage() {
         planId={assignPlanId ?? undefined}
         onClose={() => setAssignPlanId(null)}
       />
+      {codePlan && <ActivationCodesModal plan={codePlan} onClose={() => setCodePlan(null)} />}
     </ConfigProvider>
   );
 }

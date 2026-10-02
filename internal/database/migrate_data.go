@@ -65,6 +65,7 @@ func migrationModels() []any {
 		&model.RuleTemplateVersion{},
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
+		&model.ActivationCode{},
 	}
 }
 

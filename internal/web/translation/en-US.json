@@ -124,7 +124,19 @@
       "viewOverview": "Overview",
       "viewProbe": "Probe",
       "probeUnavailable": "Monitoring is temporarily unavailable",
-      "probeEmpty": "No server status to show yet."
+      "probeEmpty": "No server status to show yet.",
+      "register": "Register",
+      "registerIntro": "Create your account with an activation code from the administrator.",
+      "code": "Activation code",
+      "badCode": "The activation code is invalid or already used.",
+      "taken": "That username is already taken.",
+      "passwordLength": "Use a password between 6 and 72 bytes.",
+      "redeem": "Activate code",
+      "activated": "Your plan has been activated.",
+      "adminSignIn": "Administrator sign in",
+      "twoFactorCode": "Authenticator code",
+      "adminRequires2FA": "Administrator access requires two-factor authentication.",
+      "nextReset": "Next traffic reset"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Cards",
       "viewList": "List",
       "actions": "Actions",
-      "reapplyIpLimit": "Also apply the IP limit to the {count} user(s) on this plan"
+      "reapplyIpLimit": "Also apply the IP limit to the {count} user(s) on this plan",
+      "codes": {
+        "title": "Activation codes",
+        "create": "Create codes",
+        "count": "Number of codes",
+        "days": "Validity in days",
+        "resetDay": "Monthly reset day",
+        "unused": "Unused",
+        "used": "Used by {user}",
+        "created": "Codes created",
+        "copyAll": "Copy unused codes",
+        "deleteConfirm": "Delete this activation code?",
+        "zeroHint": "0 means no expiry or no scheduled reset."
+      }
     },
     "nodes": {
       "addNode": "Add Host",

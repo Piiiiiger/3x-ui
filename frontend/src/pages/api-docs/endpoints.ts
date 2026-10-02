@@ -134,6 +134,14 @@ export const sections: readonly Section[] = [
     endpoints: [
       {
         method: 'POST',
+        path: '/portal-admin',
+        summary:
+          'Exchange the portal administrator login handoff for an admin session. Requires the matching HttpOnly browser cookie, a single-use token less than a minute old, and two-factor authentication still enabled.',
+        body: '{\n  "token": "one-time-browser-bound-token"\n}',
+        response: '{\n  "success": true,\n  "redirect": "/panel/"\n}',
+      },
+      {
+        method: 'POST',
         path: '/login',
         summary:
           'Authenticate with username + password and receive a session cookie. Required before any cookie-based API call.',
@@ -1828,6 +1836,31 @@ export const sections: readonly Section[] = [
     endpoints: [
       {
         method: 'GET',
+        path: '/panel/api/plans/codes/:id',
+        summary: 'List activation codes for a plan, newest first. Plan id 0 lists every code.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id, or 0 for all plans.' }],
+        responseSchema: 'ActivationCode',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/codes/add',
+        summary:
+          'Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days and monthly reset day. Zero means unlimited quota, no expiry or no reset respectively.',
+        body: '{\n  "planId": 1,\n  "count": 5,\n  "totalGB": 107374182400,\n  "days": 30,\n  "resetDay": 22,\n  "note": "March group"\n}',
+        responseSchema: 'ActivationCode',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/codes/del/:id',
+        summary:
+          'Revoke an unused code or delete a used code from the history. A used code never becomes reusable.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Code id.' }],
+        response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
+      },
+      {
+        method: 'GET',
         path: '/panel/api/plans/list',
         summary: 'List every plan with the inbounds it grants and how many clients use it.',
         responseSchema: 'PlanSummary',
@@ -2363,6 +2396,46 @@ export const sections: readonly Section[] = [
       },
     ],
     endpoints: [
+      {
+        method: 'POST',
+        path: '/{subPath}portal/register',
+        summary:
+          'Register a username and password with a single-use activation code and create a portal session. The code supplies the plan, quota, validity and monthly reset day. Failed requests are limited per address.',
+        body: '{"username":"new-user","password":"example-password","code":"ABCD-EFGH-JKLM-NPQR"}',
+        response: '{"success":true}',
+      },
+      {
+        method: 'POST',
+        path: '/{subPath}portal/redeem',
+        summary:
+          'Redeem an activation code for the signed-in user. Changes the plan, quota and reset day, adds validity from the later of now and expiry, and clears usage. A failed service update can be retried with the same code without granting the days twice.',
+        body: '{"code":"ABCD-EFGH-JKLM-NPQR"}',
+        response: '{"success":true}',
+      },
+      {
+        method: 'POST',
+        path: '/{subPath}portal/admin-login',
+        summary:
+          'Verify administrator credentials and a current authenticator code. Two-factor authentication must be enabled. Returns a browser-bound single-use handoff to POST to the panel portal-admin endpoint within one minute.',
+        body: '{"username":"admin","password":"example-password","twoFactorCode":"123456"}',
+        response: '{"success":true,"token":"browser-bound-token","path":"/portal-admin"}',
+      },
+      {
+        method: 'GET',
+        path: '/{subPath}:subid/probe',
+        summary:
+          'Return probe information for only the hosts behind this subscription. Uses the portal probe field whitelist and excludes unrelated hosts. Unknown tokens return 404. Responses must not be cached.',
+        params: [{ name: 'subid', in: 'path', type: 'string', desc: 'Subscription ID.' }],
+        responses: {
+          '200': {
+            description: 'Probe information scoped to the subscription.',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/PortalProbe' } },
+            },
+          },
+          '404': { description: 'Unknown subscription token.' },
+        },
+      },
       {
         method: 'GET',
         path: '/{subPath}:subid',

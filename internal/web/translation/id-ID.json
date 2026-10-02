@@ -124,7 +124,19 @@
       "viewOverview": "Ikhtisar",
       "viewProbe": "Pemantauan",
       "probeUnavailable": "Pemantauan sementara tidak tersedia",
-      "probeEmpty": "Belum ada status server untuk ditampilkan."
+      "probeEmpty": "Belum ada status server untuk ditampilkan.",
+      "register": "Daftar",
+      "registerIntro": "Buat akun dengan kode aktivasi dari administrator.",
+      "code": "Kode aktivasi",
+      "badCode": "Kode aktivasi tidak valid atau sudah digunakan.",
+      "taken": "Nama pengguna ini sudah digunakan.",
+      "passwordLength": "Kata sandi harus berukuran 6 hingga 72 byte.",
+      "redeem": "Gunakan kode aktivasi",
+      "activated": "Paket diaktifkan.",
+      "adminSignIn": "Masuk sebagai administrator",
+      "twoFactorCode": "Kode autentikator",
+      "adminRequires2FA": "Akses administrator memerlukan autentikasi dua faktor.",
+      "nextReset": "Reset trafik berikutnya"
     }
   },
   "menu": {
@@ -1090,7 +1102,20 @@
       "viewGrid": "Kartu",
       "viewList": "Daftar",
       "actions": "Tindakan",
-      "reapplyIpLimit": "Terapkan juga batas IP ke {count} pengguna di paket ini"
+      "reapplyIpLimit": "Terapkan juga batas IP ke {count} pengguna di paket ini",
+      "codes": {
+        "title": "Kode aktivasi",
+        "create": "Buat kode",
+        "count": "Jumlah",
+        "days": "Masa berlaku dalam hari",
+        "resetDay": "Tanggal reset bulanan",
+        "unused": "Belum digunakan",
+        "used": "Digunakan oleh {user}",
+        "created": "Kode aktivasi dibuat",
+        "copyAll": "Salin kode yang belum digunakan",
+        "deleteConfirm": "Hapus kode aktivasi ini?",
+        "zeroHint": "0 berarti tanpa kedaluwarsa atau tanpa reset berkala."
+      }
     },
     "nodes": {
       "addNode": "Tambah Node",

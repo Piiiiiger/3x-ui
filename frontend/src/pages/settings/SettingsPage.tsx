@@ -169,7 +169,7 @@ export default function SettingsPage() {
       out.push(t('pages.settings.warnDefaultPort'));
     }
     const segs = window.location.pathname.split('/').length < 4;
-    if (segs && allSetting.webBasePath === '/') {
+    if (segs && allSetting.webBasePath === '/' && !allSetting.twoFactorEnable) {
       out.push(t('pages.settings.warnDefaultBasePath'));
     }
     if (allSetting.subEnable) {

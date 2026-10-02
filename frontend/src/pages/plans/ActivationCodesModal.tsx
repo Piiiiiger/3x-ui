@@ -1,0 +1,189 @@
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Space,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from 'antd';
+import { FormProvider, useForm } from 'react-hook-form';
+
+import type { PlanSummary } from '@/generated/zod';
+import { useActivationCodes } from '@/api/queries/useActivationCodes';
+import { FormField, rhfZodValidate } from '@/components/form/rhf';
+import { ActivationCodeFormSchema, type ActivationCodeFormValues } from '@/schemas/activationCode';
+import { ClipboardManager, SizeFormatter } from '@/utils';
+
+export default function ActivationCodesModal({
+  plan,
+  onClose,
+}: {
+  plan: PlanSummary;
+  onClose: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const codes = useActivationCodes(plan.id);
+  const [messageApi, contextHolder] = message.useMessage();
+  const methods = useForm<ActivationCodeFormValues>({
+    defaultValues: { count: 1, quotaGB: 0, days: 30, resetDay: 0, note: '' },
+  });
+
+  async function create(values: ActivationCodeFormValues) {
+    const reply = await codes.create.mutateAsync({
+      planId: plan.id,
+      count: values.count,
+      totalGB: Math.round(values.quotaGB * 1024 ** 3),
+      days: values.days,
+      resetDay: values.resetDay,
+      note: values.note,
+    });
+    if (reply?.success) messageApi.success(t('pages.plans.codes.created'));
+  }
+
+  async function copyUnused() {
+    const unused = (codes.data ?? [])
+      .filter((code) => code.usedAt === 0)
+      .map((code) => code.code)
+      .join('\n');
+    if (unused && (await ClipboardManager.copyText(unused))) messageApi.success(t('copied'));
+  }
+
+  return (
+    <Modal
+      open
+      title={`${t('pages.plans.codes.title')} · ${plan.name}`}
+      onCancel={onClose}
+      footer={null}
+      width={760}
+    >
+      {contextHolder}
+      <FormProvider {...methods}>
+        <Form layout="vertical" onFinish={methods.handleSubmit(create)}>
+          <div className="plan-form-row">
+            <FormField
+              name="count"
+              label={t('pages.plans.codes.count')}
+              rules={{ validate: rhfZodValidate(ActivationCodeFormSchema.shape.count) }}
+            >
+              <InputNumber min={1} max={200} precision={0} style={{ width: '100%' }} />
+            </FormField>
+            <FormField
+              name="quotaGB"
+              label={t('pages.plans.quota')}
+              tooltip={t('pages.plans.zeroUnlimited')}
+              rules={{ validate: rhfZodValidate(ActivationCodeFormSchema.shape.quotaGB) }}
+            >
+              <InputNumber min={0} precision={2} suffix="GB" style={{ width: '100%' }} />
+            </FormField>
+            <FormField
+              name="days"
+              label={t('pages.plans.codes.days')}
+              rules={{ validate: rhfZodValidate(ActivationCodeFormSchema.shape.days) }}
+            >
+              <InputNumber min={0} max={36500} precision={0} style={{ width: '100%' }} />
+            </FormField>
+            <FormField
+              name="resetDay"
+              label={t('pages.plans.codes.resetDay')}
+              rules={{ validate: rhfZodValidate(ActivationCodeFormSchema.shape.resetDay) }}
+            >
+              <InputNumber min={0} max={31} precision={0} style={{ width: '100%' }} />
+            </FormField>
+          </div>
+          <Typography.Paragraph type="secondary">
+            {t('pages.plans.codes.zeroHint')}
+          </Typography.Paragraph>
+          <FormField name="note" label={t('remark')}>
+            <Input maxLength={256} />
+          </FormField>
+          <Space style={{ marginBottom: 16 }}>
+            <Button htmlType="submit" type="primary" loading={codes.create.isPending}>
+              {t('pages.plans.codes.create')}
+            </Button>
+            <Button onClick={copyUnused} disabled={!codes.data?.some((code) => !code.usedAt)}>
+              {t('pages.plans.codes.copyAll')}
+            </Button>
+          </Space>
+        </Form>
+      </FormProvider>
+      {codes.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={t('subscription.portal.loadFailed')}
+          action={<Button onClick={() => codes.refetch()}>{t('refresh')}</Button>}
+        />
+      )}
+      <Table
+        rowKey="id"
+        size="small"
+        dataSource={codes.data ?? []}
+        loading={codes.isFetching}
+        scroll={{ x: 580 }}
+        pagination={{ pageSize: 10 }}
+        columns={[
+          {
+            title: t('subscription.portal.code'),
+            dataIndex: 'code',
+            render: (code: string) => (
+              <Typography.Text code copyable>
+                {code}
+              </Typography.Text>
+            ),
+          },
+          {
+            title: t('pages.plans.quota'),
+            key: 'grant',
+            render: (_, row) => (
+              <div>
+                {row.totalGB ? SizeFormatter.sizeFormat(row.totalGB) : t('unlimited')} ·{' '}
+                {row.days ? `${row.days} ${t('pages.plans.daysUnit')}` : t('pages.plans.permanent')}
+              </div>
+            ),
+          },
+          {
+            title: t('status'),
+            key: 'status',
+            render: (_, row) => (
+              <div>
+                <Tag color={row.usedAt ? undefined : 'green'}>
+                  {row.usedAt
+                    ? t('pages.plans.codes.used', { user: row.usedBy })
+                    : t('pages.plans.codes.unused')}
+                </Tag>
+                {row.usedAt > 0 && (
+                  <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
+                    <time dateTime={new Date(row.usedAt).toISOString()}>
+                      {new Date(row.usedAt).toLocaleString(i18n.language)}
+                    </time>
+                  </Typography.Text>
+                )}
+              </div>
+            ),
+          },
+          { title: t('remark'), dataIndex: 'note', ellipsis: true },
+          {
+            key: 'delete',
+            render: (_, row) => (
+              <Popconfirm
+                title={t('pages.plans.codes.deleteConfirm')}
+                onConfirm={() => codes.remove.mutateAsync(row.id)}
+              >
+                <Button danger type="text" loading={codes.remove.isPending}>
+                  {t('delete')}
+                </Button>
+              </Popconfirm>
+            ),
+          },
+        ]}
+      />
+    </Modal>
+  );
+}

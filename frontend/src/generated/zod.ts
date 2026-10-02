@@ -30,6 +30,30 @@ export type trafficLocalApplyAction = z.infer<typeof trafficLocalApplyActionSche
 export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
+export const ActivationCodeSchema = z.object({
+  code: z.string(),
+  createdAt: z.number().int(),
+  days: z.number().int(),
+  id: z.number().int(),
+  note: z.string(),
+  planId: z.number().int(),
+  resetDay: z.number().int(),
+  totalGB: z.number().int(),
+  usedAt: z.number().int(),
+  usedBy: z.string(),
+});
+export type ActivationCode = z.infer<typeof ActivationCodeSchema>;
+
+export const ActivationCodeInputSchema = z.object({
+  count: z.number().int(),
+  days: z.number().int(),
+  note: z.string(),
+  planId: z.number().int(),
+  resetDay: z.number().int(),
+  totalGB: z.number().int(),
+});
+export type ActivationCodeInput = z.infer<typeof ActivationCodeInputSchema>;
+
 export const AgentSecretViewSchema = z.object({
   secret: z.string(),
 });

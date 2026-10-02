@@ -218,6 +218,7 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
               >
                 <Input
                   value={allSetting.webBasePath}
+                  disabled={allSetting.twoFactorEnable}
                   onChange={(e) => updateSetting({ webBasePath: sanitizePath(e.target.value) })}
                 />
               </SettingListItem>

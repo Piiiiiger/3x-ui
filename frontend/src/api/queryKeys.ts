@@ -15,6 +15,9 @@ export const keys = {
     root: () => ['plans'] as const,
     list: () => ['plans', 'list'] as const,
   },
+  activationCodes: {
+    list: (planId: number) => ['activationCodes', planId] as const,
+  },
   ruleTemplates: {
     root: () => ['ruleTemplates'] as const,
     list: () => ['ruleTemplates', 'list'] as const,
