@@ -199,7 +199,8 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine.Use(gzip.Gzip(gzip.DefaultCompression))
+	// Agent checksums cover the exact archive bytes, including through proxies.
+	engine.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPathsRegexs([]string{`/agent/download/[^/]+/[^/]+$`})))
 	assetsBasePath := basePath + "assets/"
 
 	store := cookie.NewStore(secret)

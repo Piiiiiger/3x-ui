@@ -54,7 +54,7 @@ func (a *AgentController) download(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	c.Header("Cache-Control", "private, no-store")
+	c.Header("Cache-Control", "private, no-store, no-transform")
 	c.Header("Content-Type", "application/octet-stream")
 	http.ServeContent(c.Writer, c.Request, asset, info.ModTime(), file)
 }
