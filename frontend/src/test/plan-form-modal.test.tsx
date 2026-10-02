@@ -4,15 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import PlanFormModal from '@/pages/plans/PlanFormModal';
 import type { PlanSummary } from '@/generated/zod';
 import { HttpUtil, Msg } from '@/utils';
-import { chooseSelectOption, renderWithProviders } from './test-utils';
+import { chooseSelectOption, fieldLabels, renderWithProviders } from './test-utils';
 
 const plan: PlanSummary = {
   id: 7,
   name: 'Monthly',
-  totalGB: 100 * 1024 ** 3,
-  durationDays: 30,
-  trafficReset: 'monthly',
-  trafficResetDay: 1,
   limitIp: 2,
   remark: '',
   templateId: 0,
@@ -39,6 +35,8 @@ const TEMPLATES = [
     size: 10,
     planCount: 2,
     updatedAt: 0,
+    baseId: 0,
+    changes: [],
   },
   {
     id: 5,
@@ -48,6 +46,8 @@ const TEMPLATES = [
     size: 10,
     planCount: 0,
     updatedAt: 0,
+    baseId: 0,
+    changes: [],
   },
 ];
 
@@ -56,14 +56,20 @@ function save() {
 }
 
 describe('PlanFormModal', () => {
+  // Quota, validity and reset belong to each user now; a plan is its servers, rules and IP limit.
+  it('asks only for what a plan holds', () => {
+    renderWithProviders(<PlanFormModal open plan={plan} onClose={() => {}} onConfirm={vi.fn()} />);
+    expect(fieldLabels()).toEqual(['Name', 'IP Limit', 'Nodes', 'Rule template', 'Remark']);
+  });
+
   // Ticked by default, every edit re-stamped the members' limits, even one that only added a server.
-  it('saves an edit without re-applying limits unless the box is ticked', async () => {
+  it('saves an edit without re-applying the IP limit unless the box is ticked', async () => {
     const onConfirm = vi.fn();
     renderWithProviders(
       <PlanFormModal open plan={plan} onClose={() => {}} onConfirm={onConfirm} />,
     );
     const reapply = screen.getByRole('checkbox', {
-      name: 'Also re-apply quota, IP limit and reset schedule to the 3 user(s) on this plan',
+      name: 'Also apply the IP limit to the 3 user(s) on this plan',
     }) as HTMLInputElement;
     expect(reapply.checked).toBe(false);
     expect(

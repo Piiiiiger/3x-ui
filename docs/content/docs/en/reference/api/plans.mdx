@@ -1,9 +1,10 @@
 ---
 title: Plans
-description: Reusable limit sets — quota, validity, traffic-reset schedule, IP
-  limit and the inbounds they grant. Assigning a plan stamps those values onto
-  each client and attaches/detaches inbounds so the client sits on exactly the
-  plan inbounds.
+description: 'What a group of clients shares: the inbounds (servers) they get,
+  the rule template their Clash subscriptions use, and an IP limit. Each client
+  keeps their own quota, expiry and reset schedule; assigning a plan stamps its
+  IP limit and attaches/detaches inbounds so the client sits on exactly the plan
+  inbounds.'
 full: true
 _openapi:
   preload:
@@ -13,68 +14,51 @@ _openapi:
       title: List every plan with the inbounds it grants and how many clients use it.
       url: '#list-every-plan-with-the-inbounds-it-grants-and-how-many-clients-use-it'
     - depth: 2
-      title: Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0
-        means no expiry. trafficReset is never, hourly, daily, weekly or
-        monthly; inbound ids must exist. templateId names the rule template
+      title: Create a plan. Inbound ids must exist. templateId names the rule template
         members' Clash subscriptions use; 0 leaves them on the default template.
-      url: '#create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-templateid-names-the-rule-template-members-clash-subscriptions-use-0-leaves-them-on-the-default-template'
+        limitIp 0 means no IP limit.
+      url: '#create-a-plan-inbound-ids-must-exist-templateid-names-the-rule-template-members-clash-subscriptions-use-0-leaves-them-on-the-default-template-limitip-0-means-no-ip-limit'
     - depth: 2
       title: Replace a plan. Every client on the plan is attached to the inbounds the
         plan gained and detached from those it lost; their other inbounds stay.
-        With applyToMembers, the plan quota, IP limit and reset schedule are
-        also re-stamped onto them; their expiry and usage are left alone.
-      url: '#replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-quota-ip-limit-and-reset-schedule-are-also-re-stamped-onto-them-their-expiry-and-usage-are-left-alone'
+        With applyToMembers, the plan IP limit is also re-stamped onto them;
+        their quota, expiry and usage are left alone.
+      url: '#replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-ip-limit-is-also-re-stamped-onto-them-their-quota-expiry-and-usage-are-left-alone'
     - depth: 2
       title: Delete a plan. Refused while any client is on it — move or unassign those
         clients first.
       url: '#delete-a-plan-refused-while-any-client-is-on-it--move-or-unassign-those-clients-first'
     - depth: 2
-      title: 'Put clients on a plan. Each gets the plan quota, IP limit and reset
-        schedule, and exactly the plan inbounds. start sets the expiry: now
-        (duration from now), firstUse (duration from the first connection) or
-        keep (unchanged). resetTraffic zeroes usage and re-enables the client.'
-      url: '#put-clients-on-a-plan-each-gets-the-plan-quota-ip-limit-and-reset-schedule-and-exactly-the-plan-inbounds-start-sets-the-expiry-now-duration-from-now-firstuse-duration-from-the-first-connection-or-keep-unchanged-resettraffic-zeroes-usage-and-re-enables-the-client'
+      title: Put clients on a plan. Each gets the plan IP limit and exactly the plan
+        inbounds; their own quota, expiry and reset schedule stay as they are.
+      url: '#put-clients-on-a-plan-each-gets-the-plan-ip-limit-and-exactly-the-plan-inbounds-their-own-quota-expiry-and-reset-schedule-stay-as-they-are'
     - depth: 2
       title: Take clients off their plan. Their current quota, expiry and inbounds
         stay as they are.
       url: '#take-clients-off-their-plan-their-current-quota-expiry-and-inbounds-stay-as-they-are'
-    - depth: 2
-      title: 'Renew clients on their plan: the expiry moves forward by the plan
-        duration from the later of now and the current expiry, usage is zeroed
-        and the client is re-enabled. Fails for a client with no plan.'
-      url: '#renew-clients-on-their-plan-the-expiry-moves-forward-by-the-plan-duration-from-the-later-of-now-and-the-current-expiry-usage-is-zeroed-and-the-client-is-re-enabled-fails-for-a-client-with-no-plan'
   structuredData:
     headings:
       - content: List every plan with the inbounds it grants and how many clients use
           it.
         id: list-every-plan-with-the-inbounds-it-grants-and-how-many-clients-use-it
-      - content: Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0
-          means no expiry. trafficReset is never, hourly, daily, weekly or
-          monthly; inbound ids must exist. templateId names the rule template
-          members' Clash subscriptions use; 0 leaves them on the default
-          template.
-        id: create-a-plan-totalgb-is-in-bytes-0--unlimited-and-durationdays-0-means-no-expiry-trafficreset-is-never-hourly-daily-weekly-or-monthly-inbound-ids-must-exist-templateid-names-the-rule-template-members-clash-subscriptions-use-0-leaves-them-on-the-default-template
+      - content: Create a plan. Inbound ids must exist. templateId names the rule
+          template members' Clash subscriptions use; 0 leaves them on the
+          default template. limitIp 0 means no IP limit.
+        id: create-a-plan-inbound-ids-must-exist-templateid-names-the-rule-template-members-clash-subscriptions-use-0-leaves-them-on-the-default-template-limitip-0-means-no-ip-limit
       - content: Replace a plan. Every client on the plan is attached to the inbounds
           the plan gained and detached from those it lost; their other inbounds
-          stay. With applyToMembers, the plan quota, IP limit and reset schedule
-          are also re-stamped onto them; their expiry and usage are left alone.
-        id: replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-quota-ip-limit-and-reset-schedule-are-also-re-stamped-onto-them-their-expiry-and-usage-are-left-alone
+          stay. With applyToMembers, the plan IP limit is also re-stamped onto
+          them; their quota, expiry and usage are left alone.
+        id: replace-a-plan-every-client-on-the-plan-is-attached-to-the-inbounds-the-plan-gained-and-detached-from-those-it-lost-their-other-inbounds-stay-with-applytomembers-the-plan-ip-limit-is-also-re-stamped-onto-them-their-quota-expiry-and-usage-are-left-alone
       - content: Delete a plan. Refused while any client is on it — move or unassign
           those clients first.
         id: delete-a-plan-refused-while-any-client-is-on-it--move-or-unassign-those-clients-first
-      - content: 'Put clients on a plan. Each gets the plan quota, IP limit and reset
-          schedule, and exactly the plan inbounds. start sets the expiry: now
-          (duration from now), firstUse (duration from the first connection) or
-          keep (unchanged). resetTraffic zeroes usage and re-enables the
-          client.'
-        id: put-clients-on-a-plan-each-gets-the-plan-quota-ip-limit-and-reset-schedule-and-exactly-the-plan-inbounds-start-sets-the-expiry-now-duration-from-now-firstuse-duration-from-the-first-connection-or-keep-unchanged-resettraffic-zeroes-usage-and-re-enables-the-client
+      - content: Put clients on a plan. Each gets the plan IP limit and exactly the plan
+          inbounds; their own quota, expiry and reset schedule stay as they are.
+        id: put-clients-on-a-plan-each-gets-the-plan-ip-limit-and-exactly-the-plan-inbounds-their-own-quota-expiry-and-reset-schedule-stay-as-they-are
       - content: Take clients off their plan. Their current quota, expiry and inbounds
           stay as they are.
         id: take-clients-off-their-plan-their-current-quota-expiry-and-inbounds-stay-as-they-are
-      - content: 'Renew clients on their plan: the expiry moves forward by the plan
-          duration from the later of now and the current expiry, usage is zeroed
-          and the client is re-enabled. Fails for a client with no plan.'
-        id: renew-clients-on-their-plan-the-expiry-moves-forward-by-the-plan-duration-from-the-later-of-now-and-the-current-expiry-usage-is-zeroed-and-the-client-is-re-enabled-fails-for-a-client-with-no-plan
     contents: []
 ---
 
@@ -87,7 +71,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/plans/list","method":"get"},{"path":"/panel/api/plans/add","method":"post"},{"path":"/panel/api/plans/update/{id}","method":"post"},{"path":"/panel/api/plans/del/{id}","method":"post"},{"path":"/panel/api/plans/assign","method":"post"},{"path":"/panel/api/plans/unassign","method":"post"},{"path":"/panel/api/plans/renew","method":"post"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/plans/list","method":"get"},{"path":"/panel/api/plans/add","method":"post"},{"path":"/panel/api/plans/update/{id}","method":"post"},{"path":"/panel/api/plans/del/{id}","method":"post"},{"path":"/panel/api/plans/assign","method":"post"},{"path":"/panel/api/plans/unassign","method":"post"}]} showTitle />
     </>
   );
 }

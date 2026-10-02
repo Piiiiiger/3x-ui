@@ -8,10 +8,10 @@ export const PortalLoginSchema = z.object({
 });
 export type PortalLoginValues = z.infer<typeof PortalLoginSchema>;
 
+// The person's plan by name, with the limits they actually have.
 export const PortalPlanSchema = z.object({
   name: z.string(),
   totalGB: z.number(),
-  durationDays: z.number(),
   trafficReset: z.string(),
   trafficResetDay: z.number(),
   limitIp: z.number(),

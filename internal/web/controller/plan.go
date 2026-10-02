@@ -28,7 +28,6 @@ func (a *PlanController) initRouter(g *gin.RouterGroup) {
 	g.POST("/del/:id", a.delete)
 	g.POST("/assign", a.assign)
 	g.POST("/unassign", a.unassign)
-	g.POST("/renew", a.renew)
 }
 
 type planUpdateRequest struct {
@@ -38,10 +37,8 @@ type planUpdateRequest struct {
 }
 
 type planAssignRequest struct {
-	Emails       []string          `json:"emails"`
-	PlanId       int               `json:"planId"`
-	Start        service.PlanStart `json:"start"`
-	ResetTraffic bool              `json:"resetTraffic"`
+	Emails []string `json:"emails"`
+	PlanId int      `json:"planId"`
 }
 
 type planEmailsRequest struct {
@@ -110,7 +107,7 @@ func (a *PlanController) assign(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	needRestart, err := a.planService.Assign(&a.inboundService, req.Emails, req.PlanId, req.Start, req.ResetTraffic)
+	needRestart, err := a.planService.Assign(&a.inboundService, req.Emails, req.PlanId)
 	a.restartIf(needRestart)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
@@ -126,21 +123,6 @@ func (a *PlanController) unassign(c *gin.Context) {
 		return
 	}
 	if err := a.planService.Unassign(req.Emails); err != nil {
-		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
-		return
-	}
-	jsonObj(c, gin.H{"affected": len(req.Emails)}, nil)
-}
-
-func (a *PlanController) renew(c *gin.Context) {
-	var req planEmailsRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
-		return
-	}
-	needRestart, err := a.planService.Renew(&a.inboundService, req.Emails)
-	a.restartIf(needRestart)
-	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}

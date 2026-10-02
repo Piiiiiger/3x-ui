@@ -183,15 +183,18 @@ describe('ClientsPage (用户管理)', () => {
     expect(within(rowOf('a@x')).getByText('no expiry')).toBeTruthy();
     expect(within(rowOf('a@x')).getByText(IntlUtil.formatDate(NEXT_RESET))).toBeTruthy();
     expect(within(rowOf('c@x')).getByText('Expired 2 d ago')).toBeTruthy();
+    // Renewing is the user's own now, so one without a plan can be renewed too.
     const noPlanRenew = within(rowOf('c@x')).getByRole('button', { name: /Renew/ });
-    expect(noPlanRenew.hasAttribute('disabled')).toBe(true);
+    expect(noPlanRenew.hasAttribute('disabled')).toBe(false);
 
     fireEvent.click(within(rowOf('a@x')).getByRole('button', { name: /Renew/ }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+    // Generated ids are all "test-id" here, so the dialog is found by its title.
+    const dialog = (await screen.findByText('Renew a@x')).closest('.ant-modal') as HTMLElement;
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Renew' }));
     await waitFor(() =>
       expect(postStub).toHaveBeenCalledWith(
-        '/panel/api/plans/renew',
-        { emails: ['a@x'] },
+        '/panel/api/clients/renew',
+        { emails: ['a@x'], days: 30, resetUsage: true },
         expect.anything(),
       ),
     );

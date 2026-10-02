@@ -4,16 +4,15 @@ import { Tag, theme } from 'antd';
 
 import { SizeFormatter } from '@/utils';
 import { Sparkline } from '@/components/viz';
-import { usePlanText } from '@/lib/plans/planText';
+import { useLimitsText } from '@/lib/plans/planText';
 import type { TrafficDay } from '@/generated/zod';
 import type { PortalPlan } from '@/schemas/portal';
 
 export function PortalPlanCard({ plan }: { plan: PortalPlan }) {
   const { t } = useTranslation();
-  const text = usePlanText()(plan);
+  const text = useLimitsText()(plan);
   const facts = [
     [t('pages.plans.quota'), text.quota],
-    [t('pages.plans.duration'), text.duration],
     [t('pages.inbounds.periodicTrafficResetTitle'), text.reset],
     [t('pages.clients.limitIp'), text.ipLimit],
   ];

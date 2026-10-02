@@ -3,21 +3,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { HttpUtil } from '@/utils';
 import { keys } from '@/api/queryKeys';
 import { markLocalInvalidate } from '@/api/invalidationTracker';
-import type { PlanInput } from '@/generated/zod';
-import type { PlanFormValues, PlanStart } from '@/schemas/plan';
+import type { PlanFormValues } from '@/schemas/plan';
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
-const GIB = 1024 ** 3;
-
-export function toPlanInput({ quotaGB, ...rest }: PlanFormValues): PlanInput {
-  return { ...rest, totalGB: Math.round(quotaGB * GIB) };
-}
 
 export interface PlanAssignRequest {
   emails: string[];
   planId: number;
-  start: PlanStart;
-  resetTraffic: boolean;
 }
 
 export function usePlanMutations() {
@@ -37,7 +29,7 @@ export function usePlanMutations() {
 
   const createMut = useMutation({
     mutationFn: (values: PlanFormValues) =>
-      HttpUtil.post('/panel/api/plans/add', toPlanInput(values), JSON_HEADERS),
+      HttpUtil.post('/panel/api/plans/add', values, JSON_HEADERS),
     onSuccess: (msg) => {
       if (msg?.success) invalidatePlans();
     },
@@ -47,7 +39,7 @@ export function usePlanMutations() {
     mutationFn: (args: { id: number; values: PlanFormValues; reapplyLimits: boolean }) =>
       HttpUtil.post(
         `/panel/api/plans/update/${args.id}`,
-        { ...toPlanInput(args.values), applyToMembers: args.reapplyLimits },
+        { ...args.values, applyToMembers: args.reapplyLimits },
         JSON_HEADERS,
       ),
     onSuccess: (msg) => {
@@ -78,14 +70,6 @@ export function usePlanMutations() {
     },
   });
 
-  const renewMut = useMutation({
-    mutationFn: (emails: string[]) =>
-      HttpUtil.post('/panel/api/plans/renew', { emails }, JSON_HEADERS),
-    onSuccess: (msg) => {
-      if (msg?.success) invalidateMembers();
-    },
-  });
-
   return {
     create: (values: PlanFormValues) => createMut.mutateAsync(values),
     update: (id: number, values: PlanFormValues, reapplyLimits: boolean) =>
@@ -93,6 +77,5 @@ export function usePlanMutations() {
     remove: (id: number) => removeMut.mutateAsync(id),
     assign: (req: PlanAssignRequest) => assignMut.mutateAsync(req),
     unassign: (emails: string[]) => unassignMut.mutateAsync(emails),
-    renew: (emails: string[]) => renewMut.mutateAsync(emails),
   };
 }

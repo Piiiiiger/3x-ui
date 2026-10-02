@@ -21,15 +21,11 @@ type PlanService struct {
 
 // PlanInput is the editable part of a plan plus the inbounds it grants.
 type PlanInput struct {
-	Name            string `json:"name" example:"Monthly 100G"`
-	TotalGB         int64  `json:"totalGB" example:"107374182400"`
-	DurationDays    int    `json:"durationDays" example:"30"`
-	TrafficReset    string `json:"trafficReset" example:"monthly"`
-	TrafficResetDay int    `json:"trafficResetDay" example:"1"`
-	LimitIP         int    `json:"limitIp" example:"0"`
-	Remark          string `json:"remark" example:"Hong Kong and Singapore"`
-	TemplateId      int    `json:"templateId" example:"1"`
-	InboundIds      []int  `json:"inboundIds" example:"[1,2]"`
+	Name       string `json:"name" example:"Monthly 100G"`
+	LimitIP    int    `json:"limitIp" example:"0"`
+	Remark     string `json:"remark" example:"Hong Kong and Singapore"`
+	TemplateId int    `json:"templateId" example:"1"`
+	InboundIds []int  `json:"inboundIds" example:"[1,2]"`
 }
 
 // PlanSummary is a plan with the inbounds it grants and how many clients use it.
@@ -38,15 +34,6 @@ type PlanSummary struct {
 	InboundIds  []int `json:"inboundIds" example:"[1,2]"`
 	MemberCount int   `json:"memberCount" example:"4"`
 }
-
-// PlanStart says where an assigned plan's validity starts counting from.
-type PlanStart string
-
-const (
-	PlanStartNow      PlanStart = "now"
-	PlanStartFirstUse PlanStart = "firstUse"
-	PlanStartKeep     PlanStart = "keep"
-)
 
 const planDayMillis = int64(24 * time.Hour / time.Millisecond)
 
@@ -103,7 +90,7 @@ func (s *PlanService) Create(in PlanInput) (*model.Plan, error) {
 }
 
 // Update attaches the plan's members to the inbounds it gains and detaches them from those
-// it loses, then saves the plan; reapplyLimits also re-stamps its limits but not expiries.
+// it loses, then saves the plan; reapplyLimits also re-stamps its IP limit on them.
 func (s *PlanService) Update(inboundSvc *InboundService, id int, in PlanInput, reapplyLimits bool) (bool, error) {
 	db := database.GetDB()
 	var plan model.Plan
@@ -149,7 +136,7 @@ func (s *PlanService) updateMember(inboundSvc *InboundService, plan *model.Plan,
 		if err != nil {
 			return false, err
 		}
-		if needRestart, err = s.stampPlanLimits(inboundSvc, plan, rec, PlanStartKeep); err != nil {
+		if needRestart, err = s.stampPlanIPLimit(inboundSvc, plan, rec); err != nil {
 			return needRestart, err
 		}
 	}
@@ -217,21 +204,16 @@ func (s *PlanService) Delete(id int) error {
 	})
 }
 
-// Assign stamps the plan onto each client: quota, IP limit and reset schedule,
-// expiry per start, and exactly the plan's inbounds (attaching and detaching).
-func (s *PlanService) Assign(inboundSvc *InboundService, emails []string, planId int, start PlanStart, resetTraffic bool) (bool, error) {
+// Assign puts each client on the plan: its IP limit and exactly its inbounds (attaching
+// and detaching); the client's own quota, expiry and reset schedule stay as they are.
+func (s *PlanService) Assign(inboundSvc *InboundService, emails []string, planId int) (bool, error) {
 	plan, planIds, err := s.Get(planId)
 	if err != nil {
 		return false, err
 	}
-	switch start {
-	case PlanStartNow, PlanStartFirstUse, PlanStartKeep:
-	default:
-		return false, common.NewError("unknown plan start:", start)
-	}
 	needRestart := false
 	for _, email := range emails {
-		nr, err := s.assignOne(inboundSvc, plan, planIds, email, start, resetTraffic)
+		nr, err := s.assignOne(inboundSvc, plan, planIds, email)
 		needRestart = needRestart || nr
 		if err != nil {
 			return needRestart, err
@@ -240,12 +222,12 @@ func (s *PlanService) Assign(inboundSvc *InboundService, emails []string, planId
 	return needRestart, nil
 }
 
-func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, planIds []int, email string, start PlanStart, resetTraffic bool) (bool, error) {
+func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, planIds []int, email string) (bool, error) {
 	rec, err := s.clientService.GetRecordByEmail(nil, email)
 	if err != nil {
 		return false, err
 	}
-	needRestart, err := s.stampPlanLimits(inboundSvc, plan, rec, start)
+	needRestart, err := s.stampPlanIPLimit(inboundSvc, plan, rec)
 	if err != nil {
 		return needRestart, err
 	}
@@ -258,35 +240,14 @@ func (s *PlanService) assignOne(inboundSvc *InboundService, plan *model.Plan, pl
 	if err != nil {
 		return needRestart, err
 	}
-	if resetTraffic {
-		nr, err := s.clientService.ResetTrafficByEmail(inboundSvc, email)
-		needRestart = needRestart || nr
-		if err != nil {
-			return needRestart, err
-		}
-	}
 	return needRestart, database.GetDB().Model(&model.ClientRecord{}).
 		Where("id = ?", rec.Id).UpdateColumn("plan_id", plan.Id).Error
 }
 
-// stampPlanLimits writes the plan's quota, IP limit and reset schedule onto the
-// client, and its expiry as start says; PlanStartKeep leaves the expiry alone.
-func (s *PlanService) stampPlanLimits(inboundSvc *InboundService, plan *model.Plan, rec *model.ClientRecord, start PlanStart) (bool, error) {
+// stampPlanIPLimit writes the plan's IP limit onto the client.
+func (s *PlanService) stampPlanIPLimit(inboundSvc *InboundService, plan *model.Plan, rec *model.ClientRecord) (bool, error) {
 	client := rec.ToClient()
-	client.TotalGB = plan.TotalGB
 	client.LimitIP = plan.LimitIP
-	client.TrafficReset = plan.TrafficReset
-	client.TrafficResetDay = plan.TrafficResetDay
-	duration := int64(plan.DurationDays) * planDayMillis
-	switch start {
-	case PlanStartNow:
-		client.ExpiryTime = 0
-		if duration > 0 {
-			client.ExpiryTime = time.Now().UnixMilli() + duration
-		}
-	case PlanStartFirstUse:
-		client.ExpiryTime = -duration
-	}
 	return s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
 }
 
@@ -318,44 +279,6 @@ func (s *PlanService) Unassign(emails []string) error {
 		Where("email IN ?", emails).UpdateColumn("plan_id", 0).Error
 }
 
-// Renew extends each client by its plan's duration from the later of now and its
-// current expiry and zeroes its traffic; the reset re-enables a disabled client.
-func (s *PlanService) Renew(inboundSvc *InboundService, emails []string) (bool, error) {
-	needRestart := false
-	for _, email := range emails {
-		rec, err := s.clientService.GetRecordByEmail(nil, email)
-		if err != nil {
-			return needRestart, err
-		}
-		if rec.PlanId == 0 {
-			return needRestart, common.NewError("client has no plan to renew:", email)
-		}
-		plan, _, err := s.Get(rec.PlanId)
-		if err != nil {
-			return needRestart, err
-		}
-		client := rec.ToClient()
-		if plan.DurationDays > 0 {
-			base := time.Now().UnixMilli()
-			if rec.ExpiryTime > base {
-				base = rec.ExpiryTime
-			}
-			client.ExpiryTime = base + int64(plan.DurationDays)*planDayMillis
-		}
-		nr, err := s.clientService.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
-		needRestart = needRestart || nr
-		if err != nil {
-			return needRestart, err
-		}
-		nr, err = s.clientService.ResetTrafficByEmail(inboundSvc, email)
-		needRestart = needRestart || nr
-		if err != nil {
-			return needRestart, err
-		}
-	}
-	return needRestart, nil
-}
-
 func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 	in.Name = strings.TrimSpace(in.Name)
 	if in.Name == "" {
@@ -368,17 +291,8 @@ func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 	if taken > 0 {
 		return common.NewError("a plan with this name already exists:", in.Name)
 	}
-	if in.TotalGB < 0 || in.DurationDays < 0 || in.LimitIP < 0 {
-		return common.NewError("quota, duration and IP limit cannot be negative")
-	}
-	if in.TrafficReset == "" {
-		in.TrafficReset = "never"
-	}
-	if in.TrafficResetDay == 0 {
-		in.TrafficResetDay = 1
-	}
-	if err := validateClientTrafficReset(in.TrafficReset, in.TrafficResetDay); err != nil {
-		return err
+	if in.LimitIP < 0 {
+		return common.NewError("the IP limit cannot be negative")
 	}
 	if in.TemplateId < 0 {
 		in.TemplateId = 0
@@ -407,10 +321,6 @@ func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 
 func applyPlanInput(plan *model.Plan, in PlanInput) {
 	plan.Name = in.Name
-	plan.TotalGB = in.TotalGB
-	plan.DurationDays = in.DurationDays
-	plan.TrafficReset = in.TrafficReset
-	plan.TrafficResetDay = in.TrafficResetDay
 	plan.LimitIP = in.LimitIP
 	plan.Remark = in.Remark
 	plan.TemplateId = in.TemplateId

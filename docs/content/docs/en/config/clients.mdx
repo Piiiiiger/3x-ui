@@ -122,7 +122,10 @@ with the share of its quota used, online status, and a status tag: **Enabled**,
 **Disabled**, **Used up** (quota reached) or **Expired**. The **Renewal view**
 shows each client's plan, expiry, days left and **next reset** (when its usage
 next returns to zero, from its reset cycle or auto-renewal, in the panel's time
-zone), with a **Renew** button for clients on a plan.
+zone), with a **Renew** button: it adds the days you enter to the later of today
+and the client's expiry (a client without an expiry keeps none) and can clear
+the used traffic. A plan only sets the servers, rule template and IP limit its
+clients share; quota, expiry and reset schedule are each client's own.
 
 Chips above the list filter by plan, with each plan's head count, or by status:
 depleting soon, out of traffic, expired, disabled.

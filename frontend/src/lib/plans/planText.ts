@@ -3,29 +3,24 @@ import { useTranslation } from 'react-i18next';
 
 import { SizeFormatter } from '@/utils';
 
-export interface PlanLimits {
+export interface UserLimits {
   totalGB: number;
-  durationDays: number;
   trafficReset: string;
   trafficResetDay: number;
   limitIp: number;
 }
 
-// Human wording for a plan's limits, shared by the plans page and the client portal.
-export function usePlanText() {
+// Human wording for a person's own limits, shown with their plan in the portal.
+export function useLimitsText() {
   const { t } = useTranslation();
   return useCallback(
-    (plan: PlanLimits) => ({
-      quota: plan.totalGB > 0 ? SizeFormatter.sizeFormat(plan.totalGB) : t('unlimited'),
-      duration:
-        plan.durationDays > 0
-          ? `${plan.durationDays} ${t('pages.plans.daysUnit')}`
-          : t('pages.plans.permanent'),
+    (limits: UserLimits) => ({
+      quota: limits.totalGB > 0 ? SizeFormatter.sizeFormat(limits.totalGB) : t('unlimited'),
       reset:
-        plan.trafficReset === 'monthly'
-          ? t('pages.plans.monthlyOn', { day: plan.trafficResetDay })
-          : t(`pages.inbounds.periodicTrafficReset.${plan.trafficReset || 'never'}`),
-      ipLimit: plan.limitIp > 0 ? String(plan.limitIp) : t('unlimited'),
+        limits.trafficReset === 'monthly'
+          ? t('pages.plans.monthlyOn', { day: limits.trafficResetDay })
+          : t(`pages.inbounds.periodicTrafficReset.${limits.trafficReset || 'never'}`),
+      ipLimit: limits.limitIp > 0 ? String(limits.limitIp) : t('unlimited'),
     }),
     [t],
   );

@@ -1328,6 +1328,14 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/clients/renew',
+        summary:
+          'Renew clients: each expiry moves forward by days from the later of now and the current expiry. A client without an expiry keeps none, and one whose period starts at first use gets a longer one. resetUsage also zeroes usage and re-enables the client; without it, only a client auto-disabled for expiry or quota is re-enabled, once the renewal lifts it out of depletion. days must be at least 1.',
+        body: '{\n  "emails": ["alice", "bob"],\n  "days": 30,\n  "resetUsage": true\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "affected": 2\n  }\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/clients/bulkAdjust',
         summary:
           'Shift expiry and/or traffic quota for many clients in one call. addDays/addBytes may be negative. Clients with unlimited expiry (expiryTime=0) or unlimited traffic (totalGB=0) are skipped for the corresponding field — bulk extend never converts unlimited to limited. A client that was auto-disabled solely because it was depleted (expired or over quota) is automatically re-enabled — locally and on its node — when the adjustment lifts it out of depletion; a manually-disabled or still-depleted client is left disabled. The optional flow directive sets the XTLS flow on every client: "none" clears it, "xtls-rprx-vision"/"xtls-rprx-vision-udp443" set it where the inbound supports it (omit or "" to leave it unchanged). The optional limitHwid sets maximum registered devices (0 = unlimited). The optional adTag sets MTProto Telegram sponsor channel ("none" clears). Returns the adjusted count and per-email skip reasons.',
@@ -1816,7 +1824,7 @@ export const sections: readonly Section[] = [
     id: 'plans',
     title: 'Plans',
     description:
-      'Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds.',
+      'What a group of clients shares: the inbounds (servers) they get, the rule template their Clash subscriptions use, and an IP limit. Each client keeps their own quota, expiry and reset schedule; assigning a plan stamps its IP limit and attaches/detaches inbounds so the client sits on exactly the plan inbounds.',
     endpoints: [
       {
         method: 'GET',
@@ -1829,17 +1837,17 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/add',
         summary:
-          "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template.",
-        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "templateId": 0,\n  "inboundIds": [1, 2]\n}',
+          "Create a plan. Inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template. limitIp 0 means no IP limit.",
+        body: '{\n  "name": "Monthly 100G",\n  "limitIp": 0,\n  "remark": "",\n  "templateId": 0,\n  "inboundIds": [1, 2]\n}',
         responseSchema: 'Plan',
       },
       {
         method: 'POST',
         path: '/panel/api/plans/update/:id',
         summary:
-          'Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.',
+          'Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan IP limit is also re-stamped onto them; their quota, expiry and usage are left alone.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
-        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "templateId": 2,\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
+        body: '{\n  "name": "Monthly 200G",\n  "limitIp": 2,\n  "remark": "",\n  "templateId": 2,\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
       },
       {
@@ -1854,8 +1862,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/assign',
         summary:
-          'Put clients on a plan. Each gets the plan quota, IP limit and reset schedule, and exactly the plan inbounds. start sets the expiry: now (duration from now), firstUse (duration from the first connection) or keep (unchanged). resetTraffic zeroes usage and re-enables the client.',
-        body: '{\n  "emails": ["alice", "bob"],\n  "planId": 1,\n  "start": "now",\n  "resetTraffic": true\n}',
+          'Put clients on a plan. Each gets the plan IP limit and exactly the plan inbounds; their own quota, expiry and reset schedule stay as they are.',
+        body: '{\n  "emails": ["alice", "bob"],\n  "planId": 1\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "affected": 2\n  }\n}',
       },
       {
@@ -1863,14 +1871,6 @@ export const sections: readonly Section[] = [
         path: '/panel/api/plans/unassign',
         summary:
           'Take clients off their plan. Their current quota, expiry and inbounds stay as they are.',
-        body: '{\n  "emails": ["alice"]\n}',
-        response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/plans/renew',
-        summary:
-          'Renew clients on their plan: the expiry moves forward by the plan duration from the later of now and the current expiry, usage is zeroed and the client is re-enabled. Fails for a client with no plan.',
         body: '{\n  "emails": ["alice"]\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "affected": 1\n  }\n}',
       },

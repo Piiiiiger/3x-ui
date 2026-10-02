@@ -204,6 +204,9 @@ func initModels() error {
 	if err := movePlanRulesIntoTemplates(); err != nil {
 		return err
 	}
+	if err := dropPlanLimitColumns(); err != nil {
+		return err
+	}
 	if IsPostgres() {
 		if err := resyncPostgresSequences(db, models); err != nil {
 			log.Printf("Error resyncing postgres sequences: %v", err)
@@ -522,6 +525,20 @@ func movePlanRulesIntoTemplates() error {
 		}
 		return tx.Exec("ALTER TABLE plans DROP COLUMN clash_rules").Error
 	})
+}
+
+// dropPlanLimitColumns removes the quota, validity and reset schedule plans held before
+// each user kept their own; the users' copies are untouched.
+func dropPlanLimitColumns() error {
+	for _, column := range []string{"total_gb", "duration_days", "traffic_reset", "traffic_reset_day"} {
+		if !db.Migrator().HasColumn(&model.Plan{}, column) {
+			continue
+		}
+		if err := db.Exec("ALTER TABLE plans DROP COLUMN " + column).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // createMovedRuleTemplate saves rules as a template under the first free name based

@@ -6,9 +6,6 @@ export type GeoKind = z.infer<typeof GeoKindSchema>;
 export const OnlineAPISupportSchema = z.number().int();
 export type OnlineAPISupport = z.infer<typeof OnlineAPISupportSchema>;
 
-export const PlanStartSchema = z.string();
-export type PlanStart = z.infer<typeof PlanStartSchema>;
-
 export const ProcessStateSchema = z.string();
 export type ProcessState = z.infer<typeof ProcessStateSchema>;
 
@@ -983,16 +980,12 @@ export type PeerActivity = z.infer<typeof PeerActivitySchema>;
 
 export const PlanSchema = z.object({
   createdAt: z.number().int(),
-  durationDays: z.number().int(),
   id: z.number().int(),
   limitIp: z.number().int(),
   name: z.string(),
   remark: z.string(),
   sortIndex: z.number().int(),
   templateId: z.number().int(),
-  totalGB: z.number().int(),
-  trafficReset: z.string(),
-  trafficResetDay: z.number().int(),
   updatedAt: z.number().int(),
 });
 export type Plan = z.infer<typeof PlanSchema>;
@@ -1004,21 +997,16 @@ export const PlanInboundSchema = z.object({
 export type PlanInbound = z.infer<typeof PlanInboundSchema>;
 
 export const PlanInputSchema = z.object({
-  durationDays: z.number().int(),
   inboundIds: z.array(z.number().int()),
   limitIp: z.number().int(),
   name: z.string(),
   remark: z.string(),
   templateId: z.number().int(),
-  totalGB: z.number().int(),
-  trafficReset: z.string(),
-  trafficResetDay: z.number().int(),
 });
 export type PlanInput = z.infer<typeof PlanInputSchema>;
 
 export const PlanSummarySchema = z.object({
   createdAt: z.number().int(),
-  durationDays: z.number().int(),
   id: z.number().int(),
   inboundIds: z.array(z.number().int()),
   limitIp: z.number().int(),
@@ -1027,9 +1015,6 @@ export const PlanSummarySchema = z.object({
   remark: z.string(),
   sortIndex: z.number().int(),
   templateId: z.number().int(),
-  totalGB: z.number().int(),
-  trafficReset: z.string(),
-  trafficResetDay: z.number().int(),
   updatedAt: z.number().int(),
 });
 export type PlanSummary = z.infer<typeof PlanSummarySchema>;

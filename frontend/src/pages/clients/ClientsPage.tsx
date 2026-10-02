@@ -60,6 +60,7 @@ import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import { usePlansQuery } from '@/api/queries/usePlansQuery';
 import { usePlanMutations } from '@/api/queries/usePlanMutations';
 import AssignPlanModal from '@/pages/plans/AssignPlanModal';
+import ClientRenewModal from './ClientRenewModal';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import type {
   ClientRecord,
@@ -334,7 +335,8 @@ export default function ClientsPage() {
   );
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const { plans } = usePlansQuery();
-  const { renew: renewPlan, unassign: unassignPlan } = usePlanMutations();
+  const { unassign: unassignPlan } = usePlanMutations();
+  const [renewTarget, setRenewTarget] = useState<{ emails: string[]; bulk: boolean } | null>(null);
   const planNames = useMemo(() => new Map(plans.map((p) => [p.id, p.name])), [plans]);
   const [planTarget, setPlanTarget] = useState<{ emails: string[]; planId?: number } | null>(null);
 
@@ -535,19 +537,8 @@ export default function ClientsPage() {
   );
 
   const onRenew = useCallback(
-    (email: string) => {
-      modal.confirm({
-        title: t('pages.plans.renewConfirm', { count: 1 }),
-        content: t('pages.plans.renewHint'),
-        okText: t('confirm'),
-        cancelText: t('cancel'),
-        onOk: async () => {
-          const msg = await renewPlan([email]);
-          if (msg?.success) messageApi.success(t('pages.plans.toasts.renewed', { count: 1 }));
-        },
-      });
-    },
-    [modal, t, renewPlan, messageApi],
+    (email: string) => setRenewTarget({ emails: [email], bulk: false }),
+    [],
   );
 
   function onAdd() {
@@ -775,22 +766,9 @@ export default function ClientsPage() {
     });
   }
 
-  function onBulkRenewPlan() {
+  function onBulkRenew() {
     const emails = [...selectedRowKeys];
-    if (emails.length === 0) return;
-    modal.confirm({
-      title: t('pages.plans.renewConfirm', { count: emails.length }),
-      content: t('pages.plans.renewHint'),
-      okText: t('confirm'),
-      cancelText: t('cancel'),
-      onOk: async () => {
-        const msg = await renewPlan(emails);
-        if (msg?.success) {
-          setSelectedRowKeys([]);
-          messageApi.success(t('pages.plans.toasts.renewed', { count: emails.length }));
-        }
-      },
-    });
+    if (emails.length > 0) setRenewTarget({ emails, bulk: true });
   }
 
   function onBulkUnassignPlan() {
@@ -1002,16 +980,13 @@ export default function ClientsPage() {
             key: 'renew',
             align: 'right',
             render: (_v, record) => (
-              <Tooltip title={record.planId ? undefined : t('pages.clients.renewNeedsPlan')}>
-                <Button
-                  size="small"
-                  icon={<FieldTimeOutlined />}
-                  disabled={!record.planId}
-                  onClick={() => onRenew(record.email)}
-                >
-                  {t('pages.plans.renew')}
-                </Button>
-              </Tooltip>
+              <Button
+                size="small"
+                icon={<FieldTimeOutlined />}
+                onClick={() => onRenew(record.email)}
+              >
+                {t('pages.plans.renew')}
+              </Button>
             ),
           },
         ];
@@ -1083,12 +1058,7 @@ export default function ClientsPage() {
           key: 'actions',
           align: 'right',
           render: (_v, record) => (
-            <ClientRowMenu
-              email={record.email}
-              enabled={!!record.enable}
-              hasPlan={!!record.planId}
-              {...rowHandlers}
-            />
+            <ClientRowMenu email={record.email} enabled={!!record.enable} {...rowHandlers} />
           ),
         },
       ];
@@ -1252,7 +1222,7 @@ export default function ClientsPage() {
             key: 'renewPlan',
             icon: <FieldTimeOutlined />,
             label: t('pages.plans.renew'),
-            onClick: onBulkRenewPlan,
+            onClick: onBulkRenew,
           },
           {
             key: 'unassignPlan',
@@ -1644,7 +1614,6 @@ export default function ClientsPage() {
                                 <ClientRowMenu
                                   email={row.email}
                                   enabled={!!row.enable}
-                                  hasPlan={!!row.planId}
                                   {...rowHandlers}
                                 />
                               </div>
@@ -1825,6 +1794,14 @@ export default function ClientsPage() {
           planId={planTarget?.planId}
           onClose={() => setPlanTarget(null)}
           onAssigned={() => setSelectedRowKeys([])}
+        />
+        <ClientRenewModal
+          open={renewTarget !== null}
+          emails={renewTarget?.emails ?? []}
+          onClose={() => setRenewTarget(null)}
+          onRenewed={() => {
+            if (renewTarget?.bulk) setSelectedRowKeys([]);
+          }}
         />
         <LazyMount when={textOpen}>
           <TextModal

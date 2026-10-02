@@ -1,29 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, Form, Modal, Radio, Select, Typography, message } from 'antd';
+import { Form, Modal, Select, Typography, message } from 'antd';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormField } from '@/components/form/rhf';
 import { useClientOptions } from '@/api/queries/useClientOptions';
 import { usePlanMutations } from '@/api/queries/usePlanMutations';
 import type { PlanSummary } from '@/generated/zod';
-import { PlanStartSchema, type PlanStart } from '@/schemas/plan';
-
-const START_LABEL_KEYS: Record<PlanStart, string> = {
-  now: 'pages.plans.startNow',
-  firstUse: 'pages.plans.startFirstUse',
-  keep: 'pages.plans.startKeep',
-};
 
 interface AssignFormValues {
   planId: number | null;
   emails: string[];
-  start: PlanStart;
-  resetTraffic: boolean;
 }
 
 function initialState(planId?: number): AssignFormValues {
-  return { planId: planId ?? null, emails: [], start: 'now', resetTraffic: true };
+  return { planId: planId ?? null, emails: [] };
 }
 
 interface AssignPlanModalProps {
@@ -74,12 +65,7 @@ export default function AssignPlanModal({
     }
     setSaving(true);
     try {
-      const msg = await assign({
-        emails: targets,
-        planId: values.planId,
-        start: values.start,
-        resetTraffic: values.resetTraffic,
-      });
+      const msg = await assign({ emails: targets, planId: values.planId });
       if (msg?.success) {
         messageApi.success(t('pages.plans.toasts.assigned', { count: targets.length }));
         onAssigned?.();
@@ -122,17 +108,6 @@ export default function AssignPlanModal({
           )}
           <FormField label={t('menu.plans')} name="planId" required>
             <Select options={planOptions} />
-          </FormField>
-          <FormField label={t('pages.plans.start')} name="start">
-            <Radio.Group
-              options={PlanStartSchema.options.map((value) => ({
-                value,
-                label: t(START_LABEL_KEYS[value]),
-              }))}
-            />
-          </FormField>
-          <FormField name="resetTraffic" valueProp="checked">
-            <Checkbox>{t('pages.plans.resetTraffic')}</Checkbox>
           </FormField>
         </Form>
       </FormProvider>

@@ -75,6 +75,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/resetAllTraffics", a.resetAllTraffics)
 	g.POST("/delDepleted", a.delDepleted)
 	g.POST("/bulkAdjust", a.bulkAdjust)
+	g.POST("/renew", a.renew)
 	g.POST("/bulkEnable", a.bulkEnable)
 	g.POST("/bulkDisable", a.bulkDisable)
 	g.POST("/bulkDel", a.bulkDelete)
@@ -379,6 +380,32 @@ func (a *ClientController) bulkAdjust(c *gin.Context) {
 	if needRestart {
 		a.xrayService.SetToNeedRestart()
 	}
+	notifyClientsChanged()
+}
+
+// clientRenewRequest gives users Days more from the later of now and their expiry;
+// ResetUsage also zeroes their traffic.
+type clientRenewRequest struct {
+	Emails     []string `json:"emails"`
+	Days       int      `json:"days"`
+	ResetUsage bool     `json:"resetUsage"`
+}
+
+func (a *ClientController) renew(c *gin.Context) {
+	var req clientRenewRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	needRestart, err := a.clientService.Renew(&a.inboundService, req.Emails, req.Days, req.ResetUsage)
+	if needRestart {
+		a.xrayService.SetToNeedRestart()
+	}
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonObj(c, gin.H{"affected": len(req.Emails)}, nil)
 	notifyClientsChanged()
 }
 

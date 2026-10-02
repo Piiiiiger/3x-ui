@@ -44,10 +44,10 @@ type portalSession struct {
 	Tag      string
 }
 
+// portalPlan is the person's plan by name, with the limits they actually have.
 type portalPlan struct {
 	Name            string `json:"name"`
 	TotalGB         int64  `json:"totalGB"`
-	DurationDays    int    `json:"durationDays"`
 	TrafficReset    string `json:"trafficReset"`
 	TrafficResetDay int    `json:"trafficResetDay"`
 	LimitIP         int    `json:"limitIp"`
@@ -261,11 +261,10 @@ func (a *SUBController) portalData(c *gin.Context) {
 		if err := database.GetDB().First(&plan, client.PlanId).Error; err == nil {
 			data.Plan = &portalPlan{
 				Name:            plan.Name,
-				TotalGB:         plan.TotalGB,
-				DurationDays:    plan.DurationDays,
-				TrafficReset:    plan.TrafficReset,
-				TrafficResetDay: plan.TrafficResetDay,
-				LimitIP:         plan.LimitIP,
+				TotalGB:         client.TotalGB,
+				TrafficReset:    client.TrafficReset,
+				TrafficResetDay: client.TrafficResetDay,
+				LimitIP:         client.LimitIP,
 			}
 		}
 	}

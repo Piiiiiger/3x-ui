@@ -28,16 +28,10 @@ export interface ClientRowHandlers {
 interface ClientRowMenuProps extends ClientRowHandlers {
   email: string;
   enabled: boolean;
-  hasPlan: boolean;
 }
 
 /** 操作: one "…" menu per row instead of a column of icon buttons. */
-const ClientRowMenu = memo(function ClientRowMenu({
-  email,
-  enabled,
-  hasPlan,
-  ...on
-}: ClientRowMenuProps) {
+const ClientRowMenu = memo(function ClientRowMenu({ email, enabled, ...on }: ClientRowMenuProps) {
   const { t } = useTranslation();
   return (
     <Dropdown
@@ -72,8 +66,7 @@ const ClientRowMenu = memo(function ClientRowMenu({
           {
             key: 'renew',
             icon: <FieldTimeOutlined />,
-            label: hasPlan ? t('pages.plans.renew') : t('pages.clients.renewNeedsPlan'),
-            disabled: !hasPlan,
+            label: t('pages.plans.renew'),
             onClick: () => on.onRenew(email),
           },
           enabled

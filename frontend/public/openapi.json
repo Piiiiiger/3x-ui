@@ -4038,16 +4038,11 @@
         "type": "object"
       },
       "Plan": {
-        "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
+        "description": "Plan is the servers (inbounds), rule template and IP limit a set of users share;\neach user keeps their own quota, expiry and reset schedule.",
         "properties": {
           "createdAt": {
             "example": 1735689600000,
             "format": "int64",
-            "type": "integer"
-          },
-          "durationDays": {
-            "description": "0 = never expires",
-            "example": 30,
             "type": "integer"
           },
           "id": {
@@ -4075,20 +4070,6 @@
             "example": 1,
             "type": "integer"
           },
-          "totalGB": {
-            "description": "bytes, 0 = unlimited",
-            "example": 107374182400,
-            "format": "int64",
-            "type": "integer"
-          },
-          "trafficReset": {
-            "example": "monthly",
-            "type": "string"
-          },
-          "trafficResetDay": {
-            "example": 1,
-            "type": "integer"
-          },
           "updatedAt": {
             "example": 1735689600000,
             "format": "int64",
@@ -4097,16 +4078,12 @@
         },
         "required": [
           "createdAt",
-          "durationDays",
           "id",
           "limitIp",
           "name",
           "remark",
           "sortIndex",
           "templateId",
-          "totalGB",
-          "trafficReset",
-          "trafficResetDay",
           "updatedAt"
         ],
         "type": "object"
@@ -4130,10 +4107,6 @@
       "PlanInput": {
         "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
         "properties": {
-          "durationDays": {
-            "example": 30,
-            "type": "integer"
-          },
           "inboundIds": {
             "example": [
               1,
@@ -4159,31 +4132,14 @@
           "templateId": {
             "example": 1,
             "type": "integer"
-          },
-          "totalGB": {
-            "example": 107374182400,
-            "format": "int64",
-            "type": "integer"
-          },
-          "trafficReset": {
-            "example": "monthly",
-            "type": "string"
-          },
-          "trafficResetDay": {
-            "example": 1,
-            "type": "integer"
           }
         },
         "required": [
-          "durationDays",
           "inboundIds",
           "limitIp",
           "name",
           "remark",
-          "templateId",
-          "totalGB",
-          "trafficReset",
-          "trafficResetDay"
+          "templateId"
         ],
         "type": "object"
       },
@@ -4193,11 +4149,6 @@
           "createdAt": {
             "example": 1735689600000,
             "format": "int64",
-            "type": "integer"
-          },
-          "durationDays": {
-            "description": "0 = never expires",
-            "example": 30,
             "type": "integer"
           },
           "id": {
@@ -4239,20 +4190,6 @@
             "example": 1,
             "type": "integer"
           },
-          "totalGB": {
-            "description": "bytes, 0 = unlimited",
-            "example": 107374182400,
-            "format": "int64",
-            "type": "integer"
-          },
-          "trafficReset": {
-            "example": "monthly",
-            "type": "string"
-          },
-          "trafficResetDay": {
-            "example": 1,
-            "type": "integer"
-          },
           "updatedAt": {
             "example": 1735689600000,
             "format": "int64",
@@ -4261,7 +4198,6 @@
         },
         "required": [
           "createdAt",
-          "durationDays",
           "id",
           "inboundIds",
           "limitIp",
@@ -4270,9 +4206,6 @@
           "remark",
           "sortIndex",
           "templateId",
-          "totalGB",
-          "trafficReset",
-          "trafficResetDay",
           "updatedAt"
         ],
         "type": "object"
@@ -5798,7 +5731,7 @@
     },
     {
       "name": "Plans",
-      "description": "Reusable limit sets — quota, validity, traffic-reset schedule, IP limit and the inbounds they grant. Assigning a plan stamps those values onto each client and attaches/detaches inbounds so the client sits on exactly the plan inbounds."
+      "description": "What a group of clients shares: the inbounds (servers) they get, the rule template their Clash subscriptions use, and an IP limit. Each client keeps their own quota, expiry and reset schedule; assigning a plan stamps its IP limit and attaches/detaches inbounds so the client sits on exactly the plan inbounds."
     },
     {
       "name": "Traffic",
@@ -10523,6 +10456,60 @@
         }
       }
     },
+    "/panel/api/clients/renew": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Renew clients: each expiry moves forward by days from the later of now and the current expiry. A client without an expiry keeps none, and one whose period starts at first use gets a longer one. resetUsage also zeroes usage and re-enables the client; without it, only a client auto-disabled for expiry or quota is re-enabled, once the renewal lifts it out of depletion. days must be at least 1.",
+        "operationId": "post_panel_api_clients_renew",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "emails": [
+                  "alice",
+                  "bob"
+                ],
+                "days": 30,
+                "resetUsage": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "affected": 2
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/bulkAdjust": {
       "post": {
         "tags": [
@@ -13404,7 +13391,6 @@
                   "obj": [
                     {
                       "createdAt": 1735689600000,
-                      "durationDays": 30,
                       "id": 1,
                       "inboundIds": [
                         1,
@@ -13416,9 +13402,6 @@
                       "remark": "Hong Kong and Singapore",
                       "sortIndex": 0,
                       "templateId": 1,
-                      "totalGB": 107374182400,
-                      "trafficReset": "monthly",
-                      "trafficResetDay": 1,
                       "updatedAt": 1735689600000
                     }
                   ]
@@ -13434,7 +13417,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template.",
+        "summary": "Create a plan. Inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template. limitIp 0 means no IP limit.",
         "operationId": "post_panel_api_plans_add",
         "requestBody": {
           "required": true,
@@ -13445,10 +13428,6 @@
               },
               "example": {
                 "name": "Monthly 100G",
-                "totalGB": 107374182400,
-                "durationDays": 30,
-                "trafficReset": "monthly",
-                "trafficResetDay": 1,
                 "limitIp": 0,
                 "remark": "",
                 "templateId": 0,
@@ -13483,16 +13462,12 @@
                   "success": true,
                   "obj": {
                     "createdAt": 1735689600000,
-                    "durationDays": 30,
                     "id": 1,
                     "limitIp": 0,
                     "name": "Monthly 100G",
                     "remark": "Hong Kong and Singapore",
                     "sortIndex": 0,
                     "templateId": 1,
-                    "totalGB": 107374182400,
-                    "trafficReset": "monthly",
-                    "trafficResetDay": 1,
                     "updatedAt": 1735689600000
                   }
                 }
@@ -13507,7 +13482,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.",
+        "summary": "Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan IP limit is also re-stamped onto them; their quota, expiry and usage are left alone.",
         "operationId": "post_panel_api_plans_update_id",
         "parameters": [
           {
@@ -13529,11 +13504,7 @@
               },
               "example": {
                 "name": "Monthly 200G",
-                "totalGB": 214748364800,
-                "durationDays": 30,
-                "trafficReset": "monthly",
-                "trafficResetDay": 1,
-                "limitIp": 0,
+                "limitIp": 2,
                 "remark": "",
                 "templateId": 2,
                 "inboundIds": [
@@ -13626,7 +13597,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Put clients on a plan. Each gets the plan quota, IP limit and reset schedule, and exactly the plan inbounds. start sets the expiry: now (duration from now), firstUse (duration from the first connection) or keep (unchanged). resetTraffic zeroes usage and re-enables the client.",
+        "summary": "Put clients on a plan. Each gets the plan IP limit and exactly the plan inbounds; their own quota, expiry and reset schedule stay as they are.",
         "operationId": "post_panel_api_plans_assign",
         "requestBody": {
           "required": true,
@@ -13640,9 +13611,7 @@
                   "alice",
                   "bob"
                 ],
-                "planId": 1,
-                "start": "now",
-                "resetTraffic": true
+                "planId": 1
               }
             }
           }
@@ -13683,57 +13652,6 @@
         ],
         "summary": "Take clients off their plan. Their current quota, expiry and inbounds stay as they are.",
         "operationId": "post_panel_api_plans_unassign",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "emails": [
-                  "alice"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "affected": 1
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/plans/renew": {
-      "post": {
-        "tags": [
-          "Plans"
-        ],
-        "summary": "Renew clients on their plan: the expiry moves forward by the plan duration from the later of now and the current expiry, usage is zeroed and the client is re-enabled. Fails for a client with no plan.",
-        "operationId": "post_panel_api_plans_renew",
         "requestBody": {
           "required": true,
           "content": {

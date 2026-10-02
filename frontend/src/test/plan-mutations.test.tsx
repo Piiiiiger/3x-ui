@@ -11,10 +11,6 @@ import { HttpUtil, Msg } from '@/utils';
 
 const values: PlanFormValues = {
   name: 'Monthly',
-  quotaGB: 100,
-  durationDays: 30,
-  trafficReset: 'monthly',
-  trafficResetDay: 1,
   limitIp: 2,
   remark: '',
   templateId: 0,

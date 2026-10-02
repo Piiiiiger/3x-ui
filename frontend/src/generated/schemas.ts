@@ -4012,16 +4012,11 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "Plan": {
-    "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
+    "description": "Plan is the servers (inbounds), rule template and IP limit a set of users share;\neach user keeps their own quota, expiry and reset schedule.",
     "properties": {
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
-        "type": "integer"
-      },
-      "durationDays": {
-        "description": "0 = never expires",
-        "example": 30,
         "type": "integer"
       },
       "id": {
@@ -4049,20 +4044,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 1,
         "type": "integer"
       },
-      "totalGB": {
-        "description": "bytes, 0 = unlimited",
-        "example": 107374182400,
-        "format": "int64",
-        "type": "integer"
-      },
-      "trafficReset": {
-        "example": "monthly",
-        "type": "string"
-      },
-      "trafficResetDay": {
-        "example": 1,
-        "type": "integer"
-      },
       "updatedAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4071,16 +4052,12 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "createdAt",
-      "durationDays",
       "id",
       "limitIp",
       "name",
       "remark",
       "sortIndex",
       "templateId",
-      "totalGB",
-      "trafficReset",
-      "trafficResetDay",
       "updatedAt"
     ],
     "type": "object"
@@ -4104,10 +4081,6 @@ export const SCHEMAS: Record<string, unknown> = {
   "PlanInput": {
     "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
     "properties": {
-      "durationDays": {
-        "example": 30,
-        "type": "integer"
-      },
       "inboundIds": {
         "example": [
           1,
@@ -4133,31 +4106,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "templateId": {
         "example": 1,
         "type": "integer"
-      },
-      "totalGB": {
-        "example": 107374182400,
-        "format": "int64",
-        "type": "integer"
-      },
-      "trafficReset": {
-        "example": "monthly",
-        "type": "string"
-      },
-      "trafficResetDay": {
-        "example": 1,
-        "type": "integer"
       }
     },
     "required": [
-      "durationDays",
       "inboundIds",
       "limitIp",
       "name",
       "remark",
-      "templateId",
-      "totalGB",
-      "trafficReset",
-      "trafficResetDay"
+      "templateId"
     ],
     "type": "object"
   },
@@ -4167,11 +4123,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
-        "type": "integer"
-      },
-      "durationDays": {
-        "description": "0 = never expires",
-        "example": 30,
         "type": "integer"
       },
       "id": {
@@ -4213,20 +4164,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 1,
         "type": "integer"
       },
-      "totalGB": {
-        "description": "bytes, 0 = unlimited",
-        "example": 107374182400,
-        "format": "int64",
-        "type": "integer"
-      },
-      "trafficReset": {
-        "example": "monthly",
-        "type": "string"
-      },
-      "trafficResetDay": {
-        "example": 1,
-        "type": "integer"
-      },
       "updatedAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4235,7 +4172,6 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "createdAt",
-      "durationDays",
       "id",
       "inboundIds",
       "limitIp",
@@ -4244,9 +4180,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "remark",
       "sortIndex",
       "templateId",
-      "totalGB",
-      "trafficReset",
-      "trafficResetDay",
       "updatedAt"
     ],
     "type": "object"

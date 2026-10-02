@@ -18,11 +18,7 @@ const plan = (
 ) => ({
   id,
   name,
-  totalGB: 125 * 1024 ** 3,
-  durationDays: 0,
-  trafficReset: 'monthly',
-  trafficResetDay: 22,
-  limitIp: 0,
+  limitIp: 3,
   remark: '',
   templateId,
   inboundIds,
@@ -34,7 +30,17 @@ const plan = (
 
 const PLANS = [plan(1, 'Starter 125G', 5, 1, [7, 8]), plan(2, 'Duo 150G', 0, 4, [7])];
 const TEMPLATES = [
-  { id: 3, name: 'relay_v3', isDefault: true, kind: 'yaml', size: 10, planCount: 1, updatedAt: 0 },
+  {
+    id: 3,
+    name: 'relay_v3',
+    isDefault: true,
+    kind: 'yaml',
+    size: 10,
+    planCount: 1,
+    updatedAt: 0,
+    baseId: 0,
+    changes: [],
+  },
   {
     id: 5,
     name: 'alpha_v3',
@@ -43,6 +49,8 @@ const TEMPLATES = [
     size: 10,
     planCount: 1,
     updatedAt: 0,
+    baseId: 0,
+    changes: [],
   },
 ];
 
@@ -83,6 +91,19 @@ describe('PlansPage', () => {
     const fallback = cardOf('Duo 150G');
     expect(within(fallback).getByText('relay_v3')).toBeTruthy();
     expect(within(fallback).getByRole('img', { name: 'Default template' })).toBeTruthy();
+  });
+
+  // Each user has their own quota, validity and reset, so a card shows none of them.
+  it('shows what a plan holds: its template, IP limit, servers and users', async () => {
+    renderPage();
+    await screen.findByText('Starter 125G');
+    const labels = Array.from(cardOf('Starter 125G').querySelectorAll('.plan-row-label')).map(
+      (el) => el.textContent,
+    );
+    expect(labels).toEqual(['Rule template', 'IP Limit', 'Nodes', 'Users']);
+    expect(
+      within(cardOf('Starter 125G')).getByText('3', { selector: '.plan-row-value' }),
+    ).toBeTruthy();
   });
 
   it('says so when a plan names no template and none is the default', async () => {

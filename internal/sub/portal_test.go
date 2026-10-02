@@ -219,3 +219,40 @@ func TestPortalLoginCapsGuessesPerUsernameAcrossAddresses(t *testing.T) {
 		t.Fatalf("another username from the same address = %d, want 401 (not blocked)", res.Code)
 	}
 }
+
+// Plans hold no quota or reset of their own any more: the portal names the plan and
+// shows the limits the person actually has.
+func TestPortalDataShowsThePlanWithThePersonsOwnLimits(t *testing.T) {
+	router, _ := seedPortal(t)
+	db := database.GetDB()
+	plan := &model.Plan{Name: "Monthly", LimitIP: 3}
+	if err := db.Create(plan).Error; err != nil {
+		t.Fatalf("create plan: %v", err)
+	}
+	if err := db.Model(&model.ClientRecord{}).Where("email = ?", "pa@e").Updates(map[string]any{
+		"plan_id": plan.Id, "total_gb": int64(50) << 30, "traffic_reset": "monthly", "traffic_reset_day": 9, "limit_ip": 2,
+	}).Error; err != nil {
+		t.Fatalf("put pa@e on the plan: %v", err)
+	}
+
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	res := portalRequest(router, http.MethodGet, "/sub/portal/data", "", "198.51.100.1", cookie)
+	var data struct {
+		Plan map[string]any `json:"plan"`
+	}
+	if err := json.Unmarshal(res.Body.Bytes(), &data); err != nil || res.Code != http.StatusOK {
+		t.Fatalf("portal data = %d %s", res.Code, res.Body)
+	}
+	want := map[string]any{
+		"name": "Monthly", "totalGB": float64(int64(50) << 30), "trafficReset": "monthly",
+		"trafficResetDay": float64(9), "limitIp": float64(2),
+	}
+	if len(data.Plan) != len(want) {
+		t.Fatalf("plan = %v, want exactly %v", data.Plan, want)
+	}
+	for key, value := range want {
+		if data.Plan[key] != value {
+			t.Errorf("plan %s = %v, want %v", key, data.Plan[key], value)
+		}
+	}
+}

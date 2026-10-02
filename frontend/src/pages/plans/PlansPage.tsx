@@ -14,14 +14,12 @@ import {
   Space,
   Spin,
   Table,
-  Tag,
   Tooltip,
   Typography,
   message,
 } from 'antd';
 import {
   AppstoreOutlined,
-  CalendarOutlined,
   ClusterOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -30,7 +28,6 @@ import {
   PlusOutlined,
   SafetyOutlined,
   StarFilled,
-  SyncOutlined,
   TeamOutlined,
   UnorderedListOutlined,
   UserAddOutlined,
@@ -46,7 +43,6 @@ import type { PlanSummary } from '@/generated/zod';
 import type { PlanFormValues } from '@/schemas/plan';
 import AssignPlanModal from './AssignPlanModal';
 import PlanFormModal from './PlanFormModal';
-import { usePlanText } from '@/lib/plans/planText';
 import { useInboundChoices } from './planText';
 import './PlansPage.css';
 
@@ -98,7 +94,6 @@ export default function PlansPage() {
   const { plans, fetched, fetchError, loading, refetch } = usePlansQuery();
   const { create, update, remove } = usePlanMutations();
   const { templates } = useRuleTemplatesQuery();
-  const planText = usePlanText();
   const { labelOf } = useInboundChoices();
 
   const [view, setView] = useState<PlansView>(readView);
@@ -126,6 +121,10 @@ export default function PlansPage() {
         )}
       </span>
     );
+  }
+
+  function ipLimitOf(plan: PlanSummary): string {
+    return plan.limitIp > 0 ? String(plan.limitIp) : t('unlimited');
   }
 
   function nodesOf(plan: PlanSummary): ReactNode {
@@ -233,7 +232,6 @@ export default function PlansPage() {
   const grid = (
     <div className="plan-grid">
       {plans.map((plan) => {
-        const text = planText(plan);
         return (
           <Card
             key={plan.id}
@@ -248,20 +246,13 @@ export default function PlansPage() {
                 )}
               </span>
             }
-            extra={<Tag className="plan-card-quota">{text.quota}</Tag>}
             actions={actionsOf(plan)}
           >
-            <PlanRow icon={<CalendarOutlined />} label={t('pages.plans.duration')}>
-              {text.duration}
-            </PlanRow>
-            <PlanRow icon={<SyncOutlined />} label={t('pages.inbounds.periodicTrafficResetTitle')}>
-              {text.reset}
-            </PlanRow>
             <PlanRow icon={<FileTextOutlined />} label={t('pages.plans.template')}>
               {templateOf(plan)}
             </PlanRow>
             <PlanRow icon={<SafetyOutlined />} label={t('pages.clients.limitIp')}>
-              {text.ipLimit}
+              {ipLimitOf(plan)}
             </PlanRow>
             <PlanRow icon={<ClusterOutlined />} label={t('pages.plans.servers')}>
               {nodesOf(plan)}
@@ -285,21 +276,6 @@ export default function PlansPage() {
         columns={[
           { title: t('pages.plans.name'), dataIndex: 'name', key: 'name' },
           {
-            title: t('pages.plans.quota'),
-            key: 'quota',
-            render: (_, plan) => planText(plan).quota,
-          },
-          {
-            title: t('pages.plans.duration'),
-            key: 'validity',
-            render: (_, plan) => planText(plan).duration,
-          },
-          {
-            title: t('pages.inbounds.periodicTrafficResetTitle'),
-            key: 'reset',
-            render: (_, plan) => planText(plan).reset,
-          },
-          {
             title: t('pages.plans.template'),
             key: 'template',
             render: (_, plan) => templateOf(plan),
@@ -307,7 +283,7 @@ export default function PlansPage() {
           {
             title: t('pages.clients.limitIp'),
             key: 'ip',
-            render: (_, plan) => planText(plan).ipLimit,
+            render: (_, plan) => ipLimitOf(plan),
           },
           { title: t('pages.plans.servers'), key: 'nodes', render: (_, plan) => nodesOf(plan) },
           { title: t('pages.plans.people'), key: 'users', render: (_, plan) => membersOf(plan) },

@@ -1,16 +1,12 @@
 package model
 
-// Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the
-// inbounds it grants) that the panel stamps onto every client assigned to it.
+// Plan is the servers (inbounds), rule template and IP limit a set of users share;
+// each user keeps their own quota, expiry and reset schedule.
 type Plan struct {
-	Id              int    `json:"id" gorm:"primaryKey;autoIncrement" example:"1"`
-	Name            string `json:"name" gorm:"uniqueIndex;not null" example:"Monthly 100G"`
-	TotalGB         int64  `json:"totalGB" gorm:"column:total_gb;default:0" example:"107374182400"` // bytes, 0 = unlimited
-	DurationDays    int    `json:"durationDays" gorm:"column:duration_days;default:0" example:"30"` // 0 = never expires
-	TrafficReset    string `json:"trafficReset" gorm:"column:traffic_reset;default:never" example:"monthly"`
-	TrafficResetDay int    `json:"trafficResetDay" gorm:"column:traffic_reset_day;default:1" example:"1"`
-	LimitIP         int    `json:"limitIp" gorm:"column:limit_ip;default:0" example:"0"`
-	Remark          string `json:"remark" example:"Hong Kong and Singapore"`
+	Id      int    `json:"id" gorm:"primaryKey;autoIncrement" example:"1"`
+	Name    string `json:"name" gorm:"uniqueIndex;not null" example:"Monthly 100G"`
+	LimitIP int    `json:"limitIp" gorm:"column:limit_ip;default:0" example:"0"`
+	Remark  string `json:"remark" example:"Hong Kong and Singapore"`
 	// TemplateId is the rule template its members' Clash subscriptions use; 0 is the
 	// default template.
 	TemplateId int   `json:"templateId" gorm:"column:template_id;default:0;index" example:"1"`

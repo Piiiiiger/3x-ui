@@ -991,16 +991,12 @@ export const EXAMPLES: Record<string, unknown> = {
   },
   "Plan": {
     "createdAt": 1735689600000,
-    "durationDays": 30,
     "id": 1,
     "limitIp": 0,
     "name": "Monthly 100G",
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
     "templateId": 1,
-    "totalGB": 107374182400,
-    "trafficReset": "monthly",
-    "trafficResetDay": 1,
     "updatedAt": 1735689600000
   },
   "PlanInbound": {
@@ -1008,7 +1004,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "planId": 0
   },
   "PlanInput": {
-    "durationDays": 30,
     "inboundIds": [
       1,
       2
@@ -1016,14 +1011,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "limitIp": 0,
     "name": "Monthly 100G",
     "remark": "Hong Kong and Singapore",
-    "templateId": 1,
-    "totalGB": 107374182400,
-    "trafficReset": "monthly",
-    "trafficResetDay": 1
+    "templateId": 1
   },
   "PlanSummary": {
     "createdAt": 1735689600000,
-    "durationDays": 30,
     "id": 1,
     "inboundIds": [
       1,
@@ -1035,9 +1026,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
     "templateId": 1,
-    "totalGB": 107374182400,
-    "trafficReset": "monthly",
-    "trafficResetDay": 1,
     "updatedAt": 1735689600000
   },
   "PortalProbe": {

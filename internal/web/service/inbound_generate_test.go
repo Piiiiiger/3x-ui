@@ -44,7 +44,7 @@ func setupGenerate(t *testing.T) generateFixture {
 	plans := map[string]int{}
 	for _, name := range []string{"alice", "bob"} {
 		createPlanClient(t, name+"@gen", []int{local.Id}, 0)
-		plan, err := (&PlanService{}).Create(PlanInput{Name: name, TotalGB: 100 * planGiB, InboundIds: []int{local.Id}})
+		plan, err := (&PlanService{}).Create(PlanInput{Name: name, InboundIds: []int{local.Id}})
 		if err != nil {
 			t.Fatalf("create plan %s: %v", name, err)
 		}
