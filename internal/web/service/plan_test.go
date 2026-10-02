@@ -509,6 +509,140 @@ func TestUpdatePlanReapplyingLimitsKeepsExpiryAndHandAttachedInbounds(t *testing
 	}
 }
 
+// putOnPlan makes clients members of a plan without stamping it, so their own
+// limits stay unlike the plan's.
+func putOnPlan(t *testing.T, planId int, emails ...string) {
+	t.Helper()
+	if err := database.GetDB().Model(&model.ClientRecord{}).Where("email IN ?", emails).
+		UpdateColumn("plan_id", planId).Error; err != nil {
+		t.Fatalf("put %v on plan %d: %v", emails, planId, err)
+	}
+}
+
+// A node generated for some plans must reach their members with their own limits and
+// other inbounds intact, reach no one else, and survive being granted twice.
+func TestAddInboundToPlansAttachesOnlyTheirMembersAndIsIdempotent(t *testing.T) {
+	a, b, c := setupPlanDB(t)
+	s := &PlanService{}
+	planIds := map[string]int{}
+	for _, name := range []string{"hk", "sg", "us"} {
+		createPlanClient(t, name+"@grant", []int{a}, 0)
+		plan, err := s.Create(PlanInput{Name: name, TotalGB: 100 * planGiB, LimitIP: 2, InboundIds: []int{a}})
+		if err != nil {
+			t.Fatalf("create plan %s: %v", name, err)
+		}
+		putOnPlan(t, plan.Id, name+"@grant")
+		planIds[name] = plan.Id
+	}
+	attachByHand(t, "hk@grant", c)
+	chosen := []int{planIds["hk"], planIds["sg"]}
+
+	needRestart, err := s.AddInboundToPlans(&InboundService{}, b, chosen)
+	if err != nil {
+		t.Fatalf("add the inbound to plans: %v", err)
+	}
+	if !needRestart {
+		t.Fatal("AddInboundToPlans dropped the restart the members' new local inbound needs")
+	}
+	if needRestart, err = s.AddInboundToPlans(&InboundService{}, b, chosen); err != nil || needRestart {
+		t.Fatalf("granting it again: needRestart %v err %v, want a no-op", needRestart, err)
+	}
+
+	for email, want := range map[string][]int{"hk@grant": {a, b, c}, "sg@grant": {a, b}, "us@grant": {a}} {
+		if got := planInboundIdsOf(t, email); !slices.Equal(got, want) {
+			t.Fatalf("%s inbounds = %v, want %v", email, got, want)
+		}
+	}
+	if rec := planRecord(t, "hk@grant"); rec.TotalGB != 0 || rec.LimitIP != 0 {
+		t.Fatalf("member quota %d limitIp %d, want its own unlimited values, not the plan's", rec.TotalGB, rec.LimitIP)
+	}
+	plans, err := s.List()
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	for _, p := range plans {
+		want := []int{a, b}
+		if p.Id == planIds["us"] {
+			want = []int{a}
+		}
+		if !slices.Equal(p.InboundIds, want) {
+			t.Fatalf("plan %s inbounds = %v, want %v", p.Name, p.InboundIds, want)
+		}
+	}
+}
+
+// A grant that failed partway had already stored the plan rows, so a retry must reach
+// the members it missed, not only those of plans that gain the inbound on that call.
+func TestAddInboundToPlansRetriedAfterAFailureReachesEveryMember(t *testing.T) {
+	a, b, _ := setupPlanDB(t)
+	createPlanClient(t, "member@regrant", []int{a}, 0)
+	s := &PlanService{}
+	plan, err := s.Create(PlanInput{Name: "Regrant", InboundIds: []int{a}})
+	if err != nil {
+		t.Fatalf("create plan: %v", err)
+	}
+	putOnPlan(t, plan.Id, "member@regrant")
+
+	mend := breakInbound(t, b)
+	_, err = s.AddInboundToPlans(&InboundService{}, b, []int{plan.Id})
+	if want := "inbound " + strconv.Itoa(b) + ": "; err == nil || !strings.HasPrefix(err.Error(), want) {
+		t.Fatalf("grant over a broken inbound: err = %v, want one starting %q", err, want)
+	}
+	mend()
+	needRestart, err := s.AddInboundToPlans(&InboundService{}, b, []int{plan.Id})
+	if err != nil {
+		t.Fatalf("grant again: %v", err)
+	}
+
+	if got := planInboundIdsOf(t, "member@regrant"); !slices.Equal(got, []int{a, b}) {
+		t.Fatalf("member inbounds = %v after granting again, want %v", got, []int{a, b})
+	}
+	if !needRestart {
+		t.Fatal("the retried grant dropped the restart the member's new inbound needs")
+	}
+}
+
+// The ids arrive in a request; a stale one must fail the grant before any plan
+// or member changes, rather than leave it half applied.
+func TestAddInboundToPlansWritesNothingForAnUnknownPlanOrInbound(t *testing.T) {
+	a, b, _ := setupPlanDB(t)
+	createPlanClient(t, "member@stale", []int{a}, 0)
+	s := &PlanService{}
+	plan, err := s.Create(PlanInput{Name: "Known", InboundIds: []int{a}})
+	if err != nil {
+		t.Fatalf("create plan: %v", err)
+	}
+	putOnPlan(t, plan.Id, "member@stale")
+
+	cases := []struct {
+		name      string
+		inboundId int
+		planIds   []int
+		wantErr   string
+	}{
+		{"unknown plan", b, []int{plan.Id, 9999}, "plan not found: [9999]"},
+		{"unknown inbound", 9999, []int{plan.Id}, "inbound not found: 9999"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := s.AddInboundToPlans(&InboundService{}, tc.inboundId, tc.planIds)
+			if err == nil || strings.TrimSpace(err.Error()) != tc.wantErr {
+				t.Fatalf("err = %v, want %q", err, tc.wantErr)
+			}
+			var written int64
+			if err := database.GetDB().Model(&model.PlanInbound{}).Where("inbound_id <> ?", a).Count(&written).Error; err != nil {
+				t.Fatalf("count plan inbounds: %v", err)
+			}
+			if written != 0 {
+				t.Fatalf("%d plan_inbounds rows written for a refused grant", written)
+			}
+			if got := planInboundIdsOf(t, "member@stale"); !slices.Equal(got, []int{a}) {
+				t.Fatalf("member inbounds = %v after a refused grant, want [%d]", got, a)
+			}
+		})
+	}
+}
+
 func TestCreatePlanRejectsInvalidInput(t *testing.T) {
 	a, _, _ := setupPlanDB(t)
 	s := &PlanService{}
