@@ -194,6 +194,25 @@ describe('ProbePage', () => {
     expect(cards()).toHaveLength(0);
   });
 
+  // The modal would call every stored link lost, and clearing them would lose them.
+  it('tells Link nodes that the servers of Lite are not known while it cannot be read', async () => {
+    serve(
+      () =>
+        new Msg(true, '', overview({ error: 'Lite is not reachable', fetchedAt: 0, servers: [] })),
+    );
+    renderWithProviders(<ProbePage />);
+    await screen.findByText('The Lite monitor could not be read');
+
+    fireEvent.click(screen.getByRole('button', { name: /Link nodes$/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Link nodes' });
+    await within(dialog).findByText('203.0.113.7');
+
+    expect(
+      within(dialog).getByText('Lite cannot be read right now, so its servers cannot be listed.'),
+    ).toBeTruthy();
+    expect(within(dialog).queryByText('Lite no longer lists this server')).toBeNull();
+  });
+
   it('keeps the last servers on screen with the time of the data while Lite fails', async () => {
     serve(() => new Msg(true, '', overview({ stale: true, error: 'Lite did not answer in 3s' })));
     renderWithProviders(<ProbePage />);

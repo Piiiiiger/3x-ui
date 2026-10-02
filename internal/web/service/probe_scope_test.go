@@ -311,14 +311,15 @@ func TestClientServersNamesTheHostsWhenLiteIsDownWithNothingCached(t *testing.T)
 	})
 }
 
-// During a short outage the client keeps the last figures, marked stale with
-// the time they were fetched.
+// During a short outage the client keeps the last figures, marked stale. A host
+// linked to a server that answer does not list stays unmonitored, not unknown.
 func TestClientServersKeepsTheLastFiguresDuringAShortOutage(t *testing.T) {
 	s, clock := setupProbe(t)
 	lite := scopeLite(t, s)
 	node := seedProbeNode(t, "edge-hk", "", "203.0.113.11")
-	client := seedProbeClient(t, "alice", seedProbeInbound(t, node, "n1-in-443", "香港-Bravo", 1))
-	setProbeLinks(t, s, ProbeLinkInput{NodeId: node, ServerId: "uuid-1"})
+	client := seedProbeClient(t, "alice",
+		seedProbeInbound(t, 0, "in-443", "洛杉矶-Alpha", 1), seedProbeInbound(t, node, "n1-in-443", "香港-Bravo", 2))
+	setProbeLinks(t, s, ProbeLinkInput{NodeId: 0, ServerId: "uuid-removed"}, ProbeLinkInput{NodeId: node, ServerId: "uuid-1"})
 	clientServers(t, s, client)
 
 	lite.Override(brokenLite)
@@ -326,6 +327,7 @@ func TestClientServersKeepsTheLastFiguresDuringAShortOutage(t *testing.T) {
 	assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 		Enabled: true, FetchedAt: scopeFetchedAt, Stale: true,
 		Servers: []PortalProbeServer{
+			{Id: 0, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
 			{Id: node, Name: "香港-Bravo", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
 		},
 	})

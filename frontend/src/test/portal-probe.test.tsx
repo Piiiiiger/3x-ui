@@ -280,6 +280,21 @@ describe('the portal probe view', () => {
     expect(cardNames()).toEqual([]);
   });
 
+  // A tab left open across an upgrade may be sent a status its code has never heard of.
+  it('reports an answer it does not understand instead of drawing it', async () => {
+    window.history.replaceState(null, '', '/x/portal#probe');
+    const rebooting = { ...host({ name: 'Hong Kong' }), status: 'rebooting' };
+    serve({
+      data: () => json(portalData('alice')),
+      probe: () => json({ ...probeOf([]), servers: [rebooting] }),
+    });
+    renderWithProviders(<PortalApp base={BASE} />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toBe('Monitoring is temporarily unavailable');
+    expect(cardNames()).toEqual([]);
+  });
+
   // The probe flag is read once at sign-in; the list can be empty by the time it is asked for.
   it('says so when there is no server to show', async () => {
     window.history.replaceState(null, '', '/x/portal#probe');
