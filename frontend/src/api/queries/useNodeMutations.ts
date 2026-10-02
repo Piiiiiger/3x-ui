@@ -28,6 +28,7 @@ export function useNodeMutations() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.nodes.root() });
     queryClient.invalidateQueries({ queryKey: keys.inbounds.options() });
+    queryClient.invalidateQueries({ queryKey: keys.probe.root() });
   };
 
   const createMut = useMutation({

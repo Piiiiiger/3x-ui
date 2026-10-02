@@ -602,6 +602,7 @@ export default function NodesPage() {
           open={formOpen}
           mode={formMode}
           node={formNode}
+          probeServers={overview?.stale || overview?.error ? [] : probeServers}
           testConnection={testConnection}
           fetchFingerprint={fetchFingerprint}
           fetchInbounds={fetchInbounds}

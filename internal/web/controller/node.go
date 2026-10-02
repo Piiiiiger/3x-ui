@@ -185,7 +185,13 @@ func (a *NodeController) add(c *gin.Context) {
 			return
 		}
 	}
-	view, err := a.nodeService.CreateFromRequest(n)
+	var view *service.NodeView
+	var err error
+	if n.ProbeServerId != "" {
+		view, err = a.nodeService.CreateFromProbe(c.Request.Context(), n)
+	} else {
+		view, err = a.nodeService.CreateFromRequest(n)
+	}
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.add"), err)
 		return

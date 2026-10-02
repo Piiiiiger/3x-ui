@@ -7,6 +7,46 @@ icon: Boxes
 3x-ui can manage **multiple servers** from a single master panel, and advertise a
 node behind NAT on its **public port**.
 
+## Add a Lite server as a host
+
+1. Install the Lite monitor agent on the server and configure the panel's Lite
+   integration using its loopback address.
+2. Open **Hosts → Add host → From probe**. Only servers without a host link
+   appear. Selecting one fills its name and chooses **Agent**.
+3. Save. The host and probe link are created together. Leave **Public address**
+   empty to discover it from the first authenticated public agent connection,
+   or provide an IP/domain yourself. Later connections never overwrite it.
+4. Copy the displayed install command and run it as root on that server. It
+   downloads the agent from this panel, verifies its checksum and version,
+   installs the panel's geodata, and starts the service with the host's secret.
+5. When the host is online, choose **Generate node** on its card to create a
+   proxy service. Set the public port explicitly when the host is behind NAT.
+
+The installer supports **Linux amd64 and arm64**, with **systemd or OpenRC**.
+The Lite integration remains read-only; it needs neither a Lite administrator
+API key nor remote control on Lite agents. Run the command yourself over SSH.
+The installation adds Pigger's agent alongside Lite's existing monitor agent.
+
+New agents connect to `/agent/connect`, independently of the administrator path.
+Forward `/agent/` to the panel listener when a reverse proxy also serves the
+subscription listener. The installer is public; downloading its artifacts
+requires an enabled host's secret. Keep that secret private.
+
+### Building agent downloads
+
+Release archives and Docker images include both agent architectures under
+`agent-releases/<panel-version>/`, beside the panel binary. `make build` creates
+these packages locally too. For a custom build, use:
+
+```bash
+bash deploy/pigger-agent/package.sh 'dev+YOUR_SHA' /path/to/agent-releases
+```
+
+Pass the exact version printed by `x-ui -v`. Deploy that version's directory
+with the panel binary, and keep `geoip.dat` and `geosite.dat` in `XUI_BIN_FOLDER`.
+Use `XUI_AGENT_RELEASE_DIR` to place packages elsewhere. Missing packages or a
+version mismatch fail the install before the service files are changed.
+
 ## Nodes
 
 A **node** is another 3x-ui panel that your master panel manages over the node's

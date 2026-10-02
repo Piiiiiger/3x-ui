@@ -1234,14 +1234,13 @@
       "kindPanel": "面板",
       "kindAgent": "Agent",
       "publicAddress": "公网地址",
-      "publicAddressHint": "服务器的公网 IP 或域名，用于用户链接。",
       "agentHint": "保存后会显示一次密钥，用它在服务器上安装 agent。agent 会自己连接本面板，服务器上不需要开放面板端口。",
       "agentNewSecret": "重新生成密钥",
       "agentNewSecretConfirm": "使用当前密钥的 agent 会断开，直到它的配置文件换成新密钥。",
       "agentSecretFailed": "无法生成 agent 密钥",
       "agentSecretTitle": "{name} 的 agent 密钥",
       "agentSecretOnce": "请立即复制：密钥只显示这一次。",
-      "agentInstallCommand": "安装命令（在放有 agent 文件的目录中运行）",
+      "agentInstallCommand": "安装命令（在主机上以 root 运行）",
       "host": {
         "allHosts": "全部主机",
         "notFound": "该主机不存在",
@@ -1275,7 +1274,9 @@
       "hideIp": "隐藏 IP",
       "showIp": "显示 IP",
       "resetToday": "今天重置",
-      "resetInDays": "{count} 天后重置"
+      "resetInDays": "{count} 天后重置",
+      "fromProbe": "从探针选择",
+      "publicAddressAutoHint": "留空将自动使用代理首次连接的公网地址，也可手动填写 IP 或域名。"
     },
     "settings": {
       "defaultTag": "默认",

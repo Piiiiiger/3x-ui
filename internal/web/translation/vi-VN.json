@@ -1234,14 +1234,13 @@
       "kindPanel": "Bảng điều khiển",
       "kindAgent": "Agent",
       "publicAddress": "Địa chỉ công khai",
-      "publicAddressHint": "IP công khai hoặc tên miền của máy chủ, dùng trong liên kết của người dùng.",
       "agentHint": "Cài agent lên máy chủ bằng khóa bí mật hiển thị sau khi lưu. Agent tự kết nối tới bảng này nên máy chủ không cần mở cổng bảng điều khiển.",
       "agentNewSecret": "Khóa bí mật mới",
       "agentNewSecretConfirm": "Agent đang dùng khóa hiện tại sẽ ngắt kết nối cho đến khi tệp cấu hình của nó có khóa mới.",
       "agentSecretFailed": "Không thể tạo khóa bí mật cho agent",
       "agentSecretTitle": "Khóa bí mật agent của {name}",
       "agentSecretOnce": "Hãy sao chép ngay: khóa chỉ hiển thị một lần.",
-      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)",
+      "agentInstallCommand": "Lệnh cài đặt (chạy bằng root trên máy chủ)",
       "host": {
         "allHosts": "Tất cả nút",
         "notFound": "Nút này không còn tồn tại",
@@ -1275,7 +1274,9 @@
       "hideIp": "Ẩn IP",
       "showIp": "Hiện IP",
       "resetToday": "đặt lại hôm nay",
-      "resetInDays": "đặt lại sau {count} ngày"
+      "resetInDays": "đặt lại sau {count} ngày",
+      "fromProbe": "Từ giám sát",
+      "publicAddressAutoHint": "Để trống để dùng địa chỉ công khai từ lần kết nối đầu tiên của tác nhân. Bạn cũng có thể nhập IP hoặc tên miền."
     },
     "settings": {
       "defaultTag": "Mặc định",

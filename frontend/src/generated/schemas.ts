@@ -3758,6 +3758,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
+      "probeServerId": {
+        "maxLength": 64,
+        "type": "string"
+      },
       "remark": {
         "type": "string"
       },

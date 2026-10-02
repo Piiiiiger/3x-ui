@@ -126,7 +126,8 @@ type NodeMutationRequest struct {
 	Remark              string   `json:"remark" form:"remark"`
 	Kind                string   `json:"kind" form:"kind" validate:"omitempty,oneof=panel agent"`
 	Scheme              string   `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https"`
-	Address             string   `json:"address" form:"address" validate:"required"`
+	Address             string   `json:"address" form:"address" validate:"required_unless=Kind agent"`
+	ProbeServerId       string   `json:"probeServerId,omitempty" form:"probeServerId" validate:"max=64"`
 	Port                int      `json:"port" form:"port" validate:"omitempty,gte=1,lte=65535"`
 	BasePath            string   `json:"basePath" form:"basePath"`
 	ApiToken            *string  `json:"apiToken,omitempty" form:"apiToken"`

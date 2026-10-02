@@ -1234,14 +1234,13 @@
       "kindPanel": "Panel",
       "kindAgent": "Ajan",
       "publicAddress": "Genel adres",
-      "publicAddressHint": "Sunucunun kullanıcı bağlantılarında kullanılan genel IP adresi veya alan adı.",
       "agentHint": "Kaydettikten sonra gösterilen gizli anahtarla ajanı sunucuya kurun. Ajan bu panele kendisi bağlanır; sunucuda panel portu açmak gerekmez.",
       "agentNewSecret": "Yeni gizli anahtar",
       "agentNewSecretConfirm": "Mevcut anahtarı kullanan ajan, yapılandırma dosyasına yenisi yazılana kadar bağlantısını kaybeder.",
       "agentSecretFailed": "Ajan anahtarı oluşturulamadı",
       "agentSecretTitle": "{name} için ajan anahtarı",
       "agentSecretOnce": "Şimdi kopyalayın: anahtar yalnızca bir kez gösterilir.",
-      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)",
+      "agentInstallCommand": "Kurulum komutu (sunucuda root olarak çalıştırın)",
       "host": {
         "allHosts": "Tüm düğümler",
         "notFound": "Bu düğüm artık yok",
@@ -1275,7 +1274,9 @@
       "hideIp": "IP'yi gizle",
       "showIp": "IP'yi göster",
       "resetToday": "bugün sıfırlanır",
-      "resetInDays": "{count} gün sonra sıfırlanır"
+      "resetInDays": "{count} gün sonra sıfırlanır",
+      "fromProbe": "İzlemeden seç",
+      "publicAddressAutoHint": "Aracının ilk bağlantısındaki genel adresi kullanmak için boş bırakın. IP veya alan adını kendiniz de girebilirsiniz."
     },
     "settings": {
       "defaultTag": "Varsayılan",

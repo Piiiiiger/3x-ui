@@ -21,7 +21,7 @@ import type { Msg } from '@/utils';
 import { NodeFormSchema, type NodeFormValues, type ProbeResult } from '@/schemas/node';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { useOutboundTagGroups } from '@/api/queries/useOutboundTags';
-import type { AgentSecretView } from '@/generated/zod';
+import type { AgentSecretView, ProbeServer } from '@/generated/zod';
 import AgentSecretModal from './AgentSecretModal';
 import './NodeFormModal.css';
 
@@ -31,6 +31,7 @@ interface NodeFormModalProps {
   open: boolean;
   mode: Mode;
   node: NodeRecord | null;
+  probeServers?: Pick<ProbeServer, 'id' | 'name' | 'linked'>[];
   testConnection: (payload: Partial<NodeRecord>) => Promise<Msg<ProbeResult>>;
   fetchFingerprint: (payload: Partial<NodeRecord>) => Promise<Msg<string>>;
   fetchInbounds: (payload: Partial<NodeRecord>) => Promise<Msg<RemoteInboundOption[]>>;
@@ -47,6 +48,7 @@ function defaultValues(): NodeFormValues {
     kind: 'panel',
     scheme: 'https',
     address: '',
+    probeServerId: '',
     port: 2053,
     basePath: '/',
     apiToken: '',
@@ -65,6 +67,7 @@ export default function NodeFormModal({
   open,
   mode,
   node,
+  probeServers = [],
   testConnection,
   fetchFingerprint,
   fetchInbounds,
@@ -155,6 +158,7 @@ export default function NodeFormModal({
         remark: values.remark?.trim() || '',
         address: values.address.trim(),
         enable: values.enable,
+        ...(values.probeServerId ? { probeServerId: values.probeServerId } : {}),
       };
     }
     const token = values.apiToken.trim();
@@ -324,6 +328,9 @@ export default function NodeFormModal({
               label={t('pages.nodes.kind')}
               name="kind"
               tooltip={t('pages.nodes.kindHint')}
+              onAfterChange={(value) => {
+                if (value !== 'agent') methods.setValue('probeServerId', '');
+              }}
             >
               <Segmented
                 block
@@ -333,6 +340,28 @@ export default function NodeFormModal({
                 ]}
               />
             </FormField>
+
+            {mode === 'add' && probeServers.some((server) => !server.linked) && (
+              <FormField
+                name="probeServerId"
+                label={t('pages.nodes.fromProbe')}
+                onAfterChange={(value) => {
+                  const server = probeServers.find((server) => server.id === value);
+                  if (server) {
+                    methods.setValue('name', server.name);
+                    methods.setValue('kind', 'agent');
+                  }
+                }}
+              >
+                <Select
+                  allowClear
+                  showSearch={{ optionFilterProp: 'label' }}
+                  options={probeServers
+                    .filter((server) => !server.linked)
+                    .map((server) => ({ value: server.id, label: server.name }))}
+                />
+              </FormField>
+            )}
 
             <Row gutter={16}>
               <Col xs={24} md={12}>
@@ -373,9 +402,9 @@ export default function NodeFormModal({
               <Col xs={24} md={isAgent ? 24 : 12}>
                 <FormField
                   label={isAgent ? t('pages.nodes.publicAddress') : t('pages.nodes.address')}
-                  tooltip={isAgent ? t('pages.nodes.publicAddressHint') : undefined}
+                  tooltip={isAgent ? t('pages.nodes.publicAddressAutoHint') : undefined}
                   name="address"
-                  rules={{ validate: rhfZodValidate(NodeFormSchema.shape.address) }}
+                  rules={{ required: !isAgent && t('pages.nodes.toasts.fillRequired') }}
                 >
                   <Input placeholder={t('pages.nodes.addressPlaceholder')} />
                 </FormField>

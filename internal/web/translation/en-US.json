@@ -1234,14 +1234,13 @@
       "kindPanel": "Panel",
       "kindAgent": "Agent",
       "publicAddress": "Public address",
-      "publicAddressHint": "The server's public IP or domain, used in user links.",
       "agentHint": "Install the agent on the server with the secret shown after saving. The agent connects to this panel itself, so the server needs no open panel port.",
       "agentNewSecret": "New secret",
       "agentNewSecretConfirm": "The agent using the current secret disconnects until its config file has the new one.",
       "agentSecretFailed": "Could not create an agent secret",
       "agentSecretTitle": "Agent secret for {name}",
       "agentSecretOnce": "Copy it now: the secret is shown only once.",
-      "agentInstallCommand": "Install command (run it in the folder with the agent files)",
+      "agentInstallCommand": "Install command (run as root on the host)",
       "host": {
         "allHosts": "All hosts",
         "notFound": "This host no longer exists",
@@ -1275,7 +1274,9 @@
       "hideIp": "Hide IP",
       "showIp": "Show IP",
       "resetToday": "resets today",
-      "resetInDays": "resets in {count} d"
+      "resetInDays": "resets in {count} d",
+      "fromProbe": "From probe",
+      "publicAddressAutoHint": "Leave blank to use the public address from the agent’s first connection. You can set an IP or domain yourself."
     },
     "settings": {
       "defaultTag": "Default",

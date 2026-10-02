@@ -195,6 +195,12 @@ jobs:
           esac
           cd ../..
 
+      - name: Package matching agents
+        run: |
+          AGENT_VERSION=$(tr -d '\n' < internal/config/version)
+          if [[ "$GITHUB_REF" != refs/tags/* ]]; then AGENT_VERSION="dev+${GITHUB_SHA::8}"; fi
+          bash deploy/pigger-agent/package.sh "$AGENT_VERSION" x-ui/agent-releases
+
       - name: Package
         run: |
           tar -zcvf x-ui-linux-${{ matrix.platform }}.tar.gz x-ui
@@ -331,6 +337,13 @@ jobs:
           cd ..
           Copy-Item -Path ..\windows_files\* -Destination . -Recurse
           cd ..
+
+      - name: Package matching agents
+        shell: bash
+        run: |
+          AGENT_VERSION=$(tr -d '\n' < internal/config/version)
+          if [[ "$GITHUB_REF" != refs/tags/* ]]; then AGENT_VERSION="dev+${GITHUB_SHA::8}"; fi
+          bash deploy/pigger-agent/package.sh "$AGENT_VERSION" x-ui/agent-releases
 
       - name: Package to Zip
         shell: pwsh

@@ -1234,14 +1234,13 @@
       "kindPanel": "パネル",
       "kindAgent": "エージェント",
       "publicAddress": "公開アドレス",
-      "publicAddressHint": "ユーザーのリンクに使うサーバーの公開 IP またはドメイン。",
       "agentHint": "保存後に表示されるシークレットを使ってサーバーにエージェントをインストールします。エージェントが自らこのパネルに接続するため、サーバーでパネルのポートを開ける必要はありません。",
       "agentNewSecret": "新しいシークレット",
       "agentNewSecretConfirm": "現在のシークレットを使っているエージェントは、設定ファイルを新しいものに更新するまで切断されます。",
       "agentSecretFailed": "エージェントのシークレットを作成できませんでした",
       "agentSecretTitle": "{name} のエージェントシークレット",
       "agentSecretOnce": "今すぐコピーしてください。シークレットは一度しか表示されません。",
-      "agentInstallCommand": "インストールコマンド（エージェントのファイルがあるフォルダーで実行）",
+      "agentInstallCommand": "インストールコマンド（ホスト上で root として実行）",
       "host": {
         "allHosts": "すべてのノード",
         "notFound": "このノードは存在しません",
@@ -1275,7 +1274,9 @@
       "hideIp": "IP を隠す",
       "showIp": "IP を表示",
       "resetToday": "本日リセット",
-      "resetInDays": "{count} 日後にリセット"
+      "resetInDays": "{count} 日後にリセット",
+      "fromProbe": "プローブから選択",
+      "publicAddressAutoHint": "空欄にするとエージェントの初回接続の公開アドレスを使用します。IP またはドメインを指定することもできます。"
     },
     "settings": {
       "defaultTag": "デフォルト",

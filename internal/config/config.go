@@ -135,6 +135,13 @@ func GetBinFolderPath() string {
 	return binFolderPath
 }
 
+func GetAgentReleaseFolder() string {
+	if path := os.Getenv("XUI_AGENT_RELEASE_DIR"); path != "" {
+		return path
+	}
+	return filepath.Join(getBaseDir(), "agent-releases")
+}
+
 func getBaseDir() string {
 	exePath, err := os.Executable()
 	if err != nil {

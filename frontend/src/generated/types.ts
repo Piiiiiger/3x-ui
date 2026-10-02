@@ -865,6 +865,7 @@ export interface NodeMutationRequest {
   outboundTag: string;
   pinnedCertSha256: string;
   port: number;
+  probeServerId?: string;
   remark: string;
   scheme: string;
   tlsVerifyMode: string;

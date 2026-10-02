@@ -10,7 +10,7 @@ fi
 master=$1
 secret=$2
 case "$master$secret" in
-*\"* | *\\* | *" "*)
+*\"* | *\\* | *[[:space:]]*)
 	echo "the panel URL and the secret must not contain quotes, backslashes or spaces" >&2
 	exit 2
 	;;

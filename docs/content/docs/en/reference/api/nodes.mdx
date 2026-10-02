@@ -38,11 +38,12 @@ _openapi:
       url: '#fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel'
     - depth: 2
       title: Register a new node. kind "panel" (default) is a remote 3x-ui reached at
-        its URL with a write-only apiToken; kind "agent" is a pigger-agent that
-        dials in, so only name, remark, address (its public address) and enable
-        apply, and its secret comes from nodes/agentSecret. Responses expose
-        hasApiToken only.
-      url: '#register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-is-a-pigger-agent-that-dials-in-so-only-name-remark-address-its-public-address-and-enable-apply-and-its-secret-comes-from-nodesagentsecret-responses-expose-hasapitoken-only'
+        its URL with a write-only apiToken. kind "agent" dials in with the
+        secret from nodes/agentSecret; address may be blank and is filled from
+        its first authenticated public connection. An optional probeServerId
+        creates the host and its Lite link atomically; the server must exist and
+        be unlinked. Responses expose hasApiToken only.
+      url: '#register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-responses-expose-hasapitoken-only'
     - depth: 2
       title: 'Replace a node’s connection details. apiToken is write-only: omit it or
         send an empty string to keep the stored token; set clearApiToken=true to
@@ -84,6 +85,13 @@ _openapi:
         with it is dropped. Panel nodes have no agent secret and are refused.
       url: '#mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused'
     - depth: 2
+      title: Download the installer for the running panel version.
+      url: '#download-the-installer-for-the-running-panel-version'
+    - depth: 2
+      title: Download a versioned agent package, checksum or geodata using a host
+        secret.
+      url: '#download-a-versioned-agent-package-checksum-or-geodata-using-a-host-secret'
+    - depth: 2
       title: "Restart one host's Xray through its runtime: an agent restarts its
         embedded core, a panel node its own Xray process. Refused for a disabled
         host."
@@ -118,11 +126,12 @@ _openapi:
           central panel.
         id: fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel
       - content: Register a new node. kind "panel" (default) is a remote 3x-ui reached
-          at its URL with a write-only apiToken; kind "agent" is a pigger-agent
-          that dials in, so only name, remark, address (its public address) and
-          enable apply, and its secret comes from nodes/agentSecret. Responses
-          expose hasApiToken only.
-        id: register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-is-a-pigger-agent-that-dials-in-so-only-name-remark-address-its-public-address-and-enable-apply-and-its-secret-comes-from-nodesagentsecret-responses-expose-hasapitoken-only
+          at its URL with a write-only apiToken. kind "agent" dials in with the
+          secret from nodes/agentSecret; address may be blank and is filled from
+          its first authenticated public connection. An optional probeServerId
+          creates the host and its Lite link atomically; the server must exist
+          and be unlinked. Responses expose hasApiToken only.
+        id: register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-responses-expose-hasapitoken-only
       - content: 'Replace a node’s connection details. apiToken is write-only: omit it
           or send an empty string to keep the stored token; set
           clearApiToken=true to clear it.'
@@ -155,6 +164,11 @@ _openapi:
           connected with it is dropped. Panel nodes have no agent secret and are
           refused.
         id: mint-a-new-secret-for-an-agent-node-and-return-it-once-only-its-hash-is-stored-the-old-secret-stops-working-at-once-and-the-agent-connected-with-it-is-dropped-panel-nodes-have-no-agent-secret-and-are-refused
+      - content: Download the installer for the running panel version.
+        id: download-the-installer-for-the-running-panel-version
+      - content: Download a versioned agent package, checksum or geodata using a host
+          secret.
+        id: download-a-versioned-agent-package-checksum-or-geodata-using-a-host-secret
       - content: "Restart one host's Xray through its runtime: an agent restarts its
           embedded core, a panel node its own Xray process. Refused for a
           disabled host."
@@ -162,7 +176,19 @@ _openapi:
       - content: Aggregated metric history for a node — same shape as /server/history,
           scoped to one node.
         id: aggregated-metric-history-for-a-node--same-shape-as-serverhistory-scoped-to-one-node
-    contents: []
+    contents:
+      - content: Public shell script. Run as root with the panel origin and a host
+          secret. Supports Linux amd64/arm64 with systemd or OpenRC; downloads
+          and verifies the matching agent package and the panel’s geodata.
+          Available at the origin root independently of the administrator base
+          path.
+        heading: download-the-installer-for-the-running-panel-version
+      - content: 'Authorization: Bearer must contain an enabled agent host’s secret.
+          Administrator API tokens do not authorize this route. Version must
+          equal the running panel; unknown versions and assets return 404.
+          Available at the origin root independently of the administrator base
+          path.'
+        heading: download-a-versioned-agent-package-checksum-or-geodata-using-a-host-secret
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
@@ -174,7 +200,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/agentSecret/{id}","method":"post"},{"path":"/panel/api/nodes/restartXray/{id}","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/list","method":"get"},{"path":"/panel/api/nodes/mtls/ca","method":"post"},{"path":"/panel/api/nodes/mtls/trustCA","method":"post"},{"path":"/panel/api/nodes/mtls/reloadClient","method":"post"},{"path":"/panel/api/nodes/get/{id}","method":"get"},{"path":"/panel/api/nodes/webCert/{id}","method":"get"},{"path":"/panel/api/nodes/add","method":"post"},{"path":"/panel/api/nodes/update/{id}","method":"post"},{"path":"/panel/api/nodes/del/{id}","method":"post"},{"path":"/panel/api/nodes/setEnable/{id}","method":"post"},{"path":"/panel/api/nodes/test","method":"post"},{"path":"/panel/api/nodes/certFingerprint","method":"post"},{"path":"/panel/api/nodes/inbounds","method":"post"},{"path":"/panel/api/nodes/probe/{id}","method":"post"},{"path":"/panel/api/nodes/updatePanel","method":"post"},{"path":"/panel/api/nodes/agentSecret/{id}","method":"post"},{"path":"/agent/install.sh","method":"get"},{"path":"/agent/download/{version}/{asset}","method":"get"},{"path":"/panel/api/nodes/restartXray/{id}","method":"post"},{"path":"/panel/api/nodes/history/{id}/{metric}/{bucket}","method":"get"}]} showTitle />
     </>
   );
 }

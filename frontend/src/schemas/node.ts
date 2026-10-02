@@ -71,7 +71,8 @@ export const NodeFormSchema = z
     remark: z.string().optional(),
     kind: z.enum(['panel', 'agent']).default('panel'),
     scheme: z.enum(['http', 'https']),
-    address: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
+    address: z.string().trim(),
+    probeServerId: z.string().optional().default(''),
     port: z.number().int().min(1).max(65535),
     basePath: z.string(),
     // mTLS nodes authenticate via the client certificate, so the token is optional
@@ -92,6 +93,13 @@ export const NodeFormSchema = z
     outboundTag: z.string().optional(),
   })
   .superRefine((val, ctx) => {
+    if (val.kind === 'panel' && !val.address) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['address'],
+        message: 'pages.nodes.toasts.fillRequired',
+      });
+    }
     // An agent dials in with its own secret; only a panel node needs a token.
     if (
       val.kind === 'panel' &&

@@ -401,11 +401,14 @@ func (s *NodeService) normalize(n *model.Node) error {
 	if n.Name == "" {
 		return common.NewError("node name is required")
 	}
-	addr, err := netsafe.NormalizeHost(n.Address)
-	if err != nil {
-		return common.NewError(err.Error())
+	n.Address = strings.TrimSpace(n.Address)
+	if n.Kind != model.NodeKindAgent || n.Address != "" {
+		addr, err := netsafe.NormalizeHost(n.Address)
+		if err != nil {
+			return common.NewError(err.Error())
+		}
+		n.Address = addr
 	}
-	n.Address = addr
 	if n.Kind == model.NodeKindAgent {
 		// An agent dials in and its config comes whole from this panel, so the
 		// outbound bridge and inbound selection that steer node calls never apply.

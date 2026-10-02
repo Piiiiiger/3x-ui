@@ -941,6 +941,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "outboundTag": "",
     "pinnedCertSha256": "",
     "port": 1,
+    "probeServerId": "",
     "remark": "",
     "scheme": "http",
     "tlsVerifyMode": "verify"

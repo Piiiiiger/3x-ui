@@ -6,9 +6,9 @@ import NodeList from '@/pages/nodes/NodeList';
 import type { NodeRecord } from '@/schemas/node';
 import { MemoryRouter } from 'react-router';
 
-import { renderWithProviders } from './test-utils';
+import { chooseSelectOption, listSelectOptions, renderWithProviders } from './test-utils';
 
-function renderForm(mode: 'add' | 'edit', node: NodeRecord | null) {
+function renderForm(mode: 'add' | 'edit', node: NodeRecord | null, withProbe = false) {
   const props = {
     testConnection: vi.fn(),
     fetchFingerprint: vi.fn(),
@@ -19,7 +19,22 @@ function renderForm(mode: 'add' | 'edit', node: NodeRecord | null) {
       .mockResolvedValue({ success: true, msg: '', obj: { secret: 'S3CR3T' } }),
     onOpenChange: vi.fn(),
   };
-  renderWithProviders(<NodeFormModal open mode={mode} node={node} {...props} />);
+  renderWithProviders(
+    <NodeFormModal
+      open
+      mode={mode}
+      node={node}
+      probeServers={
+        withProbe
+          ? [
+              { id: 'free-lite', name: 'Example unlinked host', linked: false },
+              { id: 'used-lite', name: 'Already managed host', linked: true },
+            ]
+          : []
+      }
+      {...props}
+    />,
+  );
   return props;
 }
 
@@ -34,6 +49,20 @@ function submit() {
 }
 
 describe('NodeFormModal agent nodes', () => {
+  it('adds an unlinked probe server without requiring its address', async () => {
+    const props = renderForm('add', null, true);
+    const field = screen.getByLabelText('From probe').id;
+    expect(listSelectOptions(field)).toEqual(['Example unlinked host']);
+    chooseSelectOption(field, 'Example unlinked host');
+    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Example unlinked host');
+    expect((screen.getByLabelText('Public address') as HTMLInputElement).value).toBe('');
+    submit();
+    await waitFor(() => expect(props.mintAgentSecret).toHaveBeenCalledWith(7));
+    expect(props.save).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'agent', probeServerId: 'free-lite', address: '' }),
+    );
+    expect(props.testConnection).not.toHaveBeenCalled();
+  });
   // An agent dials the panel only after it is installed with the secret, so a
   // reachability probe before saving would refuse every new agent.
   it('saves an agent without probing it and shows its secret once', async () => {

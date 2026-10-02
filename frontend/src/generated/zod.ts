@@ -928,6 +928,7 @@ export const NodeMutationRequestSchema = z.object({
   outboundTag: z.string(),
   pinnedCertSha256: z.string(),
   port: z.number().int().min(1).max(65535),
+  probeServerId: z.string().max(64).optional(),
   remark: z.string(),
   scheme: z.enum(['http', 'https']),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),

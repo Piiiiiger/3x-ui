@@ -1234,14 +1234,13 @@
       "kindPanel": "Panel",
       "kindAgent": "Agen",
       "publicAddress": "Alamat publik",
-      "publicAddressHint": "IP publik atau domain server, dipakai di tautan pengguna.",
       "agentHint": "Pasang agen di server dengan rahasia yang ditampilkan setelah menyimpan. Agen terhubung sendiri ke panel ini, jadi server tidak perlu port panel yang terbuka.",
       "agentNewSecret": "Rahasia baru",
       "agentNewSecretConfirm": "Agen yang memakai rahasia saat ini akan terputus sampai file konfigurasinya berisi rahasia baru.",
       "agentSecretFailed": "Gagal membuat rahasia agen",
       "agentSecretTitle": "Rahasia agen untuk {name}",
       "agentSecretOnce": "Salin sekarang: rahasia hanya ditampilkan sekali.",
-      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)",
+      "agentInstallCommand": "Perintah instalasi (jalankan sebagai root pada host)",
       "host": {
         "allHosts": "Semua node",
         "notFound": "Node ini sudah tidak ada",
@@ -1275,7 +1274,9 @@
       "hideIp": "Sembunyikan IP",
       "showIp": "Tampilkan IP",
       "resetToday": "reset hari ini",
-      "resetInDays": "reset dalam {count} hari"
+      "resetInDays": "reset dalam {count} hari",
+      "fromProbe": "Dari pemantauan",
+      "publicAddressAutoHint": "Biarkan kosong untuk memakai alamat publik dari koneksi pertama agen. Anda juga dapat mengisi IP atau domain."
     },
     "settings": {
       "defaultTag": "Bawaan",

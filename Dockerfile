@@ -18,6 +18,7 @@ ARG TARGETARCH
 
 RUN apk --no-cache --update add \
   build-base \
+  bash \
   gcc \
   curl \
   unzip
@@ -28,6 +29,7 @@ COPY --from=frontend /src/internal/web/dist ./internal/web/dist
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 RUN go build -ldflags "-w -s" -o build/x-ui main.go
+RUN bash deploy/pigger-agent/package.sh "$(cat internal/config/version)" build/agent-releases
 RUN ./DockerInit.sh "$TARGETARCH"
 
 # ========================================================

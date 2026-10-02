@@ -27,6 +27,8 @@ type AgentController struct {
 func NewAgentController(g *gin.RouterGroup) *AgentController {
 	a := &AgentController{}
 	g.GET("/"+agentproto.ConnectPath, a.connect)
+	g.GET("/agent/install.sh", a.installer)
+	g.GET("/agent/download/:version/:asset", a.download)
 	return a
 }
 
@@ -49,6 +51,11 @@ func (a *AgentController) connect(c *gin.Context) {
 	}
 	conn, err := agentUpgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
+		return
+	}
+	if err := a.nodeService.DiscoverAgentAddress(node.Id, getRemoteIp(c)); err != nil {
+		logger.Warningf("agent address discovery failed for node %d: %v", node.Id, err)
+		_ = conn.Close()
 		return
 	}
 	logger.Infof("agent for node %s connected from %s", node.Name, getRemoteIp(c))

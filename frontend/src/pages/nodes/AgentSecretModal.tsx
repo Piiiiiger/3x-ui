@@ -3,11 +3,10 @@ import { Alert, Button, Input, Modal, Space, Typography, message } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 
 import { ClipboardManager } from '@/utils';
-import { withBasePath } from '@/api/http-init';
 
 // The agent dials this panel at the URL the admin is using right now.
 export function agentMasterUrl(): string {
-  return window.location.origin + withBasePath('/');
+  return window.location.origin + '/';
 }
 
 export function agentConfigFile(master: string, secret: string): string {
@@ -15,7 +14,8 @@ export function agentConfigFile(master: string, secret: string): string {
 }
 
 export function agentInstallCommand(master: string, secret: string): string {
-  return `sh install.sh ${master} ${secret}`;
+  const quote = (value: string) => `'${value.replaceAll("'", "'\\''")}'`;
+  return `curl -fsSL ${quote(master + 'agent/install.sh')} | sh -s -- ${quote(master)} ${quote(secret)}`;
 }
 
 interface AgentSecretModalProps {

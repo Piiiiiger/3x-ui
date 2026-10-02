@@ -1640,7 +1640,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/nodes/add',
         summary:
-          'Register a new node. kind "panel" (default) is a remote 3x-ui reached at its URL with a write-only apiToken; kind "agent" is a pigger-agent that dials in, so only name, remark, address (its public address) and enable apply, and its secret comes from nodes/agentSecret. Responses expose hasApiToken only.',
+          'Register a new node. kind "panel" (default) is a remote 3x-ui reached at its URL with a write-only apiToken. kind "agent" dials in with the secret from nodes/agentSecret; address may be blank and is filled from its first authenticated public connection. An optional probeServerId creates the host and its Lite link atomically; the server must exist and be unlinked. Responses expose hasApiToken only.',
         body: '{\n  "name": "de-fra-1",\n  "kind": "panel",\n  "remark": "",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef...",\n  "clearApiToken": false,\n  "enable": true,\n  "allowPrivateAddress": false\n}',
         responseSchema: 'NodeView',
       },
@@ -1712,6 +1712,51 @@ export const sections: readonly Section[] = [
           'Mint a new secret for an agent node and return it once; only its hash is stored. The old secret stops working at once and the agent connected with it is dropped. Panel nodes have no agent secret and are refused.',
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node ID.' }],
         responseSchema: 'AgentSecretView',
+      },
+      {
+        method: 'GET',
+        path: '/agent/install.sh',
+        summary: 'Download the installer for the running panel version.',
+        description:
+          'Public shell script. Run as root with the panel origin and a host secret. Supports Linux amd64/arm64 with systemd or OpenRC; downloads and verifies the matching agent package and the panel’s geodata. Available at the origin root independently of the administrator base path.',
+        security: [],
+        responses: {
+          '200': {
+            description: 'POSIX shell installer',
+            content: { 'text/x-shellscript': { schema: { type: 'string' } } },
+          },
+        },
+      },
+      {
+        method: 'GET',
+        path: '/agent/download/:version/:asset',
+        summary: 'Download a versioned agent package, checksum or geodata using a host secret.',
+        description:
+          'Authorization: Bearer must contain an enabled agent host’s secret. Administrator API tokens do not authorize this route. Version must equal the running panel; unknown versions and assets return 404. Available at the origin root independently of the administrator base path.',
+        params: [
+          { name: 'version', in: 'path', type: 'string', desc: 'Running panel version.' },
+          {
+            name: 'asset',
+            in: 'path',
+            type: 'string',
+            enum: [
+              'linux-amd64.tar.gz',
+              'linux-arm64.tar.gz',
+              'linux-amd64.sha256',
+              'linux-arm64.sha256',
+              'geoip.dat',
+              'geosite.dat',
+            ],
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Agent artifact',
+            content: {
+              'application/octet-stream': { schema: { type: 'string', format: 'binary' } },
+            },
+          },
+        },
       },
       {
         method: 'POST',

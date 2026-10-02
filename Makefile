@@ -74,8 +74,14 @@ build-fe: ## Build the Vite bundles into internal/web/dist
 	cd $(FRONTEND) && npm run build
 
 .PHONY: build
-build: build-fe ## Build the frontend then the Go binary
+build: build-fe build-agent-package ## Build the frontend, agent packages and Go binary
 	go build ./...
+
+AGENT_VERSION ?= $(shell cat internal/config/version)
+AGENT_RELEASE_DIR ?= agent-releases
+.PHONY: build-agent-package
+build-agent-package: ## Package matching Linux amd64/arm64 agents for panel downloads
+	bash deploy/pigger-agent/package.sh "$(AGENT_VERSION)" "$(AGENT_RELEASE_DIR)"
 
 .PHONY: build-agent
 build-agent: ## Build pigger-agent (static, no cgo) into ./pigger-agent

@@ -1234,14 +1234,13 @@
       "kindPanel": "Panel",
       "kindAgent": "Agente",
       "publicAddress": "Dirección pública",
-      "publicAddressHint": "IP pública o dominio del servidor, usado en los enlaces de los usuarios.",
       "agentHint": "Instala el agente en el servidor con el secreto que se muestra al guardar. El agente se conecta solo a este panel, así que el servidor no necesita un puerto de panel abierto.",
       "agentNewSecret": "Nuevo secreto",
       "agentNewSecretConfirm": "El agente que usa el secreto actual se desconectará hasta que su archivo de configuración tenga el nuevo.",
       "agentSecretFailed": "No se pudo crear el secreto del agente",
       "agentSecretTitle": "Secreto del agente de {name}",
       "agentSecretOnce": "Cópialo ahora: el secreto solo se muestra una vez.",
-      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)",
+      "agentInstallCommand": "Comando de instalación (ejecutar como root en el servidor)",
       "host": {
         "allHosts": "Todos los nodos",
         "notFound": "Este nodo ya no existe",
@@ -1275,7 +1274,9 @@
       "hideIp": "Ocultar IP",
       "showIp": "Mostrar IP",
       "resetToday": "se reinicia hoy",
-      "resetInDays": "se reinicia en {count} d"
+      "resetInDays": "se reinicia en {count} d",
+      "fromProbe": "Desde el monitor",
+      "publicAddressAutoHint": "Déjalo vacío para usar la dirección pública de la primera conexión del agente. También puedes indicar una IP o un dominio."
     },
     "settings": {
       "defaultTag": "Predeterminado",
