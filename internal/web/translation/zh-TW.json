@@ -2505,6 +2505,13 @@
       "available": "可預訂",
       "takenUntil": "已預訂至 {date}",
       "activeCount": "{count} 個進行中"
+    },
+    "probe": {
+      "statusUnknown": "暫無資料",
+      "statusUnmonitored": "未監控",
+      "lastSeen": "最後上線 {time}",
+      "totalTraffic": "累計上傳 / 下載",
+      "pingTimeout": "逾時"
     }
   },
   "tgbot": {

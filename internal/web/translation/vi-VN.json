@@ -2505,6 +2505,13 @@
       "available": "Còn trống",
       "takenUntil": "Đã đặt đến {date}",
       "activeCount": "{count} đang hoạt động"
+    },
+    "probe": {
+      "statusUnknown": "Chưa có dữ liệu",
+      "statusUnmonitored": "Không được giám sát",
+      "lastSeen": "Lần cuối thấy: {time}",
+      "totalTraffic": "Tổng tải lên / tải xuống",
+      "pingTimeout": "hết thời gian chờ"
     }
   },
   "tgbot": {

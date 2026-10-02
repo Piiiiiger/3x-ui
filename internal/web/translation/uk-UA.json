@@ -2505,6 +2505,13 @@
       "available": "Вільно",
       "takenUntil": "Зайнято до {date}",
       "activeCount": "Активних: {count}"
+    },
+    "probe": {
+      "statusUnknown": "Даних ще немає",
+      "statusUnmonitored": "Не відстежується",
+      "lastSeen": "Востаннє в мережі: {time}",
+      "totalTraffic": "Усього віддано / отримано",
+      "pingTimeout": "немає відповіді"
     }
   },
   "tgbot": {

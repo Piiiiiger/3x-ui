@@ -2505,6 +2505,13 @@
       "available": "متاح",
       "takenUntil": "محجوز حتى {date}",
       "activeCount": "{count} نشط"
+    },
+    "probe": {
+      "statusUnknown": "لا توجد بيانات بعد",
+      "statusUnmonitored": "غير مراقَب",
+      "lastSeen": "آخر ظهور {time}",
+      "totalTraffic": "إجمالي الرفع / التنزيل",
+      "pingTimeout": "انتهت المهلة"
     }
   },
   "tgbot": {

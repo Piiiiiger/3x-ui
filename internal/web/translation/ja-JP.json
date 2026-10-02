@@ -2505,6 +2505,13 @@
       "available": "空きあり",
       "takenUntil": "{date} まで予約済み",
       "activeCount": "{count} 件掲載中"
+    },
+    "probe": {
+      "statusUnknown": "データ未受信",
+      "statusUnmonitored": "監視対象外",
+      "lastSeen": "最終確認 {time}",
+      "totalTraffic": "合計 上り / 下り",
+      "pingTimeout": "タイムアウト"
     }
   },
   "tgbot": {

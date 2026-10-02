@@ -2505,6 +2505,13 @@
       "available": "Disponible",
       "takenUntil": "Ocupado hasta {date}",
       "activeCount": "{count} activos"
+    },
+    "probe": {
+      "statusUnknown": "Aún sin datos",
+      "statusUnmonitored": "Sin monitorizar",
+      "lastSeen": "Visto por última vez: {time}",
+      "totalTraffic": "Total subida / bajada",
+      "pingTimeout": "sin respuesta"
     }
   },
   "tgbot": {

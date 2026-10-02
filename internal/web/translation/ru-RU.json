@@ -2505,6 +2505,13 @@
       "available": "Свободно",
       "takenUntil": "Занято до {date}",
       "activeCount": "Активных: {count}"
+    },
+    "probe": {
+      "statusUnknown": "Данных пока нет",
+      "statusUnmonitored": "Не отслеживается",
+      "lastSeen": "Последний раз в сети: {time}",
+      "totalTraffic": "Всего отдано / получено",
+      "pingTimeout": "нет ответа"
     }
   },
   "tgbot": {

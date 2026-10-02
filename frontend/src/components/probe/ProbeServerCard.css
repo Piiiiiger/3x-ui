@@ -1,0 +1,153 @@
+/* Columns follow the container, not the viewport: the portal card is 880px
+   wide at most, where viewport breakpoints would squeeze in too many columns. */
+.probe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+
+.probe-card.ant-card {
+  min-width: 0;
+}
+
+.probe-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.probe-card-flag {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.probe-card-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+  color: var(--ant-color-text);
+  overflow-wrap: anywhere;
+}
+
+.probe-card-status {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.probe-card-status.is-online {
+  color: var(--ant-color-success-text);
+}
+
+.probe-card-status.is-offline {
+  color: var(--ant-color-error-text);
+}
+
+.probe-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.probe-card-subtitle,
+.probe-card-note {
+  margin-block: 6px 0;
+  margin-inline: 0;
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  overflow-wrap: anywhere;
+}
+
+.probe-card-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-block-start: 12px;
+}
+
+/* A bdi takes its direction from its own digits, so a logical margin on it
+   lands on the wrong side in RTL: the rows space their figures with gaps. */
+.probe-card-meter-head,
+.probe-card-meter-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+
+.probe-card-meter-head {
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.probe-card-meter-label {
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.probe-card-meter-detail {
+  color: var(--ant-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.probe-card-meter-value {
+  color: var(--ant-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.probe-card-meter .ant-progress {
+  display: block;
+  margin: 0;
+  line-height: 1;
+}
+
+.probe-card-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin-block: 14px 0;
+  margin-inline: 0;
+}
+
+.probe-card-facts dt {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.probe-card-facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  margin-block: 2px 0;
+  margin-inline: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.probe-card-pings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 12px;
+}
+
+.probe-card-pings .ant-tag {
+  margin: 0;
+}
+
+.probe-card-footer {
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--ant-color-border-secondary);
+}

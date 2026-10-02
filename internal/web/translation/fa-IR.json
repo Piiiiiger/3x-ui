@@ -2505,6 +2505,13 @@
       "available": "خالی",
       "takenUntil": "پر شده تا {date}",
       "activeCount": "{count} فعال"
+    },
+    "probe": {
+      "statusUnknown": "هنوز داده‌ای نیست",
+      "statusUnmonitored": "پایش نمی‌شود",
+      "lastSeen": "آخرین مشاهده: {time}",
+      "totalTraffic": "مجموع آپلود / دانلود",
+      "pingTimeout": "بدون پاسخ"
     }
   },
   "tgbot": {

@@ -2505,6 +2505,13 @@
       "available": "Müsait",
       "takenUntil": "{date} tarihine kadar dolu",
       "activeCount": "{count} aktif"
+    },
+    "probe": {
+      "statusUnknown": "Henüz veri yok",
+      "statusUnmonitored": "İzlenmiyor",
+      "lastSeen": "Son görülme: {time}",
+      "totalTraffic": "Toplam yükleme / indirme",
+      "pingTimeout": "zaman aşımı"
     }
   },
   "tgbot": {

@@ -2505,6 +2505,13 @@
       "available": "Tersedia",
       "takenUntil": "Terisi hingga {date}",
       "activeCount": "{count} aktif"
+    },
+    "probe": {
+      "statusUnknown": "Belum ada data",
+      "statusUnmonitored": "Tidak dipantau",
+      "lastSeen": "Terakhir terlihat {time}",
+      "totalTraffic": "Total unggah / unduh",
+      "pingTimeout": "waktu habis"
     }
   },
   "tgbot": {
