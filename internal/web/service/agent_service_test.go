@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"slices"
 	"strconv"
 	"testing"
@@ -127,6 +128,18 @@ func TestSyncAgent_PushesTheConfigOnlyWhenItChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	applyCarries(t, expectApply(t, applies), "n1-in-81-tcp", "alice", "bob")
+}
+
+// A caller waiting for an agent to run a change must not read a missing agent as
+// one that took it; the node would be reported live while no host runs it.
+func TestSyncAgent_ReportsAnAgentThatIsNotConnected(t *testing.T) {
+	setupSettingTestDB(t)
+	useAgentHub(t)
+	n := seedAgentNodeRow(t, "edge-hk")
+
+	if err := (&AgentService{}).SyncAgent(context.Background(), n); !errors.Is(err, runtime.ErrAgentNotConnected) {
+		t.Fatalf("SyncAgent with no agent connected: %v, want runtime.ErrAgentNotConnected", err)
+	}
 }
 
 // A change made while the agent was away marks the node dirty; only an applied

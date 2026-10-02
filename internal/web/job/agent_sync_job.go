@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -71,7 +72,8 @@ func (j *AgentSyncJob) syncNode(n *model.Node) {
 	if err := j.inboundService.DeliverNodeResets(ctx, n.Id, runtime.NewAgentRuntime(n)); err != nil {
 		logger.Warning("agent sync: clear queued resets for", n.Name, "failed:", err)
 	}
-	if err := j.agentService.SyncAgent(ctx, n); err != nil {
+	// An agent that dropped since the tick listed it reconnects and is synced then.
+	if err := j.agentService.SyncAgent(ctx, n); err != nil && !errors.Is(err, runtime.ErrAgentNotConnected) {
 		logger.Warning("agent sync: push config to", n.Name, "failed, retrying next tick:", err)
 	}
 }

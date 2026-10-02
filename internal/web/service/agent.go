@@ -57,15 +57,15 @@ func (s *AgentService) AgentConfig(nodeID int) ([]byte, string, error) {
 }
 
 // SyncAgent pushes a connected agent its config when it runs anything else, then
-// clears the node's dirty flag: the agent now holds every change made before.
+// clears the node's dirty flag; without an agent it is runtime.ErrAgentNotConnected.
 func (s *AgentService) SyncAgent(ctx context.Context, n *model.Node) error {
 	hub := runtime.GetAgentHub()
 	if hub == nil {
-		return nil
+		return runtime.ErrAgentNotConnected
 	}
 	state, ok := hub.Session(n.Id)
 	if !ok {
-		return nil
+		return runtime.ErrAgentNotConnected
 	}
 	_, _, dirty, dirtyAt, err := s.nodeService.NodeSyncState(n.Id)
 	if err != nil {
