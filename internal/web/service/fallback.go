@@ -1,12 +1,15 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 
 	"gorm.io/gorm"
 )
@@ -90,6 +93,24 @@ func (s *FallbackService) SetByMaster(masterId int, items []FallbackInput) error
 		}
 		return nil
 	})
+}
+
+// SetFallbacks replaces a master's fallback list, which is part of its config on an
+// agent, so that agent is pushed the change at once instead of on its next sync.
+func (s *InboundService) SetFallbacks(masterId int, items []FallbackInput) error {
+	if err := s.fallbackService.SetByMaster(masterId, items); err != nil {
+		return err
+	}
+	master, err := s.GetInbound(masterId)
+	if err == nil {
+		err = s.pushToAgentNode(master, func(rt runtime.Runtime) error {
+			return rt.UpdateInbound(context.Background(), master, master)
+		})
+	}
+	if err != nil {
+		logger.Warning("SetFallbacks: push to the agent failed, its next sync delivers it:", err)
+	}
+	return nil
 }
 
 func (s *FallbackService) BuildFallbacksJSON(tx *gorm.DB, masterId int) ([]map[string]any, error) {

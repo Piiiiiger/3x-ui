@@ -25,6 +25,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -1330,6 +1331,13 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 		if inbound.Enable {
 			if inbound.NodeID != nil {
 				markDirty = true
+				postCommitApply = func() {
+					if err := s.pushToAgentNode(inbound, func(rt runtime.Runtime) error {
+						return rt.AddInbound(context.Background(), inbound)
+					}); err != nil {
+						logger.Warning("AddInbound: push to the agent failed, its next sync delivers it:", err)
+					}
+				}
 			} else {
 				rt, push, _, perr := s.nodePushPlan(inbound)
 				if perr != nil {
@@ -2047,6 +2055,14 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 		} else if routingChanged {
 			needRestart = true
 		}
+	}
+	// After the rename above: an agent's config, routing included, is rebuilt whole.
+	oldSnapshot := *oldInbound
+	oldSnapshot.Tag = tag
+	if err := s.pushToAgentNode(oldInbound, func(rt runtime.Runtime) error {
+		return rt.UpdateInbound(context.Background(), &oldSnapshot, oldInbound)
+	}); err != nil {
+		logger.Warning("UpdateInbound: push to the agent failed, its next sync delivers it:", err)
 	}
 	return inbound, needRestart, nil
 }

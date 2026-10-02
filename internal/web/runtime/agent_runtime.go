@@ -34,6 +34,10 @@ func (a *AgentRuntime) UpdateInbound(context.Context, *model.Inbound, *model.Inb
 	return a.changed()
 }
 
+func (a *AgentRuntime) SetInboundSubSortIndex(context.Context, *model.Inbound, int) error {
+	return a.changed()
+}
+
 func (a *AgentRuntime) AddUser(context.Context, *model.Inbound, map[string]any) error {
 	return a.changed()
 }

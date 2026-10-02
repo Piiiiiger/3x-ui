@@ -493,7 +493,7 @@ func (a *InboundController) setFallbacks(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if err := a.fallbackService.SetByMaster(id, b.Fallbacks); err != nil {
+	if err := a.inboundService.SetFallbacks(id, b.Fallbacks); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
