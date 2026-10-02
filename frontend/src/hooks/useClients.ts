@@ -32,7 +32,6 @@ import {
   type BulkDetachResult,
 } from '@/schemas/client';
 import { DefaultsPayloadSchema } from '@/schemas/defaults';
-import { TRAFFIC_POLL_INTERVAL_S } from '@/lib/traffic/poll-interval';
 
 // One row sent to POST /clients/:email/externalLinks.
 export type ExternalLinkInput = {
@@ -87,32 +86,15 @@ const DEFAULT_SUMMARY: ClientsSummary = {
   depletedCount: 0,
   expiringCount: 0,
   deactiveCount: 0,
+  exhaustedCount: 0,
+  expiredCount: 0,
   online: [],
   depleted: [],
   expiring: [],
   deactive: [],
 };
 
-export interface ClientSpeedEntry {
-  up: number;
-  down: number;
-}
-
 type ClientStatRow = ClientTraffic & { email?: string };
-
-export function sameSpeedMap(
-  a: Record<string, ClientSpeedEntry>,
-  b: Record<string, ClientSpeedEntry>,
-): boolean {
-  const aKeys = Object.keys(a);
-  if (aKeys.length !== Object.keys(b).length) return false;
-  for (const key of aKeys) {
-    const left = a[key];
-    const right = b[key];
-    if (!right || left.up !== right.up || left.down !== right.down) return false;
-  }
-  return true;
-}
 
 export function buildClientPageQuery(p: ClientQueryParams): string {
   const sp = new URLSearchParams();
@@ -277,7 +259,6 @@ export function useClients(options: UseClientsOptions = {}) {
   // settings request still lets the page fall back and render.
   const settingsReady = defaultsQuery.isFetched;
 
-  const [clientSpeed, setClientSpeed] = useState<Record<string, ClientSpeedEntry>>({});
   const summary = listQuery.data?.summary ?? DEFAULT_SUMMARY;
 
   const invalidateAll = useCallback(() => {
@@ -312,6 +293,18 @@ export function useClients(options: UseClientsOptions = {}) {
   const updateMut = useMutation({
     mutationFn: ({ email, client }: { email: string; client: unknown }) =>
       HttpUtil.post(`/panel/api/clients/update/${encodeURIComponent(email)}`, client, JSON_HEADERS),
+    onSuccess: (msg) => {
+      if (msg?.success) invalidateAll();
+    },
+  });
+
+  const commentMut = useMutation({
+    mutationFn: ({ email, comment }: { email: string; comment: string }) =>
+      HttpUtil.post(
+        `/panel/api/clients/${encodeURIComponent(email)}/comment`,
+        { comment },
+        JSON_HEADERS,
+      ),
     onSuccess: (msg) => {
       if (msg?.success) invalidateAll();
     },
@@ -504,6 +497,10 @@ export function useClients(options: UseClientsOptions = {}) {
     },
     [updateMut],
   );
+  const setComment = useCallback(
+    (email: string, comment: string) => commentMut.mutateAsync({ email, comment }),
+    [commentMut],
+  );
   const remove = useCallback(
     (email: string, keepTraffic = false) => {
       if (!email) return Promise.resolve(null as unknown as Msg<unknown>);
@@ -671,29 +668,9 @@ export function useClients(options: UseClientsOptions = {}) {
       if (!payload || typeof payload !== 'object') return;
       const p = payload as {
         onlineClients?: string[];
-        clientTraffics?: { email: string; up: number; down: number }[];
       };
       if (Array.isArray(p.onlineClients)) {
         queryClient.setQueryData(keys.clients.onlines(), p.onlineClients);
-      }
-      if (Array.isArray(p.clientTraffics)) {
-        // Xray reports a row per client whether or not it moved a byte, so most of
-        // this map used to be zeros. A missing entry and a zero entry render
-        // identically (isActiveSpeed treats both as inactive), so the zeros are
-        // dropped and an unchanged result returns the previous object — which lets
-        // React bail out of the update instead of re-rendering the table.
-        const next: Record<string, ClientSpeedEntry> = {};
-        for (const ct of p.clientTraffics) {
-          if (!ct || !ct.email) continue;
-          const up = ct.up || 0;
-          const down = ct.down || 0;
-          if (up === 0 && down === 0) continue;
-          next[ct.email] = {
-            up: up / TRAFFIC_POLL_INTERVAL_S,
-            down: down / TRAFFIC_POLL_INTERVAL_S,
-          };
-        }
-        setClientSpeed((prev) => (sameSpeedMap(prev, next) ? prev : next));
       }
     },
     [queryClient],
@@ -763,6 +740,7 @@ export function useClients(options: UseClientsOptions = {}) {
     create,
     bulkCreate,
     update,
+    setComment,
     remove,
     bulkDelete,
     bulkAdjust,
@@ -780,7 +758,6 @@ export function useClients(options: UseClientsOptions = {}) {
     exportClients,
     importClients,
     setEnable,
-    clientSpeed,
     applyTrafficEvent,
     applyClientStatsEvent,
   };

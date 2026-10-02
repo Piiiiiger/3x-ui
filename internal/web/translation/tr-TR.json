@@ -796,7 +796,7 @@
       "renew": "Otomatik Yenileme",
       "renewDesc": "Süre dolduktan sonra otomatik yeniler. (0 = devre dışı) (birim: gün)",
       "renewDays": "Otomatik Yenileme (gün)",
-      "searchPlaceholder": "E-posta, yorum, sub ID, UUID, parola, auth, Telegram ID ara…",
+      "searchPlaceholder": "E-posta, yorum, paket, sub ID, UUID, parola, auth, Telegram ID ara…",
       "filterTitle": "Kullanıcıları Filtrele",
       "clearAllFilters": "Tümünü Temizle",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Kullanıcı Bilgileri",
       "editClient": "Kullanıcıyı Düzenle",
       "client": "Kullanıcı",
-      "enabled": "Etkin",
-      "remaining": "Kalan",
-      "duration": "Süre",
       "attachedInbounds": "Bağlı Gelen Bağlantılar",
       "selectInbound": "Bir veya Daha Fazla Gelen Bağlantı Seçin",
       "selectAllInbounds": "Tümünü Seç",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Kullanılan yenileme",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
-      "intro": "Tüm gelen bağlantılardaki kullanıcılar; trafik, bitiş tarihi ve abonelik bağlantılarıyla.",
+      "intro": "Tüm kullanıcılar; paket, trafik, durum ve abonelik bağlantısıyla. Yenileme görünümü bitiş tarihlerini ve sonraki trafik sıfırlamasını gösterir.",
       "portal": {
         "title": "Portal girişi",
         "intro": "Parola verildiğinde kullanıcı kendi adıyla portala girip paketini, kullanımını ve abonelik bağlantılarını görebilir.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "{email} için portal girişi kapatılsın mı? Açık oturumlar hemen sona erer.",
         "revoked": "Portal girişi kapatıldı",
         "subDisabled": "Abonelik sunucusu kapalı, bu yüzden kullanıcı portalı açamaz. Ayarlar → Abonelik bölümünden açın."
-      }
+      },
+      "listTitle": "Kullanıcı listesi",
+      "viewFull": "Tam görünüm",
+      "viewRenewal": "Yenileme görünümü",
+      "bulkMode": "Toplu işlemler",
+      "chips": {
+        "all": "Tümü",
+        "exhausted": "Kota doldu",
+        "expired": "Süresi dolmuş",
+        "disabled": "Devre dışı"
+      },
+      "state": {
+        "enabled": "Etkin",
+        "disabled": "Devre dışı",
+        "exhausted": "Tükendi",
+        "expired": "Süresi doldu"
+      },
+      "statusTitle": "Durum",
+      "subscription": "Abonelik",
+      "copySub": "Bağlantıyı kopyala",
+      "planUsage": "Paket / trafik",
+      "daysLeft": "Kalan gün",
+      "daysLeftValue": "{count} gün",
+      "expiredDaysAgo": "{count} gün önce doldu",
+      "nextReset": "Sonraki sıfırlama",
+      "renewNeedsPlan": "Yenilemek için kullanıcıya bir paket atayın",
+      "commentEdit": "Yorumu düzenle"
     },
     "plans": {
       "intro": "Trafik, geçerlilik süresi ve sunuculardan oluşan setler. Her kullanıcıyı tek tek ayarlamak yerine bir pakete atayın.",

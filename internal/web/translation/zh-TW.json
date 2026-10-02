@@ -796,7 +796,7 @@
       "renew": "自動續期",
       "renewDesc": "到期後自動續期。(0 = 停用) (單位: 天)",
       "renewDays": "自動續期 (天)",
-      "searchPlaceholder": "搜尋電子郵件、備註、sub ID、UUID、密碼、auth、Telegram ID…",
+      "searchPlaceholder": "搜尋電子郵件、備註、方案、sub ID、UUID、密碼、auth、Telegram ID…",
       "filterTitle": "篩選客戶端",
       "clearAllFilters": "清除全部",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "客戶端資訊",
       "editClient": "編輯客戶端",
       "client": "客戶端",
-      "enabled": "已啟用",
-      "remaining": "剩餘",
-      "duration": "時長",
       "attachedInbounds": "關聯入站",
       "selectInbound": "選擇一個或多個入站",
       "selectAllInbounds": "全選",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
-      "intro": "所有入站下的客戶端，包含流量、到期時間與訂閱連結。",
+      "intro": "所有客戶端的方案、流量、狀態與訂閱連結。續期檢視列出到期時間與下次流量重置。",
       "portal": {
         "title": "入口網站登入",
         "intro": "設定密碼後，使用者可以用自己的使用者名稱登入入口網站，查看方案、用量和訂閱連結。",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "關閉 {email} 的入口網站登入？已登入的裝置會立即登出。",
         "revoked": "已關閉入口網站登入",
         "subDisabled": "訂閱服務未開啟，使用者暫時無法開啟入口網站。請先在 設定 → 訂閱 中開啟。"
-      }
+      },
+      "listTitle": "客戶端列表",
+      "viewFull": "完整檢視",
+      "viewRenewal": "續期檢視",
+      "bulkMode": "批次操作",
+      "chips": {
+        "all": "全部",
+        "exhausted": "流量用盡",
+        "expired": "已到期",
+        "disabled": "已停用"
+      },
+      "state": {
+        "enabled": "啟用",
+        "disabled": "停用",
+        "exhausted": "用盡",
+        "expired": "到期"
+      },
+      "statusTitle": "狀態",
+      "subscription": "訂閱",
+      "copySub": "複製訂閱",
+      "planUsage": "方案/流量",
+      "daysLeft": "剩餘天數",
+      "daysLeftValue": "{count} 天",
+      "expiredDaysAgo": "已過期 {count} 天",
+      "nextReset": "下次重置",
+      "renewNeedsPlan": "先指派方案才能續期",
+      "commentEdit": "編輯備註"
     },
     "plans": {
       "intro": "流量、有效期與節點的組合。把使用者放進方案，不必逐一手動設定。",

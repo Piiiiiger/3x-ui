@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { ClientSpeedTag } from '@/components/clients/ClientSpeedTag';
 import {
   SPEED_COLUMN_WIDTH,
   SPEED_TABLE_CELL_INLINE_PADDING,
@@ -49,14 +48,6 @@ function expectStableTableTag(tag: HTMLElement) {
 }
 
 describe('stable table speed tags (issue #5912)', () => {
-  it('scopes ClientSpeedTag stable sizing to table cells', () => {
-    const { rerender } = render(<ClientSpeedTag speed={SMALL_RATE} />);
-    expectFluidTag(firstTag());
-
-    rerender(<ClientSpeedTag speed={LARGE_RATE} tableCell />);
-    expectStableTableTag(firstTag());
-  });
-
   it('scopes InboundSpeedTag stable sizing to table cells', () => {
     const { rerender } = render(<InboundSpeedTag speed={SMALL_RATE} />);
     expectFluidTag(firstTag());
@@ -66,17 +57,10 @@ describe('stable table speed tags (issue #5912)', () => {
   });
 
   it('fits the widest formatter rollover and includes small-cell padding', () => {
-    render(
-      <>
-        <ClientSpeedTag speed={FORMATTER_BOUNDARY_RATE} tableCell />
-        <InboundSpeedTag speed={FORMATTER_BOUNDARY_RATE} tableCell />
-      </>,
-    );
-    const tags = Array.from(document.querySelectorAll<HTMLElement>('.ant-tag'));
-    expect(tags).toHaveLength(2);
-    expect(tags[0]?.textContent).toBe('↑ 1024.00 MB/s / ↓ 1024.00 MB/s');
-    expect(tags[1]?.textContent).toBe(tags[0]?.textContent);
-    for (const tag of tags) expectStableTableTag(tag);
+    render(<InboundSpeedTag speed={FORMATTER_BOUNDARY_RATE} tableCell />);
+    const tag = firstTag();
+    expect(tag.textContent).toBe('↑ 1024.00 MB/s / ↓ 1024.00 MB/s');
+    expectStableTableTag(tag);
 
     expect(SPEED_TAG_WIDTH).toBeGreaterThan(FORMATTER_BOUNDARY_NATURAL_WIDTH);
     expect(SPEED_COLUMN_WIDTH).toBe(SPEED_TAG_WIDTH + SPEED_TABLE_CELL_INLINE_PADDING * 2);

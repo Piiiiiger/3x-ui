@@ -796,7 +796,7 @@
       "renew": "Renovação automática",
       "renewDesc": "Renovação automática após a expiração. (0 = desativar) (unidade: dia)",
       "renewDays": "Renovação automática (dias)",
-      "searchPlaceholder": "Buscar email, comentário, sub ID, UUID, senha, auth, Telegram ID…",
+      "searchPlaceholder": "Buscar email, comentário, plano, sub ID, UUID, senha, auth, Telegram ID…",
       "filterTitle": "Filtrar clientes",
       "clearAllFilters": "Limpar tudo",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Informações do cliente",
       "editClient": "Editar cliente",
       "client": "Cliente",
-      "enabled": "Habilitado",
-      "remaining": "Restante",
-      "duration": "Duração",
       "attachedInbounds": "Inbounds associados",
       "selectInbound": "Selecione um ou mais inbounds",
       "selectAllInbounds": "Selecionar tudo",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Renovações usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto.",
-      "intro": "Todos os clientes das suas entradas, com tráfego, validade e links de assinatura.",
+      "intro": "Todos os clientes com plano, tráfego, status e link de assinatura. A visão de renovação mostra a validade e a próxima redefinição de tráfego.",
       "portal": {
         "title": "Acesso ao portal",
         "intro": "Com uma senha, o cliente pode entrar no portal com o próprio usuário e ver o plano, o consumo e os links de assinatura.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "Desativar o acesso ao portal de {email}? As sessões abertas terminam na hora.",
         "revoked": "Acesso ao portal desativado",
         "subDisabled": "O servidor de assinaturas está desligado, então o cliente não consegue abrir o portal. Ative-o em Configurações → Assinatura."
-      }
+      },
+      "listTitle": "Lista de clientes",
+      "viewFull": "Visão completa",
+      "viewRenewal": "Visão de renovação",
+      "bulkMode": "Ações em massa",
+      "chips": {
+        "all": "Todos",
+        "exhausted": "Sem tráfego",
+        "expired": "Expirados",
+        "disabled": "Desativados"
+      },
+      "state": {
+        "enabled": "Ativo",
+        "disabled": "Desativado",
+        "exhausted": "Esgotado",
+        "expired": "Expirado"
+      },
+      "statusTitle": "Status",
+      "subscription": "Assinatura",
+      "copySub": "Copiar link",
+      "planUsage": "Plano / tráfego",
+      "daysLeft": "Dias restantes",
+      "daysLeftValue": "{count} d",
+      "expiredDaysAgo": "Expirou há {count} d",
+      "nextReset": "Próxima redefinição",
+      "renewNeedsPlan": "Coloque o cliente em um plano para renová-lo",
+      "commentEdit": "Editar comentário"
     },
     "plans": {
       "intro": "Conjuntos de tráfego, validade e servidores. Coloque os clientes em um plano em vez de configurar cada um manualmente.",

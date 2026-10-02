@@ -796,7 +796,7 @@
       "renew": "Perpanjangan otomatis",
       "renewDesc": "Perpanjangan otomatis setelah kedaluwarsa. (0 = nonaktif) (satuan: hari)",
       "renewDays": "Perpanjangan otomatis (hari)",
-      "searchPlaceholder": "Cari email, komentar, sub ID, UUID, kata sandi, auth, Telegram ID…",
+      "searchPlaceholder": "Cari email, komentar, paket, sub ID, UUID, kata sandi, auth, Telegram ID…",
       "filterTitle": "Filter klien",
       "clearAllFilters": "Hapus semua",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Informasi Klien",
       "editClient": "Ubah klien",
       "client": "Klien",
-      "enabled": "Aktif",
-      "remaining": "Sisa",
-      "duration": "Durasi",
       "attachedInbounds": "Inbound terlampir",
       "selectInbound": "Pilih satu atau lebih inbound",
       "selectAllInbounds": "Pilih semua",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Perpanjangan terpakai",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto.",
-      "intro": "Semua klien di seluruh inbound Anda, dengan trafik, masa berlaku, dan tautan langganan.",
+      "intro": "Semua klien beserta paket, trafik, status, dan tautan langganan. Tampilan perpanjangan menampilkan masa berlaku dan reset trafik berikutnya.",
       "portal": {
         "title": "Login portal",
         "intro": "Dengan kata sandi, klien bisa masuk ke portal dengan nama penggunanya dan melihat paket, pemakaian, serta tautan langganan.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "Matikan login portal untuk {email}? Sesi yang terbuka langsung berakhir.",
         "revoked": "Login portal dimatikan",
         "subDisabled": "Server langganan sedang mati, jadi klien tidak bisa membuka portal. Nyalakan di Pengaturan → Langganan."
-      }
+      },
+      "listTitle": "Daftar klien",
+      "viewFull": "Tampilan lengkap",
+      "viewRenewal": "Tampilan perpanjangan",
+      "bulkMode": "Aksi massal",
+      "chips": {
+        "all": "Semua",
+        "exhausted": "Kuota habis",
+        "expired": "Kedaluwarsa",
+        "disabled": "Nonaktif"
+      },
+      "state": {
+        "enabled": "Aktif",
+        "disabled": "Nonaktif",
+        "exhausted": "Habis",
+        "expired": "Kedaluwarsa"
+      },
+      "statusTitle": "Status",
+      "subscription": "Langganan",
+      "copySub": "Salin tautan",
+      "planUsage": "Paket / trafik",
+      "daysLeft": "Sisa hari",
+      "daysLeftValue": "{count} hari",
+      "expiredDaysAgo": "Kedaluwarsa {count} hari lalu",
+      "nextReset": "Reset berikutnya",
+      "renewNeedsPlan": "Pasang klien ke paket untuk memperpanjangnya",
+      "commentEdit": "Ubah komentar"
     },
     "plans": {
       "intro": "Kumpulan trafik, masa berlaku, dan server. Tetapkan paket ke klien alih-alih mengatur satu per satu.",

@@ -1,5 +1,4 @@
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import { useLocation, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,45 +6,42 @@ import {
   Button,
   Card,
   Checkbox,
-  Col,
   ConfigProvider,
   Dropdown,
   Input,
   Layout,
   Modal,
   Pagination,
-  Popover,
   Result,
-  Row,
+  Segmented,
   Select,
   Spin,
-  Statistic,
-  Switch,
   Table,
   Tag,
   Tooltip,
   message,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import {
+  AppstoreOutlined,
   CheckCircleOutlined,
+  CheckSquareOutlined,
   ClockCircleOutlined,
+  CopyOutlined,
   DeleteOutlined,
   DisconnectOutlined,
   DownloadOutlined,
-  EditOutlined,
   FieldTimeOutlined,
   FilterOutlined,
-  InfoCircleOutlined,
-  KeyOutlined,
   LinkOutlined,
   MinusCircleOutlined,
   MoreOutlined,
   PlusOutlined,
   ProfileOutlined,
-  QrcodeOutlined,
   RestOutlined,
   RetweetOutlined,
+  ScheduleOutlined,
   SearchOutlined,
   SortAscendingOutlined,
   StopOutlined,
@@ -54,7 +50,6 @@ import {
   UsergroupAddOutlined,
   UsergroupDeleteOutlined,
 } from '@ant-design/icons';
-import { activateOnKey } from '@/utils/a11y';
 
 import { useTheme } from '@/hooks/useTheme';
 import { formatInboundLabel } from '@/lib/inbounds/label';
@@ -72,19 +67,12 @@ import type {
   ExternalLink,
   ExternalLinkInput,
 } from '@/hooks/useClients';
-import ClientTrafficCell from '@/components/clients/ClientTrafficCell';
-import ClientSpeedTag, { isActiveSpeed } from '@/components/clients/ClientSpeedTag';
 import ClientCardComment from '@/components/clients/ClientCardComment';
 import AppNav from '@/layouts/AppNav';
 import { PageHeader } from '@/components/ui';
-import { IntlUtil, SizeFormatter } from '@/utils';
+import { ClipboardManager, IntlUtil } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import { LazyMount } from '@/components/utility';
-import {
-  SPEED_COLUMN_WIDTH,
-  SPEED_TAG_CLASS_NAME,
-  SPEED_TAG_STYLE,
-} from '@/components/utility/speedTagStyle';
 const ClientFormModal = lazy(() => import('./ClientFormModal'));
 const ClientInfoModal = lazy(() => import('./ClientInfoModal'));
 const ClientQrModal = lazy(() => import('./ClientQrModal'));
@@ -97,7 +85,12 @@ const BulkAttachInboundsModal = lazy(() => import('./BulkAttachInboundsModal'));
 const BulkDetachInboundsModal = lazy(() => import('./BulkDetachInboundsModal'));
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
 const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
-import { ClientInboundChips, ClientRowActions } from './RowCells';
+import ClientChips from './ClientChips';
+import ClientCommentCell from './ClientCommentCell';
+import ClientRowMenu from './ClientRowMenu';
+import PlanUsageCell from './PlanUsageCell';
+import { ClientStateTag, DaysLeftText, OnlineDot } from './ClientCells';
+import { clientState, daysToExpiry, usedBytes } from './clientState';
 import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
 import './ClientsPage.css';
@@ -105,57 +98,6 @@ import './ClientsPage.css';
 const FILTER_STATE_KEY = 'clientsFilterState';
 const DISABLED_PAGE_SIZE = 200;
 const DEFAULT_TABLE_PAGE_SIZE = 25;
-
-// The server sends exact counters but caps the email arrays behind them, so a
-// panel with thousands of depleted clients neither ships nor renders them all.
-// The trailing chip reports what the popover left out.
-function ClientEmailList({ emails, total }: { emails: string[]; total: number }) {
-  const hidden = total - emails.length;
-  return (
-    <div className="client-email-list">
-      {emails.map((e) => (
-        <div key={e}>{e}</div>
-      ))}
-      {hidden > 0 && <div className="client-email-more">+{hidden}</div>}
-    </div>
-  );
-}
-
-interface SummaryStatProps {
-  title: string;
-  value: number;
-  prefix: ReactNode;
-  emails?: string[];
-  selected?: boolean;
-  onSelect: () => void;
-}
-
-function SummaryStat({ title, value, prefix, emails, selected, onSelect }: SummaryStatProps) {
-  const stat = (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-pressed={selected}
-      className={selected ? 'summary-stat selected' : 'summary-stat'}
-      onClick={onSelect}
-      onKeyDown={activateOnKey(onSelect)}
-    >
-      <Statistic title={title} value={String(value)} prefix={prefix} />
-    </div>
-  );
-  if (!emails) return stat;
-  return (
-    <Popover
-      title={title}
-      open={value ? undefined : false}
-      content={<ClientEmailList emails={emails} total={value} />}
-    >
-      {stat}
-    </Popover>
-  );
-}
-
-type Bucket = 'active' | 'deactive' | 'depleted' | 'expiring';
 
 interface PersistedFilterState {
   searchKey: string;
@@ -167,24 +109,16 @@ interface PersistedFilterState {
   pageSize: number | null;
 }
 
-const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
-  vless: 'blue',
-  vmess: 'geekblue',
-  trojan: 'volcano',
-  shadowsocks: 'magenta',
-  hysteria: 'cyan',
-  hysteria2: 'green',
-  wireguard: 'gold',
-  amneziawg: 'yellow',
-  http: 'purple',
-  mixed: 'lime',
-  tunnel: 'orange',
-  tuic: 'orange',
-};
-const INBOUND_CHIP_LIMIT = 1;
-// A shared empty array keeps the memoised chip cell from seeing a fresh prop for
-// every unattached client on every render.
-const EMPTY_INBOUND_IDS: number[] = [];
+type ClientsView = 'full' | 'renewal';
+const VIEW_KEY = 'clientsView';
+
+function readView(): ClientsView {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'renewal' ? 'renewal' : 'full';
+  } catch {
+    return 'full';
+  }
+}
 
 function readFilterState(): PersistedFilterState {
   try {
@@ -307,12 +241,11 @@ export default function ClientsPage() {
     fetchError,
     subSettings,
     tgBotEnable,
-    expireDiff,
-    trafficDiff,
     pageSize,
     settingsReady,
     create,
     update,
+    setComment,
     remove,
     bulkDelete,
     bulkAdjust,
@@ -330,7 +263,6 @@ export default function ClientsPage() {
     exportClients,
     importClients,
     setEnable,
-    clientSpeed,
     applyTrafficEvent,
     applyClientStatsEvent,
     refresh,
@@ -346,7 +278,9 @@ export default function ClientsPage() {
   // actually manages nodes (#4997).
   const { nodes } = useNodesQuery();
 
-  const [togglingEmail, setTogglingEmail] = useState<string | null>(null);
+  const [view, setView] = useState<ClientsView>(readView);
+  // The checkbox column only shows while 批量操作 is on, as on 妙妙屋X.
+  const [selecting, setSelecting] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [editingClient, setEditingClient] = useState<ClientRecord | null>(null);
@@ -542,39 +476,6 @@ export default function ClientsPage() {
     return formatInboundLabel(ib?.tag, ib?.remark);
   }
 
-  const clientBucket = useCallback(
-    (row: ClientRecord | null | undefined): Bucket | null => {
-      if (!row) return null;
-      const traffic = row.traffic || {};
-      const used = (traffic.up || 0) + (traffic.down || 0);
-      const total = row.totalGB || 0;
-      const now = Date.now();
-      const expired = (row.expiryTime ?? 0) > 0 && (row.expiryTime ?? 0) <= now;
-      const exhausted = total > 0 && used >= total;
-      if (expired || exhausted) return 'depleted';
-      if (!row.enable) return 'deactive';
-      const nearExpiry =
-        (row.expiryTime ?? 0) > 0 && (row.expiryTime ?? 0) - now < (expireDiff || 0);
-      const nearLimit = total > 0 && total - used < (trafficDiff || 0);
-      if (nearExpiry || nearLimit) return 'expiring';
-      return 'active';
-    },
-    [expireDiff, trafficDiff],
-  );
-
-  function bucketBadgeStatus(bucket: Bucket | null): 'success' | 'warning' | 'error' | 'default' {
-    switch (bucket) {
-      case 'depleted':
-        return 'error';
-      case 'expiring':
-        return 'warning';
-      case 'active':
-        return 'success';
-      default:
-        return 'default';
-    }
-  }
-
   // The list page renders rows the server already sorted, filtered, and
   // paginated. Local filtering is gone — keep the variable name so the rest
   // of the file (table dataSource, mobile cards, select-all) doesn't need
@@ -585,26 +486,8 @@ export default function ClientsPage() {
   // order, so we just hand it through.
   const sortedClients = filteredClients;
 
-  function remainingLabel(row: ClientRecord) {
-    const total = row.totalGB || 0;
-    if (total <= 0) return '∞';
-    const used = (row.traffic?.up || 0) + (row.traffic?.down || 0);
-    const r = total - used;
-    return r > 0 ? SizeFormatter.sizeFormat(r) : '0';
-  }
-
-  function remainingColor(row: ClientRecord): string {
-    const total = row.totalGB || 0;
-    if (total <= 0) return 'purple';
-    const used = (row.traffic?.up || 0) + (row.traffic?.down || 0);
-    const ratio = used / total;
-    if (ratio >= 1) return 'red';
-    if (ratio >= 0.85) return 'orange';
-    return 'green';
-  }
-
   function expiryLabel(row: ClientRecord) {
-    if (!row.expiryTime) return '∞';
+    if (!row.expiryTime) return t('pages.plans.permanent');
     if (row.expiryTime < 0) {
       const days = Math.round(row.expiryTime / -86400000);
       return `${t('pages.clients.delayedStart')}: ${days}d`;
@@ -612,35 +495,60 @@ export default function ClientsPage() {
     return IntlUtil.formatDate(row.expiryTime, datepicker);
   }
 
-  function expiryRelative(row: ClientRecord) {
-    if (!row.expiryTime) return '';
-    if (row.expiryTime < 0) {
-      const days = Math.round(row.expiryTime / -86400000);
-      return `${days}d`;
-    }
-    return IntlUtil.formatRelativeTime(row.expiryTime);
-  }
+  // Read at call time, so a row's state follows the clock between polls.
+  const stateOf = useCallback((row: ClientRecord) => clientState(row, Date.now()), []);
+  const daysLeftOf = useCallback((row: ClientRecord) => daysToExpiry(row, Date.now()), []);
 
-  function expiryColor(row: ClientRecord): string {
-    if (!row.expiryTime) return 'purple';
-    if (row.expiryTime < 0) return 'blue';
-    const now = Date.now();
-    if (row.expiryTime <= now) return 'red';
-    if (row.expiryTime - now < 86400 * 1000 * 3) return 'orange';
-    return 'green';
-  }
-
-  async function onToggleEnable(row: ClientRecord, next: boolean) {
-    setTogglingEmail(row.email);
-    try {
+  const onSetEnable = useCallback(
+    async (email: string, next: boolean) => {
+      const row = rowsByEmail.current.get(email);
+      if (!row) return;
       const msg = await setEnable(row, next);
-      if (!msg?.success) {
-        messageApi.error(msg?.msg || t('somethingWentWrong'));
-      }
-    } finally {
-      setTogglingEmail(null);
-    }
-  }
+      if (!msg?.success) messageApi.error(msg?.msg || t('somethingWentWrong'));
+    },
+    [setEnable, messageApi, t],
+  );
+
+  const onSaveComment = useCallback(
+    async (email: string, comment: string) => !!(await setComment(email, comment))?.success,
+    [setComment],
+  );
+
+  const onPlanClick = useCallback((email: string) => {
+    const row = rowsByEmail.current.get(email);
+    setPlanTarget({ emails: [email], planId: row?.planId || undefined });
+  }, []);
+
+  const subLinkOf = useCallback(
+    (row: ClientRecord) =>
+      subSettings.enable && subSettings.subURI && row.subId ? subSettings.subURI + row.subId : '',
+    [subSettings.enable, subSettings.subURI],
+  );
+
+  const onCopySub = useCallback(
+    async (email: string) => {
+      const row = rowsByEmail.current.get(email);
+      const link = row ? subLinkOf(row) : '';
+      if (link && (await ClipboardManager.copyText(link))) messageApi.success(t('copied'));
+    },
+    [subLinkOf, messageApi, t],
+  );
+
+  const onRenew = useCallback(
+    (email: string) => {
+      modal.confirm({
+        title: t('pages.plans.renewConfirm', { count: 1 }),
+        content: t('pages.plans.renewHint'),
+        okText: t('confirm'),
+        cancelText: t('cancel'),
+        onOk: async () => {
+          const msg = await renewPlan([email]);
+          if (msg?.success) messageApi.success(t('pages.plans.toasts.renewed', { count: 1 }));
+        },
+      });
+    },
+    [modal, t, renewPlan, messageApi],
+  );
 
   function onAdd() {
     setFormMode('add');
@@ -1029,181 +937,177 @@ export default function ClientsPage() {
     if (pag?.pageSize) setPageSizeChoice(pag.pageSize);
   };
 
+  const rowHandlers = useMemo(
+    () => ({
+      onShowQr,
+      onShowInfo,
+      onEdit,
+      onResetTraffic,
+      onRenew,
+      onSetEnable,
+      onPortal,
+      onDelete,
+    }),
+    [onShowQr, onShowInfo, onEdit, onResetTraffic, onRenew, onSetEnable, onPortal, onDelete],
+  );
+
   const columns = useMemo<ColumnsType<ClientRecord>>(
-    () => [
-      {
-        title: t('pages.clients.actions'),
-        key: 'actions',
-        width: 236,
-        render: (_v, record) => (
-          <ClientRowActions
-            email={record.email}
-            onShowQr={onShowQr}
-            onPortal={onPortal}
-            onShowInfo={onShowInfo}
-            onResetTraffic={onResetTraffic}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ),
-      },
-      {
-        title: t('pages.clients.enabled'),
-        key: 'enable',
-        width: 80,
-        render: (_v, record) => (
-          <Switch
-            checked={!!record.enable}
-            size="small"
-            loading={togglingEmail === record.email}
-            onChange={(next) => onToggleEnable(record, next)}
-          />
-        ),
-      },
-      {
-        title: t('pages.clients.online'),
-        key: 'online',
-        width: 90,
-        render: (_v, record) => {
-          const bucket = clientBucket(record);
-          const lastOnline = record.traffic?.lastOnline ?? 0;
-          const lastSubFetch = record.traffic?.lastSubFetch ?? 0;
-          const lastOnlineTitle = `${t('lastOnline')}: ${lastOnline > 0 ? IntlUtil.formatDate(lastOnline, datepicker) : '-'}\n${t('lastSubFetch')}: ${lastSubFetch > 0 ? IntlUtil.formatDate(lastSubFetch, datepicker) : '-'}`;
-          if (bucket === 'depleted')
-            return (
-              <Tooltip title={lastOnlineTitle}>
-                <Tag color="red">{t('depleted')}</Tag>
-              </Tooltip>
-            );
-          if (record.enable && isOnline(record.email))
-            return (
-              <Tag color="green" className="dot-tag">
-                <span className="online-dot" />
-                {t('pages.clients.online')}
-              </Tag>
-            );
-          if (!record.enable) return <Tag>{t('disabled')}</Tag>;
-          if (bucket === 'expiring') return <Tag color="orange">{t('depletingSoon')}</Tag>;
-          return (
-            <Tooltip title={lastOnlineTitle}>
-              <Tag>{t('pages.clients.offline')}</Tag>
-            </Tooltip>
-          );
-        },
-      },
-      {
+    () => {
+      const emailColumn = {
         title: t('pages.clients.client'),
         key: 'email',
-        width: 220,
-        render: (_v, record) => (
-          <div className="email-cell">
-            <span className="email">{record.email}</span>
-            {record.subId && (
-              <span className="sub" title={record.subId}>
-                {record.subId}
-              </span>
-            )}
-            <ClientCardComment comment={record.comment} className="sub" />
-          </div>
+        render: (_v: unknown, record: ClientRecord) => (
+          <span className="client-email">{record.email}</span>
         ),
-      },
-      {
-        title: t('menu.plans'),
-        key: 'plan',
-        width: 130,
-        hidden: plans.length === 0,
-        render: (_v, record) => {
-          const name = record.planId ? planNames.get(record.planId) : undefined;
-          return (
-            <Tag
-              color={name ? 'volcano' : undefined}
-              style={{ margin: 0, cursor: 'pointer', borderStyle: name ? undefined : 'dashed' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setPlanTarget({ emails: [record.email], planId: record.planId || undefined });
-              }}
-            >
-              {name ?? t('pages.plans.noPlan')}
-            </Tag>
-          );
-        },
-      },
-      {
-        title: t('pages.clients.attachedInbounds'),
-        key: 'inboundIds',
-        width: 170,
-        render: (_v, record) => {
-          return (
-            <ClientInboundChips
-              ids={record.inboundIds || EMPTY_INBOUND_IDS}
-              inboundsById={inboundsById}
-              protocolColors={INBOUND_PROTOCOL_COLORS}
-              chipLimit={INBOUND_CHIP_LIMIT}
+      };
+      if (view === 'renewal') {
+        return [
+          emailColumn,
+          {
+            title: t('menu.plans'),
+            key: 'plan',
+            render: (_v, record) =>
+              record.planId ? (
+                (planNames.get(record.planId) ?? `#${record.planId}`)
+              ) : (
+                <span className="client-muted">{t('pages.plans.noPlan')}</span>
+              ),
+          },
+          {
+            title: t('pages.clients.expiryTime'),
+            key: 'expiryTime',
+            render: (_v, record) => expiryLabel(record),
+          },
+          {
+            title: t('pages.clients.daysLeft'),
+            key: 'daysLeft',
+            render: (_v, record) => (
+              <DaysLeftText days={daysLeftOf(record)} delayed={(record.expiryTime ?? 0) < 0} />
+            ),
+          },
+          {
+            title: t('pages.clients.nextReset'),
+            key: 'nextReset',
+            render: (_v, record) =>
+              record.nextReset ? (
+                <Tooltip title={IntlUtil.formatRelativeTime(record.nextReset)}>
+                  <span>{IntlUtil.formatDate(record.nextReset, datepicker)}</span>
+                </Tooltip>
+              ) : (
+                '—'
+              ),
+          },
+          {
+            title: t('pages.plans.renew'),
+            key: 'renew',
+            align: 'right',
+            render: (_v, record) => (
+              <Tooltip title={record.planId ? undefined : t('pages.clients.renewNeedsPlan')}>
+                <Button
+                  size="small"
+                  icon={<FieldTimeOutlined />}
+                  disabled={!record.planId}
+                  onClick={() => onRenew(record.email)}
+                >
+                  {t('pages.plans.renew')}
+                </Button>
+              </Tooltip>
+            ),
+          },
+        ];
+      }
+      return [
+        emailColumn,
+        {
+          title: t('pages.clients.comment'),
+          key: 'comment',
+          width: 200,
+          render: (_v, record) => (
+            <ClientCommentCell
+              email={record.email}
+              comment={record.comment}
+              onSave={onSaveComment}
             />
-          );
+          ),
         },
-      },
-      {
-        title: t('pages.clients.traffic'),
-        key: 'traffic',
-        width: 300,
-        render: (_v, record) => (
-          <ClientTrafficCell
-            up={record.traffic?.up}
-            down={record.traffic?.down}
-            total={record.totalGB}
-            enabled={record.enable}
-            trafficDiff={trafficDiff}
-          />
-        ),
-      },
-      {
-        title: t('pages.clients.speed'),
-        key: 'speed',
-        width: SPEED_COLUMN_WIDTH,
-        align: 'center',
-        render: (_v, record) => {
-          const speed = clientSpeed[record.email];
-          if (!isActiveSpeed(speed)) {
-            return (
-              <Tag color="default" className={SPEED_TAG_CLASS_NAME} style={SPEED_TAG_STYLE}>
-                —
-              </Tag>
-            );
-          }
-          return <ClientSpeedTag speed={speed} tableCell />;
+        {
+          title: t('pages.clients.subId'),
+          key: 'subId',
+          render: (_v, record) =>
+            record.subId ? <span className="client-sub-id">{record.subId}</span> : '—',
         },
-      },
-      {
-        title: t('pages.clients.remaining'),
-        key: 'remaining',
-        width: 130,
-        render: (_v, record) => <Tag color={remainingColor(record)}>{remainingLabel(record)}</Tag>,
-      },
-      {
-        title: t('pages.clients.duration'),
-        key: 'expiryTime',
-        width: 130,
-        render: (_v, record) => (
-          <Tooltip title={expiryLabel(record)}>
-            <Tag color={expiryColor(record)}>
-              {record.expiryTime ? expiryRelative(record) : '∞'}
-            </Tag>
-          </Tooltip>
-        ),
-      },
-    ],
+        {
+          title: t('pages.clients.subscription'),
+          key: 'subscription',
+          render: (_v, record) =>
+            subLinkOf(record) ? (
+              <Button size="small" icon={<CopyOutlined />} onClick={() => onCopySub(record.email)}>
+                {t('pages.clients.copySub')}
+              </Button>
+            ) : (
+              '—'
+            ),
+        },
+        {
+          title: t('pages.clients.planUsage'),
+          key: 'plan',
+          width: 240,
+          render: (_v, record) => (
+            <PlanUsageCell
+              email={record.email}
+              planName={record.planId ? planNames.get(record.planId) : undefined}
+              used={usedBytes(record)}
+              total={record.totalGB ?? 0}
+              onPlanClick={onPlanClick}
+            />
+          ),
+        },
+        {
+          title: t('pages.clients.online'),
+          key: 'online',
+          align: 'center',
+          render: (_v, record) => (
+            <OnlineDot
+              online={!!record.enable && isOnline(record.email)}
+              lastOnline={record.traffic?.lastOnline ?? 0}
+            />
+          ),
+        },
+        {
+          title: t('pages.clients.statusTitle'),
+          key: 'status',
+          render: (_v, record) => <ClientStateTag state={stateOf(record)} />,
+        },
+        {
+          title: t('pages.clients.actions'),
+          key: 'actions',
+          align: 'right',
+          render: (_v, record) => (
+            <ClientRowMenu
+              email={record.email}
+              enabled={!!record.enable}
+              hasPlan={!!record.planId}
+              {...rowHandlers}
+            />
+          ),
+        },
+      ];
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       t,
-      togglingEmail,
-      clientBucket,
-      isOnline,
-      inboundsById,
-      filters,
+      view,
+      planNames,
       datepicker,
-      trafficDiff,
-      clientSpeed,
+      isOnline,
+      stateOf,
+      daysLeftOf,
+      subLinkOf,
+      onCopySub,
+      onSaveComment,
+      onPlanClick,
+      onRenew,
+      rowHandlers,
     ],
   );
 
@@ -1243,10 +1147,28 @@ export default function ClientsPage() {
   const isOnlyBucket = (bucket: string) =>
     filters.buckets.length === 1 && filters.buckets[0] === bucket;
 
-  // Clicking the card that is already the sole status filter clears it again.
-  function selectBucket(bucket: string | null) {
-    const buckets = bucket && !isOnlyBucket(bucket) ? [bucket] : [];
-    setFilters({ ...filters, buckets });
+  // A chip filters on its own; clicking the selected chip again clears it.
+  function onBucketChip(bucket: string) {
+    setFilters({ ...filters, buckets: isOnlyBucket(bucket) ? [] : [bucket] });
+  }
+
+  function onPlanChip(planId: number) {
+    const only = filters.plans.length === 1 && filters.plans[0] === planId;
+    setFilters({ ...filters, plans: only ? [] : [planId] });
+  }
+
+  function toggleSelecting() {
+    if (selecting) setSelectedRowKeys([]);
+    setSelecting(!selecting);
+  }
+
+  function changeView(next: ClientsView) {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      // The view choice is a convenience; private windows may refuse storage.
+    }
   }
 
   function clearOneFilter<K extends keyof ClientFilters>(key: K) {
@@ -1260,6 +1182,118 @@ export default function ClientsPage() {
     }
     setFilters({ ...filters, [key]: emptyFilters()[key] });
   }
+
+  const moreMenuItems: MenuProps['items'] = [
+    {
+      key: 'bulk',
+      icon: <UsergroupAddOutlined />,
+      label: t('pages.clients.bulk'),
+      onClick: () => setBulkAddOpen(true),
+    },
+    {
+      key: 'export',
+      icon: <DownloadOutlined />,
+      label: t('pages.clients.exportClients'),
+      onClick: onExportClients,
+    },
+    {
+      key: 'import',
+      icon: <UploadOutlined />,
+      label: t('pages.clients.importClients'),
+      onClick: onImportClients,
+    },
+    {
+      key: 'resetAll',
+      icon: <RetweetOutlined />,
+      label: t('pages.clients.resetAllTraffics'),
+      onClick: onResetAllTraffics,
+    },
+    { type: 'divider' },
+    {
+      key: 'delDepleted',
+      icon: <RestOutlined />,
+      label: t('pages.clients.delDepleted'),
+      danger: true,
+      onClick: onDelDepleted,
+    },
+    {
+      key: 'delOrphans',
+      icon: <DisconnectOutlined />,
+      label: t('pages.clients.delOrphans'),
+      danger: true,
+      onClick: onDeleteOrphans,
+    },
+  ];
+
+  const bulkMenuItems: MenuProps['items'] = [
+    {
+      key: 'attach',
+      icon: <UsergroupAddOutlined />,
+      label: t('pages.clients.attach'),
+      onClick: () => setBulkAttachOpen(true),
+    },
+    {
+      key: 'detach',
+      icon: <UsergroupDeleteOutlined />,
+      label: t('pages.clients.detach'),
+      danger: true,
+      onClick: () => setBulkDetachOpen(true),
+    },
+    ...(plans.length > 0
+      ? [
+          { type: 'divider' as const },
+          {
+            key: 'assignPlan',
+            icon: <ProfileOutlined />,
+            label: t('pages.plans.assign'),
+            onClick: () => setPlanTarget({ emails: [...selectedRowKeys] }),
+          },
+          {
+            key: 'renewPlan',
+            icon: <FieldTimeOutlined />,
+            label: t('pages.plans.renew'),
+            onClick: onBulkRenewPlan,
+          },
+          {
+            key: 'unassignPlan',
+            icon: <MinusCircleOutlined />,
+            label: t('pages.plans.unassign'),
+            danger: true,
+            onClick: onBulkUnassignPlan,
+          },
+        ]
+      : []),
+    { type: 'divider' },
+    {
+      key: 'enable',
+      icon: <CheckCircleOutlined />,
+      label: t('pages.clients.enable'),
+      onClick: () => onBulkSetEnable(true),
+    },
+    {
+      key: 'disable',
+      icon: <StopOutlined />,
+      label: t('pages.clients.disable'),
+      danger: true,
+      onClick: () => onBulkSetEnable(false),
+    },
+    {
+      key: 'adjust',
+      icon: <ClockCircleOutlined />,
+      label: t('pages.clients.adjust'),
+      onClick: () => setBulkAdjustOpen(true),
+    },
+    {
+      key: 'subLinks',
+      icon: <LinkOutlined />,
+      label: t('pages.clients.subLinks'),
+      onClick: () => setSubLinksOpen(true),
+    },
+  ];
+
+  // A single bucket or plan shows as a highlighted chip, so only the rest need tags.
+  const filterTagCount =
+    activeCount - (filters.buckets.length === 1 ? 1 : 0) - (filters.plans.length === 1 ? 1 : 0);
 
   return (
     <ConfigProvider theme={antdThemeConfig}>
@@ -1286,593 +1320,371 @@ export default function ClientsPage() {
                   }
                 />
               ) : (
-                <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
-                  <Col span={24}>
-                    <Card size="small" hoverable className="summary-card">
-                      <Row gutter={[16, 12]}>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('clients')}
-                            value={summary.total}
-                            prefix={<TeamOutlined />}
-                            onSelect={() => selectBucket(null)}
-                          />
-                        </Col>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('online')}
-                            value={summary.onlineCount}
-                            emails={summary.online}
-                            prefix={<span className="dot dot-blue" />}
-                            selected={isOnlyBucket('online')}
-                            onSelect={() => selectBucket('online')}
-                          />
-                        </Col>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('depleted')}
-                            value={summary.depletedCount}
-                            emails={summary.depleted}
-                            prefix={<span className="dot dot-red" />}
-                            selected={isOnlyBucket('depleted')}
-                            onSelect={() => selectBucket('depleted')}
-                          />
-                        </Col>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('depletingSoon')}
-                            value={summary.expiringCount}
-                            emails={summary.expiring}
-                            prefix={<span className="dot dot-orange" />}
-                            selected={isOnlyBucket('expiring')}
-                            onSelect={() => selectBucket('expiring')}
-                          />
-                        </Col>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('disabled')}
-                            value={summary.deactiveCount}
-                            emails={summary.deactive}
-                            prefix={<span className="dot dot-gray" />}
-                            selected={isOnlyBucket('deactive')}
-                            onSelect={() => selectBucket('deactive')}
-                          />
-                        </Col>
-                        <Col xs={12} sm={8} md={4}>
-                          <SummaryStat
-                            title={t('subscription.active')}
-                            value={summary.active}
-                            prefix={<span className="dot dot-green" />}
-                            selected={isOnlyBucket('active')}
-                            onSelect={() => selectBucket('active')}
-                          />
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
+                <Card
+                  size="small"
+                  className="clients-card"
+                  title={t('pages.clients.listTitle')}
+                  extra={
+                    <div className="clients-card-extra">
+                      <Segmented<ClientsView>
+                        value={view}
+                        onChange={changeView}
+                        options={[
+                          {
+                            value: 'full',
+                            icon: <AppstoreOutlined />,
+                            label: isMobile ? undefined : t('pages.clients.viewFull'),
+                            title: t('pages.clients.viewFull'),
+                          },
+                          {
+                            value: 'renewal',
+                            icon: <ScheduleOutlined />,
+                            label: isMobile ? undefined : t('pages.clients.viewRenewal'),
+                            title: t('pages.clients.viewRenewal'),
+                          },
+                        ]}
+                      />
+                      <Button
+                        icon={<CheckSquareOutlined />}
+                        type={selecting ? 'primary' : 'default'}
+                        aria-pressed={selecting}
+                        aria-label={t('pages.clients.bulkMode')}
+                        onClick={toggleSelecting}
+                      >
+                        {!isMobile && t('pages.clients.bulkMode')}
+                      </Button>
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={onAdd}
+                        aria-label={t('pages.clients.addClients')}
+                      >
+                        {!isMobile && t('pages.clients.addClients')}
+                      </Button>
+                      <Dropdown
+                        trigger={['click']}
+                        placement="bottomRight"
+                        menu={{ items: moreMenuItems }}
+                      >
+                        <Button icon={<MoreOutlined />} aria-label={t('more')} />
+                      </Dropdown>
+                    </div>
+                  }
+                >
+                  <div className={isMobile ? 'filter-bar mobile' : 'filter-bar'}>
+                    <Input
+                      value={searchKey}
+                      onChange={(e) => setSearchKey(e.target.value)}
+                      placeholder={t('pages.clients.searchPlaceholder')}
+                      allowClear
+                      prefix={<SearchOutlined />}
+                      size={isMobile ? 'small' : 'middle'}
+                      style={{ maxWidth: 320 }}
+                      aria-label={t('search')}
+                    />
+                    <Badge count={activeCount} size="small" offset={[-4, 4]}>
+                      <Button
+                        icon={<FilterOutlined />}
+                        size={isMobile ? 'small' : 'middle'}
+                        onClick={() => setFilterDrawerOpen(true)}
+                        type={activeCount > 0 ? 'primary' : 'default'}
+                        aria-label={t('filter')}
+                      >
+                        {!isMobile && t('filter')}
+                      </Button>
+                    </Badge>
+                    <Select
+                      value={sortValueFor(sortColumn, sortOrder)}
+                      aria-label={t('sort')}
+                      size={isMobile ? 'small' : 'middle'}
+                      suffix={<SortAscendingOutlined />}
+                      style={{ minWidth: isMobile ? 130 : 200 }}
+                      onChange={(value) => {
+                        const opt = SORT_OPTIONS.find((o) => o.value === value);
+                        setSortColumn(opt?.column ?? null);
+                        setSortOrder(opt?.order ?? null);
+                      }}
+                      options={SORT_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: t(o.labelKey),
+                      }))}
+                    />
+                    {activeCount > 0 && (
+                      <Button
+                        size={isMobile ? 'small' : 'middle'}
+                        onClick={() => setFilters(emptyFilters())}
+                      >
+                        {t('pages.clients.clearAllFilters')}
+                      </Button>
+                    )}
+                    {(activeCount > 0 || debouncedSearch.trim().length > 0) && (
+                      <span className="filter-count">
+                        {t('pages.clients.showingCount', { shown: filtered, total })}
+                      </span>
+                    )}
+                  </div>
 
-                  <Col span={24}>
-                    <Card
-                      size="small"
-                      hoverable
-                      title={
-                        <div className="card-toolbar">
-                          {selectedRowKeys.length === 0 ? (
-                            <Button
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onClick={onAdd}
-                              aria-label={t('pages.clients.addClients')}
-                            >
-                              {!isMobile && t('pages.clients.addClients')}
-                            </Button>
-                          ) : (
-                            <Tag
-                              color="blue"
-                              closable
-                              onClose={() => setSelectedRowKeys([])}
-                              style={{ marginInlineEnd: 0, padding: '4px 8px', fontSize: 13 }}
-                            >
-                              {t('pages.clients.selectedCount', { count: selectedRowKeys.length })}
-                            </Tag>
-                          )}
-                          <Dropdown
-                            trigger={['click']}
-                            placement="bottomRight"
-                            menu={{
-                              items:
-                                selectedRowKeys.length > 0
-                                  ? [
-                                      {
-                                        key: 'attach',
-                                        icon: <UsergroupAddOutlined />,
-                                        label: t('pages.clients.attach'),
-                                        onClick: () => setBulkAttachOpen(true),
-                                      },
-                                      {
-                                        key: 'detach',
-                                        icon: <UsergroupDeleteOutlined />,
-                                        label: t('pages.clients.detach'),
-                                        danger: true,
-                                        onClick: () => setBulkDetachOpen(true),
-                                      },
-                                      ...(plans.length > 0
-                                        ? [
-                                            { type: 'divider' as const },
-                                            {
-                                              key: 'assignPlan',
-                                              icon: <ProfileOutlined />,
-                                              label: t('pages.plans.assign'),
-                                              onClick: () =>
-                                                setPlanTarget({ emails: [...selectedRowKeys] }),
-                                            },
-                                            {
-                                              key: 'renewPlan',
-                                              icon: <FieldTimeOutlined />,
-                                              label: t('pages.plans.renew'),
-                                              onClick: onBulkRenewPlan,
-                                            },
-                                            {
-                                              key: 'unassignPlan',
-                                              icon: <MinusCircleOutlined />,
-                                              label: t('pages.plans.unassign'),
-                                              danger: true,
-                                              onClick: onBulkUnassignPlan,
-                                            },
-                                          ]
-                                        : []),
-                                      { type: 'divider' as const },
-                                      {
-                                        key: 'enable',
-                                        icon: <CheckCircleOutlined />,
-                                        label: t('pages.clients.enable'),
-                                        onClick: () => onBulkSetEnable(true),
-                                      },
-                                      {
-                                        key: 'disable',
-                                        icon: <StopOutlined />,
-                                        label: t('pages.clients.disable'),
-                                        danger: true,
-                                        onClick: () => onBulkSetEnable(false),
-                                      },
-                                      {
-                                        key: 'adjust',
-                                        icon: <ClockCircleOutlined />,
-                                        label: t('pages.clients.adjust'),
-                                        onClick: () => setBulkAdjustOpen(true),
-                                      },
-                                      {
-                                        key: 'subLinks',
-                                        icon: <LinkOutlined />,
-                                        label: t('pages.clients.subLinks'),
-                                        onClick: () => setSubLinksOpen(true),
-                                      },
-                                    ]
-                                  : [
-                                      {
-                                        key: 'bulk',
-                                        icon: <UsergroupAddOutlined />,
-                                        label: t('pages.clients.bulk'),
-                                        onClick: () => setBulkAddOpen(true),
-                                      },
-                                      {
-                                        key: 'export',
-                                        icon: <DownloadOutlined />,
-                                        label: t('pages.clients.exportClients'),
-                                        onClick: onExportClients,
-                                      },
-                                      {
-                                        key: 'import',
-                                        icon: <UploadOutlined />,
-                                        label: t('pages.clients.importClients'),
-                                        onClick: onImportClients,
-                                      },
-                                      {
-                                        key: 'resetAll',
-                                        icon: <RetweetOutlined />,
-                                        label: t('pages.clients.resetAllTraffics'),
-                                        onClick: onResetAllTraffics,
-                                      },
-                                      { type: 'divider' as const },
-                                      {
-                                        key: 'delDepleted',
-                                        icon: <RestOutlined />,
-                                        label: t('pages.clients.delDepleted'),
-                                        danger: true,
-                                        onClick: onDelDepleted,
-                                      },
-                                      {
-                                        key: 'delOrphans',
-                                        icon: <DisconnectOutlined />,
-                                        label: t('pages.clients.delOrphans'),
-                                        danger: true,
-                                        onClick: onDeleteOrphans,
-                                      },
-                                    ],
-                            }}
-                          >
-                            <Button icon={<MoreOutlined />} aria-label={t('more')}>
-                              {!isMobile && t('more')}
-                            </Button>
-                          </Dropdown>
-                          {selectedRowKeys.length > 0 && (
-                            <Button
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={onBulkDelete}
-                              style={{ marginInlineStart: 'auto' }}
-                              aria-label={t('delete')}
-                            >
-                              {!isMobile && t('delete')}
-                            </Button>
-                          )}
-                        </div>
-                      }
-                    >
-                      <div className={isMobile ? 'filter-bar mobile' : 'filter-bar'}>
-                        <Input
-                          value={searchKey}
-                          onChange={(e) => setSearchKey(e.target.value)}
-                          placeholder={t('pages.clients.searchPlaceholder')}
-                          allowClear
-                          prefix={<SearchOutlined />}
-                          size={isMobile ? 'small' : 'middle'}
-                          style={{ maxWidth: 320 }}
-                          aria-label={t('search')}
-                        />
-                        <Badge count={activeCount} size="small" offset={[-4, 4]}>
-                          <Button
-                            icon={<FilterOutlined />}
-                            size={isMobile ? 'small' : 'middle'}
-                            onClick={() => setFilterDrawerOpen(true)}
-                            type={activeCount > 0 ? 'primary' : 'default'}
-                            aria-label={t('filter')}
-                          >
-                            {!isMobile && t('filter')}
-                          </Button>
-                        </Badge>
-                        <Select
-                          value={sortValueFor(sortColumn, sortOrder)}
-                          aria-label={t('sort')}
-                          size={isMobile ? 'small' : 'middle'}
-                          suffix={<SortAscendingOutlined />}
-                          style={{ minWidth: isMobile ? 130 : 200 }}
-                          onChange={(value) => {
-                            const opt = SORT_OPTIONS.find((o) => o.value === value);
-                            setSortColumn(opt?.column ?? null);
-                            setSortOrder(opt?.order ?? null);
-                          }}
-                          options={SORT_OPTIONS.map((o) => ({
-                            value: o.value,
-                            label: t(o.labelKey),
-                          }))}
-                        />
-                        {activeCount > 0 && (
-                          <Button
-                            size={isMobile ? 'small' : 'middle'}
-                            onClick={() => setFilters(emptyFilters())}
-                          >
-                            {t('pages.clients.clearAllFilters')}
-                          </Button>
-                        )}
-                        {(activeCount > 0 || debouncedSearch.trim().length > 0) && (
-                          <span className="filter-count">
-                            {t('pages.clients.showingCount', { shown: filtered, total })}
-                          </span>
-                        )}
-                      </div>
+                  <ClientChips
+                    plans={plans}
+                    summary={summary}
+                    planFilter={filters.plans}
+                    bucketFilter={filters.buckets}
+                    onShowAll={() => setFilters({ ...filters, plans: [], buckets: [] })}
+                    onPlan={onPlanChip}
+                    onBucket={onBucketChip}
+                  />
 
-                      {activeCount > 0 && (
-                        <div className="filter-chips">
-                          {filters.buckets.map((b) => (
-                            <Tag
-                              key={`b-${b}`}
-                              closable
-                              onClose={() =>
-                                setFilters({
-                                  ...filters,
-                                  buckets: filters.buckets.filter((x) => x !== b),
-                                })
-                              }
-                            >
-                              {bucketChipLabel(b, t)}
-                            </Tag>
-                          ))}
-                          {filters.protocols.map((p) => (
-                            <Tag
-                              key={`p-${p}`}
-                              closable
-                              color="blue"
-                              onClose={() =>
-                                setFilters({
-                                  ...filters,
-                                  protocols: filters.protocols.filter((x) => x !== p),
-                                })
-                              }
-                            >
-                              {p}
-                            </Tag>
-                          ))}
-                          {filters.inboundIds.map((id) => (
-                            <Tag
-                              key={`i-${id}`}
-                              closable
-                              color="cyan"
-                              onClose={() =>
-                                setFilters({
-                                  ...filters,
-                                  inboundIds: filters.inboundIds.filter((x) => x !== id),
-                                })
-                              }
-                            >
-                              {inboundLabel(id)}
-                            </Tag>
-                          ))}
-                          {filters.plans.map((id) => (
-                            <Tag
-                              key={`p-${id}`}
-                              closable
-                              color="volcano"
-                              onClose={() =>
-                                setFilters({
-                                  ...filters,
-                                  plans: filters.plans.filter((x) => x !== id),
-                                })
-                              }
-                            >
-                              {t('menu.plans')}:{' '}
-                              {id === 0 ? t('pages.plans.noPlan') : (planNames.get(id) ?? `#${id}`)}
-                            </Tag>
-                          ))}
-                          {(filters.expiryFrom || filters.expiryTo) && (
-                            <Tag
-                              closable
-                              color="purple"
-                              onClose={() => clearOneFilter('expiryFrom')}
-                            >
-                              {t('pages.clients.expiryTime')}:{' '}
-                              {filters.expiryFrom
-                                ? IntlUtil.formatDate(filters.expiryFrom, datepicker)
-                                : '…'}
-                              {' → '}
-                              {filters.expiryTo
-                                ? IntlUtil.formatDate(filters.expiryTo, datepicker)
-                                : '…'}
-                            </Tag>
-                          )}
-                          {(filters.usageFromGB || filters.usageToGB) && (
-                            <Tag
-                              closable
-                              color="orange"
-                              onClose={() => clearOneFilter('usageFromGB')}
-                            >
-                              {t('pages.clients.traffic')}: {filters.usageFromGB ?? 0}
-                              {filters.usageToGB ? `–${filters.usageToGB}` : '+'} GB
-                            </Tag>
-                          )}
-                          {filters.autoRenew && (
-                            <Tag closable color="gold" onClose={() => clearOneFilter('autoRenew')}>
-                              {t('pages.clients.renew')}:{' '}
-                              {filters.autoRenew === 'on' ? t('enabled') : t('disabled')}
-                            </Tag>
-                          )}
-                          {filters.hasTgId && (
-                            <Tag closable onClose={() => clearOneFilter('hasTgId')}>
-                              {t('pages.clients.telegramId')}:{' '}
-                              {filters.hasTgId === 'yes'
-                                ? t('pages.clients.has')
-                                : t('pages.clients.hasNot')}
-                            </Tag>
-                          )}
-                          {filters.hasComment && (
-                            <Tag closable onClose={() => clearOneFilter('hasComment')}>
-                              {t('pages.clients.comment')}:{' '}
-                              {filters.hasComment === 'yes'
-                                ? t('pages.clients.has')
-                                : t('pages.clients.hasNot')}
-                            </Tag>
-                          )}
-                        </div>
+                  {filterTagCount > 0 && (
+                    <div className="filter-chips">
+                      {filters.buckets.length > 1 &&
+                        filters.buckets.map((b) => (
+                          <Tag
+                            key={`b-${b}`}
+                            closable
+                            onClose={() =>
+                              setFilters({
+                                ...filters,
+                                buckets: filters.buckets.filter((x) => x !== b),
+                              })
+                            }
+                          >
+                            {bucketChipLabel(b, t)}
+                          </Tag>
+                        ))}
+                      {filters.protocols.map((p) => (
+                        <Tag
+                          key={`p-${p}`}
+                          closable
+                          color="blue"
+                          onClose={() =>
+                            setFilters({
+                              ...filters,
+                              protocols: filters.protocols.filter((x) => x !== p),
+                            })
+                          }
+                        >
+                          {p}
+                        </Tag>
+                      ))}
+                      {filters.inboundIds.map((id) => (
+                        <Tag
+                          key={`i-${id}`}
+                          closable
+                          color="cyan"
+                          onClose={() =>
+                            setFilters({
+                              ...filters,
+                              inboundIds: filters.inboundIds.filter((x) => x !== id),
+                            })
+                          }
+                        >
+                          {inboundLabel(id)}
+                        </Tag>
+                      ))}
+                      {filters.plans.length > 1 &&
+                        filters.plans.map((id) => (
+                          <Tag
+                            key={`p-${id}`}
+                            closable
+                            color="volcano"
+                            onClose={() =>
+                              setFilters({
+                                ...filters,
+                                plans: filters.plans.filter((x) => x !== id),
+                              })
+                            }
+                          >
+                            {t('menu.plans')}:{' '}
+                            {id === 0 ? t('pages.plans.noPlan') : (planNames.get(id) ?? `#${id}`)}
+                          </Tag>
+                        ))}
+                      {(filters.expiryFrom || filters.expiryTo) && (
+                        <Tag closable color="purple" onClose={() => clearOneFilter('expiryFrom')}>
+                          {t('pages.clients.expiryTime')}:{' '}
+                          {filters.expiryFrom
+                            ? IntlUtil.formatDate(filters.expiryFrom, datepicker)
+                            : '…'}
+                          {' → '}
+                          {filters.expiryTo
+                            ? IntlUtil.formatDate(filters.expiryTo, datepicker)
+                            : '…'}
+                        </Tag>
                       )}
+                      {(filters.usageFromGB || filters.usageToGB) && (
+                        <Tag closable color="orange" onClose={() => clearOneFilter('usageFromGB')}>
+                          {t('pages.clients.traffic')}: {filters.usageFromGB ?? 0}
+                          {filters.usageToGB ? `–${filters.usageToGB}` : '+'} GB
+                        </Tag>
+                      )}
+                      {filters.autoRenew && (
+                        <Tag closable color="gold" onClose={() => clearOneFilter('autoRenew')}>
+                          {t('pages.clients.renew')}:{' '}
+                          {filters.autoRenew === 'on' ? t('enabled') : t('disabled')}
+                        </Tag>
+                      )}
+                      {filters.hasTgId && (
+                        <Tag closable onClose={() => clearOneFilter('hasTgId')}>
+                          {t('pages.clients.telegramId')}:{' '}
+                          {filters.hasTgId === 'yes'
+                            ? t('pages.clients.has')
+                            : t('pages.clients.hasNot')}
+                        </Tag>
+                      )}
+                      {filters.hasComment && (
+                        <Tag closable onClose={() => clearOneFilter('hasComment')}>
+                          {t('pages.clients.comment')}:{' '}
+                          {filters.hasComment === 'yes'
+                            ? t('pages.clients.has')
+                            : t('pages.clients.hasNot')}
+                        </Tag>
+                      )}
+                    </div>
+                  )}
 
-                      {!isMobile ? (
-                        <Table<ClientRecord>
-                          columns={columns}
-                          dataSource={sortedClients}
-                          loading={transitioning}
-                          rowKey="email"
-                          rowSelection={rowSelection}
-                          pagination={tablePagination}
-                          size="small"
-                          scroll={{ x: 1200 }}
-                          onChange={onTableChange}
-                          locale={{
-                            emptyText: (
-                              <div className="clients-empty">
-                                <TeamOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                                <div>{t('noData')}</div>
-                              </div>
-                            ),
-                          }}
-                        />
-                      ) : (
-                        <Spin spinning={transitioning}>
-                          <div className="client-cards">
-                            {filteredClients.length > 0 && (
-                              <div className="card-bulk-bar">
+                  {selecting && (
+                    <div className="bulk-bar">
+                      <Tag color="blue">
+                        {t('pages.clients.selectedCount', { count: selectedRowKeys.length })}
+                      </Tag>
+                      <Dropdown
+                        trigger={['click']}
+                        disabled={selectedRowKeys.length === 0}
+                        menu={{ items: bulkMenuItems }}
+                      >
+                        <Button icon={<MoreOutlined />}>{t('pages.clients.actions')}</Button>
+                      </Dropdown>
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        disabled={selectedRowKeys.length === 0}
+                        onClick={onBulkDelete}
+                      >
+                        {t('delete')}
+                      </Button>
+                    </div>
+                  )}
+
+                  {!isMobile ? (
+                    <Table<ClientRecord>
+                      columns={columns}
+                      dataSource={sortedClients}
+                      loading={transitioning}
+                      rowKey="email"
+                      rowSelection={selecting ? rowSelection : undefined}
+                      pagination={tablePagination}
+                      size="small"
+                      scroll={{ x: 'max-content' }}
+                      onChange={onTableChange}
+                      locale={{
+                        emptyText: (
+                          <div className="clients-empty">
+                            <TeamOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                            <div>{t('noData')}</div>
+                          </div>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    <Spin spinning={transitioning}>
+                      <div className="client-cards">
+                        {selecting && filteredClients.length > 0 && (
+                          <div className="card-bulk-bar">
+                            <Checkbox
+                              checked={allSelected}
+                              indeterminate={someSelected}
+                              onChange={(e) => selectAll(e.target.checked)}
+                            >
+                              {t('pages.clients.selectAll')}
+                            </Checkbox>
+                          </div>
+                        )}
+                        {filteredClients.length === 0 && (
+                          <div className="card-empty">
+                            <TeamOutlined style={{ fontSize: 28, opacity: 0.5 }} />
+                            <div>{t('noData')}</div>
+                          </div>
+                        )}
+                        {filteredClients.length > 0 && (
+                          <div className="card-pagination">
+                            <Pagination
+                              current={currentPage}
+                              pageSize={tablePageSize}
+                              total={filtered}
+                              showSizeChanger={filtered > 10}
+                              pageSizeOptions={['10', '25', '50', '100', '200']}
+                              hideOnSinglePage={filtered <= tablePageSize}
+                              size="small"
+                              showTotal={(n) => `${n}`}
+                              onChange={(p, s) => {
+                                setCurrentPage(p);
+                                if (s && s !== tablePageSize) setPageSizeChoice(s);
+                              }}
+                            />
+                          </div>
+                        )}
+                        {filteredClients.map((row) => (
+                          <div
+                            key={row.email}
+                            className={`client-card${selectedRowKeys.includes(row.email) ? ' is-selected' : ''}`}
+                          >
+                            <div className="card-head">
+                              {selecting && (
                                 <Checkbox
-                                  checked={allSelected}
-                                  indeterminate={someSelected}
-                                  onChange={(e) => selectAll(e.target.checked)}
-                                >
-                                  {t('pages.clients.selectAll')}
-                                </Checkbox>
-                                {selectedRowKeys.length > 0 && (
-                                  <span className="bulk-count">{selectedRowKeys.length}</span>
-                                )}
-                              </div>
-                            )}
-                            {filteredClients.length === 0 && (
-                              <div className="card-empty">
-                                <TeamOutlined style={{ fontSize: 28, opacity: 0.5 }} />
-                                <div>{t('noData')}</div>
-                              </div>
-                            )}
-                            {filteredClients.length > 0 && (
-                              <div className="card-pagination">
-                                <Pagination
-                                  current={currentPage}
-                                  pageSize={tablePageSize}
-                                  total={filtered}
-                                  showSizeChanger={filtered > 10}
-                                  pageSizeOptions={['10', '25', '50', '100', '200']}
-                                  hideOnSinglePage={filtered <= tablePageSize}
-                                  size="small"
-                                  showTotal={(n) => `${n}`}
-                                  onChange={(p, s) => {
-                                    setCurrentPage(p);
-                                    if (s && s !== tablePageSize) setPageSizeChoice(s);
-                                  }}
+                                  checked={selectedRowKeys.includes(row.email)}
+                                  onChange={(e) => toggleSelect(row.email, e.target.checked)}
+                                />
+                              )}
+                              <OnlineDot
+                                online={!!row.enable && isOnline(row.email)}
+                                lastOnline={row.traffic?.lastOnline ?? 0}
+                              />
+                              <span className="tag-name">{row.email}</span>
+                              <ClientStateTag state={stateOf(row)} />
+                              <div className="card-actions">
+                                <ClientRowMenu
+                                  email={row.email}
+                                  enabled={!!row.enable}
+                                  hasPlan={!!row.planId}
+                                  {...rowHandlers}
                                 />
                               </div>
+                            </div>
+                            {row.comment ? (
+                              <ClientCardComment comment={row.comment} />
+                            ) : (
+                              <span className="client-card-comment client-muted">—</span>
                             )}
-                            {filteredClients.map((row) => {
-                              const bucket = clientBucket(row);
-                              return (
-                                <div
-                                  key={row.email}
-                                  className={`client-card${selectedRowKeys.includes(row.email) ? ' is-selected' : ''}`}
-                                >
-                                  <div className="card-head">
-                                    <Checkbox
-                                      checked={selectedRowKeys.includes(row.email)}
-                                      onChange={(e) => toggleSelect(row.email, e.target.checked)}
-                                    />
-                                    {row.enable && bucket !== 'depleted' && isOnline(row.email) ? (
-                                      <span className="online-dot" style={{ marginInlineEnd: 0 }} />
-                                    ) : (
-                                      <Badge status={bucketBadgeStatus(bucket)} />
-                                    )}
-                                    <span className="tag-name">{row.email}</span>
-                                    {bucket === 'depleted' && (
-                                      <Tag color="red" className="status-tag">
-                                        {t('depleted')}
-                                      </Tag>
-                                    )}
-                                    {bucket === 'expiring' && (
-                                      <Tag color="orange" className="status-tag">
-                                        {t('depletingSoon')}
-                                      </Tag>
-                                    )}
-                                    <div className="card-actions">
-                                      <Tooltip title={t('pages.clients.clientInfo')}>
-                                        <InfoCircleOutlined
-                                          className="row-action-trigger"
-                                          role="button"
-                                          tabIndex={0}
-                                          aria-label={t('pages.clients.clientInfo')}
-                                          onClick={() => onShowInfo(row.email)}
-                                          onKeyDown={activateOnKey(() => onShowInfo(row.email))}
-                                        />
-                                      </Tooltip>
-                                      <Switch
-                                        checked={!!row.enable}
-                                        size="small"
-                                        loading={togglingEmail === row.email}
-                                        onChange={(next) => onToggleEnable(row, next)}
-                                      />
-                                      <Dropdown
-                                        trigger={['click']}
-                                        placement="bottomRight"
-                                        menu={{
-                                          items: [
-                                            {
-                                              key: 'qr',
-                                              label: (
-                                                <>
-                                                  <QrcodeOutlined /> {t('pages.clients.qrCode')}
-                                                </>
-                                              ),
-                                              onClick: () => onShowQr(row.email),
-                                            },
-                                            {
-                                              key: 'portal',
-                                              label: (
-                                                <>
-                                                  <KeyOutlined /> {t('pages.clients.portal.title')}
-                                                </>
-                                              ),
-                                              onClick: () => onPortal(row.email),
-                                            },
-                                            {
-                                              key: 'reset',
-                                              label: (
-                                                <>
-                                                  <RetweetOutlined />{' '}
-                                                  {t('pages.inbounds.resetTraffic')}
-                                                </>
-                                              ),
-                                              onClick: () => onResetTraffic(row.email),
-                                            },
-                                            {
-                                              key: 'edit',
-                                              label: (
-                                                <>
-                                                  <EditOutlined /> {t('edit')}
-                                                </>
-                                              ),
-                                              onClick: () => onEdit(row.email),
-                                            },
-                                            {
-                                              key: 'delete',
-                                              danger: true,
-                                              label: (
-                                                <>
-                                                  <DeleteOutlined /> {t('delete')}
-                                                </>
-                                              ),
-                                              onClick: () => onDelete(row.email),
-                                            },
-                                          ],
-                                        }}
-                                      >
-                                        <Button
-                                          type="text"
-                                          size="small"
-                                          className="row-action-trigger"
-                                          icon={<MoreOutlined />}
-                                          aria-label={t('more')}
-                                        />
-                                      </Dropdown>
-                                    </div>
-                                  </div>
-                                  <ClientCardComment comment={row.comment} />
-                                  <ClientTrafficCell
-                                    compact
-                                    up={row.traffic?.up}
-                                    down={row.traffic?.down}
-                                    total={row.totalGB}
-                                    enabled={row.enable}
-                                    trafficDiff={trafficDiff}
-                                  />
-                                  {(() => {
-                                    const speed = clientSpeed[row.email];
-                                    if (!isActiveSpeed(speed)) return null;
-                                    return (
-                                      <div className="client-card-speed">
-                                        <ClientSpeedTag speed={speed} />
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              );
-                            })}
+                            {view === 'renewal' ? (
+                              <div className="client-card-renewal">
+                                <span>
+                                  {t('pages.clients.expiryTime')}: {expiryLabel(row)}
+                                </span>
+                                <DaysLeftText
+                                  days={daysLeftOf(row)}
+                                  delayed={(row.expiryTime ?? 0) < 0}
+                                />
+                                <span>
+                                  {t('pages.clients.nextReset')}:{' '}
+                                  {row.nextReset
+                                    ? IntlUtil.formatDate(row.nextReset, datepicker)
+                                    : '—'}
+                                </span>
+                              </div>
+                            ) : (
+                              <PlanUsageCell
+                                email={row.email}
+                                planName={row.planId ? planNames.get(row.planId) : undefined}
+                                used={usedBytes(row)}
+                                total={row.totalGB ?? 0}
+                                onPlanClick={onPlanClick}
+                              />
+                            )}
                           </div>
-                        </Spin>
-                      )}
-                    </Card>
-                  </Col>
-                </Row>
+                        ))}
+                      </div>
+                    </Spin>
+                  )}
+                </Card>
               )}
             </Spin>
           </Layout.Content>

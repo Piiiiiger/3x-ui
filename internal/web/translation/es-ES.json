@@ -796,7 +796,7 @@
       "renew": "Renovación automática",
       "renewDesc": "Renovación automática tras la expiración. (0 = desactivado) (unidad: día)",
       "renewDays": "Renovación automática (días)",
-      "searchPlaceholder": "Buscar email, comentario, sub ID, UUID, contraseña, auth, Telegram ID…",
+      "searchPlaceholder": "Buscar email, comentario, plan, sub ID, UUID, contraseña, auth, Telegram ID…",
       "filterTitle": "Filtrar clientes",
       "clearAllFilters": "Limpiar todo",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Información del cliente",
       "editClient": "Editar cliente",
       "client": "Cliente",
-      "enabled": "Habilitado",
-      "remaining": "Restante",
-      "duration": "Duración",
       "attachedInbounds": "Inbounds asociados",
       "selectInbound": "Selecciona uno o más inbounds",
       "selectAllInbounds": "Seleccionar todo",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Renovaciones usadas",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Introduce una etiqueta hexadecimal de 32 caracteres para asignar, o 'none' para borrarla en MTProto.",
-      "intro": "Todos los clientes de tus entradas, con tráfico, caducidad y enlaces de suscripción.",
+      "intro": "Todos los clientes con su plan, tráfico, estado y enlace de suscripción. La vista de renovación muestra la caducidad y el próximo reinicio del tráfico.",
       "portal": {
         "title": "Acceso al portal",
         "intro": "Con una contraseña, el cliente puede entrar al portal con su usuario y ver su plan, su consumo y sus enlaces de suscripción.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "¿Desactivar el acceso al portal de {email}? Sus sesiones abiertas terminan de inmediato.",
         "revoked": "Acceso al portal desactivado",
         "subDisabled": "El servidor de suscripciones está apagado, así que el cliente no puede abrir el portal. Actívalo en Ajustes → Suscripción."
-      }
+      },
+      "listTitle": "Lista de clientes",
+      "viewFull": "Vista completa",
+      "viewRenewal": "Vista de renovación",
+      "bulkMode": "Acciones masivas",
+      "chips": {
+        "all": "Todos",
+        "exhausted": "Sin tráfico",
+        "expired": "Caducados",
+        "disabled": "Deshabilitados"
+      },
+      "state": {
+        "enabled": "Habilitado",
+        "disabled": "Deshabilitado",
+        "exhausted": "Agotado",
+        "expired": "Caducado"
+      },
+      "statusTitle": "Estado",
+      "subscription": "Suscripción",
+      "copySub": "Copiar enlace",
+      "planUsage": "Plan / tráfico",
+      "daysLeft": "Días restantes",
+      "daysLeftValue": "{count} d",
+      "expiredDaysAgo": "Caducó hace {count} d",
+      "nextReset": "Próximo reinicio",
+      "renewNeedsPlan": "Asigna un plan al cliente para renovarlo",
+      "commentEdit": "Editar comentario"
     },
     "plans": {
       "intro": "Conjuntos de tráfico, vigencia y servidores. Asigna un plan a los clientes en lugar de configurarlos uno a uno.",

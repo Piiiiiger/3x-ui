@@ -796,7 +796,7 @@
       "renew": "تمدید خودکار",
       "renewDesc": "تمدید خودکار پس از انقضا. (۰ = غیرفعال) (واحد: روز)",
       "renewDays": "تمدید خودکار (روز)",
-      "searchPlaceholder": "جستجوی ایمیل، توضیح، Sub ID، UUID، رمز، احراز، Telegram ID...",
+      "searchPlaceholder": "جستجوی ایمیل، توضیح، پلن، Sub ID، UUID، رمز، احراز، Telegram ID...",
       "filterTitle": "فیلتر کاربران",
       "clearAllFilters": "پاک کردن همه",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "اطلاعات کلاینت",
       "editClient": "ویرایش کلاینت",
       "client": "کلاینت",
-      "enabled": "فعال",
-      "remaining": "باقی‌مانده",
-      "duration": "مدت",
       "attachedInbounds": "اینباندهای متصل",
       "selectInbound": "یک یا چند اینباند انتخاب کنید",
       "selectAllInbounds": "انتخاب همه",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "تمدیدهای استفاده‌شده",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "یک برچسب هگز ۳۲ کاراکتری برای تنظیم وارد کنید، یا 'none' برای پاک کردن در MTProto.",
-      "intro": "همه کلاینت‌های ورودی‌ها، همراه با ترافیک، تاریخ انقضا و لینک‌های اشتراک.",
+      "intro": "همه کلاینت‌ها با پلن، ترافیک، وضعیت و لینک اشتراک. نمای تمدید تاریخ انقضا و بازنشانی بعدی ترافیک را نشان می‌دهد.",
       "portal": {
         "title": "ورود به پرتال",
         "intro": "با تعیین رمز، کلاینت می‌تواند با نام کاربری خود وارد پرتال شود و پلن، مصرف و لینک‌های اشتراکش را ببیند.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "ورود به پرتال برای {email} غیرفعال شود؟ نشست‌های باز فوراً بسته می‌شوند.",
         "revoked": "ورود به پرتال غیرفعال شد",
         "subDisabled": "سرور اشتراک خاموش است و کلاینت نمی‌تواند پرتال را باز کند. آن را در تنظیمات ← اشتراک روشن کنید."
-      }
+      },
+      "listTitle": "فهرست کلاینت‌ها",
+      "viewFull": "نمای کامل",
+      "viewRenewal": "نمای تمدید",
+      "bulkMode": "عملیات گروهی",
+      "chips": {
+        "all": "همه",
+        "exhausted": "ترافیک تمام‌شده",
+        "expired": "منقضی‌شده",
+        "disabled": "غیرفعال"
+      },
+      "state": {
+        "enabled": "فعال",
+        "disabled": "غیرفعال",
+        "exhausted": "تمام‌شده",
+        "expired": "منقضی"
+      },
+      "statusTitle": "وضعیت",
+      "subscription": "اشتراک",
+      "copySub": "کپی لینک",
+      "planUsage": "پلن / ترافیک",
+      "daysLeft": "روزهای باقی‌مانده",
+      "daysLeftValue": "{count} روز",
+      "expiredDaysAgo": "{count} روز پیش منقضی شد",
+      "nextReset": "بازنشانی بعدی",
+      "renewNeedsPlan": "برای تمدید، کلاینت را روی یک پلن بگذارید",
+      "commentEdit": "ویرایش توضیح"
     },
     "plans": {
       "intro": "مجموعه‌ای از ترافیک، مدت اعتبار و سرورها. به‌جای تنظیم تک‌تک کلاینت‌ها، به آن‌ها پلن بدهید.",

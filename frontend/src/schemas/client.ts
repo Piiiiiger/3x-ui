@@ -58,6 +58,7 @@ export const ClientRecordSchema = z
     adTag: z.string().optional(),
     createdAt: z.number().optional(),
     updatedAt: z.number().optional(),
+    nextReset: z.number().optional(),
   })
   .loose();
 
@@ -160,6 +161,8 @@ export const ClientsSummarySchema = z.object({
   depletedCount: z.number().optional().default(0),
   expiringCount: z.number().optional().default(0),
   deactiveCount: z.number().optional().default(0),
+  exhaustedCount: z.number().optional().default(0),
+  expiredCount: z.number().optional().default(0),
   online: nullableStringArray,
   depleted: nullableStringArray,
   expiring: nullableStringArray,

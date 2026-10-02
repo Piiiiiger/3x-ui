@@ -796,7 +796,7 @@
       "renew": "Auto Renew",
       "renewDesc": "Auto-renewal after expiration. (0 = disable)(unit: day)",
       "renewDays": "Auto Renew (days)",
-      "searchPlaceholder": "Search email, comment, sub ID, UUID, password, auth, Telegram ID…",
+      "searchPlaceholder": "Search email, comment, plan, sub ID, UUID, password, auth, Telegram ID…",
       "filterTitle": "Filter clients",
       "clearAllFilters": "Clear all",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Client Information",
       "editClient": "Edit Client",
       "client": "Client",
-      "enabled": "Enabled",
-      "remaining": "Remaining",
-      "duration": "Duration",
       "attachedInbounds": "Attached inbounds",
       "selectInbound": "Select one or more inbounds",
       "selectAllInbounds": "Select all",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Renewals used",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Enter a 32-character hex tag to set, or 'none' to clear sponsor channel on MTProto inbounds.",
-      "intro": "Every client across your inbounds, with traffic, expiry and subscription links.",
+      "intro": "Every client with its plan, traffic, status and subscription link. The renewal view lists expiry dates and the next traffic reset.",
       "portal": {
         "title": "Portal login",
         "intro": "With a password, the client can sign in to the portal with their username and see their plan, usage and subscription links.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "Turn off portal login for {email}? Their open sessions end at once.",
         "revoked": "Portal login turned off",
         "subDisabled": "The subscription server is off, so the client cannot open the portal. Turn it on in Settings → Subscription."
-      }
+      },
+      "listTitle": "Client list",
+      "viewFull": "Full view",
+      "viewRenewal": "Renewal view",
+      "bulkMode": "Bulk actions",
+      "chips": {
+        "all": "All",
+        "exhausted": "Out of traffic",
+        "expired": "Expired",
+        "disabled": "Disabled"
+      },
+      "state": {
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "exhausted": "Used up",
+        "expired": "Expired"
+      },
+      "statusTitle": "Status",
+      "subscription": "Subscription",
+      "copySub": "Copy link",
+      "planUsage": "Plan / traffic",
+      "daysLeft": "Days left",
+      "daysLeftValue": "{count} d",
+      "expiredDaysAgo": "Expired {count} d ago",
+      "nextReset": "Next reset",
+      "renewNeedsPlan": "Put the client on a plan to renew it",
+      "commentEdit": "Edit comment"
     },
     "plans": {
       "intro": "Bundles of traffic, validity and nodes. Put clients on a plan instead of setting each one up by hand.",

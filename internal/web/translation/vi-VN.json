@@ -796,7 +796,7 @@
       "renew": "Tự động gia hạn",
       "renewDesc": "Tự động gia hạn sau khi hết hạn. (0 = tắt) (đơn vị: ngày)",
       "renewDays": "Tự động gia hạn (ngày)",
-      "searchPlaceholder": "Tìm email, ghi chú, sub ID, UUID, mật khẩu, auth, Telegram ID…",
+      "searchPlaceholder": "Tìm email, ghi chú, gói, sub ID, UUID, mật khẩu, auth, Telegram ID…",
       "filterTitle": "Lọc client",
       "clearAllFilters": "Xóa tất cả",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "Thông tin khách hàng",
       "editClient": "Chỉnh sửa khách hàng",
       "client": "Khách hàng",
-      "enabled": "Đã bật",
-      "remaining": "Còn lại",
-      "duration": "Thời hạn",
       "attachedInbounds": "Inbound đã gắn",
       "selectInbound": "Chọn một hoặc nhiều inbound",
       "selectAllInbounds": "Chọn tất cả",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "Số lần gia hạn đã dùng",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "Nhập thẻ hex 32 ký tự để đặt hoặc 'none' để xóa kênh tài trợ trên MTProto.",
-      "intro": "Tất cả khách hàng trên các inbound, kèm lưu lượng, hạn dùng và liên kết đăng ký.",
+      "intro": "Tất cả khách hàng kèm gói, lưu lượng, trạng thái và liên kết đăng ký. Chế độ gia hạn hiển thị ngày hết hạn và lần đặt lại lưu lượng tiếp theo.",
       "portal": {
         "title": "Đăng nhập cổng",
         "intro": "Khi có mật khẩu, khách hàng có thể đăng nhập cổng bằng tên của mình để xem gói, mức sử dụng và liên kết đăng ký.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "Tắt đăng nhập cổng cho {email}? Các phiên đang mở sẽ kết thúc ngay.",
         "revoked": "Đã tắt đăng nhập cổng",
         "subDisabled": "Máy chủ đăng ký đang tắt nên khách hàng không mở được cổng. Hãy bật trong Cài đặt → Đăng ký."
-      }
+      },
+      "listTitle": "Danh sách khách hàng",
+      "viewFull": "Xem đầy đủ",
+      "viewRenewal": "Xem gia hạn",
+      "bulkMode": "Thao tác hàng loạt",
+      "chips": {
+        "all": "Tất cả",
+        "exhausted": "Hết lưu lượng",
+        "expired": "Đã hết hạn",
+        "disabled": "Đã tắt"
+      },
+      "state": {
+        "enabled": "Đang bật",
+        "disabled": "Đã tắt",
+        "exhausted": "Đã hết",
+        "expired": "Hết hạn"
+      },
+      "statusTitle": "Trạng thái",
+      "subscription": "Đăng ký",
+      "copySub": "Sao chép liên kết",
+      "planUsage": "Gói / lưu lượng",
+      "daysLeft": "Số ngày còn lại",
+      "daysLeftValue": "{count} ngày",
+      "expiredDaysAgo": "Hết hạn {count} ngày trước",
+      "nextReset": "Đặt lại tiếp theo",
+      "renewNeedsPlan": "Gán gói cho khách hàng để gia hạn",
+      "commentEdit": "Sửa ghi chú"
     },
     "plans": {
       "intro": "Tập hợp lưu lượng, thời hạn và máy chủ. Gán gói cho khách hàng thay vì cấu hình từng người.",

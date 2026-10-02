@@ -796,7 +796,7 @@
       "renew": "تجديد تلقائي",
       "renewDesc": "تجديد تلقائي بعد انتهاء الصلاحية. (0 = تعطيل) (الوحدة: يوم)",
       "renewDays": "تجديد تلقائي (أيام)",
-      "searchPlaceholder": "ابحث بالبريد، التعليق، sub ID، UUID، كلمة المرور، auth، Telegram ID…",
+      "searchPlaceholder": "ابحث بالبريد، التعليق، الباقة، sub ID، UUID، كلمة المرور، auth، Telegram ID…",
       "filterTitle": "تصفية العملاء",
       "clearAllFilters": "مسح الكل",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "معلومات العميل",
       "editClient": "تعديل العميل",
       "client": "العميل",
-      "enabled": "مفعّل",
-      "remaining": "المتبقي",
-      "duration": "المدة",
       "attachedInbounds": "الاتصالات الواردة المرتبطة",
       "selectInbound": "حدد اتصالاً واردًا واحدًا أو أكثر",
       "selectAllInbounds": "تحديد الكل",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "التجديدات المستخدمة",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto.",
-      "intro": "جميع العملاء عبر الواردات، مع حركة البيانات وتاريخ الانتهاء وروابط الاشتراك.",
+      "intro": "كل العملاء مع الباقة وحركة البيانات والحالة ورابط الاشتراك. يعرض عرض التجديد تواريخ الانتهاء وإعادة ضبط البيانات التالية.",
       "portal": {
         "title": "الدخول إلى البوابة",
         "intro": "بكلمة مرور يستطيع العميل الدخول إلى البوابة باسمه ورؤية باقته واستهلاكه وروابط اشتراكه.",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "إيقاف الدخول إلى البوابة لـ {email}؟ تنتهي الجلسات المفتوحة فورًا.",
         "revoked": "تم إيقاف الدخول إلى البوابة",
         "subDisabled": "خادم الاشتراكات متوقف، لذلك لا يستطيع العميل فتح البوابة. شغّله من الإعدادات ← الاشتراك."
-      }
+      },
+      "listTitle": "قائمة العملاء",
+      "viewFull": "العرض الكامل",
+      "viewRenewal": "عرض التجديد",
+      "bulkMode": "إجراءات جماعية",
+      "chips": {
+        "all": "الكل",
+        "exhausted": "نفدت البيانات",
+        "expired": "منتهي الصلاحية",
+        "disabled": "معطَّل"
+      },
+      "state": {
+        "enabled": "مفعّل",
+        "disabled": "معطّل",
+        "exhausted": "نفد",
+        "expired": "منتهي"
+      },
+      "statusTitle": "الحالة",
+      "subscription": "الاشتراك",
+      "copySub": "نسخ الرابط",
+      "planUsage": "الباقة / البيانات",
+      "daysLeft": "الأيام المتبقية",
+      "daysLeftValue": "{count} يوم",
+      "expiredDaysAgo": "انتهى منذ {count} يوم",
+      "nextReset": "إعادة الضبط التالية",
+      "renewNeedsPlan": "ضع العميل على باقة لتجديده",
+      "commentEdit": "تعديل التعليق"
     },
     "plans": {
       "intro": "مجموعات من حركة البيانات ومدة الصلاحية والخوادم. ضع العملاء في باقة بدلًا من ضبط كل عميل يدويًا.",

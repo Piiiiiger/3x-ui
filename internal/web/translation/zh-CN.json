@@ -796,7 +796,7 @@
       "renew": "自动续期",
       "renewDesc": "到期后自动续期。(0 = 禁用) (单位: 天)",
       "renewDays": "自动续期 (天)",
-      "searchPlaceholder": "搜索邮箱、备注、sub ID、UUID、密码、auth、Telegram ID…",
+      "searchPlaceholder": "搜索邮箱、备注、套餐、sub ID、UUID、密码、auth、Telegram ID…",
       "filterTitle": "筛选客户端",
       "clearAllFilters": "清除全部",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "客户端信息",
       "editClient": "编辑客户端",
       "client": "客户端",
-      "enabled": "已启用",
-      "remaining": "剩余",
-      "duration": "时长",
       "attachedInbounds": "关联入站",
       "selectInbound": "选择一个或多个入站",
       "selectAllInbounds": "全选",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "已用续期次数",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。",
-      "intro": "所有入站下的客户端，包括流量、到期时间和订阅链接。",
+      "intro": "所有客户端的套餐、流量、状态和订阅链接。续期视图列出到期时间和下次流量重置。",
       "portal": {
         "title": "门户登录",
         "intro": "设置密码后，用户可以用自己的用户名登录门户，查看套餐、用量和订阅链接。",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "关闭 {email} 的门户登录？已登录的设备会立即退出。",
         "revoked": "已关闭门户登录",
         "subDisabled": "订阅服务未开启，用户暂时打不开门户。请先在 设置 → 订阅 中开启。"
-      }
+      },
+      "listTitle": "客户端列表",
+      "viewFull": "完整视图",
+      "viewRenewal": "续期视图",
+      "bulkMode": "批量操作",
+      "chips": {
+        "all": "全部",
+        "exhausted": "流量用完",
+        "expired": "已到期",
+        "disabled": "已停用"
+      },
+      "state": {
+        "enabled": "启用",
+        "disabled": "停用",
+        "exhausted": "用完",
+        "expired": "到期"
+      },
+      "statusTitle": "状态",
+      "subscription": "订阅",
+      "copySub": "复制订阅",
+      "planUsage": "套餐/流量",
+      "daysLeft": "剩余天数",
+      "daysLeftValue": "{count} 天",
+      "expiredDaysAgo": "已过期 {count} 天",
+      "nextReset": "下次重置",
+      "renewNeedsPlan": "先分配套餐才能续期",
+      "commentEdit": "编辑备注"
     },
     "plans": {
       "intro": "流量、有效期和节点的组合。把用户放进套餐，不用逐个手动设置。",

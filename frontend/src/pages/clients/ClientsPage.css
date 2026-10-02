@@ -16,13 +16,6 @@
   white-space: nowrap;
 }
 
-.client-email-more {
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid var(--ant-color-border-secondary, rgba(128, 128, 128, 0.2));
-  opacity: 0.65;
-}
-
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -61,23 +54,6 @@
   margin: 0;
 }
 
-.summary-stat {
-  margin: -4px -8px;
-  padding: 4px 8px;
-  border-radius: var(--ant-border-radius-lg);
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-
-.summary-stat:hover,
-.summary-stat:focus-visible {
-  background: var(--ant-color-fill-tertiary);
-}
-
-.summary-stat.selected {
-  background: var(--ant-color-primary-bg);
-}
-
 .dot {
   display: inline-block;
   width: 8px;
@@ -85,13 +61,6 @@
   border-radius: 50%;
   margin-right: 4px;
   vertical-align: middle;
-}
-
-.dot-green {
-  background: var(--ant-color-success);
-}
-.dot-blue {
-  background: var(--ant-color-primary);
 }
 .dot-red {
   background: var(--ant-color-error);
@@ -101,13 +70,6 @@
 }
 .dot-gray {
   background: var(--ant-color-text-quaternary);
-}
-
-.status-tag {
-  margin: 0 0 0 4px;
-  font-size: 11px;
-  padding: 0 6px;
-  line-height: 18px;
 }
 
 .external-link-card {
@@ -180,46 +142,6 @@
   }
 }
 
-.card-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 6px 0;
-}
-
-@media (min-width: 769px) and (max-width: 920px) {
-  .card-toolbar {
-    gap: 6px;
-  }
-  .card-toolbar .ant-btn .ant-btn-icon + span,
-  .card-toolbar .ant-btn > span:not(.ant-btn-icon):not(.ant-tag):not(.anticon) {
-    display: none;
-  }
-  .card-toolbar .ant-btn {
-    padding-inline: 8px;
-  }
-}
-
-.email-cell {
-  display: flex;
-  flex-direction: column;
-}
-
-.email-cell .email {
-  font-weight: 500;
-}
-
-.email-cell .sub {
-  font-size: 11px;
-  opacity: 0.55;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
-}
-
 .client-cards {
   display: flex;
   flex-direction: column;
@@ -277,12 +199,6 @@
   white-space: pre-wrap;
 }
 
-.client-card-speed {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--ant-color-text-secondary);
-}
-
 .card-head {
   display: flex;
   align-items: center;
@@ -331,4 +247,114 @@
   padding: 32px 0;
   text-align: center;
   color: var(--ant-color-text-secondary);
+}
+
+/* 用户管理: header buttons, chips and the cells of the two views. */
+.clients-card-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.client-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.client-chips-divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 4px;
+  background: var(--ant-color-border-secondary);
+}
+
+.bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.client-email {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.client-sub-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.client-muted {
+  color: var(--ant-color-text-tertiary);
+}
+
+.client-comment {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 200px;
+}
+
+.client-comment-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-usage {
+  min-width: 200px;
+}
+
+.plan-usage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.plan-usage-name.ant-btn {
+  height: auto;
+  padding: 0;
+}
+
+.plan-usage-value {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-usage .ant-progress {
+  margin: 2px 0 0;
+}
+
+.offline-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-inline-end: 5px;
+  vertical-align: middle;
+  background: var(--ant-color-text-quaternary);
+}
+
+.client-card .plan-usage {
+  min-width: 0;
+  margin-top: 6px;
+}
+
+.client-card-renewal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 12px;
 }

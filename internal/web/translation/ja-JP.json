@@ -796,7 +796,7 @@
       "renew": "自動更新",
       "renewDesc": "有効期限切れ後に自動更新します。(0 = 無効) (単位: 日)",
       "renewDays": "自動更新 (日)",
-      "searchPlaceholder": "メール、コメント、sub ID、UUID、パスワード、auth、Telegram ID を検索…",
+      "searchPlaceholder": "メール、コメント、プラン、sub ID、UUID、パスワード、auth、Telegram ID を検索…",
       "filterTitle": "クライアントをフィルタ",
       "clearAllFilters": "すべてクリア",
       "filters": {
@@ -854,9 +854,6 @@
       "clientInfo": "クライアント情報",
       "editClient": "クライアントを編集",
       "client": "クライアント",
-      "enabled": "有効",
-      "remaining": "残量",
-      "duration": "期間",
       "attachedInbounds": "関連付けされたインバウンド",
       "selectInbound": "1 つ以上のインバウンドを選択",
       "selectAllInbounds": "すべて選択",
@@ -1004,7 +1001,7 @@
       "renewsUsed": "使用済み更新回数",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "設定するには 32 文字の 16 進数タグを入力し、クリアするには 'none' を入力します (MTProto 用)。",
-      "intro": "すべてのインバウンドのクライアントと、その通信量・有効期限・サブスクリプションリンク。",
+      "intro": "すべてのクライアントのプラン・通信量・状態・サブスクリプションリンク。更新ビューでは有効期限と次回の通信量リセットを確認できます。",
       "portal": {
         "title": "ポータルログイン",
         "intro": "パスワードを設定すると、クライアントは自分のユーザー名でポータルにログインし、プラン・使用量・サブスクリプションリンクを確認できます。",
@@ -1023,7 +1020,33 @@
         "revokeConfirm": "{email} のポータルログインを無効にしますか？ログイン中のセッションはすぐに終了します。",
         "revoked": "ポータルログインを無効にしました",
         "subDisabled": "サブスクリプションサーバーがオフのため、クライアントはポータルを開けません。設定 → サブスクリプション でオンにしてください。"
-      }
+      },
+      "listTitle": "クライアント一覧",
+      "viewFull": "全体表示",
+      "viewRenewal": "更新ビュー",
+      "bulkMode": "一括操作",
+      "chips": {
+        "all": "すべて",
+        "exhausted": "通信量切れ",
+        "expired": "期限切れ",
+        "disabled": "無効"
+      },
+      "state": {
+        "enabled": "有効",
+        "disabled": "無効",
+        "exhausted": "使い切り",
+        "expired": "期限切れ"
+      },
+      "statusTitle": "状態",
+      "subscription": "サブスクリプション",
+      "copySub": "リンクをコピー",
+      "planUsage": "プラン / 通信量",
+      "daysLeft": "残り日数",
+      "daysLeftValue": "{count} 日",
+      "expiredDaysAgo": "{count} 日前に期限切れ",
+      "nextReset": "次回リセット",
+      "renewNeedsPlan": "更新するにはプランを割り当ててください",
+      "commentEdit": "コメントを編集"
     },
     "plans": {
       "intro": "通信量・有効期間・サーバーをまとめたセット。クライアントを一人ずつ設定する代わりにプランに割り当てます。",

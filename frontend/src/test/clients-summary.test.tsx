@@ -3,26 +3,13 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { sameSpeedMap, useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useClients';
 import { makeTestQueryClient } from '@/test/test-utils';
 import { HttpUtil, Msg } from '@/utils';
 import type { ClientsSummary } from '@/schemas/client';
 
 afterEach(() => {
   vi.restoreAllMocks();
-});
-
-describe('websocket payload identity preservation', () => {
-  const speed = (up: number, down: number) => ({ up, down });
-
-  it('treats an unchanged speed map as unchanged', () => {
-    const a = { 'a@x': speed(1, 2), 'b@x': speed(3, 4) };
-    expect(sameSpeedMap(a, { 'a@x': speed(1, 2), 'b@x': speed(3, 4) })).toBe(true);
-    expect(sameSpeedMap(a, { 'a@x': speed(1, 2) })).toBe(false);
-    expect(sameSpeedMap(a, { 'a@x': speed(1, 2), 'b@x': speed(3, 5) })).toBe(false);
-    expect(sameSpeedMap(a, { 'a@x': speed(1, 2), 'c@x': speed(3, 4) })).toBe(false);
-    expect(sameSpeedMap({}, {})).toBe(true);
-  });
 });
 
 describe('client summary always reflects the server, never a client_stats recompute (#6116)', () => {
@@ -33,6 +20,8 @@ describe('client summary always reflects the server, never a client_stats recomp
     depletedCount: 0,
     expiringCount: 0,
     deactiveCount: 0,
+    exhaustedCount: 0,
+    expiredCount: 0,
     online: [],
     depleted: [],
     expiring: [],
