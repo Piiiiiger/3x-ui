@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Card, Progress, Table, theme } from 'antd';
+import { Card, Table } from 'antd';
 import { ArrowDownOutlined, ArrowUpOutlined, CloudServerOutlined } from '@ant-design/icons';
 
+import { RainbowBar } from '@/components/ui';
 import { SizeFormatter } from '@/utils';
-import { usageTierColor } from '@/models/status';
 import type { TrafficHost } from '@/generated/zod';
 import type { Speed } from './trafficOverview';
 
@@ -16,7 +16,6 @@ interface HostOverviewCardProps {
 /** Each host's live speed and where it stands against its quota this billing cycle. */
 export default function HostOverviewCard({ hosts, speeds, hostName }: HostOverviewCardProps) {
   const { t } = useTranslation();
-  const { token } = theme.useToken();
   const dash = <span className="ov-faint">—</span>;
 
   return (
@@ -93,12 +92,14 @@ export default function HostOverviewCard({ hosts, speeds, hostName }: HostOvervi
               if (!host.linked || host.quotaBytes <= 0) return dash;
               const rate = Math.min((host.usedBytes / host.quotaBytes) * 100, 100);
               return (
-                <Progress
-                  percent={rate}
-                  size="small"
-                  format={(p) => `${(p ?? 0).toFixed(1)}%`}
-                  strokeColor={usageTierColor(rate, token.colorPrimary)}
-                />
+                <div className="ov-usage">
+                  <RainbowBar
+                    percent={rate}
+                    label={t('pages.index.traffic.usageRate')}
+                    valueText={`${SizeFormatter.sizeFormat(host.usedBytes)} / ${SizeFormatter.sizeFormat(host.quotaBytes)}`}
+                  />
+                  <span className="ov-usage-value">{rate.toFixed(1)}%</span>
+                </div>
               );
             },
           },

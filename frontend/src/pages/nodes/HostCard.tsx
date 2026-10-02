@@ -5,6 +5,7 @@ import { Button, Card, Popconfirm, Tag, Tooltip } from 'antd';
 import { EditOutlined, ExportOutlined, PoweroffOutlined, ReloadOutlined } from '@ant-design/icons';
 
 import { NetworkQuality, ProbeMeter } from '@/components/probe/ProbeServerCard';
+import { RainbowBar } from '@/components/ui';
 import { SizeFormatter, TimeFormatter } from '@/utils';
 import type { HostMeter, HostView } from './hostView';
 import { useRelativeTime } from './relativeTime';
@@ -61,6 +62,10 @@ const HostCard = memo(function HostCard({
   const page = host.transitive ? '' : `/nodes/${host.nodeId ?? 'local'}`;
   const traffic = host.traffic;
   const size = SizeFormatter.sizeFormat;
+  const trafficPercent = traffic && traffic.limit > 0 ? (traffic.used / traffic.limit) * 100 : null;
+  const trafficDetail = traffic
+    ? `${size(traffic.used)} / ${traffic.limit > 0 ? size(traffic.limit) : t('unlimited')}`
+    : '—';
 
   return (
     <Card size="small" className={`host-card${host.enabled ? '' : ' is-disabled'}`}>
@@ -158,15 +163,26 @@ const HostCard = memo(function HostCard({
           percent={host.disk?.percent ?? null}
           detail={meterDetail(host.disk)}
         />
-        <ProbeMeter
-          label={t('pages.probe.quota')}
-          percent={traffic && traffic.limit > 0 ? (traffic.used / traffic.limit) * 100 : null}
-          detail={
-            traffic
-              ? `${size(traffic.used)} / ${traffic.limit > 0 ? size(traffic.limit) : t('unlimited')}`
-              : '—'
-          }
-        />
+        <div className="probe-card-meter">
+          <div className="probe-card-meter-head">
+            <span className="probe-card-meter-name">
+              <span className="probe-card-meter-label">{t('pages.probe.quota')}</span>
+              <bdi className="probe-card-meter-detail">{trafficDetail}</bdi>
+            </span>
+            {trafficPercent !== null && (
+              <bdi className="probe-card-meter-value">{`${trafficPercent.toFixed(1)} %`}</bdi>
+            )}
+          </div>
+          {traffic ? (
+            <RainbowBar
+              percent={trafficPercent}
+              label={t('pages.probe.quota')}
+              valueText={trafficDetail}
+            />
+          ) : (
+            <div className="rainbow-bar" />
+          )}
+        </div>
       </div>
 
       <dl className="probe-card-facts">

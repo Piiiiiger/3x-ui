@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Progress, Tag, theme } from 'antd';
 
+import { RainbowBar } from '@/components/ui';
 import { IntlUtil } from '@/utils';
 import type { CalendarKind } from '@/utils';
 import { usagePercent } from './subPageModel';
@@ -113,6 +114,12 @@ export default function SubHero({
         <div className="sub-muted">
           {hasQuota ? t('subscription.ofTotal', { total }) : t('subscription.unlimited')}
         </div>
+        <RainbowBar
+          className="sub-usage-bar"
+          percent={hasQuota ? pct : null}
+          label={t('usage')}
+          valueText={`${used} / ${hasQuota ? total : t('subscription.unlimited')}`}
+        />
         <dl className="sub-stats">
           {stats.map((stat) => (
             <div key={stat.key} className="sub-stat">

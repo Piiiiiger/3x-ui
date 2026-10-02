@@ -297,13 +297,13 @@ describe('the hosts page (服务管理)', () => {
     expect(within(local).getByText('25.00 GB / 100.00 GB')).toBeTruthy();
     expect(within(local).getByText('Xray 25.10.2')).toBeTruthy();
 
-    // Without a limit the quota row stays, with the usage and an empty bar.
+    // Without a limit the quota bar runs full, as on 妙妙屋X, and claims no share.
     const hk = hostCard('edge-hk');
     expect(
       within(hk)
         .getByRole('progressbar', { name: 'Traffic quota 3.00 GB / Unlimited' })
         .getAttribute('aria-valuenow'),
-    ).toBe('0');
+    ).toBeNull();
 
     // No probe server: the heartbeat still gives the CPU.
     const sg = hostCard('edge-sg');
@@ -331,7 +331,7 @@ describe('the hosts page (服务管理)', () => {
     );
 
     for (const card of hostCards()) {
-      expect(within(card).getAllByRole('progressbar')).toHaveLength(4);
+      expect(card.querySelectorAll('.probe-card-meter')).toHaveLength(4);
       expect(card.querySelectorAll('.host-card-network')).toHaveLength(1);
       expect(card.querySelectorAll('.host-card-foot')).toHaveLength(1);
     }

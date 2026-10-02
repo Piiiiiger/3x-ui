@@ -328,3 +328,19 @@
 .ov-hosts-table td {
   white-space: nowrap;
 }
+
+.ov-usage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ov-usage .rainbow-bar {
+  flex: 1;
+}
+
+.ov-usage-value {
+  min-width: 44px;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}

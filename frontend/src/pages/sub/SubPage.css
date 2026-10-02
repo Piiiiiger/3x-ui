@@ -628,3 +628,9 @@ a.sub-row-title:hover {
     display: none;
   }
 }
+
+.sub-usage-bar {
+  height: 8px;
+  margin-top: 10px;
+  max-width: 420px;
+}

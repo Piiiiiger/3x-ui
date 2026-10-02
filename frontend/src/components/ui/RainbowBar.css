@@ -1,0 +1,63 @@
+/* The rainbow spans the whole track and is clipped to the used share, so its colours
+   keep one size whether a tenth or all of the quota is used. */
+.rainbow-bar {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ant-color-primary) 16%, transparent);
+}
+
+.rainbow-bar-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: inset(0 calc(100% - var(--rainbow-fill, 0%)) 0 0 round 999px);
+  transition: clip-path 0.4s ease;
+}
+
+.rainbow-bar-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  background-image: linear-gradient(
+    90deg,
+    #ef4444,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #06b6d4,
+    #3b82f6,
+    #a855f7 42%,
+    #ec4899 47%,
+    #ef4444 50%,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #06b6d4,
+    #3b82f6,
+    #a855f7 92%,
+    #ec4899 97%,
+    #ef4444
+  );
+  will-change: transform;
+  animation: rainbow-bar-flow 2.4s linear infinite;
+}
+
+@keyframes rainbow-bar-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rainbow-bar-fill::before {
+    animation: none;
+  }
+}

@@ -1,8 +1,9 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Progress, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { ProfileOutlined } from '@ant-design/icons';
 
+import { RainbowBar } from '@/components/ui';
 import { SizeFormatter } from '@/utils';
 
 interface PlanUsageCellProps {
@@ -24,7 +25,6 @@ const PlanUsageCell = memo(function PlanUsageCell({
   const { t } = useTranslation();
   const percent = total > 0 ? Math.min(100, Math.floor((used / total) * 100)) : 0;
   const amount = `${SizeFormatter.sizeFormat(used)} / ${total > 0 ? SizeFormatter.sizeFormat(total) : '∞'}`;
-  const status = percent >= 100 ? 'exception' : percent >= 85 ? 'active' : 'normal';
   return (
     <div className="plan-usage">
       <div className="plan-usage-head">
@@ -48,12 +48,10 @@ const PlanUsageCell = memo(function PlanUsageCell({
           </span>
         </Tooltip>
       </div>
-      <Progress
-        percent={total > 0 ? percent : 0}
-        showInfo={false}
-        size="small"
-        status={status}
-        aria-label={amount}
+      <RainbowBar
+        percent={total > 0 ? (used / total) * 100 : null}
+        label={t('usage')}
+        valueText={amount}
       />
     </div>
   );
