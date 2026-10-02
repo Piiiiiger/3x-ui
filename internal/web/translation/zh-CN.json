@@ -130,7 +130,7 @@
   "menu": {
     "theme": "主题",
     "dashboard": "系统状态",
-    "inbounds": "入站",
+    "inbounds": "节点",
     "clients": "客户端",
     "plans": "套餐",
     "nodes": "主机",
@@ -747,7 +747,7 @@
       },
       "sniffingDestOverride": "目标覆盖",
       "advancedTitle": "高级设置",
-      "intro": "监听端口、协议与传输方式，以及每个入站下的客户端。"
+      "intro": "监听端口、协议与传输方式，以及每个节点下的客户端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -1172,7 +1172,7 @@
       "fetchPin": "获取",
       "pinFetched": "已获取主机当前证书",
       "pinFetchFailed": "无法获取证书",
-      "intro": "由本面板管理的远程面板，包括状态、版本和入站。",
+      "intro": "由本面板管理的远程面板，包括状态、版本和节点。",
       "kind": "类型",
       "kindHint": "面板主机是本面板去调用的完整 3x-ui 面板。Agent 是内置 Xray 的小程序，由它主动连接本面板，所有设置都保存在本面板。",
       "kindPanel": "面板",

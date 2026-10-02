@@ -130,7 +130,7 @@
   "menu": {
     "theme": "主題",
     "dashboard": "系統狀態",
-    "inbounds": "入站",
+    "inbounds": "節點",
     "clients": "客戶端",
     "plans": "方案",
     "nodes": "主機",
@@ -747,7 +747,7 @@
       },
       "sniffingDestOverride": "目標覆寫",
       "advancedTitle": "進階設定",
-      "intro": "監聽連接埠、協定與傳輸方式，以及每個入站下的客戶端。"
+      "intro": "監聽連接埠、協定與傳輸方式，以及每個節點下的客戶端。"
     },
     "clients": {
       "tabBasics": "基本",
@@ -1172,7 +1172,7 @@
       "fetchPin": "取得",
       "pinFetched": "已取得主機目前憑證",
       "pinFetchFailed": "無法取得憑證",
-      "intro": "由本面板管理的遠端面板，包含狀態、版本與入站。",
+      "intro": "由本面板管理的遠端面板，包含狀態、版本與節點。",
       "kind": "類型",
       "kindHint": "面板主機是本面板去呼叫的完整 3x-ui 面板。Agent 是內建 Xray 的小程式，由它主動連線本面板，所有設定都保存在本面板。",
       "kindPanel": "面板",

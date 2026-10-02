@@ -70,7 +70,7 @@ test('collapses the page buttons into the drawer on narrow screens', async () =>
 
   const drawerNav = document.querySelector('.drawer-nav') as HTMLElement;
   expect(within(drawerNav).getByText('API Docs')).not.toBeNull();
-  expect(within(drawerNav).getByText('Inbounds').closest('li')?.className).toContain(
+  expect(within(drawerNav).getByText('Nodes').closest('li')?.className).toContain(
     'ant-menu-item-selected',
   );
 });

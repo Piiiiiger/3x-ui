@@ -130,7 +130,7 @@
   "menu": {
     "theme": "Theme",
     "dashboard": "Overview",
-    "inbounds": "Inbounds",
+    "inbounds": "Nodes",
     "clients": "Clients",
     "plans": "Plans",
     "nodes": "Hosts",
@@ -1172,7 +1172,7 @@
       "fetchPin": "Fetch",
       "pinFetched": "Fetched the host's current certificate",
       "pinFetchFailed": "Could not fetch the certificate",
-      "intro": "Remote panels managed from here, with their status, versions and inbounds.",
+      "intro": "Remote panels managed from here, with their status, versions and nodes.",
       "kind": "Type",
       "kindHint": "A panel host is a full 3x-ui panel that this panel calls. An agent is a small program with Xray built in that connects to this panel itself; this panel keeps all of its settings.",
       "kindPanel": "Panel",
