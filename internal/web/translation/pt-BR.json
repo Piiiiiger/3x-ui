@@ -142,7 +142,8 @@
     "docs": "Documentação",
     "openMenu": "Abrir menu",
     "subFormats": "Sub Formats",
-    "probe": "Monitoramento"
+    "probe": "Monitoramento",
+    "rules": "Regras"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} cliente(s) renovado(s)",
         "unassigned": "{count} cliente(s) removido(s) do plano"
       },
-      "clashRules": "Regras do Clash",
-      "clashInherit": "Usar regras globais",
-      "clashCustom": "Regras próprias do plano",
-      "clashRulesHint": "As regras próprias do plano substituem as regras globais do Clash nas assinaturas dos clientes dele, mesmo com o roteamento global do Clash desligado. Cole regras/YAML ou uma URL HTTPS permanente (atualizada em segundo plano).",
-      "errClashRulesRequired": "Informe as regras ou volte para as regras globais",
-      "name": "Nome"
+      "name": "Nome",
+      "template": "Modelo de regras",
+      "templateHint": "As regras do Clash nas assinaturas dos membros. Os modelos ficam na página Regras; o padrão (★) atende os planos sem modelo.",
+      "templateDefault": "Padrão ({name})",
+      "templateNoDefault": "Padrão (não definido)",
+      "templateNone": "Nenhum",
+      "viewGrid": "Cartões",
+      "viewList": "Lista",
+      "actions": "Ações"
     },
     "nodes": {
       "addNode": "Adicionar nó",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Injetar um perfil de roteamento no corpo da assinatura para o cliente Incy. (Apenas para Incy)",
       "subIncyRoutingRules": "Regras de roteamento",
       "subIncyRoutingRulesDesc": "Cole um deeplink incy:// pronto ou uma URL HTTPS permanente para JSON. O Incy cria um perfil de autorouting e o atualiza automaticamente. (Apenas para Incy)",
-      "subClashEnableRouting": "Ativar roteamento",
-      "subClashEnableRoutingDesc": "Incluir regras globais de roteamento Clash/Mihomo nas assinaturas YAML geradas.",
-      "subClashRoutingRules": "Regras globais de roteamento",
-      "subClashRoutingRulesDesc": "Cole regras/YAML ou uma URL HTTPS permanente. O painel a atualiza em segundo plano, importa apenas grupos, provedores de regras e regras, e preserva os nós VPN gerados e o último valor válido.",
       "subListen": "IP de Escuta",
       "subListenDesc": "O endereço IP para o serviço de assinatura. (deixe em branco para escutar em todos os IPs)",
       "subPort": "Porta de Escuta",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Protocolo da entrada (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Rede de transporte (tcp, ws, grpc, …)",
         "descSECURITY": "Segurança do transporte (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Regras do Clash",
+      "subClashRulesMovedDesc": "As regras do Clash das assinaturas agora são modelos na página Regras: cada plano escolhe um, e o padrão atende planos sem modelo e clientes sem plano."
     },
     "xray": {
       "metricsListen": "Endpoint de métricas",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "Não é um endereço de loopback",
       "errPublicUrl": "Não é uma URL http ou https",
       "settingsSaved": "Configurações de monitoramento salvas"
+    },
+    "rules": {
+      "intro": "Os modelos de regras do Clash usados pelos planos. Cada plano escolhe um; planos sem modelo e clientes sem plano recebem o padrão (★).",
+      "add": "Novo modelo",
+      "empty": "Ainda não há modelos de regras",
+      "name": "Nome",
+      "kind": "Tipo",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Lista de regras",
+        "remote": "Remoto"
+      },
+      "size": "Tamanho",
+      "usage": "Usado por",
+      "usedBy": "{count} plano(s)",
+      "updated": "Atualizado",
+      "actions": "Ações",
+      "isDefault": "Modelo padrão",
+      "setDefault": "Tornar padrão",
+      "preview": "Visualizar",
+      "versions": "Versões",
+      "deleteConfirm": "Excluir o modelo \"{name}\"?",
+      "editTitle": "Editar modelo",
+      "content": "Conteúdo",
+      "contentHint": "Linhas de regras do Clash, um documento YAML do Clash cujos grupos de proxy listam __PROXY_NODES__ onde ficam os nós, ou uma URL HTTPS.",
+      "errNameRequired": "Informe um nome",
+      "errContentRequired": "Informe o conteúdo do modelo",
+      "versionsTitle": "Versões de \"{name}\"",
+      "versionsEmpty": "Ainda não há salvamentos",
+      "versionCurrent": "Atual",
+      "versionRestore": "Restaurar",
+      "versionRestoreConfirm": "Restaurar esta versão? A restauração fica salva como uma nova versão.",
+      "previewTitle": "Visualização: {name}",
+      "previewPlan": "Plano",
+      "previewPick": "Escolha um plano",
+      "previewHint": "A configuração do Clash que o primeiro cliente do plano receberia",
+      "toasts": {
+        "saved": "Modelo salvo",
+        "deleted": "Modelo excluído",
+        "defaultSet": "Modelo padrão definido",
+        "restored": "Versão restaurada"
+      }
     }
   },
   "tgbot": {

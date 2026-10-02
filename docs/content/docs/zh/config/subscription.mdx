@@ -52,7 +52,7 @@ Clash Verge Rev、Mihomo 及其他仍在维护的 Mihomo 客户端应使用
 Shadowsocks 节点，并排除 VLESS、Hysteria2、Reality、XHTTP、HTTPUpgrade
 和 Shadowsocks 2022。如果没有任何兼容节点，端点会明确返回 `422`，而不是返回一份无法导入的 YAML。
 为避免 Mihomo 专用语法进入旧版配置，此端点始终使用最小的 `PROXY` 策略组与
-`MATCH,PROXY` 规则，并忽略自定义 Clash 路由设置。
+`MATCH,PROXY` 规则，并忽略套餐的规则模板。
 
 如果管理员已经把 `/mihomo/` 或 `/clash-legacy/` 分配给其他可配置订阅路径，
 系统会保留原有路径，并在启动时记录警告、跳过发生冲突的别名。

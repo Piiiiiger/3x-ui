@@ -142,7 +142,8 @@
     "docs": "Dokumentasi",
     "openMenu": "Buka menu",
     "subFormats": "Sub Formats",
-    "probe": "Pemantauan"
+    "probe": "Pemantauan",
+    "rules": "Aturan"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} klien diperpanjang",
         "unassigned": "{count} klien dikeluarkan dari paket"
       },
-      "clashRules": "Aturan Clash",
-      "clashInherit": "Gunakan aturan global",
-      "clashCustom": "Aturan khusus paket",
-      "clashRulesHint": "Aturan khusus paket menggantikan aturan Clash global di langganan klien paket ini, bahkan saat perutean Clash global dimatikan. Tempel aturan/YAML atau satu URL HTTPS tetap (diperbarui di latar belakang).",
-      "errClashRulesRequired": "Isi aturan, atau kembali ke aturan global",
-      "name": "Nama"
+      "name": "Nama",
+      "template": "Templat aturan",
+      "templateHint": "Aturan Clash dalam langganan anggota. Templat ada di halaman Aturan; templat bawaan (★) dipakai paket tanpa templat.",
+      "templateDefault": "Bawaan ({name})",
+      "templateNoDefault": "Bawaan (belum diatur)",
+      "templateNone": "Tidak ada",
+      "viewGrid": "Kartu",
+      "viewList": "Daftar",
+      "actions": "Tindakan"
     },
     "nodes": {
       "addNode": "Tambah Node",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Menyuntikkan profil perutean ke dalam body langganan untuk klien Incy. (Hanya untuk Incy)",
       "subIncyRoutingRules": "Aturan routing",
       "subIncyRoutingRulesDesc": "Tempel deeplink incy:// siap pakai atau URL HTTPS permanen ke JSON. Incy membuat profil autorouting dan memperbaruinya secara otomatis. (Hanya untuk Incy)",
-      "subClashEnableRouting": "Aktifkan routing",
-      "subClashEnableRoutingDesc": "Sertakan aturan routing global Clash/Mihomo dalam langganan YAML yang dibuat.",
-      "subClashRoutingRules": "Aturan routing global",
-      "subClashRoutingRulesDesc": "Tempel aturan/YAML atau satu URL HTTPS permanen. Panel memperbaruinya di latar belakang, hanya mengimpor grup, penyedia aturan, dan aturan, serta mempertahankan node VPN buatan panel dan nilai valid terakhir.",
       "subListen": "IP Pendengar",
       "subListenDesc": "Alamat IP untuk layanan langganan. (biarkan kosong untuk mendengarkan semua IP)",
       "subPort": "Port Pendengar",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Protokol inbound (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Jaringan transport (tcp, ws, grpc, …)",
         "descSECURITY": "Keamanan transport (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Aturan Clash",
+      "subClashRulesMovedDesc": "Aturan Clash untuk langganan kini berupa templat di halaman Aturan: setiap paket memilih satu, dan templat bawaan dipakai paket tanpa templat serta klien tanpa paket."
     },
     "xray": {
       "save": "Simpan",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "Ini bukan alamat loopback",
       "errPublicUrl": "Ini bukan URL http atau https",
       "settingsSaved": "Pengaturan pemantauan disimpan"
+    },
+    "rules": {
+      "intro": "Templat aturan Clash yang dipakai paket. Setiap paket memilih satu; paket tanpa templat dan klien tanpa paket memakai templat bawaan (★).",
+      "add": "Templat baru",
+      "empty": "Belum ada templat aturan",
+      "name": "Nama",
+      "kind": "Jenis",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Daftar aturan",
+        "remote": "Jarak jauh"
+      },
+      "size": "Ukuran",
+      "usage": "Dipakai oleh",
+      "usedBy": "{count} paket",
+      "updated": "Diperbarui",
+      "actions": "Tindakan",
+      "isDefault": "Templat bawaan",
+      "setDefault": "Jadikan bawaan",
+      "preview": "Pratinjau",
+      "versions": "Versi",
+      "deleteConfirm": "Hapus templat \"{name}\"?",
+      "editTitle": "Ubah templat",
+      "content": "Isi",
+      "contentHint": "Baris aturan Clash, dokumen YAML Clash yang grup proksinya memuat __PROXY_NODES__ di tempat node, atau satu URL HTTPS.",
+      "errNameRequired": "Masukkan nama",
+      "errContentRequired": "Masukkan isi templat",
+      "versionsTitle": "Versi \"{name}\"",
+      "versionsEmpty": "Belum ada simpanan",
+      "versionCurrent": "Saat ini",
+      "versionRestore": "Pulihkan",
+      "versionRestoreConfirm": "Pulihkan versi ini? Pemulihan disimpan sebagai versi baru.",
+      "previewTitle": "Pratinjau: {name}",
+      "previewPlan": "Paket",
+      "previewPick": "Pilih paket",
+      "previewHint": "Konfigurasi Clash yang akan didapat klien pertama paket",
+      "toasts": {
+        "saved": "Templat disimpan",
+        "deleted": "Templat dihapus",
+        "defaultSet": "Templat bawaan ditetapkan",
+        "restored": "Versi dipulihkan"
+      }
     }
   },
   "tgbot": {

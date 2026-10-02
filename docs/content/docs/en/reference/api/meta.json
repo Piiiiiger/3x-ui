@@ -13,6 +13,7 @@
     "subscription-server",
     "subscription-balancers",
     "plans",
+    "rule-templates",
     "traffic",
     "probe",
     "nodes",

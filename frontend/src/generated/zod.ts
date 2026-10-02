@@ -101,9 +101,7 @@ export const AllSettingSchema = z.object({
   subCertFile: z.string(),
   subClashAutoDetect: z.boolean(),
   subClashEnable: z.boolean(),
-  subClashEnableRouting: z.boolean(),
   subClashPath: z.string(),
-  subClashRules: z.string(),
   subClashURI: z.string(),
   subClashUserAgentRegex: z.string(),
   subDomain: z.string(),
@@ -287,9 +285,7 @@ export const AllSettingViewSchema = z.object({
   subCertFile: z.string(),
   subClashAutoDetect: z.boolean(),
   subClashEnable: z.boolean(),
-  subClashEnableRouting: z.boolean(),
   subClashPath: z.string(),
-  subClashRules: z.string(),
   subClashURI: z.string(),
   subClashUserAgentRegex: z.string(),
   subDomain: z.string(),
@@ -983,7 +979,6 @@ export const PeerActivitySchema = z.object({
 export type PeerActivity = z.infer<typeof PeerActivitySchema>;
 
 export const PlanSchema = z.object({
-  clashRules: z.string(),
   createdAt: z.number().int(),
   durationDays: z.number().int(),
   id: z.number().int(),
@@ -991,6 +986,7 @@ export const PlanSchema = z.object({
   name: z.string(),
   remark: z.string(),
   sortIndex: z.number().int(),
+  templateId: z.number().int(),
   totalGB: z.number().int(),
   trafficReset: z.string(),
   trafficResetDay: z.number().int(),
@@ -1005,12 +1001,12 @@ export const PlanInboundSchema = z.object({
 export type PlanInbound = z.infer<typeof PlanInboundSchema>;
 
 export const PlanInputSchema = z.object({
-  clashRules: z.string(),
   durationDays: z.number().int(),
   inboundIds: z.array(z.number().int()),
   limitIp: z.number().int(),
   name: z.string(),
   remark: z.string(),
+  templateId: z.number().int(),
   totalGB: z.number().int(),
   trafficReset: z.string(),
   trafficResetDay: z.number().int(),
@@ -1018,7 +1014,6 @@ export const PlanInputSchema = z.object({
 export type PlanInput = z.infer<typeof PlanInputSchema>;
 
 export const PlanSummarySchema = z.object({
-  clashRules: z.string(),
   createdAt: z.number().int(),
   durationDays: z.number().int(),
   id: z.number().int(),
@@ -1028,6 +1023,7 @@ export const PlanSummarySchema = z.object({
   name: z.string(),
   remark: z.string(),
   sortIndex: z.number().int(),
+  templateId: z.number().int(),
   totalGB: z.number().int(),
   trafficReset: z.string(),
   trafficResetDay: z.number().int(),
@@ -1189,6 +1185,40 @@ export const RealityScanResultSchema = z.object({
   x25519: z.boolean(),
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
+
+export const RuleTemplateSchema = z.object({
+  content: z.string(),
+  createdAt: z.number().int(),
+  id: z.number().int(),
+  isDefault: z.boolean(),
+  name: z.string(),
+  updatedAt: z.number().int(),
+});
+export type RuleTemplate = z.infer<typeof RuleTemplateSchema>;
+
+export const RuleTemplateInputSchema = z.object({
+  content: z.string(),
+  name: z.string(),
+});
+export type RuleTemplateInput = z.infer<typeof RuleTemplateInputSchema>;
+
+export const RuleTemplateSummarySchema = z.object({
+  id: z.number().int(),
+  isDefault: z.boolean(),
+  kind: z.enum(['rules', 'yaml', 'remote']),
+  name: z.string(),
+  planCount: z.number().int(),
+  size: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type RuleTemplateSummary = z.infer<typeof RuleTemplateSummarySchema>;
+
+export const RuleTemplateVersionViewSchema = z.object({
+  id: z.number().int(),
+  savedAt: z.number().int(),
+  size: z.number().int(),
+});
+export type RuleTemplateVersionView = z.infer<typeof RuleTemplateVersionViewSchema>;
 
 export const ServerSettingsSchema = z.object({
   contentPaddingAddition: z.string().optional(),

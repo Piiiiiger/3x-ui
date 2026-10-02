@@ -25,7 +25,7 @@ func subscriptionOutputs(t *testing.T, subID string) map[string]string {
 	if err != nil {
 		t.Fatalf("GetSubs: %v", err)
 	}
-	clash, _, err := NewSubClashService(false, "", NewSubService("")).GetClash(subID, "req.example.com")
+	clash, _, err := NewSubClashService(NewSubService("")).GetClash(subID, "req.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
 	}

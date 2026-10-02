@@ -18,6 +18,7 @@ import {
   DiscordOutlined,
   DownOutlined,
   EllipsisOutlined,
+  FileTextOutlined,
   GithubOutlined,
   HeartOutlined,
   ImportOutlined,
@@ -67,6 +68,7 @@ type IconName =
   | 'inbound'
   | 'team'
   | 'plans'
+  | 'rules'
   | 'setting'
   | 'tool'
   | 'cluster'
@@ -80,6 +82,7 @@ const iconByName: Record<IconName, ComponentType> = {
   inbound: ImportOutlined,
   team: TeamOutlined,
   plans: ProfileOutlined,
+  rules: FileTextOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
@@ -125,6 +128,7 @@ export default function AppNav() {
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
+      { key: '/rules', icon: 'rules', title: t('menu.rules') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },

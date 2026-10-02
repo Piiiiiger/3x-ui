@@ -78,9 +78,7 @@ export interface AllSetting {
   subCertFile: string;
   subClashAutoDetect: boolean;
   subClashEnable: boolean;
-  subClashEnableRouting: boolean;
   subClashPath: string;
-  subClashRules: string;
   subClashURI: string;
   subClashUserAgentRegex: string;
   subDomain: string;
@@ -263,9 +261,7 @@ export interface AllSettingView {
   subCertFile: string;
   subClashAutoDetect: boolean;
   subClashEnable: boolean;
-  subClashEnableRouting: boolean;
   subClashPath: string;
-  subClashRules: string;
   subClashURI: string;
   subClashUserAgentRegex: string;
   subDomain: string;
@@ -916,7 +912,6 @@ export interface PeerActivity {
 }
 
 export interface Plan {
-  clashRules: string;
   createdAt: number;
   durationDays: number;
   id: number;
@@ -924,6 +919,7 @@ export interface Plan {
   name: string;
   remark: string;
   sortIndex: number;
+  templateId: number;
   totalGB: number;
   trafficReset: string;
   trafficResetDay: number;
@@ -936,19 +932,18 @@ export interface PlanInbound {
 }
 
 export interface PlanInput {
-  clashRules: string;
   durationDays: number;
   inboundIds: number[];
   limitIp: number;
   name: string;
   remark: string;
+  templateId: number;
   totalGB: number;
   trafficReset: string;
   trafficResetDay: number;
 }
 
 export interface PlanSummary {
-  clashRules: string;
   createdAt: number;
   durationDays: number;
   id: number;
@@ -958,6 +953,7 @@ export interface PlanSummary {
   name: string;
   remark: string;
   sortIndex: number;
+  templateId: number;
   totalGB: number;
   trafficReset: string;
   trafficResetDay: number;
@@ -1105,6 +1101,36 @@ export interface RealityScanResult {
   tls13: boolean;
   tlsVersion: string;
   x25519: boolean;
+}
+
+export interface RuleTemplate {
+  content: string;
+  createdAt: number;
+  id: number;
+  isDefault: boolean;
+  name: string;
+  updatedAt: number;
+}
+
+export interface RuleTemplateInput {
+  content: string;
+  name: string;
+}
+
+export interface RuleTemplateSummary {
+  id: number;
+  isDefault: boolean;
+  kind: string;
+  name: string;
+  planCount: number;
+  size: number;
+  updatedAt: number;
+}
+
+export interface RuleTemplateVersionView {
+  id: number;
+  savedAt: number;
+  size: number;
 }
 
 export interface ServerSettings {

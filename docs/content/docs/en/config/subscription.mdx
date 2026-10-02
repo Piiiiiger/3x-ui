@@ -62,8 +62,8 @@ and Shadowsocks nodes and excludes VLESS, Hysteria2, Reality, XHTTP,
 HTTPUpgrade, and Shadowsocks 2022. If no compatible node exists, it returns an
 explicit `422` response instead of a YAML profile the client cannot import.
 To avoid Mihomo-only syntax entering the legacy profile, this endpoint always
-uses its minimal `PROXY` group and `MATCH,PROXY` rule and ignores custom Clash
-routing settings.
+uses its minimal `PROXY` group and `MATCH,PROXY` rule and ignores the plans'
+rule templates.
 
 If an administrator has already assigned `/mihomo/` or `/clash-legacy/` to a
 different configurable subscription path, that existing path is preserved and

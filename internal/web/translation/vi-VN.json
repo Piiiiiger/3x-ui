@@ -142,7 +142,8 @@
     "docs": "Tài liệu",
     "openMenu": "Mở menu",
     "subFormats": "Sub Formats",
-    "probe": "Giám sát"
+    "probe": "Giám sát",
+    "rules": "Quy tắc"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "Đã gia hạn {count} khách hàng",
         "unassigned": "Đã gỡ {count} khách hàng khỏi gói"
       },
-      "clashRules": "Quy tắc Clash",
-      "clashInherit": "Dùng quy tắc chung",
-      "clashCustom": "Quy tắc riêng của gói",
-      "clashRulesHint": "Quy tắc riêng của gói thay thế quy tắc Clash chung trong gói đăng ký của khách hàng thuộc gói, kể cả khi định tuyến Clash chung đang tắt. Dán quy tắc/YAML hoặc một URL HTTPS cố định (được cập nhật nền).",
-      "errClashRulesRequired": "Hãy nhập quy tắc, hoặc chuyển về quy tắc chung",
-      "name": "Tên"
+      "name": "Tên",
+      "template": "Mẫu quy tắc",
+      "templateHint": "Quy tắc Clash trong đăng ký của thành viên. Mẫu nằm ở trang Quy tắc; mẫu mặc định (★) dùng cho gói chưa chọn mẫu.",
+      "templateDefault": "Mặc định ({name})",
+      "templateNoDefault": "Mặc định (chưa đặt)",
+      "templateNone": "Không có",
+      "viewGrid": "Thẻ",
+      "viewList": "Danh sách",
+      "actions": "Thao tác"
     },
     "nodes": {
       "addNode": "Thêm nút",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Chèn hồ sơ định tuyến vào nội dung đăng ký cho ứng dụng Incy. (Chỉ dành cho Incy)",
       "subIncyRoutingRules": "Quy tắc định tuyến",
       "subIncyRoutingRulesDesc": "Dán deeplink incy:// có sẵn hoặc URL HTTPS cố định tới JSON. Incy tạo hồ sơ autorouting và tự động cập nhật. (Chỉ dành cho Incy)",
-      "subClashEnableRouting": "Bật định tuyến",
-      "subClashEnableRoutingDesc": "Bao gồm quy tắc định tuyến Clash/Mihomo toàn cầu trong các đăng ký YAML được tạo.",
-      "subClashRoutingRules": "Quy tắc định tuyến toàn cầu",
-      "subClashRoutingRulesDesc": "Dán quy tắc/YAML hoặc một URL HTTPS cố định. Bảng điều khiển cập nhật trong nền, chỉ nhập nhóm, nhà cung cấp quy tắc và quy tắc, đồng thời giữ các nút VPN đã tạo và giá trị hợp lệ gần nhất.",
       "subListen": "Listening IP",
       "subListenDesc": "Mặc định để trống để nghe tất cả các IP",
       "subPort": "Cổng gói đăng ký",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Giao thức inbound (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Mạng truyền tải (tcp, ws, grpc, …)",
         "descSECURITY": "Bảo mật truyền tải (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Quy tắc Clash",
+      "subClashRulesMovedDesc": "Quy tắc Clash cho đăng ký giờ là các mẫu ở trang Quy tắc: mỗi gói chọn một mẫu, và mẫu mặc định dùng cho gói chưa chọn mẫu và khách hàng không có gói."
     },
     "xray": {
       "metricsListen": "Điểm cuối Metrics",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "Đây không phải địa chỉ loopback",
       "errPublicUrl": "Đây không phải URL http hoặc https",
       "settingsSaved": "Đã lưu cài đặt giám sát"
+    },
+    "rules": {
+      "intro": "Các mẫu quy tắc Clash mà gói sử dụng. Mỗi gói chọn một mẫu; gói chưa chọn và khách hàng không có gói dùng mẫu mặc định (★).",
+      "add": "Mẫu mới",
+      "empty": "Chưa có mẫu quy tắc nào",
+      "name": "Tên",
+      "kind": "Loại",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Danh sách quy tắc",
+        "remote": "Từ xa"
+      },
+      "size": "Kích thước",
+      "usage": "Được dùng bởi",
+      "usedBy": "{count} gói",
+      "updated": "Cập nhật",
+      "actions": "Thao tác",
+      "isDefault": "Mẫu mặc định",
+      "setDefault": "Đặt làm mặc định",
+      "preview": "Xem trước",
+      "versions": "Phiên bản",
+      "deleteConfirm": "Xóa mẫu \"{name}\"?",
+      "editTitle": "Sửa mẫu",
+      "content": "Nội dung",
+      "contentHint": "Các dòng quy tắc Clash, tài liệu YAML Clash có nhóm proxy ghi __PROXY_NODES__ ở chỗ đặt nút, hoặc một URL HTTPS.",
+      "errNameRequired": "Nhập tên",
+      "errContentRequired": "Nhập nội dung mẫu",
+      "versionsTitle": "Các phiên bản của \"{name}\"",
+      "versionsEmpty": "Chưa có lần lưu nào",
+      "versionCurrent": "Hiện tại",
+      "versionRestore": "Khôi phục",
+      "versionRestoreConfirm": "Khôi phục phiên bản này? Lần khôi phục được giữ thành phiên bản mới.",
+      "previewTitle": "Xem trước: {name}",
+      "previewPlan": "Gói",
+      "previewPick": "Chọn một gói",
+      "previewHint": "Cấu hình Clash mà khách hàng đầu tiên của gói sẽ nhận",
+      "toasts": {
+        "saved": "Đã lưu mẫu",
+        "deleted": "Đã xóa mẫu",
+        "defaultSet": "Đã đặt mẫu mặc định",
+        "restored": "Đã khôi phục phiên bản"
+      }
     }
   },
   "tgbot": {

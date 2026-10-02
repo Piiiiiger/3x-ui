@@ -16,6 +16,14 @@ export const keys = {
     root: () => ['plans'] as const,
     list: () => ['plans', 'list'] as const,
   },
+  ruleTemplates: {
+    root: () => ['ruleTemplates'] as const,
+    list: () => ['ruleTemplates', 'list'] as const,
+    get: (id: number) => ['ruleTemplates', 'get', id] as const,
+    versions: (id: number) => ['ruleTemplates', 'versions', id] as const,
+    preview: (requestId: number, planId: number) =>
+      ['ruleTemplates', 'preview', requestId, planId] as const,
+  },
   traffic: {
     root: () => ['traffic'] as const,
     overview: (period: string) => ['traffic', 'overview', period] as const,

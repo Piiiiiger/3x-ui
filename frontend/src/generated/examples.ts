@@ -66,9 +66,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subCertFile": "",
     "subClashAutoDetect": false,
     "subClashEnable": false,
-    "subClashEnableRouting": false,
     "subClashPath": "",
-    "subClashRules": "",
     "subClashURI": "",
     "subClashUserAgentRegex": "",
     "subDomain": "",
@@ -250,9 +248,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subCertFile": "",
     "subClashAutoDetect": false,
     "subClashEnable": false,
-    "subClashEnableRouting": false,
     "subClashPath": "",
-    "subClashRules": "",
     "subClashURI": "",
     "subClashUserAgentRegex": "",
     "subDomain": "",
@@ -988,7 +984,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "up": 1048576
   },
   "Plan": {
-    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "createdAt": 1735689600000,
     "durationDays": 30,
     "id": 1,
@@ -996,6 +991,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "name": "Monthly 100G",
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
+    "templateId": 1,
     "totalGB": 107374182400,
     "trafficReset": "monthly",
     "trafficResetDay": 1,
@@ -1006,7 +1002,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "planId": 0
   },
   "PlanInput": {
-    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "durationDays": 30,
     "inboundIds": [
       1,
@@ -1015,12 +1010,12 @@ export const EXAMPLES: Record<string, unknown> = {
     "limitIp": 0,
     "name": "Monthly 100G",
     "remark": "Hong Kong and Singapore",
+    "templateId": 1,
     "totalGB": 107374182400,
     "trafficReset": "monthly",
     "trafficResetDay": 1
   },
   "PlanSummary": {
-    "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",
     "createdAt": 1735689600000,
     "durationDays": 30,
     "id": 1,
@@ -1033,6 +1028,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "name": "Monthly 100G",
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
+    "templateId": 1,
     "totalGB": 107374182400,
     "trafficReset": "monthly",
     "trafficResetDay": 1,
@@ -1295,6 +1291,32 @@ export const EXAMPLES: Record<string, unknown> = {
     "tls13": true,
     "tlsVersion": "1.3",
     "x25519": true
+  },
+  "RuleTemplate": {
+    "content": "DOMAIN-SUFFIX,example.com,DIRECT",
+    "createdAt": 1735689600000,
+    "id": 1,
+    "isDefault": false,
+    "name": "alpha_v3",
+    "updatedAt": 1735689600000
+  },
+  "RuleTemplateInput": {
+    "content": "DOMAIN-SUFFIX,example.com,DIRECT",
+    "name": "alpha_v3"
+  },
+  "RuleTemplateSummary": {
+    "id": 1,
+    "isDefault": false,
+    "kind": "yaml",
+    "name": "alpha_v3",
+    "planCount": 2,
+    "size": 389305,
+    "updatedAt": 1735689600000
+  },
+  "RuleTemplateVersionView": {
+    "id": 7,
+    "savedAt": 1735689600000,
+    "size": 389305
   },
   "ServerSettings": {
     "contentPaddingAddition": "",

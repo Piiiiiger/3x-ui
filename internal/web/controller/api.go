@@ -200,6 +200,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	plans := api.Group("/plans")
 	NewPlanController(plans)
 
+	// Rule templates API — the Clash rules plans share
+	ruleTemplates := api.Group("/ruleTemplates")
+	NewRuleTemplateController(ruleTemplates)
+
 	traffic := api.Group("/traffic")
 	NewTrafficController(traffic)
 

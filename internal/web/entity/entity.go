@@ -119,8 +119,6 @@ type AllSetting struct {
 	SubClashEnable              bool   `json:"subClashEnable" form:"subClashEnable"`
 	SubClashPath                string `json:"subClashPath" form:"subClashPath"`
 	SubClashURI                 string `json:"subClashURI" form:"subClashURI"`
-	SubClashEnableRouting       bool   `json:"subClashEnableRouting" form:"subClashEnableRouting"`
-	SubClashRules               string `json:"subClashRules" form:"subClashRules"`
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`
 	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
 	SubJsonRoutingRules         string `json:"subJsonRoutingRules" form:"subJsonRoutingRules"`

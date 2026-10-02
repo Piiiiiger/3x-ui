@@ -1712,6 +1712,85 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'rule-templates',
+    title: 'Rule templates',
+    description:
+      "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template.",
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/ruleTemplates/list',
+        summary:
+          'List the templates without their content: kind (rules, yaml or remote), size in bytes, whether it is the default, and how many plans use it (the default also counts the plans that name none).',
+        responseSchema: 'RuleTemplateSummary',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleTemplates/get/:id',
+        summary: 'Get one template with its content.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+        responseSchema: 'RuleTemplate',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/add',
+        summary:
+          'Create a template. Names are unique. Content that could not render is refused: broken YAML, a URL with credentials or not HTTPS, or proxy groups none of which lists __PROXY_NODES__ or a filter.',
+        body: '{\n  "name": "alpha_v3",\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
+        responseSchema: 'RuleTemplate',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/update/:id',
+        summary:
+          'Rename a template or replace its content, checked as on create. A changed content is kept as a new version.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+        body: '{\n  "name": "alpha_v3",\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
+        responseSchema: 'RuleTemplate',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/del/:id',
+        summary:
+          'Delete a template and its versions. Refused for the default template and while any plan uses it.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/setDefault/:id',
+        summary:
+          'Make the template the default: the one plans without their own, and clients without a plan, get.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleTemplates/versions/:id',
+        summary: "List the template's kept versions, newest first, without their content.",
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+        responseSchema: 'RuleTemplateVersionView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/restore/:versionId',
+        summary:
+          "Put a kept version back as its template's content; the restore is itself a new version.",
+        params: [{ name: 'versionId', in: 'path', type: 'integer', desc: 'Version id.' }],
+        responseSchema: 'RuleTemplate',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/preview',
+        summary:
+          "Render the Clash config the plan's first member would get with this content as their template, checked as on save. Refused for a plan without members.",
+        body: '{\n  "planId": 1,\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
+        response:
+          '{\n  "success": true,\n  "obj": "proxies:\\n  - name: ...\\nrules:\\n  - DOMAIN-SUFFIX,example.com,DIRECT\\n"\n}',
+      },
+    ],
+  },
+  {
     id: 'plans',
     title: 'Plans',
     description:
@@ -1728,8 +1807,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/add',
         summary:
-          "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. clashRules (inline rules/YAML or one HTTPS URL) replaces the global Clash rules in members' subscriptions, even with global Clash routing off; empty inherits them.",
-        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "",\n  "inboundIds": [1, 2]\n}',
+          "Create a plan. totalGB is in bytes (0 = unlimited) and durationDays 0 means no expiry. trafficReset is never, hourly, daily, weekly or monthly; inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template.",
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "templateId": 0,\n  "inboundIds": [1, 2]\n}',
         responseSchema: 'Plan',
       },
       {
@@ -1738,7 +1817,7 @@ export const sections: readonly Section[] = [
         summary:
           'Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
-        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
+        body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "templateId": 2,\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',
       },
       {

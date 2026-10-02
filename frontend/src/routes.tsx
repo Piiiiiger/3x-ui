@@ -9,6 +9,7 @@ const ProbePage = lazy(() => import('@/pages/probe/ProbePage'));
 const InboundsPage = lazy(() => import('@/pages/inbounds/InboundsPage'));
 const ClientsPage = lazy(() => import('@/pages/clients/ClientsPage'));
 const PlansPage = lazy(() => import('@/pages/plans/PlansPage'));
+const RulesPage = lazy(() => import('@/pages/rules/RulesPage'));
 const NodesPage = lazy(() => import('@/pages/nodes/NodesPage'));
 const HostPage = lazy(() => import('@/pages/nodes/HostPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
@@ -47,6 +48,7 @@ const routes: RouteObject[] = [
       { path: 'inbounds', element: withSuspense(<InboundsPage />) },
       { path: 'clients', element: withSuspense(<ClientsPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },
+      { path: 'rules', element: withSuspense(<RulesPage />) },
       { path: 'nodes', element: withSuspense(<NodesPage />) },
       { path: 'nodes/:hostId', element: withSuspense(<HostPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },

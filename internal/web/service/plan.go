@@ -28,7 +28,7 @@ type PlanInput struct {
 	TrafficResetDay int    `json:"trafficResetDay" example:"1"`
 	LimitIP         int    `json:"limitIp" example:"0"`
 	Remark          string `json:"remark" example:"Hong Kong and Singapore"`
-	ClashRules      string `json:"clashRules" example:"DOMAIN-SUFFIX,example.com,DIRECT"`
+	TemplateId      int    `json:"templateId" example:"1"`
 	InboundIds      []int  `json:"inboundIds" example:"[1,2]"`
 }
 
@@ -380,10 +380,17 @@ func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 	if err := validateClientTrafficReset(in.TrafficReset, in.TrafficResetDay); err != nil {
 		return err
 	}
-	if strings.TrimSpace(in.ClashRules) == "" {
-		in.ClashRules = ""
-	} else if _, _, err := common.ParseRemoteRoutingURL(in.ClashRules); err != nil {
-		return common.NewError("clash rules:", err)
+	if in.TemplateId < 0 {
+		in.TemplateId = 0
+	}
+	if in.TemplateId > 0 {
+		var found int64
+		if err := tx.Model(&model.RuleTemplate{}).Where("id = ?", in.TemplateId).Count(&found).Error; err != nil {
+			return err
+		}
+		if found == 0 {
+			return common.NewError("plan refers to a rule template that does not exist")
+		}
 	}
 	in.InboundIds = uniqueSortedIds(in.InboundIds)
 	if len(in.InboundIds) > 0 {
@@ -406,16 +413,7 @@ func applyPlanInput(plan *model.Plan, in PlanInput) {
 	plan.TrafficResetDay = in.TrafficResetDay
 	plan.LimitIP = in.LimitIP
 	plan.Remark = in.Remark
-	plan.ClashRules = in.ClashRules
-}
-
-// ClashRuleSources lists the distinct Clash rules set on plans, so remote ones
-// can be fetched ahead of the first subscription request.
-func (s *PlanService) ClashRuleSources() ([]string, error) {
-	var sources []string
-	err := database.GetDB().Model(&model.Plan{}).Distinct("clash_rules").
-		Where("clash_rules <> ''").Pluck("clash_rules", &sources).Error
-	return sources, err
+	plan.TemplateId = in.TemplateId
 }
 
 func replacePlanInbounds(tx *gorm.DB, planId int, inboundIds []int) error {

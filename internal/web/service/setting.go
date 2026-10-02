@@ -184,8 +184,6 @@ var defaultValueMap = map[string]string{
 	"subClashEnable":              "false",
 	"subClashPath":                "/clash/",
 	"subClashURI":                 "",
-	"subClashEnableRouting":       "false",
-	"subClashRules":               "",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
 	"subJsonRoutingRules":         "",
@@ -1211,14 +1209,6 @@ func (s *SettingService) GetSubClashURI() (string, error) {
 	return s.getString("subClashURI")
 }
 
-func (s *SettingService) GetSubClashEnableRouting() (bool, error) {
-	return s.getBool("subClashEnableRouting")
-}
-
-func (s *SettingService) GetSubClashRules() (string, error) {
-	return s.getString("subClashRules")
-}
-
 func (s *SettingService) GetSubJsonMux() (string, error) {
 	return s.getString("subJsonMux")
 }
@@ -1777,7 +1767,6 @@ func validateSettingsURLs(allSetting *entity.AllSetting) error {
 	}
 	for name, value := range map[string]*string{
 		"Happ routing source":              &allSetting.SubRoutingRules,
-		"Clash/Mihomo routing source":      &allSetting.SubClashRules,
 		"Incy routing source":              &allSetting.SubIncyRoutingRules,
 		"JSON subscription routing source": &allSetting.SubJsonRoutingRules,
 	} {

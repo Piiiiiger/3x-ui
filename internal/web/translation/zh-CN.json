@@ -142,7 +142,8 @@
     "docs": "文档",
     "openMenu": "打开菜单",
     "subFormats": "Sub Formats",
-    "probe": "探针"
+    "probe": "探针",
+    "rules": "规则"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "已为 {count} 个用户续期",
         "unassigned": "已将 {count} 个用户移出套餐"
       },
-      "clashRules": "Clash 规则",
-      "clashInherit": "使用全局规则",
-      "clashCustom": "套餐专属规则",
-      "clashRulesHint": "专属规则会替换该套餐用户订阅中的全局 Clash 规则，即使关闭了全局路由也会生效。可粘贴规则/YAML，或一个固定的 HTTPS URL（后台定时更新）。",
-      "errClashRulesRequired": "请填写规则，或改为使用全局规则",
-      "name": "名称"
+      "name": "名称",
+      "template": "订阅模板",
+      "templateHint": "成员订阅里的 Clash 规则。模板在「规则」页管理；没有选择的套餐使用默认模板（★）。",
+      "templateDefault": "默认（{name}）",
+      "templateNoDefault": "默认（未设置）",
+      "templateNone": "无",
+      "viewGrid": "卡片",
+      "viewList": "列表",
+      "actions": "操作"
     },
     "nodes": {
       "addNode": "添加主机",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "为 Incy 客户端将路由配置注入订阅内容中。（仅限 Incy）",
       "subIncyRoutingRules": "路由规则",
       "subIncyRoutingRulesDesc": "粘贴现成的 incy:// 深层链接或指向 JSON 的固定 HTTPS URL。Incy 会创建 autorouting 配置并自动更新。（仅限 Incy）",
-      "subClashEnableRouting": "启用路由",
-      "subClashEnableRoutingDesc": "在生成的 YAML 订阅中包含 Clash/Mihomo 全局路由规则。",
-      "subClashRoutingRules": "全局路由规则",
-      "subClashRoutingRulesDesc": "粘贴规则/YAML 或一个固定 HTTPS URL。面板会在后台更新，仅导入代理组、规则提供者和规则，并保留面板生成的 VPN 节点及最后一个有效值。",
       "subListen": "监听 IP",
       "subListenDesc": "订阅服务监听的 IP 地址（留空表示监听所有 IP）",
       "subPort": "监听端口",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "入站协议（VLESS、VMess、Trojan……）",
         "descTRANSPORT": "传输网络（tcp、ws、grpc……）",
         "descSECURITY": "传输安全（TLS、REALITY、NONE）"
-      }
+      },
+      "subClashRulesMoved": "Clash 规则",
+      "subClashRulesMovedDesc": "订阅里的 Clash 规则改在「规则」页按模板管理：每个套餐选一个模板，默认模板用于没选模板的套餐和没有套餐的用户。"
     },
     "xray": {
       "metricsListen": "指标端点",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "这不是回环地址",
       "errPublicUrl": "这不是 http 或 https 地址",
       "settingsSaved": "探针设置已保存"
+    },
+    "rules": {
+      "intro": "套餐使用的 Clash 规则模板。每个套餐选一个模板；没选的套餐和没有套餐的用户使用默认模板（★）。",
+      "add": "新建模板",
+      "empty": "还没有规则模板",
+      "name": "名称",
+      "kind": "类型",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "规则列表",
+        "remote": "远程"
+      },
+      "size": "大小",
+      "usage": "使用",
+      "usedBy": "被 {count} 个套餐使用",
+      "updated": "更新时间",
+      "actions": "操作",
+      "isDefault": "默认模板",
+      "setDefault": "设为默认",
+      "preview": "预览",
+      "versions": "版本",
+      "deleteConfirm": "删除模板「{name}」？",
+      "editTitle": "编辑模板",
+      "content": "内容",
+      "contentHint": "Clash 规则列表、在代理组里用 __PROXY_NODES__ 放节点的 Clash YAML，或者一个 HTTPS 地址。",
+      "errNameRequired": "请输入名称",
+      "errContentRequired": "请输入模板内容",
+      "versionsTitle": "「{name}」的版本",
+      "versionsEmpty": "还没有保存记录",
+      "versionCurrent": "当前",
+      "versionRestore": "还原",
+      "versionRestoreConfirm": "还原到这个版本？这次还原会作为新版本保留。",
+      "previewTitle": "预览：{name}",
+      "previewPlan": "套餐",
+      "previewPick": "选择一个套餐",
+      "previewHint": "该套餐第一个用户会拿到的 Clash 配置",
+      "toasts": {
+        "saved": "模板已保存",
+        "deleted": "模板已删除",
+        "defaultSet": "已设为默认模板",
+        "restored": "已还原该版本"
+      }
     }
   },
   "tgbot": {

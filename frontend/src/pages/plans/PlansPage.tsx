@@ -1,26 +1,38 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import {
   Button,
   Card,
-  Col,
   ConfigProvider,
   Empty,
   Layout,
   Modal,
   Result,
-  Row,
+  Segmented,
+  Space,
   Spin,
+  Table,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from 'antd';
 import {
+  AppstoreOutlined,
+  CalendarOutlined,
+  ClusterOutlined,
   DeleteOutlined,
   EditOutlined,
+  FileTextOutlined,
+  InfoCircleOutlined,
   PlusOutlined,
+  SafetyOutlined,
+  StarFilled,
+  SyncOutlined,
   TeamOutlined,
+  UnorderedListOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 
@@ -29,6 +41,7 @@ import { PageHeader } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { usePlansQuery } from '@/api/queries/usePlansQuery';
 import { usePlanMutations } from '@/api/queries/usePlanMutations';
+import { useRuleTemplatesQuery } from '@/api/queries/useRuleTemplates';
 import type { PlanSummary } from '@/generated/zod';
 import type { PlanFormValues } from '@/schemas/plan';
 import AssignPlanModal from './AssignPlanModal';
@@ -36,6 +49,45 @@ import PlanFormModal from './PlanFormModal';
 import { usePlanText } from '@/lib/plans/planText';
 import { useInboundChoices } from './planText';
 import './PlansPage.css';
+
+type PlansView = 'grid' | 'list';
+const VIEW_KEY = 'plans-view';
+
+function readView(): PlansView {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'grid';
+  } catch {
+    return 'grid';
+  }
+}
+
+function writeView(view: PlansView) {
+  try {
+    localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    /* a blocked store only forgets the choice */
+  }
+}
+
+function PlanRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="plan-row">
+      <span className="plan-row-label">
+        {icon}
+        {label}
+      </span>
+      <span className="plan-row-value">{children}</span>
+    </div>
+  );
+}
 
 export default function PlansPage() {
   const { t } = useTranslation();
@@ -45,9 +97,11 @@ export default function PlansPage() {
   const [modal, modalContextHolder] = Modal.useModal();
   const { plans, fetched, fetchError, loading, refetch } = usePlansQuery();
   const { create, update, remove } = usePlanMutations();
+  const { templates } = useRuleTemplatesQuery();
   const planText = usePlanText();
   const { labelOf } = useInboundChoices();
 
+  const [view, setView] = useState<PlansView>(readView);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PlanSummary | null>(null);
   const [assignPlanId, setAssignPlanId] = useState<number | null>(null);
@@ -58,6 +112,49 @@ export default function PlansPage() {
     if (isUltra) classes.push('is-ultra');
     return classes.join(' ');
   }, [isDark, isUltra]);
+
+  // A plan naming no template gets the default one, shown with its star.
+  function templateOf(plan: PlanSummary): ReactNode {
+    const tpl = templates.find((x) => (plan.templateId ? x.id === plan.templateId : x.isDefault));
+    if (!tpl)
+      return <Typography.Text type="secondary">{t('pages.plans.templateNone')}</Typography.Text>;
+    return (
+      <span className="plan-template-name">
+        {tpl.name}
+        {tpl.isDefault && (
+          <StarFilled className="plan-template-star" aria-label={t('pages.rules.isDefault')} />
+        )}
+      </span>
+    );
+  }
+
+  function nodesOf(plan: PlanSummary): ReactNode {
+    const count = plan.inboundIds.length;
+    if (count === 0) return <Typography.Text type="secondary">0</Typography.Text>;
+    return (
+      <Tooltip title={plan.inboundIds.map((id) => labelOf(id)).join(' · ')}>
+        <span className="plan-count">{count}</span>
+      </Tooltip>
+    );
+  }
+
+  function membersOf(plan: PlanSummary): ReactNode {
+    return (
+      <Button
+        type="link"
+        size="small"
+        className="plan-members-link"
+        onClick={() => navigate(`/clients?plan=${plan.id}`)}
+      >
+        {t('pages.plans.members', { count: plan.memberCount })}
+      </Button>
+    );
+  }
+
+  function changeView(next: PlansView) {
+    setView(next);
+    writeView(next);
+  }
 
   function openForm(plan: PlanSummary | null) {
     setEditing(plan);
@@ -95,6 +192,135 @@ export default function PlansPage() {
     </Button>
   );
 
+  const headerExtra =
+    plans.length > 0 ? (
+      <Space>
+        <Segmented<PlansView>
+          value={view}
+          onChange={changeView}
+          options={[
+            { value: 'grid', icon: <AppstoreOutlined />, title: t('pages.plans.viewGrid') },
+            { value: 'list', icon: <UnorderedListOutlined />, title: t('pages.plans.viewList') },
+          ]}
+        />
+        {addButton}
+      </Space>
+    ) : undefined;
+
+  const actionsOf = (plan: PlanSummary) => [
+    <Button
+      key="assign"
+      type="text"
+      icon={<UserAddOutlined />}
+      onClick={() => setAssignPlanId(plan.id)}
+    >
+      {t('pages.plans.addPeople')}
+    </Button>,
+    <Button key="edit" type="text" icon={<EditOutlined />} onClick={() => openForm(plan)}>
+      {t('edit')}
+    </Button>,
+    <Button
+      key="delete"
+      type="text"
+      danger
+      icon={<DeleteOutlined />}
+      onClick={() => confirmDelete(plan)}
+    >
+      {t('delete')}
+    </Button>,
+  ];
+
+  const grid = (
+    <div className="plan-grid">
+      {plans.map((plan) => {
+        const text = planText(plan);
+        return (
+          <Card
+            key={plan.id}
+            className="plan-card"
+            title={
+              <span className="plan-card-title">
+                <Typography.Text ellipsis>{plan.name}</Typography.Text>
+                {plan.remark && (
+                  <Tooltip title={plan.remark}>
+                    <InfoCircleOutlined className="plan-card-remark-icon" />
+                  </Tooltip>
+                )}
+              </span>
+            }
+            extra={<Tag className="plan-card-quota">{text.quota}</Tag>}
+            actions={actionsOf(plan)}
+          >
+            <PlanRow icon={<CalendarOutlined />} label={t('pages.plans.duration')}>
+              {text.duration}
+            </PlanRow>
+            <PlanRow icon={<SyncOutlined />} label={t('pages.inbounds.periodicTrafficResetTitle')}>
+              {text.reset}
+            </PlanRow>
+            <PlanRow icon={<FileTextOutlined />} label={t('pages.plans.template')}>
+              {templateOf(plan)}
+            </PlanRow>
+            <PlanRow icon={<SafetyOutlined />} label={t('pages.clients.limitIp')}>
+              {text.ipLimit}
+            </PlanRow>
+            <PlanRow icon={<ClusterOutlined />} label={t('pages.plans.servers')}>
+              {nodesOf(plan)}
+            </PlanRow>
+            <PlanRow icon={<TeamOutlined />} label={t('pages.plans.people')}>
+              {membersOf(plan)}
+            </PlanRow>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
+  const list = (
+    <Card styles={{ body: { padding: 0 } }}>
+      <Table<PlanSummary>
+        rowKey="id"
+        pagination={false}
+        scroll={{ x: 'max-content' }}
+        dataSource={plans}
+        columns={[
+          { title: t('pages.plans.name'), dataIndex: 'name', key: 'name' },
+          {
+            title: t('pages.plans.quota'),
+            key: 'quota',
+            render: (_, plan) => planText(plan).quota,
+          },
+          {
+            title: t('pages.plans.duration'),
+            key: 'validity',
+            render: (_, plan) => planText(plan).duration,
+          },
+          {
+            title: t('pages.inbounds.periodicTrafficResetTitle'),
+            key: 'reset',
+            render: (_, plan) => planText(plan).reset,
+          },
+          {
+            title: t('pages.plans.template'),
+            key: 'template',
+            render: (_, plan) => templateOf(plan),
+          },
+          {
+            title: t('pages.clients.limitIp'),
+            key: 'ip',
+            render: (_, plan) => planText(plan).ipLimit,
+          },
+          { title: t('pages.plans.servers'), key: 'nodes', render: (_, plan) => nodesOf(plan) },
+          { title: t('pages.plans.people'), key: 'users', render: (_, plan) => membersOf(plan) },
+          {
+            title: t('pages.plans.actions'),
+            key: 'actions',
+            render: (_, plan) => <Space size={0}>{actionsOf(plan)}</Space>,
+          },
+        ]}
+      />
+    </Card>
+  );
+
   return (
     <ConfigProvider theme={antdThemeConfig}>
       {messageContextHolder}
@@ -106,7 +332,7 @@ export default function PlansPage() {
             <PageHeader
               title={t('menu.plans')}
               description={t('pages.plans.intro')}
-              extra={plans.length > 0 ? addButton : undefined}
+              extra={headerExtra}
             />
             <Spin spinning={!fetched} delay={200} description={t('loading')} size="large">
               {!fetched ? (
@@ -126,93 +352,10 @@ export default function PlansPage() {
                 <Card>
                   <Empty description={t('pages.plans.empty')}>{addButton}</Empty>
                 </Card>
+              ) : view === 'list' ? (
+                list
               ) : (
-                <Row gutter={[16, 16]}>
-                  {plans.map((plan) => {
-                    const text = planText(plan);
-                    return (
-                      <Col xs={24} md={12} xl={8} key={plan.id}>
-                        <Card
-                          className="plan-card"
-                          title={plan.name}
-                          extra={
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<TeamOutlined />}
-                              onClick={() => navigate(`/clients?plan=${plan.id}`)}
-                            >
-                              {t('pages.plans.members', { count: plan.memberCount })}
-                            </Button>
-                          }
-                          actions={[
-                            <Button
-                              key="assign"
-                              type="text"
-                              icon={<UserAddOutlined />}
-                              onClick={() => setAssignPlanId(plan.id)}
-                            >
-                              {t('pages.plans.addPeople')}
-                            </Button>,
-                            <Button
-                              key="edit"
-                              type="text"
-                              icon={<EditOutlined />}
-                              onClick={() => openForm(plan)}
-                            >
-                              {t('edit')}
-                            </Button>,
-                            <Button
-                              key="delete"
-                              type="text"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={() => confirmDelete(plan)}
-                            >
-                              {t('delete')}
-                            </Button>,
-                          ]}
-                        >
-                          <div className="plan-card-headline">
-                            <span className="plan-card-quota">{text.quota}</span>
-                            <span className="plan-card-duration">/ {text.duration}</span>
-                          </div>
-                          <dl className="plan-card-facts">
-                            <dt>{t('pages.inbounds.periodicTrafficResetTitle')}</dt>
-                            <dd>{text.reset}</dd>
-                            <dt>{t('pages.clients.limitIp')}</dt>
-                            <dd>{text.ipLimit}</dd>
-                            <dt>{t('pages.plans.clashRules')}</dt>
-                            <dd>
-                              {plan.clashRules
-                                ? t('pages.plans.clashCustom')
-                                : t('pages.plans.clashInherit')}
-                            </dd>
-                            <dt>{t('pages.plans.servers')}</dt>
-                            <dd>
-                              {plan.inboundIds.length > 0 ? (
-                                plan.inboundIds.map((id) => (
-                                  <Tag key={id} className="plan-card-server">
-                                    {labelOf(id)}
-                                  </Tag>
-                                ))
-                              ) : (
-                                <Typography.Text type="secondary">
-                                  {t('pages.plans.noServers')}
-                                </Typography.Text>
-                              )}
-                            </dd>
-                          </dl>
-                          {plan.remark && (
-                            <Typography.Paragraph type="secondary" className="plan-card-remark">
-                              {plan.remark}
-                            </Typography.Paragraph>
-                          )}
-                        </Card>
-                      </Col>
-                    );
-                  })}
-                </Row>
+                grid
               )}
             </Spin>
           </Layout.Content>

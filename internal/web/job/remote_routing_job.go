@@ -10,7 +10,7 @@ import (
 // network work runs here (cron + startup warm), never in a request handler.
 type RemoteRoutingJob struct {
 	settingService service.SettingService
-	planService    service.PlanService
+	templates      service.RuleTemplateService
 }
 
 func NewRemoteRoutingJob() *RemoteRoutingJob {
@@ -23,19 +23,14 @@ func (j *RemoteRoutingJob) Run() {
 		logger.Warning("Could not read Happ routing source:", err)
 		return
 	}
-	clash, err := j.settingService.GetSubClashRules()
-	if err != nil {
-		logger.Warning("Could not read Clash routing source:", err)
-		return
-	}
 	jsonRouting, err := j.settingService.GetSubJsonRoutingRules()
 	if err != nil {
 		logger.Warning("Could not read JSON subscription routing source:", err)
 		return
 	}
-	planClash, err := j.planService.ClashRuleSources()
+	clash, err := j.templates.Contents()
 	if err != nil {
-		logger.Warning("Could not read plan Clash routing sources:", err)
+		logger.Warning("Could not read the rule templates' Clash routing sources:", err)
 	}
-	sub.RefreshRemoteRoutingSources(happ, append([]string{clash}, planClash...), jsonRouting)
+	sub.RefreshRemoteRoutingSources(happ, clash, jsonRouting)
 }

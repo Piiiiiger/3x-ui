@@ -142,7 +142,8 @@
     "docs": "Documentación",
     "openMenu": "Abrir menú",
     "subFormats": "Sub Formats",
-    "probe": "Monitorización"
+    "probe": "Monitorización",
+    "rules": "Reglas"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} cliente(s) renovado(s)",
         "unassigned": "{count} cliente(s) quitado(s) de su plan"
       },
-      "clashRules": "Reglas de Clash",
-      "clashInherit": "Usar reglas globales",
-      "clashCustom": "Reglas propias del plan",
-      "clashRulesHint": "Las reglas propias del plan sustituyen las reglas globales de Clash en las suscripciones de sus clientes, incluso con el enrutamiento global de Clash desactivado. Pega reglas/YAML o una URL HTTPS permanente (se actualiza en segundo plano).",
-      "errClashRulesRequired": "Escribe las reglas o vuelve a las reglas globales",
-      "name": "Nombre"
+      "name": "Nombre",
+      "template": "Plantilla de reglas",
+      "templateHint": "Las reglas de Clash de las suscripciones de los miembros. Las plantillas están en la página Reglas; la predeterminada (★) sirve a los planes sin plantilla.",
+      "templateDefault": "Predeterminada ({name})",
+      "templateNoDefault": "Predeterminada (sin definir)",
+      "templateNone": "Ninguna",
+      "viewGrid": "Tarjetas",
+      "viewList": "Lista",
+      "actions": "Acciones"
     },
     "nodes": {
       "addNode": "Agregar nodo",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Inyectar un perfil de enrutamiento en el cuerpo de la suscripción para el cliente Incy. (Solo para Incy)",
       "subIncyRoutingRules": "Reglas de enrutamiento",
       "subIncyRoutingRulesDesc": "Pegue un enlace incy:// listo o una URL HTTPS permanente a JSON. Incy crea un perfil de autorouting y lo actualiza automáticamente. (Solo para Incy)",
-      "subClashEnableRouting": "Habilitar enrutamiento",
-      "subClashEnableRoutingDesc": "Incluir reglas globales de enrutamiento Clash/Mihomo en las suscripciones YAML generadas.",
-      "subClashRoutingRules": "Reglas globales de enrutamiento",
-      "subClashRoutingRulesDesc": "Pegue reglas/YAML o una URL HTTPS permanente. El panel la actualiza en segundo plano, importa solo grupos, proveedores de reglas y reglas, y conserva los nodos VPN generados y el último valor válido.",
       "subListen": "Listening IP",
       "subListenDesc": "Dejar en blanco por defecto para monitorear todas las IPs.",
       "subPort": "Puerto de Suscripción",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Protocolo del inbound (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Red de transporte (tcp, ws, grpc, …)",
         "descSECURITY": "Seguridad del transporte (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Reglas de Clash",
+      "subClashRulesMovedDesc": "Las reglas de Clash de las suscripciones ahora son plantillas en la página Reglas: cada plan elige una y la predeterminada sirve a los planes sin plantilla y a los clientes sin plan."
     },
     "xray": {
       "save": "Guardar configuración",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "No es una dirección de loopback",
       "errPublicUrl": "No es una URL http ni https",
       "settingsSaved": "Ajustes de monitorización guardados"
+    },
+    "rules": {
+      "intro": "Las plantillas de reglas de Clash que usan los planes. Cada plan elige una; los planes sin plantilla y los clientes sin plan reciben la predeterminada (★).",
+      "add": "Nueva plantilla",
+      "empty": "Aún no hay plantillas de reglas",
+      "name": "Nombre",
+      "kind": "Tipo",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Lista de reglas",
+        "remote": "Remota"
+      },
+      "size": "Tamaño",
+      "usage": "Usada por",
+      "usedBy": "{count} plan(es)",
+      "updated": "Actualizada",
+      "actions": "Acciones",
+      "isDefault": "Plantilla predeterminada",
+      "setDefault": "Hacer predeterminada",
+      "preview": "Vista previa",
+      "versions": "Versiones",
+      "deleteConfirm": "¿Eliminar la plantilla \"{name}\"?",
+      "editTitle": "Editar plantilla",
+      "content": "Contenido",
+      "contentHint": "Líneas de reglas de Clash, un documento YAML de Clash cuyos grupos de proxy ponen __PROXY_NODES__ donde van los nodos, o una URL HTTPS.",
+      "errNameRequired": "Introduce un nombre",
+      "errContentRequired": "Introduce el contenido de la plantilla",
+      "versionsTitle": "Versiones de \"{name}\"",
+      "versionsEmpty": "Aún no hay guardados",
+      "versionCurrent": "Actual",
+      "versionRestore": "Restaurar",
+      "versionRestoreConfirm": "¿Restaurar esta versión? La restauración se guarda como una versión nueva.",
+      "previewTitle": "Vista previa: {name}",
+      "previewPlan": "Plan",
+      "previewPick": "Elige un plan",
+      "previewHint": "La configuración de Clash que recibiría el primer cliente del plan",
+      "toasts": {
+        "saved": "Plantilla guardada",
+        "deleted": "Plantilla eliminada",
+        "defaultSet": "Plantilla predeterminada establecida",
+        "restored": "Versión restaurada"
+      }
     }
   },
   "tgbot": {

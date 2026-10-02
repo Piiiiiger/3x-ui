@@ -61,6 +61,8 @@ func migrationModels() []any {
 		&model.ClientTrafficMark{},
 		&model.HostDailyTraffic{},
 		&model.InboundTrafficMark{},
+		&model.RuleTemplate{},
+		&model.RuleTemplateVersion{},
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 	}

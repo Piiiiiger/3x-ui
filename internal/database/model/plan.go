@@ -11,12 +11,12 @@ type Plan struct {
 	TrafficResetDay int    `json:"trafficResetDay" gorm:"column:traffic_reset_day;default:1" example:"1"`
 	LimitIP         int    `json:"limitIp" gorm:"column:limit_ip;default:0" example:"0"`
 	Remark          string `json:"remark" example:"Hong Kong and Singapore"`
-	// ClashRules replaces the global Clash rules for members: inline rules/YAML or an
-	// HTTPS URL. Empty inherits the global rules.
-	ClashRules string `json:"clashRules" gorm:"column:clash_rules;default:''" example:"DOMAIN-SUFFIX,example.com,DIRECT"`
-	SortIndex  int    `json:"sortIndex" gorm:"column:sort_index;default:0" example:"0"`
-	CreatedAt  int64  `json:"createdAt" gorm:"autoCreateTime:milli" example:"1735689600000"`
-	UpdatedAt  int64  `json:"updatedAt" gorm:"autoUpdateTime:milli" example:"1735689600000"`
+	// TemplateId is the rule template its members' Clash subscriptions use; 0 is the
+	// default template.
+	TemplateId int   `json:"templateId" gorm:"column:template_id;default:0;index" example:"1"`
+	SortIndex  int   `json:"sortIndex" gorm:"column:sort_index;default:0" example:"0"`
+	CreatedAt  int64 `json:"createdAt" gorm:"autoCreateTime:milli" example:"1735689600000"`
+	UpdatedAt  int64 `json:"updatedAt" gorm:"autoUpdateTime:milli" example:"1735689600000"`
 }
 
 // PlanInbound is the plan-to-inbound join: the servers a plan grants its members.

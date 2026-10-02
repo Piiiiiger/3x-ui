@@ -113,14 +113,12 @@ type subControllerConfig struct {
 	remarkTemplate string
 	updateInterval string
 
-	subJsonMux            string
-	subJsonRules          string
-	subJsonRoutingRules   string
-	subJsonDns            string
-	subJsonFinalMask      string
-	subJsonObservatory    string
-	subClashEnableRouting bool
-	subClashRules         string
+	subJsonMux          string
+	subJsonRules        string
+	subJsonRoutingRules string
+	subJsonDns          string
+	subJsonFinalMask    string
+	subJsonObservatory  string
 
 	subTitle         string
 	subSupportURL    string
@@ -213,14 +211,6 @@ func WithSUBJsonFinalMask(value string) SUBControllerOption {
 
 func WithSUBJsonObservatory(value string) SUBControllerOption {
 	return func(config *subControllerConfig) { config.subJsonObservatory = value }
-}
-
-func WithSUBClashEnableRouting(value bool) SUBControllerOption {
-	return func(config *subControllerConfig) { config.subClashEnableRouting = value }
-}
-
-func WithSUBClashRules(value string) SUBControllerOption {
-	return func(config *subControllerConfig) { config.subClashRules = value }
 }
 
 func WithSUBTitle(value string) SUBControllerOption {
@@ -325,7 +315,7 @@ func NewSUBController(g *gin.RouterGroup, options ...SUBControllerOption) *SUBCo
 
 		subService:      sub,
 		subJsonService:  subJsonSvc,
-		subClashService: NewSubClashService(config.subClashEnableRouting, config.subClashRules, sub),
+		subClashService: NewSubClashService(sub),
 
 		subTemplateCache: map[string]*cachedSubTemplate{},
 		portalLimiter:    loginlimit.New(loginlimit.MaxFailures, loginlimit.Window, loginlimit.Cooldown),

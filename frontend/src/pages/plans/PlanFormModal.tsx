@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, Form, Input, InputNumber, Modal, Radio, Select } from 'antd';
+import { Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
+import { StarFilled } from '@ant-design/icons';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import SelectAllClearButtons from '@/components/form/SelectAllClearButtons';
-import { remoteSourceBadge } from '@/pages/settings/subscriptionShared';
+import { useRuleTemplatesQuery } from '@/api/queries/useRuleTemplates';
 import type { PlanSummary } from '@/generated/zod';
 import {
-  PlanClashModeSchema,
   PlanFormSchema,
   PlanTrafficResetSchema,
-  type PlanClashMode,
   type PlanFormValues,
   type PlanTrafficReset,
 } from '@/schemas/plan';
@@ -19,16 +18,8 @@ import { useInboundChoices } from './planText';
 
 const GIB = 1024 ** 3;
 
-// reapplyLimits and clashMode ride along in the form so reopening the modal resets them too.
-type PlanFormState = PlanFormValues & { reapplyLimits: boolean; clashMode: PlanClashMode };
-
-const CLASH_MODE_LABEL_KEYS: Record<PlanClashMode, string> = {
-  inherit: 'pages.plans.clashInherit',
-  custom: 'pages.plans.clashCustom',
-};
-
-const CLASH_RULES_PLACEHOLDER =
-  'https://…/rules.yaml\n\nDOMAIN-SUFFIX,example.com,DIRECT\nGEOIP,CN,DIRECT';
+// reapplyLimits rides along in the form so reopening the modal resets it too.
+type PlanFormState = PlanFormValues & { reapplyLimits: boolean };
 
 function initialState(plan: PlanSummary | null): PlanFormState {
   const reset = PlanTrafficResetSchema.safeParse(plan?.trafficReset);
@@ -40,10 +31,9 @@ function initialState(plan: PlanSummary | null): PlanFormState {
     trafficResetDay: plan?.trafficResetDay || 1,
     limitIp: plan?.limitIp ?? 0,
     remark: plan?.remark ?? '',
-    clashRules: plan?.clashRules ?? '',
+    templateId: plan?.templateId ?? 0,
     inboundIds: [...(plan?.inboundIds ?? [])],
     reapplyLimits: false,
-    clashMode: plan?.clashRules ? 'custom' : 'inherit',
   };
 }
 
@@ -67,8 +57,26 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
 
   const trafficReset = useWatch({ control: methods.control, name: 'trafficReset' });
   const inboundIds = useWatch({ control: methods.control, name: 'inboundIds' });
-  const clashMode = useWatch({ control: methods.control, name: 'clashMode' });
-  const clashRules = useWatch({ control: methods.control, name: 'clashRules' });
+  const { templates } = useRuleTemplatesQuery();
+  const defaultTemplate = templates.find((tpl) => tpl.isDefault);
+  const templateOptions = [
+    {
+      value: 0,
+      label: defaultTemplate
+        ? t('pages.plans.templateDefault', { name: defaultTemplate.name })
+        : t('pages.plans.templateNoDefault'),
+    },
+    ...templates.map((tpl) => ({
+      value: tpl.id,
+      label: tpl.isDefault ? (
+        <span>
+          {tpl.name} <StarFilled className="plan-template-star" />
+        </span>
+      ) : (
+        tpl.name
+      ),
+    })),
+  ];
   const { options: inboundGroups, flat: inboundOptions } = useInboundChoices();
 
   const resetOptions = PlanTrafficResetSchema.options.map((value: PlanTrafficReset) => ({
@@ -76,13 +84,10 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
     label: t(`pages.inbounds.periodicTrafficReset.${value}`),
   }));
 
-  async function onFinish({ reapplyLimits, clashMode: mode, ...values }: PlanFormState) {
+  async function onFinish({ reapplyLimits, ...values }: PlanFormState) {
     setSaving(true);
     try {
-      const parsed = PlanFormSchema.parse({
-        ...values,
-        clashRules: mode === 'custom' ? values.clashRules : '',
-      });
+      const parsed = PlanFormSchema.parse(values);
       await onConfirm(parsed, isEdit && members > 0 && reapplyLimits);
     } finally {
       setSaving(false);
@@ -169,30 +174,12 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
           />
 
           <FormField
-            label={t('pages.plans.clashRules')}
-            name="clashMode"
-            tooltip={t('pages.plans.clashRulesHint')}
+            label={t('pages.plans.template')}
+            name="templateId"
+            tooltip={t('pages.plans.templateHint')}
           >
-            <Radio.Group
-              optionType="button"
-              options={PlanClashModeSchema.options.map((value) => ({
-                value,
-                label: t(CLASH_MODE_LABEL_KEYS[value]),
-              }))}
-            />
+            <Select options={templateOptions} />
           </FormField>
-          {clashMode === 'custom' && (
-            <FormField
-              name="clashRules"
-              extra={remoteSourceBadge(clashRules ?? '')}
-              rules={{
-                validate: (value) =>
-                  String(value ?? '').trim() !== '' || 'pages.plans.errClashRulesRequired',
-              }}
-            >
-              <Input.TextArea rows={6} placeholder={CLASH_RULES_PLACEHOLDER} spellCheck={false} />
-            </FormField>
-          )}
 
           <FormField label={t('remark')} name="remark">
             <Input maxLength={256} />

@@ -142,7 +142,8 @@
     "docs": "文件",
     "openMenu": "開啟選單",
     "subFormats": "Sub Formats",
-    "probe": "探針"
+    "probe": "探針",
+    "rules": "規則"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "已為 {count} 位使用者續期",
         "unassigned": "已將 {count} 位使用者移出方案"
       },
-      "clashRules": "Clash 規則",
-      "clashInherit": "使用全域規則",
-      "clashCustom": "方案專屬規則",
-      "clashRulesHint": "專屬規則會取代此方案使用者訂閱中的全域 Clash 規則，即使關閉了全域路由也會生效。可貼上規則/YAML，或一個固定的 HTTPS URL（背景定時更新）。",
-      "errClashRulesRequired": "請填寫規則，或改為使用全域規則",
-      "name": "名稱"
+      "name": "名稱",
+      "template": "訂閱範本",
+      "templateHint": "成員訂閱裡的 Clash 規則。範本在「規則」頁管理；沒有選擇的方案使用預設範本（★）。",
+      "templateDefault": "預設（{name}）",
+      "templateNoDefault": "預設（未設定）",
+      "templateNone": "無",
+      "viewGrid": "卡片",
+      "viewList": "清單",
+      "actions": "操作"
     },
     "nodes": {
       "addNode": "新增主機",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "為 Incy 用戶端將路由設定檔注入訂閱內容中。（僅限 Incy）",
       "subIncyRoutingRules": "路由規則",
       "subIncyRoutingRulesDesc": "貼上現成的 incy:// 深層連結或指向 JSON 的固定 HTTPS URL。Incy 會建立 autorouting 設定並自動更新。（僅限 Incy）",
-      "subClashEnableRouting": "啟用路由",
-      "subClashEnableRoutingDesc": "在產生的 YAML 訂閱中包含 Clash/Mihomo 全域路由規則。",
-      "subClashRoutingRules": "全域路由規則",
-      "subClashRoutingRulesDesc": "貼上規則/YAML 或一個固定 HTTPS URL。面板會在背景更新，只匯入代理群組、規則提供者與規則，並保留面板產生的 VPN 節點及最後一個有效值。",
       "subListen": "監聽 IP",
       "subListenDesc": "訂閱服務監聽的 IP 地址（留空表示監聽所有 IP）",
       "subPort": "監聽埠",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "入站協定（VLESS、VMess、Trojan…）",
         "descTRANSPORT": "傳輸網路（tcp、ws、grpc…）",
         "descSECURITY": "傳輸安全（TLS、REALITY、NONE）"
-      }
+      },
+      "subClashRulesMoved": "Clash 規則",
+      "subClashRulesMovedDesc": "訂閱裡的 Clash 規則改在「規則」頁以範本管理：每個方案選一個範本，預設範本用於沒選範本的方案和沒有方案的使用者。"
     },
     "xray": {
       "save": "儲存",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "這不是回環位址",
       "errPublicUrl": "這不是 http 或 https 網址",
       "settingsSaved": "探針設定已儲存"
+    },
+    "rules": {
+      "intro": "方案使用的 Clash 規則範本。每個方案選一個範本；沒選的方案和沒有方案的使用者使用預設範本（★）。",
+      "add": "新增範本",
+      "empty": "還沒有規則範本",
+      "name": "名稱",
+      "kind": "類型",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "規則清單",
+        "remote": "遠端"
+      },
+      "size": "大小",
+      "usage": "使用",
+      "usedBy": "被 {count} 個方案使用",
+      "updated": "更新時間",
+      "actions": "操作",
+      "isDefault": "預設範本",
+      "setDefault": "設為預設",
+      "preview": "預覽",
+      "versions": "版本",
+      "deleteConfirm": "刪除範本「{name}」？",
+      "editTitle": "編輯範本",
+      "content": "內容",
+      "contentHint": "Clash 規則清單、在代理群組裡用 __PROXY_NODES__ 放節點的 Clash YAML，或一個 HTTPS 網址。",
+      "errNameRequired": "請輸入名稱",
+      "errContentRequired": "請輸入範本內容",
+      "versionsTitle": "「{name}」的版本",
+      "versionsEmpty": "還沒有儲存紀錄",
+      "versionCurrent": "目前",
+      "versionRestore": "還原",
+      "versionRestoreConfirm": "還原到這個版本？這次還原會作為新版本保留。",
+      "previewTitle": "預覽：{name}",
+      "previewPlan": "方案",
+      "previewPick": "選擇一個方案",
+      "previewHint": "該方案第一個使用者會拿到的 Clash 設定",
+      "toasts": {
+        "saved": "範本已儲存",
+        "deleted": "範本已刪除",
+        "defaultSet": "已設為預設範本",
+        "restored": "已還原該版本"
+      }
     }
   },
   "tgbot": {

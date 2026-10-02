@@ -142,7 +142,8 @@
     "docs": "التوثيق",
     "openMenu": "فتح القائمة",
     "subFormats": "Sub Formats",
-    "probe": "المراقبة"
+    "probe": "المراقبة",
+    "rules": "القواعد"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "تم تجديد {count} عميل",
         "unassigned": "تمت إزالة {count} عميل من الباقة"
       },
-      "clashRules": "قواعد Clash",
-      "clashInherit": "استخدام القواعد العامة",
-      "clashCustom": "قواعد خاصة بالباقة",
-      "clashRulesHint": "تحل القواعد الخاصة بالباقة محل قواعد Clash العامة في اشتراكات عملائها، حتى عند إيقاف توجيه Clash العام. ألصق قواعد/YAML أو عنوان HTTPS دائمًا واحدًا (يُحدَّث في الخلفية).",
-      "errClashRulesRequired": "أدخل القواعد أو عُد إلى القواعد العامة",
-      "name": "الاسم"
+      "name": "الاسم",
+      "template": "قالب القواعد",
+      "templateHint": "قواعد Clash في اشتراكات الأعضاء. القوالب في صفحة القواعد، والقالب الافتراضي (★) يخدم الباقات التي لم تختر قالبًا.",
+      "templateDefault": "الافتراضي ({name})",
+      "templateNoDefault": "الافتراضي (غير معيّن)",
+      "templateNone": "لا شيء",
+      "viewGrid": "بطاقات",
+      "viewList": "قائمة",
+      "actions": "الإجراءات"
     },
     "nodes": {
       "addNode": "إضافة نود",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "حقن ملف تعريف التوجيه في محتوى الاشتراك لعميل Incy. (فقط لـ Incy)",
       "subIncyRoutingRules": "قواعد التوجيه",
       "subIncyRoutingRulesDesc": "ألصق رابط incy:// جاهزًا أو عنوان HTTPS دائمًا لملف JSON. ينشئ Incy ملف autorouting ويحدّثه تلقائيًا. (فقط لـ Incy)",
-      "subClashEnableRouting": "تفعيل التوجيه",
-      "subClashEnableRoutingDesc": "تضمين قواعد توجيه Clash/Mihomo العامة في اشتراكات YAML المُنشأة.",
-      "subClashRoutingRules": "قواعد التوجيه العامة",
-      "subClashRoutingRulesDesc": "ألصق قواعد/YAML أو عنوان HTTPS دائمًا. تحدّثه اللوحة في الخلفية، وتستورد المجموعات وموفري القواعد والقواعد فقط، وتحافظ على عقد VPN المُنشأة وآخر قيمة صالحة.",
       "subListen": "IP الاستماع",
       "subListenDesc": "عنوان IP لخدمة الاشتراك. (سيبه فاضي عشان يستمع على كل الـ IPs)",
       "subPort": "بورت الاستماع",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "بروتوكول الوارد (VLESS، VMess، Trojan، …)",
         "descTRANSPORT": "شبكة النقل (tcp، ws، grpc، …)",
         "descSECURITY": "أمان النقل (TLS، REALITY، NONE)"
-      }
+      },
+      "subClashRulesMoved": "قواعد Clash",
+      "subClashRulesMovedDesc": "أصبحت قواعد Clash للاشتراكات قوالب في صفحة القواعد: تختار كل باقة قالبًا، والقالب الافتراضي للباقات بلا قالب وللعملاء بلا باقة."
     },
     "xray": {
       "save": "احفظ",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "هذا ليس عنوان loopback",
       "errPublicUrl": "هذا ليس رابط http أو https",
       "settingsSaved": "تم حفظ إعدادات المراقبة"
+    },
+    "rules": {
+      "intro": "قوالب قواعد Clash التي تستخدمها الباقات. تختار كل باقة قالبًا؛ والباقات التي لم تختر، والعملاء بلا باقة، يحصلون على القالب الافتراضي (★).",
+      "add": "قالب جديد",
+      "empty": "لا توجد قوالب قواعد بعد",
+      "name": "الاسم",
+      "kind": "النوع",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "قائمة قواعد",
+        "remote": "عن بُعد"
+      },
+      "size": "الحجم",
+      "usage": "مستخدم في",
+      "usedBy": "{count} باقة",
+      "updated": "آخر تحديث",
+      "actions": "الإجراءات",
+      "isDefault": "القالب الافتراضي",
+      "setDefault": "تعيين كافتراضي",
+      "preview": "معاينة",
+      "versions": "الإصدارات",
+      "deleteConfirm": "حذف القالب \"{name}\"؟",
+      "editTitle": "تعديل القالب",
+      "content": "المحتوى",
+      "contentHint": "أسطر قواعد Clash، أو مستند YAML لـ Clash تضع مجموعات الوكيل فيه __PROXY_NODES__ مكان العُقد، أو رابط HTTPS واحد.",
+      "errNameRequired": "أدخل اسمًا",
+      "errContentRequired": "أدخل محتوى القالب",
+      "versionsTitle": "إصدارات \"{name}\"",
+      "versionsEmpty": "لا توجد عمليات حفظ بعد",
+      "versionCurrent": "الحالي",
+      "versionRestore": "استعادة",
+      "versionRestoreConfirm": "استعادة هذا الإصدار؟ ستُحفظ الاستعادة كإصدار جديد.",
+      "previewTitle": "معاينة: {name}",
+      "previewPlan": "الباقة",
+      "previewPick": "اختر باقة",
+      "previewHint": "إعداد Clash الذي سيحصل عليه أول عميل في الباقة",
+      "toasts": {
+        "saved": "تم حفظ القالب",
+        "deleted": "تم حذف القالب",
+        "defaultSet": "تم تعيين القالب الافتراضي",
+        "restored": "تمت استعادة الإصدار"
+      }
     }
   },
   "tgbot": {

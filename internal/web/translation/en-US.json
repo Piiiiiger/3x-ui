@@ -142,7 +142,8 @@
     "docs": "Documentation",
     "openMenu": "Open menu",
     "subFormats": "Sub Formats",
-    "probe": "Probe"
+    "probe": "Probe",
+    "rules": "Rules"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "Renewed {count} client(s)",
         "unassigned": "Removed {count} client(s) from their plan"
       },
-      "clashRules": "Clash rules",
-      "clashInherit": "Use global rules",
-      "clashCustom": "Plan's own rules",
-      "clashRulesHint": "The plan's own rules replace the global Clash rules in its clients' subscriptions, even while global Clash routing is off. Paste rules/YAML or one permanent HTTPS URL (refreshed in the background).",
-      "errClashRulesRequired": "Enter rules, or switch back to the global rules",
-      "name": "Name"
+      "name": "Name",
+      "template": "Rule template",
+      "templateHint": "The Clash rules in members' subscriptions. Templates live on the Rules page; the default (★) serves plans without one.",
+      "templateDefault": "Default ({name})",
+      "templateNoDefault": "Default (none set)",
+      "templateNone": "None",
+      "viewGrid": "Cards",
+      "viewList": "List",
+      "actions": "Actions"
     },
     "nodes": {
       "addNode": "Add Host",
@@ -1363,10 +1367,6 @@
       "subIncyEnableRoutingDesc": "Inject a routing profile into the subscription body for the Incy client. (Only for Incy)",
       "subIncyRoutingRules": "Routing rules",
       "subIncyRoutingRulesDesc": "Paste a ready incy:// deeplink or one permanent HTTPS URL returning JSON. An HTTPS URL becomes an autorouting profile refreshed by Incy itself. (Incy only)",
-      "subClashEnableRouting": "Enable routing",
-      "subClashEnableRoutingDesc": "Include global Clash/Mihomo routing rules in generated YAML subscriptions.",
-      "subClashRoutingRules": "Global routing rules",
-      "subClashRoutingRulesDesc": "Paste inline rules/YAML or one permanent HTTPS URL. The panel refreshes it in the background, imports only groups/providers/rules, preserves generated VPN nodes and keeps the last valid value.",
       "subListen": "Listen IP",
       "subListenDesc": "The IP address for the subscription service. (leave blank to listen on all IPs)",
       "subPort": "Listen Port",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Inbound protocol (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Transport network (tcp, ws, grpc, …)",
         "descSECURITY": "Transport security (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Clash rules",
+      "subClashRulesMovedDesc": "Clash rules for subscriptions are now templates on the Rules page: each plan picks one, and the default serves plans without one and clients without a plan."
     },
     "xray": {
       "save": "Save",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "This is not a loopback address",
       "errPublicUrl": "This is not an http or https URL",
       "settingsSaved": "Probe settings saved"
+    },
+    "rules": {
+      "intro": "The Clash rule templates plans use. Each plan picks one; plans without one, and clients without a plan, get the default (★).",
+      "add": "New template",
+      "empty": "No rule templates yet",
+      "name": "Name",
+      "kind": "Type",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Rule list",
+        "remote": "Remote"
+      },
+      "size": "Size",
+      "usage": "Used by",
+      "usedBy": "{count} plan(s)",
+      "updated": "Updated",
+      "actions": "Actions",
+      "isDefault": "Default template",
+      "setDefault": "Make default",
+      "preview": "Preview",
+      "versions": "Versions",
+      "deleteConfirm": "Delete the template \"{name}\"?",
+      "editTitle": "Edit template",
+      "content": "Content",
+      "contentHint": "Clash rule lines, a Clash YAML document whose proxy groups list __PROXY_NODES__ where the nodes go, or one HTTPS URL.",
+      "errNameRequired": "Enter a name",
+      "errContentRequired": "Enter the template's content",
+      "versionsTitle": "Versions of \"{name}\"",
+      "versionsEmpty": "No saves yet",
+      "versionCurrent": "Current",
+      "versionRestore": "Restore",
+      "versionRestoreConfirm": "Restore this version? The restore is kept as a new version.",
+      "previewTitle": "Preview: {name}",
+      "previewPlan": "Plan",
+      "previewPick": "Pick a plan",
+      "previewHint": "The Clash config the plan's first client would get",
+      "toasts": {
+        "saved": "Template saved",
+        "deleted": "Template deleted",
+        "defaultSet": "Default template set",
+        "restored": "Version restored"
+      }
     }
   },
   "tgbot": {

@@ -146,7 +146,7 @@ It is paths-filtered, so a docs-only or workflow-only change produces no run.
 | --- | --- |
 | `go-test` | `go test -shuffle=on -count=1` over every package except `frontend/node_modules` |
 | `race` | the same set under `-race -shuffle=on` |
-| `postgres-durable-first` | live PostgreSQL 16: the `PostgresCommitFailure` tests plus `TestClientWeeklyRenewMigration_Postgres`, `TestInitDB_DropsClientGroupLeftovers_Postgres` and `TestInitDB_MovesEntriesOntoTheirInbounds_Postgres`. Both steps COUNT passes rather than assert on SKIP, so a renamed or deleted test fails the job |
+| `postgres-durable-first` | live PostgreSQL 16: the `PostgresCommitFailure` tests plus `TestClientWeeklyRenewMigration_Postgres`, `TestInitDB_DropsClientGroupLeftovers_Postgres`, `TestInitDB_MovesEntriesOntoTheirInbounds_Postgres` and `TestInitDB_MovesPlanRulesIntoTemplates_Postgres`. Both steps COUNT passes rather than assert on SKIP, so a renamed or deleted test fails the job |
 | `govulncheck` | known vulnerabilities |
 | `golangci` | `golangci-lint` |
 | `fuzz-smoke` | 30s each on `FuzzParseLink` and `FuzzDecodeCertPin` |

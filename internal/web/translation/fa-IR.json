@@ -142,7 +142,8 @@
     "docs": "مستندات",
     "openMenu": "باز کردن منو",
     "subFormats": "Sub Formats",
-    "probe": "پایش"
+    "probe": "پایش",
+    "rules": "قوانین"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} کلاینت تمدید شدند",
         "unassigned": "{count} کلاینت از پلن حذف شدند"
       },
-      "clashRules": "قوانین Clash",
-      "clashInherit": "استفاده از قوانین سراسری",
-      "clashCustom": "قوانین اختصاصی پلن",
-      "clashRulesHint": "قوانین اختصاصی پلن جایگزین قوانین سراسری Clash در اشتراک کلاینت‌های این پلن می‌شوند، حتی وقتی مسیریابی سراسری Clash خاموش است. قوانین/YAML یا یک نشانی دائمی HTTPS وارد کنید (در پس‌زمینه به‌روزرسانی می‌شود).",
-      "errClashRulesRequired": "قوانین را وارد کنید یا به قوانین سراسری برگردید",
-      "name": "نام"
+      "name": "نام",
+      "template": "قالب قوانین",
+      "templateHint": "قوانین Clash در اشتراک اعضا. قالب‌ها در صفحه‌ی قوانین هستند؛ قالب پیش‌فرض (★) برای پلن‌های بدون قالب است.",
+      "templateDefault": "پیش‌فرض ({name})",
+      "templateNoDefault": "پیش‌فرض (تنظیم نشده)",
+      "templateNone": "هیچ",
+      "viewGrid": "کارت‌ها",
+      "viewList": "فهرست",
+      "actions": "عملیات"
     },
     "nodes": {
       "addNode": "افزودن نود",
@@ -1363,10 +1367,6 @@
       "subIncyEnableRoutingDesc": "تزریق پروفایل مسیریابی به بدنه اشتراک برای کلاینت Incy. (فقط برای Incy)",
       "subIncyRoutingRules": "قوانین مسیریابی",
       "subIncyRoutingRulesDesc": "یک پیوند آماده incy:// یا یک نشانی دائمی HTTPS برای JSON وارد کنید. Incy یک نمایه autorouting می‌سازد و آن را خودکار به‌روزرسانی می‌کند. (فقط برای Incy)",
-      "subClashEnableRouting": "فعال‌سازی مسیریابی",
-      "subClashEnableRoutingDesc": "قوانین مسیریابی سراسری Clash/Mihomo را در اشتراک‌های YAML تولیدشده وارد کن.",
-      "subClashRoutingRules": "قوانین مسیریابی سراسری",
-      "subClashRoutingRulesDesc": "قوانین/YAML یا یک نشانی دائمی HTTPS وارد کنید. پنل آن را در پس‌زمینه به‌روزرسانی می‌کند، فقط گروه‌ها، ارائه‌دهندگان قانون و قوانین را وارد می‌کند و گره‌های VPN ساخته‌شده و آخرین مقدار معتبر را حفظ می‌کند.",
       "subListen": "آدرس آی‌پی",
       "subListenDesc": "آدرس آی‌پی برای سرویس سابسکریپشن. برای گوش دادن به‌تمام آی‌پی‌ها خالی‌بگذارید",
       "subPort": "پورت",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "پروتکل اینباند (VLESS، VMess، Trojan، …)",
         "descTRANSPORT": "شبکهٔ انتقال (tcp، ws، grpc، …)",
         "descSECURITY": "امنیت انتقال (TLS، REALITY، NONE)"
-      }
+      },
+      "subClashRulesMoved": "قوانین Clash",
+      "subClashRulesMovedDesc": "قوانین Clash اشتراک‌ها اکنون قالب‌هایی در صفحه‌ی قوانین هستند: هر پلن یکی را برمی‌گزیند و قالب پیش‌فرض برای پلن‌های بدون قالب و کلاینت‌های بدون پلن است."
     },
     "xray": {
       "save": "ذخیره",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "این یک نشانی لوپ‌بک نیست",
       "errPublicUrl": "این یک نشانی http یا https نیست",
       "settingsSaved": "تنظیمات پایش ذخیره شد"
+    },
+    "rules": {
+      "intro": "قالب‌های قوانین Clash که پلن‌ها استفاده می‌کنند. هر پلن یکی را انتخاب می‌کند؛ پلن‌های بدون قالب و کلاینت‌های بدون پلن قالب پیش‌فرض (★) را می‌گیرند.",
+      "add": "قالب جدید",
+      "empty": "هنوز قالب قانونی وجود ندارد",
+      "name": "نام",
+      "kind": "نوع",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "فهرست قوانین",
+        "remote": "راه دور"
+      },
+      "size": "اندازه",
+      "usage": "استفاده",
+      "usedBy": "{count} پلن",
+      "updated": "به‌روزرسانی",
+      "actions": "عملیات",
+      "isDefault": "قالب پیش‌فرض",
+      "setDefault": "پیش‌فرض کن",
+      "preview": "پیش‌نمایش",
+      "versions": "نسخه‌ها",
+      "deleteConfirm": "قالب «{name}» حذف شود؟",
+      "editTitle": "ویرایش قالب",
+      "content": "محتوا",
+      "contentHint": "خطوط قوانین Clash، یک سند YAML کلش که گروه‌های پراکسی آن جای نودها __PROXY_NODES__ دارند، یا یک نشانی HTTPS.",
+      "errNameRequired": "نامی وارد کنید",
+      "errContentRequired": "محتوای قالب را وارد کنید",
+      "versionsTitle": "نسخه‌های «{name}»",
+      "versionsEmpty": "هنوز ذخیره‌ای نیست",
+      "versionCurrent": "فعلی",
+      "versionRestore": "بازگردانی",
+      "versionRestoreConfirm": "این نسخه بازگردانی شود؟ بازگردانی به‌عنوان نسخه‌ای جدید نگه داشته می‌شود.",
+      "previewTitle": "پیش‌نمایش: {name}",
+      "previewPlan": "پلن",
+      "previewPick": "یک پلن انتخاب کنید",
+      "previewHint": "پیکربندی Clash که نخستین کلاینت پلن دریافت می‌کند",
+      "toasts": {
+        "saved": "قالب ذخیره شد",
+        "deleted": "قالب حذف شد",
+        "defaultSet": "قالب پیش‌فرض تنظیم شد",
+        "restored": "نسخه بازگردانی شد"
+      }
     }
   },
   "tgbot": {

@@ -383,6 +383,12 @@ export default function CommandPalette() {
         icon: <ProfileOutlined />,
       },
       {
+        path: '/rules',
+        title: t('menu.rules'),
+        keywords: ['rules', 'templates', 'clash', 'yaml', '规则', '模板'],
+        icon: <FileTextOutlined />,
+      },
+      {
         path: '/nodes',
         title: t('menu.nodes'),
         keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],

@@ -533,13 +533,7 @@ func TestLegacyClashEndpointExplainsWhenNoCompatibleProxyExists(t *testing.T) {
 func TestLegacyClashEndpointIgnoresCustomMihomoRouting(t *testing.T) {
 	seedSubDB(t)
 	seedSubProtocolInbound(t, "s1", "vmess", 4485, 1, `{"network":"tcp","security":"tls","tlsSettings":{"serverName":"vm.example.com"}}`, model.VMESS)
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	NewSUBController(
-		router.Group("/"),
-		WithSUBClashEnabled(true),
-		WithSUBClashEnableRouting(true),
-		WithSUBClashRules(`
+	seedRuleTemplate(t, "default", `
 proxies:
   - name: injected-modern-node
     type: vless
@@ -552,8 +546,10 @@ proxy-groups:
     include-all: true
 rules:
   - MATCH,MIHOMO-ONLY
-`),
-	)
+`, true)
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	NewSUBController(router.Group("/"), WithSUBClashEnabled(true))
 
 	req := httptest.NewRequest(http.MethodGet, "http://sub.example.com/clash-legacy/s1", nil)
 	resp := httptest.NewRecorder()

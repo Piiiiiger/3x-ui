@@ -17,7 +17,7 @@ const values: PlanFormValues = {
   trafficResetDay: 1,
   limitIp: 2,
   remark: '',
-  clashRules: '',
+  templateId: 0,
   inboundIds: [1, 2],
 };
 

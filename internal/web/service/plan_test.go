@@ -742,18 +742,22 @@ func TestListPagedFiltersByPlanAndReportsIt(t *testing.T) {
 	}
 }
 
-func TestPlanClashRulesRejectBadURLsAndTreatBlankAsInherit(t *testing.T) {
+// A plan names its rule template by id; 0 leaves it on the default template.
+func TestPlanTemplateMustExist(t *testing.T) {
 	setupPlanDB(t)
 	svc := &PlanService{}
-	_, err := svc.Create(PlanInput{Name: "Bad URL", ClashRules: "https://user:pw@rules.example/x.yaml"})
-	if err == nil || !strings.Contains(err.Error(), "clash rules") {
-		t.Fatalf("create with a credentialed URL: err = %v, want a clash rules error", err)
+	if _, err := svc.Create(PlanInput{Name: "Ghost", TemplateId: 42}); err == nil || !strings.Contains(err.Error(), "rule template that does not exist") {
+		t.Fatalf("create on a missing template: err = %v, want it refused", err)
 	}
-	plan, err := svc.Create(PlanInput{Name: "Blank", ClashRules: "  \n\t"})
+	tpl, err := (&RuleTemplateService{}).Create(RuleTemplateInput{Name: "alpha_v3", Content: "MATCH,DIRECT"})
 	if err != nil {
-		t.Fatalf("create with blank rules: %v", err)
+		t.Fatalf("create template: %v", err)
 	}
-	if plan.ClashRules != "" {
-		t.Fatalf("blank rules stored as %q, want empty so the plan inherits", plan.ClashRules)
+	plan, err := svc.Create(PlanInput{Name: "Real", TemplateId: tpl.Id})
+	if err != nil || plan.TemplateId != tpl.Id {
+		t.Fatalf("create on the template: plan %+v, err %v; want it stored", plan, err)
+	}
+	if plan, err := svc.Create(PlanInput{Name: "Default"}); err != nil || plan.TemplateId != 0 {
+		t.Fatalf("create without a template: plan %+v, err %v; want template 0", plan, err)
 	}
 }

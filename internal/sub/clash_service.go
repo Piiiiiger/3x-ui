@@ -21,15 +21,23 @@ import (
 )
 
 type SubClashService struct {
-	enableRouting bool
-	clashRules    string
-	SubService    *SubService
+	SubService *SubService
+	// rulesOverride, when set, stands in for the subscription's template (a preview).
+	rulesOverride *string
 }
 
 var errNoLegacyClashProxies = errors.New("no Clash for Windows-compatible proxies found; use the Mihomo subscription for modern proxy types")
 
-func NewSubClashService(enableRouting bool, clashRules string, subService *SubService) *SubClashService {
-	return &SubClashService{enableRouting: enableRouting, clashRules: clashRules, SubService: subService}
+func NewSubClashService(subService *SubService) *SubClashService {
+	return &SubClashService{SubService: subService}
+}
+
+// PreviewClash renders the Clash config subId would get with rules in place of its
+// plan's template, for the rule templates page.
+func PreviewClash(subId, host, remarkTemplate, rules string) (string, error) {
+	s := &SubClashService{SubService: NewSubService(remarkTemplate), rulesOverride: &rules}
+	out, _, err := s.GetClash(subId, host)
+	return out, err
 }
 
 func (s *SubClashService) GetClash(subId string, host string) (string, string, error) {
@@ -190,25 +198,26 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	return string(finalYAML), header, nil
 }
 
-// routingRules picks the subscription's plan rules when its plan has its own,
-// else the global rules while global Clash routing is on.
+// routingRules picks the rule template of the subscription's plan, else the default
+// template: for a plan that names none, and for clients without a plan.
 func (s *SubClashService) routingRules(subId string) (string, error) {
-	var planRules []string
-	err := database.GetDB().Table("plans AS p").
-		Joins("JOIN clients AS c ON c.plan_id = p.id").
-		Where("c.sub_id = ? AND p.clash_rules <> ''", subId).
+	if s.rulesOverride != nil {
+		return *s.rulesOverride, nil
+	}
+	db := database.GetDB()
+	var rules []string
+	err := db.Table("clients AS c").
+		Joins("JOIN plans AS p ON p.id = c.plan_id").
+		Joins("JOIN rule_templates AS t ON t.id = p.template_id").
+		Where("c.sub_id = ?", subId).
 		Order("p.id").Limit(1).
-		Pluck("p.clash_rules", &planRules).Error
-	if err != nil {
-		return "", err
+		Pluck("t.content", &rules).Error
+	if err != nil || len(rules) > 0 {
+		return strings.Join(rules, ""), err
 	}
-	if len(planRules) > 0 {
-		return planRules[0], nil
-	}
-	if s.enableRouting {
-		return s.clashRules, nil
-	}
-	return "", nil
+	err = db.Model(&model.RuleTemplate{}).Where("is_default = ?", true).
+		Order("id").Limit(1).Pluck("content", &rules).Error
+	return strings.Join(rules, ""), err
 }
 
 func legacyClashProxies(proxies []map[string]any) []map[string]any {

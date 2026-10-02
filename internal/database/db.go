@@ -88,6 +88,8 @@ func allModels() []any {
 		&model.ClientTrafficMark{},
 		&model.HostDailyTraffic{},
 		&model.InboundTrafficMark{},
+		&model.RuleTemplate{},
+		&model.RuleTemplateVersion{},
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 	}
@@ -197,6 +199,9 @@ func initModels() error {
 		return err
 	}
 	if err := deleteOutboundIntegrationSettings(); err != nil {
+		return err
+	}
+	if err := movePlanRulesIntoTemplates(); err != nil {
 		return err
 	}
 	if IsPostgres() {
@@ -471,6 +476,73 @@ func dropOutboundTables() error {
 func deleteOutboundIntegrationSettings() error {
 	keys := []string{"warp", "warpUpdateInterval", "warpLastUpdate", "nord", "pia"}
 	return db.Where("key IN ?", keys).Delete(&model.Setting{}).Error
+}
+
+// movePlanRulesIntoTemplates turns each plan's own Clash rules, and the global rules
+// setting, into rule templates that render the same subscriptions.
+func movePlanRulesIntoTemplates() error {
+	if !db.Migrator().HasColumn(&model.Plan{}, "clash_rules") {
+		return nil
+	}
+	return db.Transaction(func(tx *gorm.DB) error {
+		var plans []struct {
+			Id         int
+			Name       string
+			ClashRules string
+		}
+		if err := tx.Raw("SELECT id, name, COALESCE(clash_rules, '') AS clash_rules FROM plans " +
+			"WHERE COALESCE(clash_rules, '') <> '' ORDER BY sort_index, id").Scan(&plans).Error; err != nil {
+			return err
+		}
+		for _, plan := range plans {
+			tpl, err := createMovedRuleTemplate(tx, plan.Name, plan.ClashRules, false)
+			if err != nil {
+				return err
+			}
+			if err := tx.Model(&model.Plan{}).Where("id = ?", plan.Id).Update("template_id", tpl.Id).Error; err != nil {
+				return err
+			}
+		}
+		globalKeys := []string{"subClashEnableRouting", "subClashRules"}
+		var settings []model.Setting
+		if err := tx.Where("key IN ?", globalKeys).Find(&settings).Error; err != nil {
+			return err
+		}
+		global := map[string]string{}
+		for _, setting := range settings {
+			global[setting.Key] = setting.Value
+		}
+		if strings.TrimSpace(global["subClashRules"]) != "" {
+			if _, err := createMovedRuleTemplate(tx, "global", global["subClashRules"], global["subClashEnableRouting"] == "true"); err != nil {
+				return err
+			}
+		}
+		if err := tx.Where("key IN ?", globalKeys).Delete(&model.Setting{}).Error; err != nil {
+			return err
+		}
+		return tx.Exec("ALTER TABLE plans DROP COLUMN clash_rules").Error
+	})
+}
+
+// createMovedRuleTemplate saves rules as a template under the first free name based
+// on name, with its content as the template's first version.
+func createMovedRuleTemplate(tx *gorm.DB, name, content string, isDefault bool) (*model.RuleTemplate, error) {
+	unique := name
+	for n := 2; ; n++ {
+		var taken int64
+		if err := tx.Model(&model.RuleTemplate{}).Where("name = ?", unique).Count(&taken).Error; err != nil {
+			return nil, err
+		}
+		if taken == 0 {
+			break
+		}
+		unique = fmt.Sprintf("%s (%d)", name, n)
+	}
+	tpl := &model.RuleTemplate{Name: unique, Content: content, IsDefault: isDefault}
+	if err := tx.Create(tpl).Error; err != nil {
+		return nil, err
+	}
+	return tpl, tx.Create(&model.RuleTemplateVersion{TemplateId: tpl.Id, Content: content, Size: len(content)}).Error
 }
 
 // dropClientGroups removes what client groups left behind once Pigger dropped

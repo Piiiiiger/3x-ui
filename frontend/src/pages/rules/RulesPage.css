@@ -1,0 +1,10 @@
+.rule-template-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.rule-template-star {
+  color: var(--ant-color-warning);
+}

@@ -142,7 +142,8 @@
     "docs": "ドキュメント",
     "openMenu": "メニューを開く",
     "subFormats": "Sub Formats",
-    "probe": "サーバー監視"
+    "probe": "サーバー監視",
+    "rules": "ルール"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} クライアントを更新しました",
         "unassigned": "{count} クライアントをプランから外しました"
       },
-      "clashRules": "Clash ルール",
-      "clashInherit": "グローバルルールを使用",
-      "clashCustom": "プラン専用ルール",
-      "clashRulesHint": "専用ルールは、このプランのクライアントのサブスクリプションでグローバル Clash ルールを置き換えます。グローバル Clash ルーティングがオフでも適用されます。ルール/YAML、または固定の HTTPS URL（バックグラウンドで更新）を貼り付けてください。",
-      "errClashRulesRequired": "ルールを入力するか、グローバルルールに戻してください",
-      "name": "名前"
+      "name": "名前",
+      "template": "ルールテンプレート",
+      "templateHint": "メンバーのサブスクリプションに入る Clash ルール。テンプレートはルールページで管理し、選ばないプランには既定（★）が使われます。",
+      "templateDefault": "既定（{name}）",
+      "templateNoDefault": "既定（未設定）",
+      "templateNone": "なし",
+      "viewGrid": "カード",
+      "viewList": "リスト",
+      "actions": "操作"
     },
     "nodes": {
       "addNode": "ノードを追加",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Incyクライアント用に、サブスクリプション本文へルーティングプロファイルを挿入します。(Incyのみ)",
       "subIncyRoutingRules": "ルーティングルール",
       "subIncyRoutingRulesDesc": "完成した incy:// ディープリンク、または JSON への永続的な HTTPS URL を入力します。Incy は autorouting プロファイルを作成し、自動更新します。(Incyのみ)",
-      "subClashEnableRouting": "ルーティングを有効化",
-      "subClashEnableRoutingDesc": "生成されたYAMLサブスクリプションにClash/Mihomoのグローバルルーティングルールを含めます。",
-      "subClashRoutingRules": "グローバルルーティングルール",
-      "subClashRoutingRulesDesc": "ルール/YAML、または永続的な HTTPS URL を入力します。パネルはバックグラウンドで更新し、グループ・ルールプロバイダー・ルールのみを取り込み、生成済み VPN ノードと最後の有効値を保持します。",
       "subListen": "監視IP",
       "subListenDesc": "サブスクリプションサービスが監視するIPアドレス（空白にするとすべてのIPを監視）",
       "subPort": "監視ポート",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "インバウンドのプロトコル（VLESS、VMess、Trojan など）",
         "descTRANSPORT": "トランスポートネットワーク（tcp、ws、grpc など）",
         "descSECURITY": "トランスポートのセキュリティ（TLS、REALITY、NONE）"
-      }
+      },
+      "subClashRulesMoved": "Clash ルール",
+      "subClashRulesMovedDesc": "サブスクリプションの Clash ルールはルールページのテンプレートになりました。各プランが 1 つ選び、既定のテンプレートは未選択のプランとプランのないクライアントに使われます。"
     },
     "xray": {
       "metricsListen": "メトリクスエンドポイント",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "ループバックアドレスではありません",
       "errPublicUrl": "http または https の URL ではありません",
       "settingsSaved": "サーバー監視の設定を保存しました"
+    },
+    "rules": {
+      "intro": "プランが使う Clash ルールテンプレート。各プランが 1 つ選び、選んでいないプランとプランのないクライアントには既定のテンプレート（★）が使われます。",
+      "add": "新しいテンプレート",
+      "empty": "ルールテンプレートはまだありません",
+      "name": "名前",
+      "kind": "種類",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "ルール一覧",
+        "remote": "リモート"
+      },
+      "size": "サイズ",
+      "usage": "使用状況",
+      "usedBy": "{count} プラン",
+      "updated": "更新日時",
+      "actions": "操作",
+      "isDefault": "既定のテンプレート",
+      "setDefault": "既定にする",
+      "preview": "プレビュー",
+      "versions": "バージョン",
+      "deleteConfirm": "テンプレート「{name}」を削除しますか？",
+      "editTitle": "テンプレートを編集",
+      "content": "内容",
+      "contentHint": "Clash のルール行、プロキシグループのノードの位置に __PROXY_NODES__ を書いた Clash YAML、または HTTPS URL 1 つ。",
+      "errNameRequired": "名前を入力してください",
+      "errContentRequired": "テンプレートの内容を入力してください",
+      "versionsTitle": "「{name}」のバージョン",
+      "versionsEmpty": "保存履歴はまだありません",
+      "versionCurrent": "現在",
+      "versionRestore": "復元",
+      "versionRestoreConfirm": "このバージョンに復元しますか？復元は新しいバージョンとして保存されます。",
+      "previewTitle": "プレビュー: {name}",
+      "previewPlan": "プラン",
+      "previewPick": "プランを選択",
+      "previewHint": "プランの最初のクライアントが受け取る Clash 設定",
+      "toasts": {
+        "saved": "テンプレートを保存しました",
+        "deleted": "テンプレートを削除しました",
+        "defaultSet": "既定のテンプレートを設定しました",
+        "restored": "バージョンを復元しました"
+      }
     }
   },
   "tgbot": {

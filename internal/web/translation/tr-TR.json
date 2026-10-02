@@ -142,7 +142,8 @@
     "docs": "Belgeler",
     "openMenu": "Menüyü aç",
     "subFormats": "Abonelik Formatları",
-    "probe": "İzleme"
+    "probe": "İzleme",
+    "rules": "Kurallar"
   },
   "pages": {
     "login": {
@@ -1068,12 +1069,15 @@
         "renewed": "{count} kullanıcı yenilendi",
         "unassigned": "{count} kullanıcı paketten çıkarıldı"
       },
-      "clashRules": "Clash kuralları",
-      "clashInherit": "Genel kuralları kullan",
-      "clashCustom": "Pakete özel kurallar",
-      "clashRulesHint": "Pakete özel kurallar, paketteki kullanıcıların aboneliklerinde genel Clash kurallarının yerini alır; genel Clash yönlendirmesi kapalıyken bile uygulanır. Kurallar/YAML ya da kalıcı bir HTTPS URL'si yapıştırın (arka planda yenilenir).",
-      "errClashRulesRequired": "Kuralları girin ya da genel kurallara dönün",
-      "name": "İsim"
+      "name": "İsim",
+      "template": "Kural şablonu",
+      "templateHint": "Üyelerin aboneliklerindeki Clash kuralları. Şablonlar Kurallar sayfasında; varsayılan (★) şablonu olmayan paketlere uygulanır.",
+      "templateDefault": "Varsayılan ({name})",
+      "templateNoDefault": "Varsayılan (ayarlanmadı)",
+      "templateNone": "Yok",
+      "viewGrid": "Kartlar",
+      "viewList": "Liste",
+      "actions": "İşlemler"
     },
     "nodes": {
       "addNode": "Düğüm Ekle",
@@ -1359,10 +1363,6 @@
       "subIncyEnableRoutingDesc": "Incy istemcisi için abonelik gövdesine bir yönlendirme profili ekleyin. (Yalnızca Incy için)",
       "subIncyRoutingRules": "Yönlendirme kuralları",
       "subIncyRoutingRulesDesc": "Hazır bir incy:// derin bağlantısı veya JSON için kalıcı bir HTTPS URL'si yapıştırın. Incy bir autorouting profili oluşturur ve otomatik olarak günceller. (Yalnızca Incy için)",
-      "subClashEnableRouting": "Yönlendirmeyi Etkinleştir",
-      "subClashEnableRoutingDesc": "Oluşturulan YAML aboneliklerine genel Clash/Mihomo yönlendirme kurallarını ekler.",
-      "subClashRoutingRules": "Genel Yönlendirme Kuralları",
-      "subClashRoutingRulesDesc": "Kurallar/YAML veya kalıcı bir HTTPS URL'si yapıştırın. Panel bunu arka planda yeniler, yalnızca grupları, kural sağlayıcılarını ve kuralları içe aktarır; oluşturulan VPN düğümlerini ve son geçerli değeri korur.",
       "subListen": "Dinleme IP",
       "subListenDesc": "Abonelik hizmeti için IP adresi. (tüm IP'leri dinlemek için boş bırakın)",
       "subPort": "Dinleme Portu",
@@ -1882,7 +1882,9 @@
         "descPROTOCOL": "Gelen bağlantı protokolü (VLESS, VMess, Trojan, …)",
         "descTRANSPORT": "Taşıma ağı (tcp, ws, grpc, …)",
         "descSECURITY": "Taşıma güvenliği (TLS, REALITY, NONE)"
-      }
+      },
+      "subClashRulesMoved": "Clash kuralları",
+      "subClashRulesMovedDesc": "Aboneliklerin Clash kuralları artık Kurallar sayfasındaki şablonlardır: her paket birini seçer; varsayılan, şablonu olmayan paketlere ve paketi olmayan kullanıcılara uygulanır."
     },
     "xray": {
       "save": "Kaydet",
@@ -2168,6 +2170,48 @@
       "errLiteUrl": "Bu bir loopback adresi değil",
       "errPublicUrl": "Bu bir http veya https URL’si değil",
       "settingsSaved": "İzleme ayarları kaydedildi"
+    },
+    "rules": {
+      "intro": "Paketlerin kullandığı Clash kural şablonları. Her paket bir şablon seçer; şablonsuz paketler ve paketi olmayan kullanıcılar varsayılanı (★) alır.",
+      "add": "Yeni şablon",
+      "empty": "Henüz kural şablonu yok",
+      "name": "Ad",
+      "kind": "Tür",
+      "kinds": {
+        "yaml": "YAML",
+        "rules": "Kural listesi",
+        "remote": "Uzak"
+      },
+      "size": "Boyut",
+      "usage": "Kullanan",
+      "usedBy": "{count} paket",
+      "updated": "Güncellendi",
+      "actions": "İşlemler",
+      "isDefault": "Varsayılan şablon",
+      "setDefault": "Varsayılan yap",
+      "preview": "Önizleme",
+      "versions": "Sürümler",
+      "deleteConfirm": "\"{name}\" şablonu silinsin mi?",
+      "editTitle": "Şablonu düzenle",
+      "content": "İçerik",
+      "contentHint": "Clash kural satırları, proxy gruplarında düğümlerin yerine __PROXY_NODES__ yazan bir Clash YAML belgesi ya da tek bir HTTPS adresi.",
+      "errNameRequired": "Bir ad girin",
+      "errContentRequired": "Şablonun içeriğini girin",
+      "versionsTitle": "\"{name}\" sürümleri",
+      "versionsEmpty": "Henüz kayıt yok",
+      "versionCurrent": "Güncel",
+      "versionRestore": "Geri yükle",
+      "versionRestoreConfirm": "Bu sürüm geri yüklensin mi? Geri yükleme yeni bir sürüm olarak saklanır.",
+      "previewTitle": "Önizleme: {name}",
+      "previewPlan": "Paket",
+      "previewPick": "Bir paket seçin",
+      "previewHint": "Paketin ilk kullanıcısının alacağı Clash yapılandırması",
+      "toasts": {
+        "saved": "Şablon kaydedildi",
+        "deleted": "Şablon silindi",
+        "defaultSet": "Varsayılan şablon ayarlandı",
+        "restored": "Sürüm geri yüklendi"
+      }
     }
   },
   "tgbot": {

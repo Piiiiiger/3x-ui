@@ -7,6 +7,7 @@
 .probe-page,
 .groups-page,
 .plans-page,
+.rules-page,
 .api-docs-page,
 .sponsors-page {
   --bg-page: #fdfaf8;
@@ -31,6 +32,7 @@
 .probe-page.is-dark,
 .groups-page.is-dark,
 .plans-page.is-dark,
+.rules-page.is-dark,
 .api-docs-page.is-dark,
 .sponsors-page.is-dark {
   --bg-page: #0d1018;
@@ -52,6 +54,7 @@
 .probe-page.is-dark.is-ultra,
 .groups-page.is-dark.is-ultra,
 .plans-page.is-dark.is-ultra,
+.rules-page.is-dark.is-ultra,
 .api-docs-page.is-dark.is-ultra,
 .sponsors-page.is-dark.is-ultra {
   --bg-page: #000;
@@ -72,6 +75,7 @@
 .probe-page::before,
 .groups-page::before,
 .plans-page::before,
+.rules-page::before,
 .api-docs-page::before,
 .sponsors-page::before,
 .hosts-page::before {
@@ -102,8 +106,10 @@
 .probe-page .ant-layout-content,
 .groups-page .ant-layout,
 .plans-page .ant-layout,
+.rules-page .ant-layout,
 .groups-page .ant-layout-content,
 .plans-page .ant-layout-content,
+.rules-page .ant-layout-content,
 .api-docs-page .ant-layout,
 .api-docs-page .ant-layout-content {
   background: transparent;
@@ -118,6 +124,7 @@
 .probe-page .content-shell,
 .groups-page .content-shell,
 .plans-page .content-shell,
+.rules-page .content-shell,
 .api-docs-page .content-shell {
   background: transparent;
 }
@@ -130,7 +137,8 @@
 .nodes-page .content-area,
 .probe-page .content-area,
 .groups-page .content-area,
-.plans-page .content-area {
+.plans-page .content-area,
+.rules-page .content-area {
   padding: 24px;
 }
 
@@ -144,6 +152,7 @@
 .probe-page .content-area,
 .groups-page .content-area,
 .plans-page .content-area,
+.rules-page .content-area,
 .api-docs-page .content-area,
 .hosts-page .content-area,
 .sponsors-page .content-area {
@@ -158,7 +167,8 @@
   .nodes-page .content-area,
   .probe-page .content-area,
   .groups-page .content-area,
-  .plans-page .content-area {
+  .plans-page .content-area,
+  .rules-page .content-area {
     padding: 8px;
   }
 }

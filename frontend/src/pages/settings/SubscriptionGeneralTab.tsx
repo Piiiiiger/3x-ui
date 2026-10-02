@@ -421,33 +421,13 @@ export default function SubscriptionGeneralTab({
           key: '6',
           label: catTabLabel(<NodeIndexOutlined />, 'Clash / Mihomo', isMobile),
           children: (
-            <>
-              <SettingListItem
-                paddings="small"
-                title={t('pages.settings.subClashEnableRouting')}
-                description={t('pages.settings.subClashEnableRoutingDesc')}
-              >
-                <Switch
-                  checked={allSetting.subClashEnableRouting}
-                  onChange={(v) => updateSetting({ subClashEnableRouting: v })}
-                />
-              </SettingListItem>
-              <SettingListItem
-                paddings="small"
-                title={t('pages.settings.subClashRoutingRules')}
-                badge={remoteSourceBadge(allSetting.subClashRules)}
-                description={t('pages.settings.subClashRoutingRulesDesc')}
-              >
-                <Input.TextArea
-                  value={allSetting.subClashRules}
-                  rows={8}
-                  placeholder={
-                    'https://.../routing.yaml\n\nor inline rules:\nGEOSITE,category-ir,DIRECT'
-                  }
-                  onChange={(e) => updateSetting({ subClashRules: e.target.value })}
-                />
-              </SettingListItem>
-            </>
+            <SettingListItem
+              paddings="small"
+              title={t('pages.settings.subClashRulesMoved')}
+              description={t('pages.settings.subClashRulesMovedDesc')}
+            >
+              <Button onClick={() => navigate('/rules')}>{t('menu.rules')}</Button>
+            </SettingListItem>
           ),
         },
         {

@@ -223,13 +223,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashEnable": {
         "type": "boolean"
       },
-      "subClashEnableRouting": {
-        "type": "boolean"
-      },
       "subClashPath": {
-        "type": "string"
-      },
-      "subClashRules": {
         "type": "string"
       },
       "subClashURI": {
@@ -643,9 +637,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subCertFile",
       "subClashAutoDetect",
       "subClashEnable",
-      "subClashEnableRouting",
       "subClashPath",
-      "subClashRules",
       "subClashURI",
       "subClashUserAgentRegex",
       "subDomain",
@@ -988,13 +980,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashEnable": {
         "type": "boolean"
       },
-      "subClashEnableRouting": {
-        "type": "boolean"
-      },
       "subClashPath": {
-        "type": "string"
-      },
-      "subClashRules": {
         "type": "string"
       },
       "subClashURI": {
@@ -1414,9 +1400,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subCertFile",
       "subClashAutoDetect",
       "subClashEnable",
-      "subClashEnableRouting",
       "subClashPath",
-      "subClashRules",
       "subClashURI",
       "subClashUserAgentRegex",
       "subDomain",
@@ -4012,11 +3996,6 @@ export const SCHEMAS: Record<string, unknown> = {
   "Plan": {
     "description": "Plan is a reusable set of limits (quota, validity, reset schedule, IP limit and the\ninbounds it grants) that the panel stamps onto every client assigned to it.",
     "properties": {
-      "clashRules": {
-        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
-        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
-        "type": "string"
-      },
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4047,6 +4026,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "templateId": {
+        "description": "TemplateId is the rule template its members' Clash subscriptions use; 0 is the\ndefault template.",
+        "example": 1,
+        "type": "integer"
+      },
       "totalGB": {
         "description": "bytes, 0 = unlimited",
         "example": 107374182400,
@@ -4068,7 +4052,6 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "clashRules",
       "createdAt",
       "durationDays",
       "id",
@@ -4076,6 +4059,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "name",
       "remark",
       "sortIndex",
+      "templateId",
       "totalGB",
       "trafficReset",
       "trafficResetDay",
@@ -4102,10 +4086,6 @@ export const SCHEMAS: Record<string, unknown> = {
   "PlanInput": {
     "description": "PlanInput is the editable part of a plan plus the inbounds it grants.",
     "properties": {
-      "clashRules": {
-        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
-        "type": "string"
-      },
       "durationDays": {
         "example": 30,
         "type": "integer"
@@ -4132,6 +4112,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "Hong Kong and Singapore",
         "type": "string"
       },
+      "templateId": {
+        "example": 1,
+        "type": "integer"
+      },
       "totalGB": {
         "example": 107374182400,
         "format": "int64",
@@ -4147,12 +4131,12 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "clashRules",
       "durationDays",
       "inboundIds",
       "limitIp",
       "name",
       "remark",
+      "templateId",
       "totalGB",
       "trafficReset",
       "trafficResetDay"
@@ -4162,11 +4146,6 @@ export const SCHEMAS: Record<string, unknown> = {
   "PlanSummary": {
     "description": "PlanSummary is a plan with the inbounds it grants and how many clients use it.",
     "properties": {
-      "clashRules": {
-        "description": "ClashRules replaces the global Clash rules for members: inline rules/YAML or an\nHTTPS URL. Empty inherits the global rules.",
-        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
-        "type": "string"
-      },
       "createdAt": {
         "example": 1735689600000,
         "format": "int64",
@@ -4211,6 +4190,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "templateId": {
+        "description": "TemplateId is the rule template its members' Clash subscriptions use; 0 is the\ndefault template.",
+        "example": 1,
+        "type": "integer"
+      },
       "totalGB": {
         "description": "bytes, 0 = unlimited",
         "example": 107374182400,
@@ -4232,7 +4216,6 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "clashRules",
       "createdAt",
       "durationDays",
       "id",
@@ -4242,6 +4225,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "name",
       "remark",
       "sortIndex",
+      "templateId",
       "totalGB",
       "trafficReset",
       "trafficResetDay",
@@ -4926,6 +4910,137 @@ export const SCHEMAS: Record<string, unknown> = {
       "tls13",
       "tlsVersion",
       "x25519"
+    ],
+    "type": "object"
+  },
+  "RuleTemplate": {
+    "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document\n(妙妙屋X's templates, whose groups list __PROXY_NODES__) or an HTTPS URL.",
+    "properties": {
+      "content": {
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
+      "createdAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "isDefault": {
+        "example": false,
+        "type": "boolean"
+      },
+      "name": {
+        "example": "alpha_v3",
+        "type": "string"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "content",
+      "createdAt",
+      "id",
+      "isDefault",
+      "name",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "RuleTemplateInput": {
+    "description": "RuleTemplateInput is the editable part of a template.",
+    "properties": {
+      "content": {
+        "example": "DOMAIN-SUFFIX,example.com,DIRECT",
+        "type": "string"
+      },
+      "name": {
+        "example": "alpha_v3",
+        "type": "string"
+      }
+    },
+    "required": [
+      "content",
+      "name"
+    ],
+    "type": "object"
+  },
+  "RuleTemplateSummary": {
+    "description": "RuleTemplateSummary is a template in the list, without its content. Kind says\nhow its content reads; planCount includes the plans the default serves.",
+    "properties": {
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "isDefault": {
+        "example": false,
+        "type": "boolean"
+      },
+      "kind": {
+        "enum": [
+          "rules",
+          "yaml",
+          "remote"
+        ],
+        "example": "yaml",
+        "type": "string"
+      },
+      "name": {
+        "example": "alpha_v3",
+        "type": "string"
+      },
+      "planCount": {
+        "example": 2,
+        "type": "integer"
+      },
+      "size": {
+        "example": 389305,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "isDefault",
+      "kind",
+      "name",
+      "planCount",
+      "size",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "RuleTemplateVersionView": {
+    "description": "RuleTemplateVersionView is one kept save, without its content.",
+    "properties": {
+      "id": {
+        "example": 7,
+        "type": "integer"
+      },
+      "savedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "size": {
+        "example": 389305,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "savedAt",
+      "size"
     ],
     "type": "object"
   },

@@ -47,15 +47,9 @@ func TestPlanTemplateRendersLikeMMWX(t *testing.T) {
 			t.Fatalf("set stream: %v", err)
 		}
 	}
-	plan := &model.Plan{Name: "Template", ClashRules: mmwxStyleTemplate}
-	if err := db.Create(plan).Error; err != nil {
-		t.Fatalf("create plan: %v", err)
-	}
-	if err := db.Model(&model.ClientRecord{}).Where("sub_id = ?", "s1").Update("plan_id", plan.Id).Error; err != nil {
-		t.Fatalf("assign plan: %v", err)
-	}
+	putS1OnPlan(t, seedRuleTemplate(t, "Template", mmwxStyleTemplate, false))
 
-	out, _, err := NewSubClashService(false, "", NewSubService("{{INBOUND}}")).GetClash("s1", "req.example.com")
+	out, _, err := NewSubClashService(NewSubService("{{INBOUND}}")).GetClash("s1", "req.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
 	}
