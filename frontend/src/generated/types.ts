@@ -600,6 +600,37 @@ export interface FreePortView {
   port: number;
 }
 
+export interface GenerateNodeRequest {
+  clientStats: ClientTraffic[];
+  disableFlow: boolean;
+  down: number;
+  enable: boolean;
+  excludeFromSub: boolean;
+  expiryTime: number;
+  fallbackParent?: FallbackParentInfo | null;
+  id: number;
+  lastTrafficResetTime: number;
+  listen: string;
+  nodeId?: number | null;
+  originNodeGuid?: string;
+  planIds: number[];
+  port: number;
+  protocol: Protocol;
+  publicPort: number;
+  remark: string;
+  settings: unknown;
+  shareAddr: string;
+  shareAddrStrategy: string;
+  sniffing: unknown;
+  streamSettings: unknown;
+  subSortIndex: number;
+  tag: string;
+  total: number;
+  trafficReset: string;
+  trafficResetDay: number;
+  up: number;
+}
+
 export interface GeoCategory {
   attributes: string[];
   code: string;

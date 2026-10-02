@@ -323,6 +323,16 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/inbounds/generate',
+        summary:
+          'Generate a node on the local panel or a connected agent host. The inbound is created disabled; when NAT exposes it on another public port an entry row carries that port; the chosen plans’ members get it without their limits being re-applied. It is enabled only once the host runs it: the local panel must bind the port and take it live, an agent must accept the pushed config. A node the host refuses is left as a disabled row and the message says why; an earlier failure removes it.',
+        body: '{\n  "inbound": {\n    "remark": "HK-Edge-2",\n    "enable": true,\n    "port": 81,\n    "protocol": "vless",\n    "nodeId": 5,\n    "settings": { "clients": [], "decryption": "none" },\n    "streamSettings": { "network": "tcp", "security": "reality" },\n    "sniffing": {}\n  },\n  "planIds": [1, 2],\n  "publicPort": 20443\n}',
+        requestSchema: { $ref: '#/components/schemas/GenerateNodeRequest' },
+        errorResponse:
+          '{\n  "success": false,\n  "msg": "the node was left disabled: agent on edge-hk refused its config: listen tcp :81: bind: address already in use"\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/inbounds/del/:id',
         summary: 'Delete an inbound by ID. Also removes its associated client stats rows.',
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Inbound ID.' }],

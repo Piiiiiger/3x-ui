@@ -107,6 +107,7 @@ func run(root, outDir string) error {
 				"ClientsSummary",
 				"InboundTrafficSummary",
 				"FreePortView",
+				"GenerateNodeRequest",
 				"LogEntry",
 				"NewUUIDResponse",
 				"MLDSA65Response",

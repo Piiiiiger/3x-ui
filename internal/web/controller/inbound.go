@@ -80,6 +80,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.GET("/:id/fallbacks", a.getFallbacks)
 
 	g.POST("/add", a.addInbound)
+	g.POST("/generate", a.generateNode)
 	g.POST("/del/:id", a.delInbound)
 	g.POST("/bulkDel", a.bulkDelInbounds)
 	g.POST("/update/:id", a.updateInbound)
@@ -177,6 +178,30 @@ func (a *InboundController) getFreePort(c *gin.Context) {
 		return
 	}
 	jsonObj(c, view, nil)
+}
+
+// generateNode creates a node on a host and enables it once the host runs it; a
+// node the host refused stays as a disabled row, so the lists refresh either way.
+func (a *InboundController) generateNode(c *gin.Context) {
+	req, ok := middleware.BindJSONAndValidate[service.GenerateNodeRequest](c)
+	if !ok {
+		return
+	}
+	user := session.GetLoginUser(c)
+	req.Inbound.UserId = user.Id
+	if req.Inbound.NodeID != nil && *req.Inbound.NodeID == 0 {
+		req.Inbound.NodeID = nil
+	}
+	inbound, err := a.inboundService.GenerateNode(req)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+	} else {
+		jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundCreateSuccess"), inbound, nil)
+	}
+	if inbound != nil {
+		a.broadcastInboundsUpdate(user.Id)
+		notifyClientsChanged()
+	}
 }
 
 // addInbound creates a new inbound configuration.

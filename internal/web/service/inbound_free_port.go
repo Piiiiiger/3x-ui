@@ -5,6 +5,7 @@ import (
 	"math/rand/v2"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -51,7 +52,7 @@ func freePortIn(db *gorm.DB, nodeID *int, low, high int, offset func(int) int) (
 		if err != nil {
 			return FreePortView{}, err
 		}
-		if conflict != nil || (nodeID == nil && !machinePortFree(port)) {
+		if conflict != nil || (nodeID == nil && !machineCanBind("", port, transportTCP|transportUDP)) {
 			continue
 		}
 		return FreePortView{Port: port}, nil
@@ -59,20 +60,27 @@ func freePortIn(db *gorm.DB, nodeID *int, low, high int, offset func(int) int) (
 	return FreePortView{}, common.NewErrorf("no free port between %d and %d on this host; enter one by hand", low, high)
 }
 
-// machinePortFree asks this machine, which only the local panel's Xray shares:
-// programs such as haproxy or sing-box hold ports no inbound row records.
-func machinePortFree(port int) bool {
+// machineCanBind asks this machine, which only the local panel's Xray shares, as
+// haproxy or sing-box hold ports no inbound row records; a socket path is no port.
+func machineCanBind(listen string, port int, bits transportBits) bool {
+	if strings.HasPrefix(listen, "/") || strings.HasPrefix(listen, "@") {
+		return true
+	}
 	var lc net.ListenConfig
-	addr := ":" + strconv.Itoa(port)
-	tcp, err := lc.Listen(context.Background(), "tcp", addr)
-	if err != nil {
-		return false
+	addr := net.JoinHostPort(listen, strconv.Itoa(port))
+	if bits&transportTCP != 0 {
+		tcp, err := lc.Listen(context.Background(), "tcp", addr)
+		if err != nil {
+			return false
+		}
+		_ = tcp.Close()
 	}
-	_ = tcp.Close()
-	udp, err := lc.ListenPacket(context.Background(), "udp", addr)
-	if err != nil {
-		return false
+	if bits&transportUDP != 0 {
+		udp, err := lc.ListenPacket(context.Background(), "udp", addr)
+		if err != nil {
+			return false
+		}
+		_ = udp.Close()
 	}
-	_ = udp.Close()
 	return true
 }
