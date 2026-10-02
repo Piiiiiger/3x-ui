@@ -76,7 +76,7 @@ describe('PlansPage', () => {
     renderPage();
     await screen.findByText('Starter 125G');
     await within(cardOf('Starter 125G')).findByText('alpha_v3');
-    expect(within(cardOf('Starter 125G')).getByText('1 client(s)')).toBeTruthy();
+    expect(within(cardOf('Starter 125G')).getByText('1 user(s)')).toBeTruthy();
     expect(within(cardOf('Starter 125G')).getByText('2')).toBeTruthy();
 
     // A plan naming no template gets the default one.

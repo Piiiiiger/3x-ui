@@ -268,7 +268,7 @@ func TestGatewayClient_EndToEndCommands(t *testing.T) {
 			if strings.Contains(e.Title, "Server Status") {
 				foundStatus = true
 			}
-			if strings.Contains(e.Title, "Client Usage: client@test.com") {
+			if strings.Contains(e.Title, "User Usage: client@test.com") {
 				foundUsage = true
 			}
 		}

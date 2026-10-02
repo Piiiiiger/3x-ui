@@ -63,12 +63,12 @@ describe('PlanFormModal', () => {
       <PlanFormModal open plan={plan} onClose={() => {}} onConfirm={onConfirm} />,
     );
     const reapply = screen.getByRole('checkbox', {
-      name: 'Also re-apply quota, IP limit and reset schedule to the 3 client(s) on this plan',
+      name: 'Also re-apply quota, IP limit and reset schedule to the 3 user(s) on this plan',
     }) as HTMLInputElement;
     expect(reapply.checked).toBe(false);
     expect(
       screen.getByText(
-        "Nodes you add or remove always reach this plan's clients, with or without this option.",
+        "Nodes you add or remove always reach this plan's users, with or without this option.",
       ),
     ).toBeTruthy();
 

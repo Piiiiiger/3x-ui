@@ -126,7 +126,7 @@ describe('GenerateNodeModal', () => {
     expect(field('SNI').value).toBe('www.bing.com');
     expect(screen.getByRole('checkbox', { name: 'Asia' })).toHaveProperty('checked', true);
     expect(screen.getByRole('checkbox', { name: 'US' })).toHaveProperty('checked', false);
-    expect(screen.getByText('3 client(s) will get this node')).toBeTruthy();
+    expect(screen.getByText('3 user(s) will get this node')).toBeTruthy();
   });
 
   // A NAT provider forwards one public port to one inside port; a node with
