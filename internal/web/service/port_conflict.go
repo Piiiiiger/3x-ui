@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
@@ -209,28 +210,61 @@ func (d *portConflictDetail) String() string {
 // template can't be parsed.
 const defaultXrayAPIPort = 62789
 
-// reservedAPIPort returns the port of the internal Xray API inbound declared
-// in the config template, falling back to defaultXrayAPIPort.
-func reservedAPIPort() int {
+// templateListener is a socket every Xray built from the config template opens
+// itself; it is no DB row, so the inbound query cannot see it.
+type templateListener struct {
+	tag  string
+	bind bindAddr
+	port int
+}
+
+// templateListeners reads the API inbound and the metrics listener from the config
+// template; one that cannot be read still holds the API on defaultXrayAPIPort.
+func templateListeners() []templateListener {
+	api := templateListener{tag: "api", bind: loopbackBind, port: defaultXrayAPIPort}
 	tmpl, err := (&SettingService{}).GetXrayConfigTemplate()
 	if err != nil || tmpl == "" {
-		return defaultXrayAPIPort
+		return []templateListener{api}
 	}
 	var parsed struct {
 		Inbounds []struct {
 			Port int    `json:"port"`
 			Tag  string `json:"tag"`
 		} `json:"inbounds"`
+		Metrics *struct {
+			Listen string `json:"listen"`
+		} `json:"metrics"`
 	}
 	if json.Unmarshal([]byte(tmpl), &parsed) != nil {
-		return defaultXrayAPIPort
+		return []templateListener{api}
 	}
 	for _, in := range parsed.Inbounds {
 		if in.Tag == "api" && in.Port > 0 {
-			return in.Port
+			api.port = in.Port
+			break
 		}
 	}
-	return defaultXrayAPIPort
+	listeners := []templateListener{api}
+	if parsed.Metrics == nil {
+		return listeners
+	}
+	host, portText, err := net.SplitHostPort(parsed.Metrics.Listen)
+	if err != nil {
+		return listeners
+	}
+	if port, err := strconv.Atoi(portText); err == nil {
+		listeners = append(listeners, templateListener{tag: "metrics", bind: bindAddr{listen: host}, port: port})
+	}
+	return listeners
+}
+
+// panelBuildsConfigFor reports whether this panel builds the Xray config an inbound
+// on nodeID runs in: the panel's own and an agent's, but not a panel node's.
+func panelBuildsConfigFor(db *gorm.DB, nodeID *int) (bool, error) {
+	if nodeID == nil {
+		return true, nil
+	}
+	return isAgentNode(db, *nodeID)
 }
 
 // checkPortConflict reads outside any transaction; callers that must not race a
@@ -242,18 +276,27 @@ func (s *InboundService) checkPortConflict(inbound *model.Inbound, ignoreId int)
 func checkPortConflictTx(db *gorm.DB, inbound *model.Inbound, ignoreId int) (*portConflictDetail, error) {
 	newBits := inboundTransports(inbound.Protocol, inbound.StreamSettings, inbound.Settings)
 
-	// The internal Xray API inbound (tag "api", loopback TCP) isn't a DB row,
-	// so a local user inbound reusing its port would leave Xray binding the
-	// port twice (#5304). Nodes run their own Xray, so this only applies to
-	// the local panel.
-	if inbound.NodeID == nil && inbound.Port == reservedAPIPort() &&
-		newBits&transportTCP != 0 && listenOverlaps(loopbackBind, inboundBindAddr(inbound)) {
-		return &portConflictDetail{
-			Tag:        "api",
-			Listen:     "127.0.0.1",
-			Port:       inbound.Port,
-			Transports: transportTCP,
-		}, nil
+	// An inbound on a template listener's port made Xray bind it twice (#5304), on
+	// the panel and on every agent, since both run Xray built from the template.
+	if newBits&transportTCP != 0 {
+		for _, l := range templateListeners() {
+			if inbound.Port != l.port || !listenOverlaps(l.bind, inboundBindAddr(inbound)) {
+				continue
+			}
+			builds, err := panelBuildsConfigFor(db, inbound.NodeID)
+			if err != nil {
+				return nil, err
+			}
+			if !builds {
+				break
+			}
+			return &portConflictDetail{
+				Tag:        l.tag,
+				Listen:     l.bind.listen,
+				Port:       l.port,
+				Transports: transportTCP,
+			}, nil
+		}
 	}
 
 	// Egress SOCKS server holds loopback EgressPort when AWG outbounds are

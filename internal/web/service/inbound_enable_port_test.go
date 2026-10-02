@@ -81,3 +81,22 @@ func TestSetInboundEnableAllowsANodeRowOnALocalPort(t *testing.T) {
 		t.Fatalf("a node row must be enableable regardless of a local row's port: %v", err)
 	}
 }
+
+// An agent row saved before its host's template listeners were reserved reaches
+// the enable path unchecked, and enabling it kept the agent's Xray from starting.
+func TestSetInboundEnableRefusesATemplateListenerPortOnAnAgent(t *testing.T) {
+	setupEnablePortTest(t)
+	agent := seedAgentNodeRow(t, "edge-hk")
+	seedInboundConflictNode(t, "agent-metrics", "0.0.0.0", defaultTemplateMetricsPort, model.VLESS, `{"network":"tcp"}`, `{}`, &agent.Id)
+	row := loadInboundByTag(t, "agent-metrics")
+	disableInboundRow(t, row.Id)
+
+	_, err := (&InboundService{}).SetInboundEnable(row.Id, true)
+	want := "port 11111 (tcp) already used by inbound 'metrics' on 127.0.0.1"
+	if err == nil || strings.TrimSpace(err.Error()) != want {
+		t.Fatalf("enabling an agent row onto the metrics port: err %v, want %q", err, want)
+	}
+	if after := loadInboundByTag(t, "agent-metrics"); after.Enable {
+		t.Fatal("a refused enable must not write the flag")
+	}
+}

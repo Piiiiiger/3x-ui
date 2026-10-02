@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"net"
 	"path/filepath"
 	"strconv"
@@ -691,22 +692,196 @@ func TestCheckPortConflict_ReservedAPIPortBlockedLocal(t *testing.T) {
 	}
 }
 
-// nodes run their own Xray with their own API port, so a node inbound on the
-// central panel's reserved API port must be allowed.
-func TestCheckPortConflict_ReservedAPIPortAllowedOnNode(t *testing.T) {
-	setupConflictDB(t)
+// defaultTemplateMetricsPort is the metrics.listen port of the embedded config.json.
+const defaultTemplateMetricsPort = 11111
 
-	svc := &InboundService{}
-	candidate := &model.Inbound{
-		Tag:            "node-62789",
-		Listen:         "0.0.0.0",
-		Port:           defaultXrayAPIPort,
-		Protocol:       model.VLESS,
-		StreamSettings: `{"network":"tcp"}`,
-		NodeID:         new(1),
+func tcpInboundOn(listen string, port int, nodeID *int) *model.Inbound {
+	return &model.Inbound{Listen: listen, Port: port, Protocol: model.VLESS, StreamSettings: `{"network":"tcp"}`, NodeID: nodeID}
+}
+
+func seedPanelNodeRow(t *testing.T, name string) *model.Node {
+	t.Helper()
+	n := &model.Node{Name: name, Kind: model.NodeKindPanel, Address: "203.0.113.8", Port: 2096, ApiToken: "tok", Enable: true, Status: "online"}
+	seedNodeRow(t, database.GetDB(), n)
+	return n
+}
+
+// saveTemplateWith stores the embedded config template as edit leaves it.
+func saveTemplateWith(t *testing.T, edit func(tmpl map[string]any)) {
+	t.Helper()
+	var tmpl map[string]any
+	if err := json.Unmarshal([]byte(xrayTemplateConfig), &tmpl); err != nil {
+		t.Fatalf("parse the embedded template: %v", err)
 	}
-	if got, err := svc.checkPortConflict(candidate, 0); err != nil || got != nil {
-		t.Fatalf("node inbound on the reserved API port must be allowed; got=%v err=%v", got, err)
+	edit(tmpl)
+	raw, err := json.Marshal(tmpl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&SettingService{}).saveSetting("xrayTemplateConfig", string(raw)); err != nil {
+		t.Fatalf("save template: %v", err)
+	}
+}
+
+// A panel node is another 3x-ui building its own config, so the listeners of this
+// panel's template hold no port there.
+func TestCheckPortConflict_TemplateListenersAllowedOnPanelNode(t *testing.T) {
+	for _, port := range []int{defaultXrayAPIPort, defaultTemplateMetricsPort} {
+		t.Run(strconv.Itoa(port), func(t *testing.T) {
+			setupConflictDB(t)
+			node := seedPanelNodeRow(t, "edge-us")
+			got, err := (&InboundService{}).checkPortConflict(tcpInboundOn("0.0.0.0", port, &node.Id), 0)
+			if err != nil || got != nil {
+				t.Fatalf("a panel node's inbound on port %d must be allowed; got=%v err=%v", port, got, err)
+			}
+		})
+	}
+}
+
+// conflictText is the refusal the user reads, "" for none.
+func conflictText(got *portConflictDetail) string {
+	if got == nil {
+		return ""
+	}
+	return got.String()
+}
+
+// An agent runs this panel's template, so its Xray opens the API inbound and the
+// metrics listener too; an inbound on either port kept that Xray from starting.
+func TestCheckPortConflict_TemplateListenersBlockedOnAgentNode(t *testing.T) {
+	for _, tc := range []struct {
+		port int
+		want string
+	}{
+		{defaultXrayAPIPort, "port 62789 (tcp) already used by inbound 'api' on 127.0.0.1"},
+		{defaultTemplateMetricsPort, "port 11111 (tcp) already used by inbound 'metrics' on 127.0.0.1"},
+	} {
+		t.Run(strconv.Itoa(tc.port), func(t *testing.T) {
+			setupConflictDB(t)
+			agent := seedAgentNodeRow(t, "edge-hk")
+			got, err := (&InboundService{}).checkPortConflict(tcpInboundOn("0.0.0.0", tc.port, &agent.Id), 0)
+			if err != nil {
+				t.Fatalf("checkPortConflict: %v", err)
+			}
+			if conflictText(got) != tc.want {
+				t.Fatalf("an agent inbound on port %d: conflict %q, want %q", tc.port, conflictText(got), tc.want)
+			}
+		})
+	}
+}
+
+// The metrics listener is no DB row either, so a local inbound on its port made
+// the panel's own Xray fail to start.
+func TestCheckPortConflict_MetricsPortBlockedLocal(t *testing.T) {
+	setupConflictDB(t)
+	got, err := (&InboundService{}).checkPortConflict(tcpInboundOn("0.0.0.0", defaultTemplateMetricsPort, nil), 0)
+	if err != nil {
+		t.Fatalf("checkPortConflict: %v", err)
+	}
+	if want := "port 11111 (tcp) already used by inbound 'metrics' on 127.0.0.1"; conflictText(got) != want {
+		t.Fatalf("a local inbound on the metrics port: conflict %q, want %q", conflictText(got), want)
+	}
+}
+
+// Both listeners bind loopback, so an inbound on one of the host's own public
+// addresses may use their ports.
+func TestCheckPortConflict_TemplateListenersLeaveOtherAddressesFree(t *testing.T) {
+	for _, port := range []int{defaultXrayAPIPort, defaultTemplateMetricsPort} {
+		t.Run(strconv.Itoa(port), func(t *testing.T) {
+			setupConflictDB(t)
+			agent := seedAgentNodeRow(t, "edge-hk")
+			got, err := (&InboundService{}).checkPortConflict(tcpInboundOn("203.0.113.7", port, &agent.Id), 0)
+			if err != nil || got != nil {
+				t.Fatalf("an inbound on a public address must not conflict with a loopback listener on port %d; got=%v err=%v", port, got, err)
+			}
+		})
+	}
+}
+
+// The metrics listener serves HTTP, which is TCP, so a UDP-only inbound may share
+// its port like it may the API's.
+func TestCheckPortConflict_MetricsPortUDPCoexists(t *testing.T) {
+	setupConflictDB(t)
+	candidate := &model.Inbound{Listen: "0.0.0.0", Port: defaultTemplateMetricsPort, Protocol: model.Hysteria}
+	if got, err := (&InboundService{}).checkPortConflict(candidate, 0); err != nil || got != nil {
+		t.Fatalf("a udp-only inbound must coexist with the tcp metrics listener; got=%v err=%v", got, err)
+	}
+}
+
+// The listeners are wherever the configured template puts them, not where the
+// embedded default does; a template without a metrics block opens no such port.
+func TestCheckPortConflict_TemplateListenersFollowTheTemplate(t *testing.T) {
+	moveMetrics := func(listen string) func(map[string]any) {
+		return func(tmpl map[string]any) { tmpl["metrics"] = map[string]any{"tag": "metrics_out", "listen": listen} }
+	}
+	moveAPI := func(port int) func(map[string]any) {
+		return func(tmpl map[string]any) {
+			for _, in := range tmpl["inbounds"].([]any) {
+				if in := in.(map[string]any); in["tag"] == "api" {
+					in["port"] = port
+				}
+			}
+		}
+	}
+	moveAPIBehindAProbe := func(tmpl map[string]any) {
+		moveAPI(62000)(tmpl)
+		probe := map[string]any{"tag": "probe", "listen": "127.0.0.1", "port": 62001, "protocol": "tunnel"}
+		tmpl["inbounds"] = append([]any{probe}, tmpl["inbounds"].([]any)...)
+	}
+	for _, tc := range []struct {
+		name   string
+		edit   func(tmpl map[string]any)
+		listen string
+		port   int
+		want   string
+	}{
+		{
+			"moved metrics holds its new port", moveMetrics("127.0.0.1:12345"), "0.0.0.0", 12345,
+			"port 12345 (tcp) already used by inbound 'metrics' on 127.0.0.1",
+		},
+		{"moved metrics frees its old port", moveMetrics("127.0.0.1:12345"), "0.0.0.0", defaultTemplateMetricsPort, ""},
+		{
+			"metrics on every address holds a public one too", moveMetrics("0.0.0.0:11111"), "203.0.113.7", defaultTemplateMetricsPort,
+			"port 11111 (tcp) already used by inbound 'metrics' on *",
+		},
+		{"no metrics block holds nothing", func(tmpl map[string]any) { delete(tmpl, "metrics") }, "0.0.0.0", defaultTemplateMetricsPort, ""},
+		{
+			"moved api holds its new port", moveAPI(62000), "0.0.0.0", 62000,
+			"port 62000 (tcp) already used by inbound 'api' on 127.0.0.1",
+		},
+		{"moved api frees its old port", moveAPI(62000), "0.0.0.0", defaultXrayAPIPort, ""},
+		{
+			"api is found by its tag behind another inbound", moveAPIBehindAProbe, "0.0.0.0", 62000,
+			"port 62000 (tcp) already used by inbound 'api' on 127.0.0.1",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			setupConflictDB(t)
+			saveTemplateWith(t, tc.edit)
+			got, err := (&InboundService{}).checkPortConflict(tcpInboundOn(tc.listen, tc.port, nil), 0)
+			if err != nil {
+				t.Fatalf("checkPortConflict: %v", err)
+			}
+			if conflictText(got) != tc.want {
+				t.Fatalf("port %d on %s: conflict %q, want %q", tc.port, tc.listen, conflictText(got), tc.want)
+			}
+		})
+	}
+}
+
+// A template the panel cannot parse names no port, so the API's default one stays
+// reserved rather than none.
+func TestCheckPortConflict_UnreadableTemplateStillHoldsTheAPIPort(t *testing.T) {
+	setupConflictDB(t)
+	if err := (&SettingService{}).saveSetting("xrayTemplateConfig", "{ not valid json"); err != nil {
+		t.Fatal(err)
+	}
+	got, err := (&InboundService{}).checkPortConflict(tcpInboundOn("0.0.0.0", defaultXrayAPIPort, nil), 0)
+	if err != nil {
+		t.Fatalf("checkPortConflict: %v", err)
+	}
+	if want := "port 62789 (tcp) already used by inbound 'api' on 127.0.0.1"; conflictText(got) != want {
+		t.Fatalf("conflict %q, want %q", conflictText(got), want)
 	}
 }
 
