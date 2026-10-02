@@ -11,6 +11,8 @@ import {
 } from '@ant-design/icons';
 
 import { LanguageManager } from '@/utils';
+import { BrandMark } from '@/components/ui';
+import { PANEL_NAME } from '@/lib/brand';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 
 interface SubHeaderProps {
@@ -73,7 +75,7 @@ export default function SubHeader({
         </span>
         <div className="sub-brand-text">
           <div className="sub-brand-title" dir="auto">
-            {title || t('subscription.title')}
+            {title === PANEL_NAME ? <BrandMark /> : title || t('subscription.title')}
           </div>
           <div className="sub-brand-id">
             <bdi>{email ? `${sId} - ${email}` : sId}</bdi>

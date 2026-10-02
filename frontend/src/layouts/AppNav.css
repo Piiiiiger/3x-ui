@@ -32,8 +32,23 @@
   color: var(--ant-color-primary-hover);
 }
 
-/* Page buttons: each item carries a raised square pill; the current page is
-   filled with the accent tint, like 妙妙屋X's active tab. */
+/* Page buttons and actions are 妙妙屋X's pixel buttons: a square 2px frame with a
+   hard shadow, a coral outline drawn round on hover, and the current page filled
+   with the accent tint. */
+.app-nav {
+  --pixel-border: rgba(137, 110, 96, 0.45);
+  --pixel-shadow: rgba(0, 0, 0, 0.18);
+  --pixel-shadow-hover: rgba(0, 0, 0, 0.22);
+  --pixel-outline: rgba(217, 119, 87, 0.9);
+}
+
+body.dark .app-nav {
+  --pixel-border: rgba(255, 255, 255, 0.18);
+  --pixel-shadow: rgba(0, 0, 0, 0.45);
+  --pixel-shadow-hover: rgba(0, 0, 0, 0.55);
+  --pixel-outline: rgba(251, 191, 36, 0.95);
+}
+
 .app-nav-menu.ant-menu-horizontal {
   flex: 1 1 auto;
   min-width: 0;
@@ -47,7 +62,7 @@
 .app-nav-menu.ant-menu-horizontal > .ant-menu-submenu {
   top: 0;
   margin: 0;
-  padding: 3px 6px 3px 0;
+  padding: 4px 8px 4px 0;
   border: 0;
   background: transparent;
   line-height: normal;
@@ -63,24 +78,54 @@
   line-height: normal;
 }
 
+.app-nav-pill,
+.app-nav-btn {
+  position: relative;
+  isolation: isolate;
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 var(--pixel-shadow);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+/* The outline is a ring behind the frame, uncovered edge by edge on hover; the
+   ::after copy of the face hides its middle. */
+.app-nav-pill::before,
+.app-nav-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--pixel-outline);
+  clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
+  transition: clip-path 0.35s ease-out;
+}
+
+.app-nav-pill::after,
+.app-nav-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: inherit;
+}
+
 .app-nav-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 36px;
   padding: 0 10px;
-  border: 1px solid var(--ant-color-border);
-  border-radius: var(--ant-border-radius);
   background: var(--ant-color-bg-container);
-  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   white-space: nowrap;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    border-color 0.15s ease;
 }
 
 .app-nav-pill .anticon {
@@ -91,16 +136,41 @@
   font-size: 10px;
 }
 
-.app-nav-menu.ant-menu-horizontal > li:hover .app-nav-pill {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
-  background: color-mix(in srgb, var(--ant-color-primary) 8%, var(--ant-color-bg-container));
+.app-nav-menu.ant-menu-horizontal > li:hover .app-nav-pill,
+.app-nav-btn:hover,
+.app-nav-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0 var(--pixel-shadow-hover);
+}
+
+.app-nav-menu.ant-menu-horizontal > li:hover .app-nav-pill::before,
+.app-nav-btn:hover::before,
+.app-nav-btn:focus-visible::before {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
+    2px 2px,
+    2px calc(100% - 2px),
+    calc(100% - 2px) calc(100% - 2px),
+    calc(100% - 2px) 2px,
+    2px 2px
+  );
+}
+
+.app-nav-menu.ant-menu-horizontal > li:active .app-nav-pill,
+.app-nav-btn:active {
+  transform: none;
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
 }
 
 .app-nav-menu.ant-menu-horizontal > .ant-menu-item-selected .app-nav-pill,
 .app-nav-menu.ant-menu-horizontal > .ant-menu-submenu-selected .app-nav-pill {
-  background: color-mix(in srgb, var(--ant-color-primary) 16%, var(--ant-color-bg-container));
-  border-color: color-mix(in srgb, var(--ant-color-primary) 60%, transparent);
+  background: color-mix(in srgb, var(--ant-color-primary) 20%, var(--ant-color-bg-layout));
+  border-color: color-mix(in srgb, var(--ant-color-primary) 55%, transparent);
+  color: var(--ant-color-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -123,23 +193,14 @@
   height: 36px;
   min-width: 36px;
   padding: 0 10px;
-  border: 1px solid var(--ant-color-border);
-  border-radius: var(--ant-border-radius);
   background: var(--ant-color-bg-container);
   color: var(--ant-color-text);
-  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
   font: inherit;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.06em;
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
 }
 
 .app-nav-btn .anticon {
@@ -148,19 +209,8 @@
 
 .app-nav-btn:hover,
 .app-nav-btn:focus-visible {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
   color: var(--ant-color-link);
   outline: none;
-}
-
-.app-nav-btn:focus-visible {
-  border-color: var(--ant-color-primary);
-}
-
-.app-nav-btn:active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
 }
 
 .app-nav-btn-label {
@@ -173,6 +223,11 @@
   .app-nav-btn:focus-visible,
   .app-nav-btn:active {
     transform: none;
+  }
+
+  .app-nav-pill::before,
+  .app-nav-btn::before {
+    transition: none;
   }
 }
 

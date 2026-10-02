@@ -44,6 +44,12 @@ test('marks the page the router is on as the current top-bar item', async () => 
   );
 });
 
+// The animated P has a glow copy of the letter behind it, which must not be read out twice.
+test('names the brand once, however its first letter is drawn', async () => {
+  await renderNav();
+  expect(screen.getByRole('link', { name: 'Pigger' })).toBeTruthy();
+});
+
 test('labels the palette shortcut with the modifier the platform actually uses', async () => {
   const view = await renderNav();
   const chip = view.container.querySelector('.app-nav .nav-search-kbd');

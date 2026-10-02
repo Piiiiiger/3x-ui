@@ -24,7 +24,7 @@ import {
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { HttpUtil, LanguageManager } from '@/utils';
-import { PANEL_NAME } from '@/lib/brand';
+import { BrandMark } from '@/components/ui';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { setMessageInstance } from '@/utils/messageBus';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
@@ -178,7 +178,9 @@ export default function LoginPage() {
             ) : (
               <div className="login-card">
                 <div className="brand">
-                  <span className="brand-name">{PANEL_NAME}</span>
+                  <span className="brand-name">
+                    <BrandMark />
+                  </span>
                   <span className="brand-accent" aria-hidden="true" />
                 </div>
                 <h2 className="welcome">

@@ -3,4 +3,5 @@ export { default as InfinityIcon } from './InfinityIcon';
 export { default as SettingListItem } from './SettingListItem';
 export { default as DefaultSettingTag } from './DefaultSettingTag';
 export { default as PageHeader } from './PageHeader';
+export { default as BrandMark } from './BrandMark';
 export { default as RainbowBar } from './RainbowBar';

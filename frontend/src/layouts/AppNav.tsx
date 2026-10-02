@@ -33,7 +33,7 @@ import {
 } from '@ant-design/icons';
 
 import { HttpUtil } from '@/utils';
-import { PANEL_NAME } from '@/lib/brand';
+import { BrandMark } from '@/components/ui';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAllSettings } from '@/api/queries/useAllSettings';
@@ -258,7 +258,7 @@ export default function AppNav() {
     <>
       <header className="app-nav">
         <Link to="/" className="app-nav-brand">
-          {PANEL_NAME}
+          <BrandMark />
         </Link>
         {!navCollapsed && (
           <Menu
@@ -329,7 +329,9 @@ export default function AppNav() {
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
-          <span className="drawer-brand">{PANEL_NAME}</span>
+          <span className="drawer-brand">
+            <BrandMark />
+          </span>
           <div className="drawer-header-actions">
             <button
               id="theme-cycle-drawer"
