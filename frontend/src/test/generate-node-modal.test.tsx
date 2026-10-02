@@ -37,7 +37,7 @@ const plan = (id: number, name: string, inboundIds: number[], memberCount: numbe
   trafficResetDay: 0,
   updatedAt: 0,
 });
-const PLANS = [plan(11, 'HK+SG', [1, 5], 3), plan(12, 'US', [7], 2)];
+const PLANS = [plan(11, 'Asia', [1, 5], 3), plan(12, 'US', [7], 2)];
 const TEMPLATE = {
   id: 5,
   remark: '香港-Edge',
@@ -120,7 +120,7 @@ describe('GenerateNodeModal', () => {
     expect(field('Name').value).toBe('香港-Edge-2');
     expect(field('REALITY target').value).toBe('www.bing.com:443');
     expect(field('SNI').value).toBe('www.bing.com');
-    expect(screen.getByRole('checkbox', { name: 'HK+SG' })).toHaveProperty('checked', true);
+    expect(screen.getByRole('checkbox', { name: 'Asia' })).toHaveProperty('checked', true);
     expect(screen.getByRole('checkbox', { name: 'US' })).toHaveProperty('checked', false);
     expect(screen.getByText('3 client(s) will get this node')).toBeTruthy();
   });

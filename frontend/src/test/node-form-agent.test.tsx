@@ -39,8 +39,8 @@ describe('NodeFormModal agent nodes', () => {
   it('saves an agent without probing it and shows its secret once', async () => {
     const props = renderForm('add', null);
     fireEvent.click(screen.getByText('Agent'));
-    typeInto('Name', 'lazycat');
-    typeInto('Public address', '216.236.63.53');
+    typeInto('Name', 'edge-hk');
+    typeInto('Public address', '203.0.113.53');
     submit();
 
     await waitFor(() => expect(props.mintAgentSecret).toHaveBeenCalledWith(7));
@@ -48,9 +48,9 @@ describe('NodeFormModal agent nodes', () => {
     expect(props.save).toHaveBeenCalledWith({
       id: 0,
       kind: 'agent',
-      name: 'lazycat',
+      name: 'edge-hk',
       remark: '',
-      address: '216.236.63.53',
+      address: '203.0.113.53',
       enable: true,
     });
     await waitFor(() => {
@@ -64,9 +64,9 @@ describe('NodeFormModal agent nodes', () => {
   it('mints a secret only when a node becomes an agent', async () => {
     const agent = renderForm('edit', {
       id: 3,
-      name: 'frontier',
+      name: 'edge-us',
       kind: 'agent',
-      address: '66.132.239.17',
+      address: '203.0.113.17',
       enable: true,
     });
     typeInto('Remark', 'US west');
@@ -78,16 +78,16 @@ describe('NodeFormModal agent nodes', () => {
   it('mints a secret when a panel node is converted', async () => {
     const converted = renderForm('edit', {
       id: 5,
-      name: 'lazycat',
+      name: 'edge-hk',
       kind: 'panel',
       scheme: 'http',
       address: '127.0.0.1',
-      port: 22605,
+      port: 24005,
       hasApiToken: true,
       enable: true,
     });
     fireEvent.click(screen.getByText('Agent'));
-    typeInto('Public address', '216.236.63.53');
+    typeInto('Public address', '203.0.113.53');
     submit();
     await waitFor(() => expect(converted.mintAgentSecret).toHaveBeenCalledWith(5));
     expect(converted.testConnection).not.toHaveBeenCalled();

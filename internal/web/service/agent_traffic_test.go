@@ -51,7 +51,7 @@ func agentReport(t *testing.T, nodeID int, instance string, seq int64, tag, emai
 // user twice, and a reinstalled agent must start over instead of being ignored.
 func TestAddAgentTraffic_AppliesEachReportOnce(t *testing.T) {
 	setupSettingTestDB(t)
-	a := seedAgentNodeRow(t, "lazycat")
+	a := seedAgentNodeRow(t, "edge-hk")
 	alice := model.Client{Email: "alice", ID: "11111111-1111-1111-1111-111111111111", Enable: true}
 	ib := seedNodeInbound(t, &a.Id, "n1-in-81-tcp", 81, model.VLESS, true, []model.Client{alice})
 	seedClientTrafficRow(t, ib.Id, "alice", 0)
@@ -91,8 +91,8 @@ func TestAddAgentTraffic_AppliesEachReportOnce(t *testing.T) {
 // inbound that lives on the panel or on another server.
 func TestAddAgentTraffic_IgnoresInboundsItDoesNotHost(t *testing.T) {
 	setupSettingTestDB(t)
-	a := seedAgentNodeRow(t, "lazycat")
-	b := seedAgentNodeRow(t, "frontier")
+	a := seedAgentNodeRow(t, "edge-hk")
+	b := seedAgentNodeRow(t, "edge-us")
 	seedNodeInbound(t, nil, "in-443-tcp", 443, model.VLESS, true, nil)
 	seedNodeInbound(t, &b.Id, "n2-in-81-tcp", 81, model.VLESS, true, nil)
 
@@ -115,7 +115,7 @@ func TestAddAgentTraffic_QuotaCutsTheClientOffTheAgent(t *testing.T) {
 	runtime.SetAgentHub(hub)
 	t.Cleanup(func() { runtime.SetAgentHub(prev) })
 
-	a := seedAgentNodeRow(t, "lazycat")
+	a := seedAgentNodeRow(t, "edge-hk")
 	alice := model.Client{Email: "alice", ID: "11111111-1111-1111-1111-111111111111", Enable: true}
 	ib := seedNodeInbound(t, &a.Id, "n1-in-81-tcp", 81, model.VLESS, true, []model.Client{alice})
 	seedClientTrafficRow(t, ib.Id, "alice", 100)

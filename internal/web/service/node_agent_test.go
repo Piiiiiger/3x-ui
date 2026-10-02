@@ -13,9 +13,9 @@ import (
 // or an inbound selection would still steer the master, so they are dropped.
 func TestNodeService_Normalize_AgentDropsPanelSyncSettings(t *testing.T) {
 	n := &model.Node{
-		Name:            "lazycat",
+		Name:            "edge-hk",
 		Kind:            model.NodeKindAgent,
-		Address:         "216.236.63.53",
+		Address:         "203.0.113.53",
 		InboundSyncMode: "selected",
 		InboundTags:     []string{"in-81-tcp"},
 		OutboundTag:     "warp",
@@ -26,7 +26,7 @@ func TestNodeService_Normalize_AgentDropsPanelSyncSettings(t *testing.T) {
 	if n.OutboundTag != "" || n.InboundSyncMode != "all" || n.InboundTags != nil {
 		t.Fatalf("panel sync fields kept: outbound=%q mode=%q tags=%v", n.OutboundTag, n.InboundSyncMode, n.InboundTags)
 	}
-	if n.Address != "216.236.63.53" {
+	if n.Address != "203.0.113.53" {
 		t.Fatalf("address = %q, want the public address kept", n.Address)
 	}
 }
@@ -44,7 +44,7 @@ func TestNodeService_Normalize_UnknownKindIsPanel(t *testing.T) {
 func TestNodeService_CreateAgentWithoutToken(t *testing.T) {
 	setupConflictDB(t)
 	view, err := (&NodeService{}).CreateFromRequest(&NodeMutationRequest{
-		Name: "lazycat", Kind: model.NodeKindAgent, Address: "216.236.63.53", Enable: true,
+		Name: "edge-hk", Kind: model.NodeKindAgent, Address: "203.0.113.53", Enable: true,
 	})
 	if err != nil {
 		t.Fatalf("create agent node without a token: %v", err)
@@ -88,14 +88,14 @@ func TestNodeService_ConvertPanelNodeToAgentAndBack(t *testing.T) {
 	s := &NodeService{}
 	token := "node-sync-token"
 	view, err := s.CreateFromRequest(&NodeMutationRequest{
-		Name: "lazycat", Address: "127.0.0.1", Port: 22605, Scheme: "http", BasePath: "/p8jt/",
+		Name: "edge-hk", Address: "127.0.0.1", Port: 24005, Scheme: "http", BasePath: "/a1b2/",
 		ApiToken: &token, AllowPrivateAddress: true, Enable: true,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := s.UpdateFromRequest(view.Id, &NodeMutationRequest{
-		Name: "lazycat", Kind: model.NodeKindAgent, Address: "216.236.63.53", Enable: true,
+		Name: "edge-hk", Kind: model.NodeKindAgent, Address: "203.0.113.53", Enable: true,
 	}); err != nil {
 		t.Fatalf("convert to agent: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestNodeService_ConvertPanelNodeToAgentAndBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !got.IsAgent() || got.Address != "216.236.63.53" {
+	if !got.IsAgent() || got.Address != "203.0.113.53" {
 		t.Fatalf("after conversion: kind=%q address=%q", got.Kind, got.Address)
 	}
 	if got.ApiToken != token {
@@ -111,8 +111,8 @@ func TestNodeService_ConvertPanelNodeToAgentAndBack(t *testing.T) {
 	}
 
 	if err := s.UpdateFromRequest(view.Id, &NodeMutationRequest{
-		Name: "lazycat", Kind: model.NodeKindPanel, Address: "127.0.0.1", Port: 22605, Scheme: "http",
-		BasePath: "/p8jt/", AllowPrivateAddress: true, Enable: true,
+		Name: "edge-hk", Kind: model.NodeKindPanel, Address: "127.0.0.1", Port: 24005, Scheme: "http",
+		BasePath: "/a1b2/", AllowPrivateAddress: true, Enable: true,
 	}); err != nil {
 		t.Fatalf("convert back to a panel with the stored token: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestNodeService_ConvertPanelNodeToAgentAndBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.IsAgent() || got.Port != 22605 {
+	if got.IsAgent() || got.Port != 24005 {
 		t.Fatalf("after rollback: kind=%q port=%d", got.Kind, got.Port)
 	}
 }

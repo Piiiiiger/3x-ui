@@ -101,7 +101,7 @@ func TestAgentSyncJob_PushesConnectedAgentsAndDropsRetiredOnes(t *testing.T) {
 // agent would keep that client's node verdict frozen.
 func TestAgentSyncJob_ClearsQueuedResets(t *testing.T) {
 	hub := setupAgentJobTest(t)
-	n := seedAgent(t, "lazycat")
+	n := seedAgent(t, "edge-hk")
 	connectAgent(t, hub, n).AnswerApplies(true)
 	if err := database.GetDB().Create(&model.NodePendingReset{NodeId: n.Id, Email: "alice", QueuedAt: 1}).Error; err != nil {
 		t.Fatal(err)
@@ -118,7 +118,7 @@ func TestAgentSyncJob_ClearsQueuedResets(t *testing.T) {
 
 func TestAgentSyncJob_NudgeSyncsWithoutWaitingForTheTick(t *testing.T) {
 	hub := setupAgentJobTest(t)
-	n := seedAgent(t, "lazycat")
+	n := seedAgent(t, "edge-hk")
 	agent := connectAgent(t, hub, n)
 	// The hello already nudged; drain it so only the nudge below can sync.
 	for len(hub.Nudges()) > 0 {

@@ -26,7 +26,7 @@ func TestMigrateNodeAgentColumns(t *testing.T) {
 	}
 	if err := legacy.Exec(
 		`INSERT INTO nodes (name, scheme, address, port, base_path, api_token, enable)
-		 VALUES ('vmiss', 'http', '127.0.0.1', 22601, '/b0h1/', 'token', 1)`,
+		 VALUES ('edge-sg', 'http', '127.0.0.1', 24001, '/a1b2/', 'token', 1)`,
 	).Error; err != nil {
 		t.Fatalf("seed legacy node: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestMigrateNodeAgentColumns(t *testing.T) {
 	t.Cleanup(func() { _ = CloseDB() })
 
 	var row model.Node
-	if err := GetDB().Where("name = ?", "vmiss").First(&row).Error; err != nil {
+	if err := GetDB().Where("name = ?", "edge-sg").First(&row).Error; err != nil {
 		t.Fatalf("preexisting node lost: %v", err)
 	}
 	if row.Kind != model.NodeKindPanel || row.IsAgent() {
