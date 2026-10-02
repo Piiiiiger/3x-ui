@@ -18,6 +18,7 @@ import {
   genInboundLinks,
   genWireguardLinks,
   preferPublicHost,
+  type ShareHostFields,
 } from '@/lib/xray/inbound-link';
 import { inboundFromDb } from '@/lib/xray/inbound-from-db';
 import { Protocols } from '@/schemas/primitives';
@@ -26,7 +27,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import { useHostsQuery } from '@/api/queries/useHostsQuery';
-import { withHostEndpoints } from '@/lib/hosts/host-link';
+import { publicEndpointsOf, withHostEndpoints } from '@/lib/hosts/host-link';
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
 import type { TextModalTab } from '@/components/feedback/TextModal';
 const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
@@ -70,7 +71,12 @@ interface ClientMatchTarget {
   password?: string;
 }
 
-export function InboundsWorkspace() {
+interface InboundsWorkspaceProps {
+  /** Show only this host's inbounds: a node id, or 0 for the local panel. */
+  hostScope?: number;
+}
+
+export function InboundsWorkspace({ hostScope }: InboundsWorkspaceProps = {}) {
   const { t } = useTranslation();
   const { isMobile } = useMediaQuery();
 
@@ -144,6 +150,24 @@ export function InboundsWorkspace() {
 
   const cloneSharesByHost = useMemo(() => hostShares(dbInbounds || []), [dbInbounds]);
 
+  const shownInbounds = useMemo(
+    () =>
+      hostScope === undefined
+        ? dbInbounds
+        : (dbInbounds || []).filter((ib) => (ib.nodeId ?? 0) === hostScope),
+    [dbInbounds, hostScope],
+  );
+  const shownTotals = useMemo(() => {
+    if (hostScope === undefined) return totals;
+    let up = 0;
+    let down = 0;
+    for (const ib of shownInbounds) {
+      up += ib.up || 0;
+      down += ib.down || 0;
+    }
+    return { up, down };
+  }, [hostScope, totals, shownInbounds]);
+
   useWebSocket({
     traffic: applyTrafficEvent,
     client_stats: applyClientStatsEvent,
@@ -197,6 +221,17 @@ export function InboundsWorkspace() {
       return nodesById.get(dbInbound.nodeId)?.address || '';
     },
     [nodesById],
+  );
+
+  const publicEndpointsFor = useCallback(
+    (ib: { id: number; port: number; nodeId?: number | null } & ShareHostFields) =>
+      publicEndpointsOf(
+        ib,
+        hosts,
+        ib.nodeId == null ? '' : nodesById.get(ib.nodeId)?.address || '',
+        preferPublicHost(window.location.hostname, subSettings.publicHost),
+      ),
+    [hosts, nodesById, subSettings.publicHost],
   );
 
   const infoNodeAddress = useMemo(
@@ -756,9 +791,9 @@ export function InboundsWorkspace() {
                       value={0}
                       formatter={() => (
                         <span>
-                          <ArrowUpOutlined /> {SizeFormatter.sizeFormat(totals.up)}
+                          <ArrowUpOutlined /> {SizeFormatter.sizeFormat(shownTotals.up)}
                           {' / '}
-                          <ArrowDownOutlined /> {SizeFormatter.sizeFormat(totals.down)}
+                          <ArrowDownOutlined /> {SizeFormatter.sizeFormat(shownTotals.down)}
                         </span>
                       )}
                     />
@@ -766,14 +801,14 @@ export function InboundsWorkspace() {
                   <Col xs={12} sm={12} md={8}>
                     <Statistic
                       title={t('pages.inbounds.totalUsage')}
-                      value={SizeFormatter.sizeFormat(totals.up + totals.down)}
+                      value={SizeFormatter.sizeFormat(shownTotals.up + shownTotals.down)}
                       prefix={<PieChartOutlined />}
                     />
                   </Col>
                   <Col xs={24} sm={24} md={8}>
                     <Statistic
                       title={t('pages.inbounds.inboundCount')}
-                      value={String(dbInbounds.length)}
+                      value={String(shownInbounds.length)}
                       prefix={<BarsOutlined />}
                     />
                   </Col>
@@ -783,7 +818,7 @@ export function InboundsWorkspace() {
 
             <Col span={24}>
               <InboundList
-                dbInbounds={dbInbounds}
+                dbInbounds={shownInbounds}
                 clientCount={clientCount}
                 onlineClients={onlineClients}
                 lastOnlineMap={lastOnlineMap}
@@ -794,7 +829,9 @@ export function InboundsWorkspace() {
                 isMobile={isMobile}
                 subEnable={subSettings.enable}
                 nodesById={nodesById}
-                hasActiveNode={showNodeInfo}
+                hasActiveNode={hostScope === undefined && showNodeInfo}
+                scoped={hostScope !== undefined}
+                publicEndpointsOf={hostScope === undefined ? undefined : publicEndpointsFor}
                 hosts={hosts}
                 onAddInbound={onAddInbound}
                 onGeneralAction={onGeneralAction}
@@ -818,6 +855,7 @@ export function InboundsWorkspace() {
           dbInbounds={dbInbounds}
           availableNodes={nodesList}
           availableNodesFetched={nodesFetched}
+          presetHost={formMode === 'add' ? hostScope : undefined}
         />
       </LazyMount>
       <LazyMount when={infoOpen}>

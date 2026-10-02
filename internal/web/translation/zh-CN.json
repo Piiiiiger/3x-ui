@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "无法生成 agent 密钥",
       "agentSecretTitle": "{name} 的 agent 密钥",
       "agentSecretOnce": "请立即复制：密钥只显示这一次。",
-      "agentInstallCommand": "安装命令（在放有 agent 文件的目录中运行）"
+      "agentInstallCommand": "安装命令（在放有 agent 文件的目录中运行）",
+      "host": {
+        "allHosts": "全部主机",
+        "notFound": "该主机不存在",
+        "publicEndpoint": "公网端点"
+      }
     },
     "settings": {
       "defaultTag": "默认",

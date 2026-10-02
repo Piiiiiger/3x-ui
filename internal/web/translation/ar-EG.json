@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "تعذّر إنشاء سر الوكيل",
       "agentSecretTitle": "سر الوكيل لـ {name}",
       "agentSecretOnce": "انسخه الآن: يظهر السر مرة واحدة فقط.",
-      "agentInstallCommand": "أمر التثبيت (شغّله في المجلد الذي يحتوي ملفات الوكيل)"
+      "agentInstallCommand": "أمر التثبيت (شغّله في المجلد الذي يحتوي ملفات الوكيل)",
+      "host": {
+        "allHosts": "كل النودز",
+        "notFound": "هذا النود لم يعد موجودًا",
+        "publicEndpoint": "العنوان العام"
+      }
     },
     "settings": {
       "defaultTag": "افتراضي",

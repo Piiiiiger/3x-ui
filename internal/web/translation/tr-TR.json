@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "Ajan anahtarı oluşturulamadı",
       "agentSecretTitle": "{name} için ajan anahtarı",
       "agentSecretOnce": "Şimdi kopyalayın: anahtar yalnızca bir kez gösterilir.",
-      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)"
+      "agentInstallCommand": "Kurulum komutu (ajan dosyalarının bulunduğu klasörde çalıştırın)",
+      "host": {
+        "allHosts": "Tüm düğümler",
+        "notFound": "Bu düğüm artık yok",
+        "publicEndpoint": "Genel uç nokta"
+      }
     },
     "settings": {
       "defaultTag": "Varsayılan",

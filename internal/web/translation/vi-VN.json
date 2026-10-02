@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "Không thể tạo khóa bí mật cho agent",
       "agentSecretTitle": "Khóa bí mật agent của {name}",
       "agentSecretOnce": "Hãy sao chép ngay: khóa chỉ hiển thị một lần.",
-      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)"
+      "agentInstallCommand": "Lệnh cài đặt (chạy trong thư mục chứa các tệp của agent)",
+      "host": {
+        "allHosts": "Tất cả nút",
+        "notFound": "Nút này không còn tồn tại",
+        "publicEndpoint": "Điểm truy cập công khai"
+      }
     },
     "settings": {
       "defaultTag": "Mặc định",

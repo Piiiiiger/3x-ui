@@ -172,6 +172,8 @@ interface InboundFormModalProps {
   dbInbounds: DBInbound[];
   availableNodes?: NodeRecord[];
   availableNodesFetched?: boolean;
+  /** The host a new inbound is added on, locked in the form; 0 is the local panel. */
+  presetHost?: number;
 }
 
 function buildAddModeValues(): InboundFormValues {
@@ -228,6 +230,7 @@ export default function InboundFormModal({
   dbInbounds,
   availableNodes,
   availableNodesFetched = true,
+  presetHost,
 }: InboundFormModalProps) {
   const { t } = useTranslation();
   const [messageApi, messageContextHolder] = message.useMessage();
@@ -445,7 +448,10 @@ export default function InboundFormModal({
     const initial =
       mode === 'edit' && dbInbound
         ? withoutClients(rawInboundToFormValues(dbInbound))
-        : buildAddModeValues();
+        : {
+            ...buildAddModeValues(),
+            ...(presetHost !== undefined ? { nodeId: presetHost > 0 ? presetHost : null } : {}),
+          };
     methods.reset(initial);
     setScanResult(null);
     setActiveTab('basic');
@@ -469,7 +475,7 @@ export default function InboundFormModal({
     }
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [open, mode, dbInbound, methods]);
+  }, [open, mode, dbInbound, methods, presetHost]);
 
   useEffect(() => {
     if (!open) return;
@@ -630,7 +636,7 @@ export default function InboundFormModal({
         <FormField name="nodeId" label={t('pages.inbounds.deployTo')}>
           <Select
             showSearch
-            disabled={mode === 'edit'}
+            disabled={mode === 'edit' || presetHost !== undefined}
             placeholder={t('pages.inbounds.localPanel')}
             allowClear
             options={selectableNodes.map((n) => ({

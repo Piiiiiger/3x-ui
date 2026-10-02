@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "ساخت رمز عامل ممکن نشد",
       "agentSecretTitle": "رمز عامل برای {name}",
       "agentSecretOnce": "همین حالا کپی کنید: رمز فقط یک بار نمایش داده می‌شود.",
-      "agentInstallCommand": "فرمان نصب (در پوشهٔ حاوی فایل‌های عامل اجرا کنید)"
+      "agentInstallCommand": "فرمان نصب (در پوشهٔ حاوی فایل‌های عامل اجرا کنید)",
+      "host": {
+        "allHosts": "همه نودها",
+        "notFound": "این نود دیگر وجود ندارد",
+        "publicEndpoint": "نقطه دسترسی عمومی"
+      }
     },
     "settings": {
       "defaultTag": "پیش‌فرض",

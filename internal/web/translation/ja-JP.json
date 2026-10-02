@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "エージェントのシークレットを作成できませんでした",
       "agentSecretTitle": "{name} のエージェントシークレット",
       "agentSecretOnce": "今すぐコピーしてください。シークレットは一度しか表示されません。",
-      "agentInstallCommand": "インストールコマンド（エージェントのファイルがあるフォルダーで実行）"
+      "agentInstallCommand": "インストールコマンド（エージェントのファイルがあるフォルダーで実行）",
+      "host": {
+        "allHosts": "すべてのノード",
+        "notFound": "このノードは存在しません",
+        "publicEndpoint": "公開エンドポイント"
+      }
     },
     "settings": {
       "defaultTag": "デフォルト",

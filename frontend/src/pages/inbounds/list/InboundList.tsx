@@ -64,6 +64,8 @@ export default function InboundList({
   onGeneralAction,
   onRowAction,
   onBulkDelete,
+  scoped = false,
+  publicEndpointsOf,
 }: InboundListProps) {
   const { t } = useTranslation();
   const [statsRecord, setStatsRecord] = useState<DBInboundRecord | null>(null);
@@ -85,8 +87,8 @@ export default function InboundList({
   }
 
   const showNodeFilter = useMemo(
-    () => nodesById.size > 0 || dbInbounds.some((ib) => ib.nodeId != null),
-    [nodesById, dbInbounds],
+    () => !scoped && (nodesById.size > 0 || dbInbounds.some((ib) => ib.nodeId != null)),
+    [scoped, nodesById, dbInbounds],
   );
 
   const nodeFilterOptions = useMemo(
@@ -179,6 +181,7 @@ export default function InboundList({
     trafficDiff,
     onRowAction,
     onSwitchEnable,
+    publicEndpointsOf,
   });
 
   const tableScrollX = useMemo(
@@ -226,15 +229,17 @@ export default function InboundList({
           >
             {!isMobile && t('pages.inbounds.addInbound')}
           </Button>
-          <Dropdown trigger={['click']} menu={generalActionsMenu}>
-            <Button
-              type="primary"
-              icon={<MenuOutlined />}
-              aria-label={t('pages.inbounds.generalActions')}
-            >
-              {!isMobile && t('pages.inbounds.generalActions')}
-            </Button>
-          </Dropdown>
+          {!scoped && (
+            <Dropdown trigger={['click']} menu={generalActionsMenu}>
+              <Button
+                type="primary"
+                icon={<MenuOutlined />}
+                aria-label={t('pages.inbounds.generalActions')}
+              >
+                {!isMobile && t('pages.inbounds.generalActions')}
+              </Button>
+            </Dropdown>
+          )}
           {showNodeFilter && (
             <Select
               value={nodeFilter}

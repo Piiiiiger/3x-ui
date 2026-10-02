@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "Gagal membuat rahasia agen",
       "agentSecretTitle": "Rahasia agen untuk {name}",
       "agentSecretOnce": "Salin sekarang: rahasia hanya ditampilkan sekali.",
-      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)"
+      "agentInstallCommand": "Perintah instalasi (jalankan di folder berisi file agen)",
+      "host": {
+        "allHosts": "Semua node",
+        "notFound": "Node ini sudah tidak ada",
+        "publicEndpoint": "Titik akses publik"
+      }
     },
     "settings": {
       "defaultTag": "Bawaan",

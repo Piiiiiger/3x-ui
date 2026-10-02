@@ -1,7 +1,11 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 
-import { hostToExternalProxyEntry, withHostEndpoints } from '@/lib/hosts/host-link';
+import {
+  hostToExternalProxyEntry,
+  publicEndpointsOf,
+  withHostEndpoints,
+} from '@/lib/hosts/host-link';
 import { inboundFromDb } from '@/lib/xray/inbound-from-db';
 import { genAllLinks, getInboundClients } from '@/lib/xray/inbound-link';
 import type { HostRecord } from '@/schemas/api/host';
@@ -248,5 +252,41 @@ describe('withHostEndpoints on a VLESS REALITY inbound', () => {
   it('keeps the inbound address and port when every entry is disabled', () => {
     const [link] = linksFor([natEntry({ isDisabled: true })]);
     expect(link.host).toBe('203.0.113.53:81');
+  });
+});
+
+describe('publicEndpointsOf', () => {
+  const natNode = {
+    id: 5,
+    port: 81,
+    listen: '',
+    shareAddrStrategy: 'custom',
+    shareAddr: '203.0.113.53',
+  };
+  const nat: HostRecord = {
+    groupId: 'nat',
+    inboundIds: [5],
+    hosts: [':20443'],
+    port: 20443,
+    remark: 'HK',
+  };
+
+  // What people connect to, not what Xray listens on: behind NAT they differ.
+  it("shows an entry's public port instead of the listen port", () => {
+    expect(publicEndpointsOf(natNode, [nat], '', 'panel.example.com')).toEqual([
+      '203.0.113.53:20443',
+    ]);
+  });
+
+  it('shows the link address and listen port without an enabled entry', () => {
+    expect(publicEndpointsOf(natNode, [], '', 'panel.example.com')).toEqual(['203.0.113.53:81']);
+    expect(
+      publicEndpointsOf(natNode, [{ ...nat, isDisabled: true }], '', 'panel.example.com'),
+    ).toEqual(['203.0.113.53:81']);
+  });
+
+  it('brackets an IPv6 address', () => {
+    const v6 = { ...natNode, shareAddr: '2001:db8::1' };
+    expect(publicEndpointsOf(v6, [], '', 'panel.example.com')).toEqual(['[2001:db8::1]:81']);
   });
 });

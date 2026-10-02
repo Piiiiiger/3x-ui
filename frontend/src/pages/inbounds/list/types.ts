@@ -84,4 +84,7 @@ export interface InboundListProps {
   onGeneralAction: (key: GeneralAction) => void;
   onRowAction: (action: { key: RowAction; dbInbound: DBInboundRecord }) => void;
   onBulkDelete: (ids: number[]) => Promise<boolean>;
+  /** One host's list: no host filter and no panel-wide import or export. */
+  scoped?: boolean;
+  publicEndpointsOf?: (dbInbound: DBInboundRecord) => string[];
 }

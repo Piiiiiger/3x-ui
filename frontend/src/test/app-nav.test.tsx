@@ -74,3 +74,11 @@ test('collapses the page buttons into the drawer on narrow screens', async () =>
     'ant-menu-item-selected',
   );
 });
+
+test("keeps the hosts item lit on one host's own page", async () => {
+  await renderNav('/nodes/3');
+  const nav = screen.getByRole('menu');
+  expect(within(nav).getByText('Hosts').closest('li')?.className).toContain(
+    'ant-menu-item-selected',
+  );
+});

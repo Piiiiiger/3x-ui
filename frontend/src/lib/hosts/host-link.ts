@@ -2,7 +2,7 @@ import type { ExternalProxyEntry } from '@/schemas/protocols/stream/external-pro
 import { AlpnSchema, UtlsFingerprintSchema } from '@/schemas/protocols/security/tls';
 import type { HostFormValues, HostRecord } from '@/schemas/api/host';
 import type { Inbound } from '@/schemas/api/inbound';
-import { resolveAddr } from '@/lib/xray/inbound-link';
+import { resolveAddr, resolveShareHost } from '@/lib/xray/inbound-link';
 
 // The subset of a host that affects its share link. Mirrors the fields the
 // backend's hostToExternalProxyMap reads.
@@ -177,4 +177,25 @@ function hostEndpointToEntry(endpoint: HostEndpoint): ExternalProxyEntry {
     ...(endpoint.vlessRoute ? { vlessRoute: endpoint.vlessRoute } : {}),
     ...(endpoint.allowInsecure ? { allowInsecure: true } : {}),
   };
+}
+
+/** The address and port people connect to: an inbound's enabled entries, else its own. */
+export function publicEndpointsOf(
+  inbound: {
+    id: number;
+    port: number;
+    listen?: string;
+    shareAddrStrategy?: string;
+    shareAddr?: string;
+  },
+  records: HostRecord[],
+  nodeAddress: string,
+  fallbackHostname: string,
+): string[] {
+  const dest = resolveShareHost(inbound, nodeAddress, fallbackHostname);
+  const endpoints = hostEndpointsFor(records, inbound.id, inbound.port, dest);
+  const shown = endpoints.length > 0 ? endpoints : [{ dest, port: inbound.port }];
+  return shown.map(({ dest: host, port }) =>
+    host.includes(':') && !host.startsWith('[') ? `[${host}]:${port}` : `${host}:${port}`,
+  );
 }

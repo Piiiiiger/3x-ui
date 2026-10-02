@@ -1364,7 +1364,12 @@
       "agentSecretFailed": "Could not create an agent secret",
       "agentSecretTitle": "Agent secret for {name}",
       "agentSecretOnce": "Copy it now: the secret is shown only once.",
-      "agentInstallCommand": "Install command (run it in the folder with the agent files)"
+      "agentInstallCommand": "Install command (run it in the folder with the agent files)",
+      "host": {
+        "allHosts": "All hosts",
+        "notFound": "This host no longer exists",
+        "publicEndpoint": "Public endpoint"
+      }
     },
     "settings": {
       "defaultTag": "Default",

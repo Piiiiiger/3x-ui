@@ -1245,7 +1245,12 @@
       "agentSecretFailed": "No se pudo crear el secreto del agente",
       "agentSecretTitle": "Secreto del agente de {name}",
       "agentSecretOnce": "Cópialo ahora: el secreto solo se muestra una vez.",
-      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)"
+      "agentInstallCommand": "Comando de instalación (ejecútalo en la carpeta con los archivos del agente)",
+      "host": {
+        "allHosts": "Todos los nodos",
+        "notFound": "Este nodo ya no existe",
+        "publicEndpoint": "Punto de acceso público"
+      }
     },
     "settings": {
       "defaultTag": "Predeterminado",
