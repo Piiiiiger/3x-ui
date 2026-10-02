@@ -26,6 +26,12 @@ export const keys = {
     root: () => ['traffic'] as const,
     overview: () => ['traffic', 'overview'] as const,
   },
+  probe: {
+    root: () => ['probe'] as const,
+    servers: () => ['probe', 'servers'] as const,
+    links: () => ['probe', 'links'] as const,
+    settings: () => ['probe', 'settings'] as const,
+  },
   settings: {
     root: () => ['settings'] as const,
     all: () => ['settings', 'all'] as const,

@@ -142,7 +142,8 @@
     "hosts": "Host",
     "docs": "Dokumentasi",
     "openMenu": "Buka menu",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "Pemantauan"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "Tidak dipantau",
       "lastSeen": "Terakhir terlihat {time}",
       "totalTraffic": "Total unggah / unduh",
-      "pingTimeout": "waktu habis"
+      "pingTimeout": "waktu habis",
+      "intro": "Semua server yang dipantau Lite, beserta beban, trafik, dan latensinya. Tautkan server ke sebuah node, dan klien node itu melihatnya di portal.",
+      "openPublic": "Buka halaman publik",
+      "linkNodes": "Tautkan node",
+      "settings": "Pengaturan",
+      "master": "Panel lokal",
+      "notLinked": "Belum ditautkan",
+      "cores": "{count} inti",
+      "quota": "Kuota trafik",
+      "summaryOnline": "Server online",
+      "summaryLinked": "Ditautkan ke panel ini",
+      "summaryUp": "Kecepatan unggah",
+      "summaryDown": "Kecepatan unduh",
+      "notConfigured": "Pemantauan belum diatur",
+      "notConfiguredHint": "Masukkan alamat Lite yang berjalan di host ini, dan server-servernya akan muncul di sini.",
+      "unreadable": "Lite tidak dapat dibaca",
+      "staleData": "Menampilkan data pukul {time}",
+      "empty": "Lite belum memiliki server.",
+      "linksIntro": "Pilih server terpantau untuk setiap host panel ini. Klien lalu melihat di portal server tempat inbound mereka berada.",
+      "linkMissing": "Lite tidak lagi mencantumkan server ini",
+      "linksUnreadable": "Lite sedang tidak dapat dibaca, jadi server-servernya tidak bisa ditampilkan.",
+      "linksSaved": "Tautan disimpan",
+      "settingsTitle": "Pengaturan pemantauan",
+      "liteUrl": "Alamat Lite",
+      "liteUrlHint": "Kosongkan untuk mematikan pemantauan. Jika diisi, harus berupa alamat loopback, misalnya:",
+      "publicUrl": "URL halaman publik",
+      "publicUrlHint": "Opsional. Menambahkan tombol di halaman ini untuk membuka halaman status publik.",
+      "errLiteUrl": "Ini bukan alamat loopback",
+      "errPublicUrl": "Ini bukan URL http atau https",
+      "settingsSaved": "Pengaturan pemantauan disimpan"
     }
   },
   "tgbot": {

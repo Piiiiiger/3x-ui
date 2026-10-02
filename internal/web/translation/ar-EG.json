@@ -142,7 +142,8 @@
     "hosts": "المضيفات",
     "docs": "التوثيق",
     "openMenu": "فتح القائمة",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "المراقبة"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "غير مراقَب",
       "lastSeen": "آخر ظهور {time}",
       "totalTraffic": "إجمالي الرفع / التنزيل",
-      "pingTimeout": "انتهت المهلة"
+      "pingTimeout": "انتهت المهلة",
+      "intro": "كل الخوادم التي يراقبها Lite مع الحِمل وحركة البيانات والكمون. اربط الخادم بعقدة ليراه عملاء تلك العقدة في البوابة.",
+      "openPublic": "فتح الصفحة العامة",
+      "linkNodes": "ربط العقد",
+      "settings": "الإعدادات",
+      "master": "بانل محلي",
+      "notLinked": "غير مرتبط",
+      "cores": "الأنوية: {count}",
+      "quota": "حصة البيانات",
+      "summaryOnline": "الخوادم المتصلة",
+      "summaryLinked": "مرتبطة بهذه اللوحة",
+      "summaryUp": "سرعة الرفع",
+      "summaryDown": "سرعة التنزيل",
+      "notConfigured": "لم يتم إعداد المراقبة بعد",
+      "notConfiguredHint": "أدخل عنوان Lite الذي يعمل على هذا المضيف لتظهر خوادمه هنا.",
+      "unreadable": "تعذّرت قراءة Lite",
+      "staleData": "تُعرض بيانات الساعة {time}",
+      "empty": "لا توجد خوادم في Lite بعد.",
+      "linksIntro": "اختر لكل مضيف في هذه اللوحة الخادم المراقَب المقابل له. بعدها يرى العملاء في البوابة الخوادم التي تعمل عليها وارداتهم.",
+      "linkMissing": "هذا الخادم لم يعد موجودًا في Lite",
+      "linksUnreadable": "تتعذّر قراءة Lite الآن، لذلك لا يمكن عرض خوادمه.",
+      "linksSaved": "تم حفظ الروابط",
+      "settingsTitle": "إعدادات المراقبة",
+      "liteUrl": "عنوان Lite",
+      "liteUrlHint": "اتركه فارغًا لإيقاف المراقبة. وإلا يجب أن يكون عنوان loopback، مثل:",
+      "publicUrl": "رابط الصفحة العامة",
+      "publicUrlHint": "اختياري. يضيف إلى هذه الصفحة زرًا يفتح صفحة الحالة العامة.",
+      "errLiteUrl": "هذا ليس عنوان loopback",
+      "errPublicUrl": "هذا ليس رابط http أو https",
+      "settingsSaved": "تم حفظ إعدادات المراقبة"
     }
   },
   "tgbot": {

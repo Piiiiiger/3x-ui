@@ -27,6 +27,7 @@ import {
   MoonOutlined,
   PlusOutlined,
   ProfileOutlined,
+  RadarChartOutlined,
   ReloadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -350,6 +351,12 @@ export default function CommandPalette() {
         title: t('menu.dashboard'),
         keywords: ['overview', 'dashboard', 'cpu', 'ram', 'memory', 'traffic', 'speed'],
         icon: <DashboardOutlined />,
+      },
+      {
+        path: '/probe',
+        title: t('menu.probe'),
+        keywords: ['probe', 'monitor', 'servers', 'status', 'load', 'latency', 'ping', '探针'],
+        icon: <RadarChartOutlined />,
       },
       {
         path: '/inbounds',

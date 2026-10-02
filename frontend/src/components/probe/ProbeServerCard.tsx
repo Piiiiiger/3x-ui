@@ -32,7 +32,8 @@ interface ProbeMeterProps {
   detail?: string;
 }
 
-function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
+// Exported for the admin page, which adds a quota bar of the same make to the footer.
+export function ProbeMeter({ label, percent, detail }: ProbeMeterProps) {
   const { token } = theme.useToken();
   const value = `${percent.toFixed(1)} %`;
   return (

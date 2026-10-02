@@ -142,7 +142,8 @@
     "hosts": "主機",
     "docs": "文件",
     "openMenu": "開啟選單",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "探針"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "未監控",
       "lastSeen": "最後上線 {time}",
       "totalTraffic": "累計上傳 / 下載",
-      "pingTimeout": "逾時"
+      "pingTimeout": "逾時",
+      "intro": "Lite 監控中的所有伺服器，包含負載、流量與延遲。把伺服器關聯到節點後，該節點的使用者就能在入口網站看到它。",
+      "openPublic": "開啟公開頁面",
+      "linkNodes": "關聯節點",
+      "settings": "設定",
+      "master": "本機面板",
+      "notLinked": "未關聯",
+      "cores": "{count} 核",
+      "quota": "流量配額",
+      "summaryOnline": "上線伺服器",
+      "summaryLinked": "已關聯到本面板",
+      "summaryUp": "上傳速度",
+      "summaryDown": "下載速度",
+      "notConfigured": "探針尚未設定",
+      "notConfiguredHint": "填寫本機上執行的 Lite 監控位址，這裡就會顯示它的伺服器。",
+      "unreadable": "無法讀取 Lite 監控",
+      "staleData": "目前顯示的是 {time} 的資料",
+      "empty": "Lite 監控中還沒有伺服器。",
+      "linksIntro": "為本面板的每台主機選擇對應的監控伺服器。之後使用者會在入口網站看到自己入站所在的伺服器。",
+      "linkMissing": "Lite 中已沒有這台伺服器",
+      "linksUnreadable": "暫時無法讀取 Lite，因此無法列出它的伺服器。",
+      "linksSaved": "關聯已儲存",
+      "settingsTitle": "探針設定",
+      "liteUrl": "Lite 位址",
+      "liteUrlHint": "留空則關閉探針。否則必須是回環位址，例如：",
+      "publicUrl": "公開頁面網址",
+      "publicUrlHint": "選填。填寫後本頁會出現一個開啟公開狀態頁的按鈕。",
+      "errLiteUrl": "這不是回環位址",
+      "errPublicUrl": "這不是 http 或 https 網址",
+      "settingsSaved": "探針設定已儲存"
     }
   },
   "tgbot": {

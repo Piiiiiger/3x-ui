@@ -142,7 +142,8 @@
     "hosts": "Hosts",
     "docs": "Documentação",
     "openMenu": "Abrir menu",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "Monitoramento"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "Não monitorado",
       "lastSeen": "Visto por último em {time}",
       "totalTraffic": "Total de upload / download",
-      "pingTimeout": "sem resposta"
+      "pingTimeout": "sem resposta",
+      "intro": "Todos os servidores acompanhados pelo Lite, com carga, tráfego e latência. Vincule um servidor a um nó e os clientes desse nó o verão no portal.",
+      "openPublic": "Abrir página pública",
+      "linkNodes": "Vincular nós",
+      "settings": "Configurações",
+      "master": "Painel local",
+      "notLinked": "Não vinculado",
+      "cores": "núcleos: {count}",
+      "quota": "Cota de tráfego",
+      "summaryOnline": "Servidores online",
+      "summaryLinked": "Vinculados a este painel",
+      "summaryUp": "Velocidade de upload",
+      "summaryDown": "Velocidade de download",
+      "notConfigured": "O monitoramento ainda não foi configurado",
+      "notConfiguredHint": "Informe o endereço do monitor Lite que roda neste host e os servidores dele aparecerão aqui.",
+      "unreadable": "Não foi possível ler o monitor Lite",
+      "staleData": "Exibindo dados das {time}",
+      "empty": "O monitor Lite ainda não tem servidores.",
+      "linksIntro": "Escolha o servidor monitorado que corresponde a cada host deste painel. Os clientes verão no portal os servidores das próprias entradas.",
+      "linkMissing": "O Lite não lista mais este servidor",
+      "linksUnreadable": "No momento não é possível ler o Lite, então os servidores dele não podem ser listados.",
+      "linksSaved": "Vínculos salvos",
+      "settingsTitle": "Configurações de monitoramento",
+      "liteUrl": "Endereço do Lite",
+      "liteUrlHint": "Deixe vazio para desligar o monitoramento. Caso contrário, deve ser um endereço de loopback, por exemplo:",
+      "publicUrl": "URL da página pública",
+      "publicUrlHint": "Opcional. Adiciona a esta página um botão que abre a página pública de status.",
+      "errLiteUrl": "Não é um endereço de loopback",
+      "errPublicUrl": "Não é uma URL http ou https",
+      "settingsSaved": "Configurações de monitoramento salvas"
     }
   },
   "tgbot": {

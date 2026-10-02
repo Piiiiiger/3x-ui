@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import { HttpUtil, Msg } from '@/utils';
-import { parseMsg } from '@/utils/zodValidate';
+import { parseMsg, parseRequired } from '@/utils/zodValidate';
 import { ClientPageResponseSchema } from '@/schemas/client';
 import { fetchXrayConfig } from '@/hooks/useXraySetting';
 
@@ -42,6 +42,31 @@ describe('parseMsg', () => {
     expect(warning).toHaveBeenCalledWith(
       '[zod] clients/list/paged response failed validation',
       expect.arrayContaining([expect.objectContaining({ code: 'invalid_type', path: ['total'] })]),
+    );
+  });
+});
+
+// A caller that builds a form or a page from the payload has nothing to build from null.
+describe('parseRequired', () => {
+  const schema = z.object({ id: z.number() });
+
+  it('hands back the validated payload itself', () => {
+    expect(parseRequired(new Msg(true, '', { id: 7, extra: true }), schema, 'test/value')).toEqual({
+      id: 7,
+    });
+  });
+
+  it('rejects a successful response that carries no payload', () => {
+    expect(() => parseRequired(new Msg(true, '', null), schema, 'test/value')).toThrow(
+      'test/value response is empty',
+    );
+  });
+
+  it('rejects a payload that violates its schema', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    expect(() => parseRequired(new Msg(true, '', { id: '7' }), schema, 'test/value')).toThrow(
+      'test/value response failed validation',
     );
   });
 });

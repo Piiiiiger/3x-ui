@@ -142,7 +142,8 @@
     "sponsors": "Sponsors",
     "docs": "Documentation",
     "openMenu": "Open menu",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "Probe"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "Not monitored",
       "lastSeen": "Last seen {time}",
       "totalTraffic": "Total up / down",
-      "pingTimeout": "timeout"
+      "pingTimeout": "timeout",
+      "intro": "Every server the Lite monitor watches, with its load, traffic and latency. Link a server to a node, and that node's clients see it in their portal.",
+      "openPublic": "Open public page",
+      "linkNodes": "Link nodes",
+      "settings": "Settings",
+      "master": "Local panel",
+      "notLinked": "Not linked",
+      "cores": "{count}-core",
+      "quota": "Traffic quota",
+      "summaryOnline": "Servers online",
+      "summaryLinked": "Linked to this panel",
+      "summaryUp": "Upload speed",
+      "summaryDown": "Download speed",
+      "notConfigured": "The probe is not set up yet",
+      "notConfiguredHint": "Enter the address of the Lite monitor that runs on this host, and its servers appear here.",
+      "unreadable": "The Lite monitor could not be read",
+      "staleData": "Showing data from {time}",
+      "empty": "The Lite monitor lists no servers yet.",
+      "linksIntro": "Choose the monitored server each host of this panel runs on. Clients then see the servers behind their own inbounds in the portal.",
+      "linkMissing": "Lite no longer lists this server",
+      "linksUnreadable": "Lite cannot be read right now, so its servers cannot be listed.",
+      "linksSaved": "Links saved",
+      "settingsTitle": "Probe settings",
+      "liteUrl": "Lite address",
+      "liteUrlHint": "Leave it empty to turn the probe off. Otherwise it must be a loopback address, for example:",
+      "publicUrl": "Public page URL",
+      "publicUrlHint": "Optional. Adds a button to this page that opens the public status page.",
+      "errLiteUrl": "This is not a loopback address",
+      "errPublicUrl": "This is not an http or https URL",
+      "settingsSaved": "Probe settings saved"
     }
   },
   "tgbot": {

@@ -142,7 +142,8 @@
     "hosts": "主机",
     "docs": "文档",
     "openMenu": "打开菜单",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "探针"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "未监控",
       "lastSeen": "最后在线 {time}",
       "totalTraffic": "累计上传 / 下载",
-      "pingTimeout": "超时"
+      "pingTimeout": "超时",
+      "intro": "Lite 监控中的所有服务器，包括负载、流量和延迟。把服务器关联到节点后，该节点的用户就能在门户里看到它。",
+      "openPublic": "打开公开页面",
+      "linkNodes": "关联节点",
+      "settings": "设置",
+      "master": "本地面板",
+      "notLinked": "未关联",
+      "cores": "{count} 核",
+      "quota": "流量配额",
+      "summaryOnline": "在线服务器",
+      "summaryLinked": "已关联到本面板",
+      "summaryUp": "上传速度",
+      "summaryDown": "下载速度",
+      "notConfigured": "探针尚未配置",
+      "notConfiguredHint": "填写本机上运行的 Lite 监控地址，这里就会显示它的服务器。",
+      "unreadable": "无法读取 Lite 监控",
+      "staleData": "当前显示的是 {time} 的数据",
+      "empty": "Lite 监控中还没有服务器。",
+      "linksIntro": "为本面板的每台主机选择对应的监控服务器。之后用户会在门户里看到自己入站所在的服务器。",
+      "linkMissing": "Lite 中已没有这台服务器",
+      "linksUnreadable": "暂时无法读取 Lite，因此无法列出它的服务器。",
+      "linksSaved": "关联已保存",
+      "settingsTitle": "探针设置",
+      "liteUrl": "Lite 地址",
+      "liteUrlHint": "留空则关闭探针。否则必须是回环地址，例如：",
+      "publicUrl": "公开页面地址",
+      "publicUrlHint": "可选。填写后本页会出现一个打开公开状态页的按钮。",
+      "errLiteUrl": "这不是回环地址",
+      "errPublicUrl": "这不是 http 或 https 地址",
+      "settingsSaved": "探针设置已保存"
     }
   },
   "tgbot": {

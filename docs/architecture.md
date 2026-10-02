@@ -497,6 +497,10 @@ Lite's pages and stores no Lite credential, so it sees Lite's guest view.
 - **Scoping:** the admin API (`controller/probe.go`) lists every server. The portal route
   `<subPath>portal/probe` (`sub/portal.go`) goes through `ProbeService.ClientServers`: only
   the hosts behind the client's own subscription inbounds, with whitelisted fields.
+- **Pages:** `frontend/src/pages/probe/` is the admin page at `/panel/probe`: every server,
+  plus the modals that link hosts to servers and set the Lite address. Each server is drawn by
+  `frontend/src/components/probe/ProbeServerCard.tsx`, which fetches nothing and imports
+  nothing panel-only, so that the client portal can draw the same card.
 
 ---
 

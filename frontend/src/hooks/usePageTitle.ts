@@ -6,6 +6,7 @@ import { PANEL_NAME } from '@/lib/brand';
 
 const TITLE_KEYS: Record<string, string> = {
   '/': 'menu.dashboard',
+  '/probe': 'menu.probe',
   '/inbounds': 'menu.inbounds',
   '/clients': 'menu.clients',
   '/groups': 'menu.groups',

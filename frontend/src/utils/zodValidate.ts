@@ -22,3 +22,15 @@ export function parseMsg<T extends z.ZodType>(
   }
   return new Msg<z.infer<T>>(msg.success, msg.msg, result.data);
 }
+
+// For a response whose payload a form or a page is built from: the validated
+// payload itself, or an error when it is missing or malformed.
+export function parseRequired<T extends z.ZodType>(
+  msg: Msg<unknown>,
+  schema: T,
+  context: string,
+): NonNullable<z.infer<T>> {
+  const obj = parseMsg(msg, schema, context, { strict: true }).obj;
+  if (obj == null) throw new Error(`${context} response is empty`);
+  return obj;
+}

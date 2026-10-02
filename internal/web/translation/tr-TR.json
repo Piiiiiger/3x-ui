@@ -142,7 +142,8 @@
     "hosts": "Host'lar",
     "docs": "Belgeler",
     "openMenu": "Menüyü aç",
-    "subFormats": "Abonelik Formatları"
+    "subFormats": "Abonelik Formatları",
+    "probe": "İzleme"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "İzlenmiyor",
       "lastSeen": "Son görülme: {time}",
       "totalTraffic": "Toplam yükleme / indirme",
-      "pingTimeout": "zaman aşımı"
+      "pingTimeout": "zaman aşımı",
+      "intro": "Lite’ın izlediği tüm sunucular; yük, trafik ve gecikme bilgileriyle. Bir sunucuyu bir düğüme bağlayın, o düğümün kullanıcıları onu portalda görsün.",
+      "openPublic": "Herkese açık sayfayı aç",
+      "linkNodes": "Düğümleri bağla",
+      "settings": "Ayarlar",
+      "master": "Yerel Panel",
+      "notLinked": "Bağlı değil",
+      "cores": "{count} çekirdek",
+      "quota": "Trafik kotası",
+      "summaryOnline": "Çevrimiçi sunucular",
+      "summaryLinked": "Bu panele bağlı",
+      "summaryUp": "Yükleme hızı",
+      "summaryDown": "İndirme hızı",
+      "notConfigured": "İzleme henüz ayarlanmadı",
+      "notConfiguredHint": "Bu sunucuda çalışan Lite izleyicisinin adresini girin; sunucuları burada görünür.",
+      "unreadable": "Lite izleyicisi okunamadı",
+      "staleData": "{time} itibarıyla veriler gösteriliyor",
+      "empty": "Lite izleyicisinde henüz sunucu yok.",
+      "linksIntro": "Bu panelin her ana makinesi için izlenen sunucuyu seçin. Kullanıcılar portalda kendi gelen bağlantılarının bulunduğu sunucuları görür.",
+      "linkMissing": "Lite artık bu sunucuyu listelemiyor",
+      "linksUnreadable": "Lite şu anda okunamıyor, bu yüzden sunucuları listelenemiyor.",
+      "linksSaved": "Bağlantılar kaydedildi",
+      "settingsTitle": "İzleme ayarları",
+      "liteUrl": "Lite adresi",
+      "liteUrlHint": "İzlemeyi kapatmak için boş bırakın. Aksi halde bir loopback adresi olmalıdır, örneğin:",
+      "publicUrl": "Herkese açık sayfa URL’si",
+      "publicUrlHint": "İsteğe bağlı. Bu sayfaya, herkese açık durum sayfasını açan bir düğme ekler.",
+      "errLiteUrl": "Bu bir loopback adresi değil",
+      "errPublicUrl": "Bu bir http veya https URL’si değil",
+      "settingsSaved": "İzleme ayarları kaydedildi"
     }
   },
   "tgbot": {

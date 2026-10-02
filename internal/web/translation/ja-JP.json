@@ -142,7 +142,8 @@
     "hosts": "ホスト",
     "docs": "ドキュメント",
     "openMenu": "メニューを開く",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "サーバー監視"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "監視対象外",
       "lastSeen": "最終確認 {time}",
       "totalTraffic": "合計 上り / 下り",
-      "pingTimeout": "タイムアウト"
+      "pingTimeout": "タイムアウト",
+      "intro": "Lite が監視しているすべてのサーバーの負荷・通信量・遅延。サーバーをノードに紐付けると、そのノードのクライアントがポータルで確認できます。",
+      "openPublic": "公開ページを開く",
+      "linkNodes": "ノードを紐付け",
+      "settings": "設定",
+      "master": "ローカルパネル",
+      "notLinked": "未紐付け",
+      "cores": "{count} コア",
+      "quota": "通信量クォータ",
+      "summaryOnline": "オンラインのサーバー",
+      "summaryLinked": "このパネルに紐付け済み",
+      "summaryUp": "アップロード速度",
+      "summaryDown": "ダウンロード速度",
+      "notConfigured": "サーバー監視はまだ設定されていません",
+      "notConfiguredHint": "このホストで動作している Lite のアドレスを入力すると、そのサーバーがここに表示されます。",
+      "unreadable": "Lite を読み取れませんでした",
+      "staleData": "{time} 時点のデータを表示中",
+      "empty": "Lite にはまだサーバーが登録されていません。",
+      "linksIntro": "このパネルの各ホストに対応する監視サーバーを選択します。クライアントはポータルで自分のインバウンドがあるサーバーを確認できます。",
+      "linkMissing": "Lite にこのサーバーはもうありません",
+      "linksUnreadable": "現在 Lite を読み取れないため、サーバーを一覧表示できません。",
+      "linksSaved": "紐付けを保存しました",
+      "settingsTitle": "サーバー監視の設定",
+      "liteUrl": "Lite のアドレス",
+      "liteUrlHint": "空欄にするとサーバー監視をオフにします。それ以外はループバックアドレスを指定してください。例：",
+      "publicUrl": "公開ページの URL",
+      "publicUrlHint": "任意。入力すると、公開ステータスページを開くボタンがこのページに表示されます。",
+      "errLiteUrl": "ループバックアドレスではありません",
+      "errPublicUrl": "http または https の URL ではありません",
+      "settingsSaved": "サーバー監視の設定を保存しました"
     }
   },
   "tgbot": {

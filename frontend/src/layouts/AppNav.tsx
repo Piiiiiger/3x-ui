@@ -30,6 +30,7 @@ import {
   MoonFilled,
   MoonOutlined,
   ProfileOutlined,
+  RadarChartOutlined,
   ReadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -66,6 +67,7 @@ const MORE_PAGES = new Set(['/api-docs', '/sponsors']);
 
 type IconName =
   | 'dashboard'
+  | 'probe'
   | 'inbound'
   | 'team'
   | 'groups'
@@ -82,6 +84,7 @@ type IconName =
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
+  probe: RadarChartOutlined,
   inbound: ImportOutlined,
   team: TeamOutlined,
   groups: TagsOutlined,
@@ -129,6 +132,8 @@ export default function AppNav() {
   const tabs = useMemo<{ key: string; icon: IconName; title: string }[]>(
     () => [
       { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
+      // Second on purpose: the bar folds the items that do not fit from the end.
+      { key: '/probe', icon: 'probe', title: t('menu.probe') },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },

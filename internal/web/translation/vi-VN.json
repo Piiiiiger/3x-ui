@@ -142,7 +142,8 @@
     "hosts": "Hosts",
     "docs": "Tài liệu",
     "openMenu": "Mở menu",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "probe": "Giám sát"
   },
   "pages": {
     "login": {
@@ -2511,7 +2512,36 @@
       "statusUnmonitored": "Không được giám sát",
       "lastSeen": "Lần cuối thấy: {time}",
       "totalTraffic": "Tổng tải lên / tải xuống",
-      "pingTimeout": "hết thời gian chờ"
+      "pingTimeout": "hết thời gian chờ",
+      "intro": "Mọi máy chủ mà Lite theo dõi, kèm tải, lưu lượng và độ trễ. Liên kết máy chủ với một nút để khách hàng của nút đó thấy nó trong cổng.",
+      "openPublic": "Mở trang công khai",
+      "linkNodes": "Liên kết nút",
+      "settings": "Cài đặt",
+      "master": "Panel cục bộ",
+      "notLinked": "Chưa liên kết",
+      "cores": "{count} nhân",
+      "quota": "Hạn mức lưu lượng",
+      "summaryOnline": "Máy chủ trực tuyến",
+      "summaryLinked": "Đã liên kết với bảng này",
+      "summaryUp": "Tốc độ tải lên",
+      "summaryDown": "Tốc độ tải xuống",
+      "notConfigured": "Chưa thiết lập giám sát",
+      "notConfiguredHint": "Nhập địa chỉ của Lite đang chạy trên máy này, các máy chủ của nó sẽ hiện ở đây.",
+      "unreadable": "Không đọc được Lite",
+      "staleData": "Đang hiển thị dữ liệu lúc {time}",
+      "empty": "Lite chưa có máy chủ nào.",
+      "linksIntro": "Chọn máy chủ được giám sát tương ứng với từng máy của bảng điều khiển này. Khách hàng sẽ thấy trong cổng các máy chủ chứa inbound của họ.",
+      "linkMissing": "Lite không còn liệt kê máy chủ này",
+      "linksUnreadable": "Hiện không đọc được Lite nên không thể liệt kê các máy chủ của nó.",
+      "linksSaved": "Đã lưu liên kết",
+      "settingsTitle": "Cài đặt giám sát",
+      "liteUrl": "Địa chỉ Lite",
+      "liteUrlHint": "Để trống để tắt giám sát. Nếu không, phải là địa chỉ loopback, ví dụ:",
+      "publicUrl": "URL trang công khai",
+      "publicUrlHint": "Không bắt buộc. Thêm vào trang này một nút mở trang trạng thái công khai.",
+      "errLiteUrl": "Đây không phải địa chỉ loopback",
+      "errPublicUrl": "Đây không phải URL http hoặc https",
+      "settingsSaved": "Đã lưu cài đặt giám sát"
     }
   },
   "tgbot": {
