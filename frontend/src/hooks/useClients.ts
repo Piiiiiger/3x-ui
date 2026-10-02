@@ -135,26 +135,10 @@ export function buildClientPageQuery(p: ClientQueryParams): string {
   return sp.toString();
 }
 
-// Callers pass a fresh object every render; an equal query keeps the previous one
-// so the re-render does not refetch.
+// Callers pass a fresh object every render; an equal query keeps the previous one so
+// the re-render does not refetch. Comparing the request itself cannot miss a filter.
 export function sameClientQuery(prev: ClientQueryParams, next: ClientQueryParams): boolean {
-  return (
-    prev.page === next.page &&
-    prev.pageSize === next.pageSize &&
-    (prev.search ?? '') === (next.search ?? '') &&
-    (prev.filter ?? '') === (next.filter ?? '') &&
-    (prev.protocol ?? '') === (next.protocol ?? '') &&
-    (prev.inbound ?? '') === (next.inbound ?? '') &&
-    (prev.sort ?? '') === (next.sort ?? '') &&
-    (prev.order ?? '') === (next.order ?? '') &&
-    (prev.expiryFrom ?? 0) === (next.expiryFrom ?? 0) &&
-    (prev.expiryTo ?? 0) === (next.expiryTo ?? 0) &&
-    (prev.usageFrom ?? 0) === (next.usageFrom ?? 0) &&
-    (prev.usageTo ?? 0) === (next.usageTo ?? 0) &&
-    (prev.autoRenew ?? '') === (next.autoRenew ?? '') &&
-    (prev.hasTgId ?? '') === (next.hasTgId ?? '') &&
-    (prev.hasComment ?? '') === (next.hasComment ?? '')
-  );
+  return buildClientPageQuery(prev) === buildClientPageQuery(next);
 }
 
 async function fetchClientPage(params: ClientQueryParams): Promise<ClientPageResponse> {
