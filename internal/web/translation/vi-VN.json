@@ -2473,5 +2473,6 @@
     "restartXray": "Khởi động lại dịch vụ Xray",
     "restartXraySuccess": "Dịch vụ Xray đã được khởi động lại thành công",
     "settings": "Cài đặt"
-  }
+  },
+  "yamlEditor": "Trình chỉnh sửa YAML"
 }

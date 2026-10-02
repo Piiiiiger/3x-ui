@@ -2473,5 +2473,6 @@
     "restartXray": "Mulai Ulang Layanan Xray",
     "restartXraySuccess": "Layanan Xray berhasil dimulai ulang",
     "settings": "Pengaturan"
-  }
+  },
+  "yamlEditor": "Editor YAML"
 }

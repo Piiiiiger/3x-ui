@@ -2473,5 +2473,6 @@
     "restartXray": "Xray Hizmetini Yeniden Başlat",
     "restartXraySuccess": "Xray hizmeti başarıyla yeniden başlatıldı",
     "settings": "Ayarlar"
-  }
+  },
+  "yamlEditor": "YAML Düzenleyici"
 }

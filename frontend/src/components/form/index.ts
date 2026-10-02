@@ -1,5 +1,6 @@
 export { default as DateTimePicker } from './DateTimePicker';
 export { default as JsonEditor } from './JsonEditor';
+export { default as YamlEditor } from './YamlEditor';
 export { default as HeaderMapEditor } from './HeaderMapEditor';
 export { default as GoRegexInput, validateGoRegex } from './GoRegexInput';
 export { default as SelectAllClearButtons } from './SelectAllClearButtons';

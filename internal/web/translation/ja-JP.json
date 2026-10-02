@@ -2473,5 +2473,6 @@
     "restartXray": "Xrayサービスを再起動",
     "restartXraySuccess": "Xrayサービスが正常に再起動されました",
     "settings": "設定"
-  }
+  },
+  "yamlEditor": "YAML エディター"
 }

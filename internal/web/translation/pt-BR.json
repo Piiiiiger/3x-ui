@@ -2473,5 +2473,6 @@
     "restartXray": "Reiniciar serviço Xray",
     "restartXraySuccess": "O serviço Xray foi reiniciado com sucesso",
     "settings": "Configurações"
-  }
+  },
+  "yamlEditor": "Editor YAML"
 }

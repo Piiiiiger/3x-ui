@@ -2473,5 +2473,6 @@
     "restartXray": "Перезапустити службу Xray",
     "restartXraySuccess": "Службу Xray успішно перезапущено",
     "settings": "Налаштування"
-  }
+  },
+  "yamlEditor": "Редактор YAML"
 }

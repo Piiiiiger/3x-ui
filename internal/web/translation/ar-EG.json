@@ -2473,5 +2473,6 @@
     "restartXray": "إعادة تشغيل خدمة Xray",
     "restartXraySuccess": "تمت إعادة تشغيل خدمة Xray بنجاح",
     "settings": "الإعدادات"
-  }
+  },
+  "yamlEditor": "محرر YAML"
 }
