@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Select, Typography, message } from 'antd';
 
-import { HttpUtil } from '@/utils';
 import { SelectAllClearButtons } from '@/components/form';
-import { buildClonePayload, pickClonePort } from '@/lib/xray/inbound-clone';
+import { pickClonePort, type CloneShare } from '@/lib/xray/inbound-clone';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import type { DBInbound } from '@/models/dbinbound';
+
+import { postClone } from './realityKeys';
 
 // 0 is the "local panel" sentinel (inbounds without a nodeId) — the same
 // convention as the clients page node filter (#4997).
@@ -17,6 +18,7 @@ interface CloneInboundModalProps {
   dbInbound: DBInbound | null;
   nodes: NodeRecord[];
   portsInUse: Map<number, Set<number>>;
+  sharesByHost: Map<number, CloneShare>;
   onClose: () => void;
   onCloned: () => void | Promise<void>;
 }
@@ -26,6 +28,7 @@ export default function CloneInboundModal({
   dbInbound,
   nodes,
   portsInUse,
+  sharesByHost,
   onClose,
   onCloned,
 }: CloneInboundModalProps) {
@@ -81,16 +84,9 @@ export default function CloneInboundModal({
       // target gets its own fresh port because ports are only node-scoped.
       const results: { ok: boolean; reason: string }[] = [];
       for (const target of targets) {
-        const msg = await HttpUtil.post(
-          '/panel/api/inbounds/add',
-          buildClonePayload(
-            dbInbound,
-            pickClonePort(portsInUse.get(target)),
-            target === LOCAL_PANEL ? null : target,
-          ),
-          { silent: true },
+        results.push(
+          await postClone(dbInbound, target, pickClonePort(portsInUse.get(target)), sharesByHost),
         );
-        results.push({ ok: !!msg?.success, reason: msg?.success ? '' : msg?.msg || '' });
       }
       const okCount = results.filter((r) => r.ok).length;
       const failed = results.length - okCount;

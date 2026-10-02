@@ -23,7 +23,7 @@ import {
 } from '@ant-design/icons';
 
 import { HttpUtil, SizeFormatter, RandomUtil } from '@/utils';
-import { buildClonePayload } from '@/lib/xray/inbound-clone';
+import { hostShares } from '@/lib/xray/inbound-clone';
 import { NODE_ELIGIBLE_PROTOCOLS } from '@/lib/xray/node-protocols';
 import {
   genAmneziaWGLinks,
@@ -50,7 +50,10 @@ import { useInbounds } from './useInbounds';
 import { InboundList } from './list';
 import { LazyMount } from '@/components/utility';
 const InboundFormModal = lazy(() => import('./form/InboundFormModal'));
+import { postClone } from './realityKeys';
+
 const CloneInboundModal = lazy(() => import('./CloneInboundModal'));
+
 const InboundInfoModal = lazy(() => import('./info/InboundInfoModal'));
 const QrCodeModal = lazy(() => import('./qr/QrCodeModal'));
 const AttachClientsModal = lazy(() => import('./clients/AttachClientsModal'));
@@ -154,6 +157,8 @@ export default function InboundsPage() {
     }
     return map;
   }, [dbInbounds]);
+
+  const cloneSharesByHost = useMemo(() => hostShares(dbInbounds || []), [dbInbounds]);
 
   useWebSocket({
     traffic: applyTrafficEvent,
@@ -588,15 +593,22 @@ export default function InboundsPage() {
         okText: t('pages.inbounds.clone'),
         cancelText: t('cancel'),
         onOk: async () => {
-          const msg = await HttpUtil.post(
-            '/panel/api/inbounds/add',
-            buildClonePayload(dbInbound, RandomUtil.randomInteger(10000, 60000), null),
+          const result = await postClone(
+            dbInbound,
+            0,
+            RandomUtil.randomInteger(10000, 60000),
+            cloneSharesByHost,
           );
-          if (msg?.success) await refresh();
+          if (!result.ok) {
+            messageApi.error(result.reason || t('somethingWentWrong'));
+            return;
+          }
+          messageApi.success(t('pages.inbounds.toasts.inboundCreateSuccess'));
+          await refresh();
         },
       });
     },
-    [modal, nodesList, refresh, t],
+    [modal, nodesList, refresh, t, messageApi, cloneSharesByHost],
   );
 
   const onGeneralAction = useCallback(
@@ -900,6 +912,7 @@ export default function InboundsPage() {
             dbInbound={cloneSource}
             nodes={nodesList || []}
             portsInUse={clonePortsInUse}
+            sharesByHost={cloneSharesByHost}
           />
         </LazyMount>
 
