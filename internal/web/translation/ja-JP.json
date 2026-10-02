@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "すべてのノード",
         "notFound": "このノードは存在しません",
-        "publicEndpoint": "公開エンドポイント"
+        "publicEndpoint": "公開エンドポイント",
+        "nodes": "インバウンド"
       }
     },
     "settings": {

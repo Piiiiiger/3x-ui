@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "全部主機",
         "notFound": "此主機不存在",
-        "publicEndpoint": "公網端點"
+        "publicEndpoint": "公網端點",
+        "nodes": "節點"
       }
     },
     "settings": {

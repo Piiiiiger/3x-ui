@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Semua node",
         "notFound": "Node ini sudah tidak ada",
-        "publicEndpoint": "Titik akses publik"
+        "publicEndpoint": "Titik akses publik",
+        "nodes": "Inbound"
       }
     },
     "settings": {

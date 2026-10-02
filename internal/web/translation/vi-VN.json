@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Tất cả nút",
         "notFound": "Nút này không còn tồn tại",
-        "publicEndpoint": "Điểm truy cập công khai"
+        "publicEndpoint": "Điểm truy cập công khai",
+        "nodes": "Inbound"
       }
     },
     "settings": {

@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "همه نودها",
         "notFound": "این نود دیگر وجود ندارد",
-        "publicEndpoint": "نقطه دسترسی عمومی"
+        "publicEndpoint": "نقطه دسترسی عمومی",
+        "nodes": "ورودی‌ها"
       }
     },
     "settings": {

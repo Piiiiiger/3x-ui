@@ -4,6 +4,8 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import NodeFormModal from '@/pages/nodes/NodeFormModal';
 import NodeList from '@/pages/nodes/NodeList';
 import type { NodeRecord } from '@/schemas/node';
+import { MemoryRouter } from 'react-router';
+
 import { renderWithProviders } from './test-utils';
 
 function renderForm(mode: 'add' | 'edit', node: NodeRecord | null) {
@@ -96,39 +98,41 @@ describe('NodeList agent nodes', () => {
   it('offers no panel update for an agent', () => {
     const noop = () => {};
     renderWithProviders(
-      <NodeList
-        nodes={[
-          {
-            id: 1,
-            name: 'panel',
-            kind: 'panel',
-            enable: true,
-            status: 'online',
-            address: 'a.example.com',
-            port: 2053,
-            scheme: 'https',
-          },
-          {
-            id: 2,
-            name: 'agent',
-            kind: 'agent',
-            enable: true,
-            status: 'online',
-            address: '203.0.113.9',
-          },
-        ]}
-        isMobile={false}
-        selectedIds={[]}
-        onSelectionChange={noop}
-        onAdd={noop}
-        onMtls={noop}
-        onEdit={noop}
-        onDelete={noop}
-        onProbe={noop}
-        onToggleEnable={noop}
-        onUpdateNode={noop}
-        onUpdateSelected={noop}
-      />,
+      <MemoryRouter>
+        <NodeList
+          nodes={[
+            {
+              id: 1,
+              name: 'panel',
+              kind: 'panel',
+              enable: true,
+              status: 'online',
+              address: 'a.example.com',
+              port: 2053,
+              scheme: 'https',
+            },
+            {
+              id: 2,
+              name: 'agent',
+              kind: 'agent',
+              enable: true,
+              status: 'online',
+              address: '203.0.113.9',
+            },
+          ]}
+          isMobile={false}
+          selectedIds={[]}
+          onSelectionChange={noop}
+          onAdd={noop}
+          onMtls={noop}
+          onEdit={noop}
+          onDelete={noop}
+          onProbe={noop}
+          onToggleEnable={noop}
+          onUpdateNode={noop}
+          onUpdateSelected={noop}
+        />
+      </MemoryRouter>,
     );
     const updateButtons = document.querySelectorAll('button[aria-label="Update Panel"]');
     expect(updateButtons).toHaveLength(1);

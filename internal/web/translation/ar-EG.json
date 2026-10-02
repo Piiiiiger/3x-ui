@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "كل النودز",
         "notFound": "هذا النود لم يعد موجودًا",
-        "publicEndpoint": "العنوان العام"
+        "publicEndpoint": "العنوان العام",
+        "nodes": "الواردات"
       }
     },
     "settings": {

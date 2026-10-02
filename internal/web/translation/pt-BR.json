@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Todos os nós",
         "notFound": "Este nó não existe mais",
-        "publicEndpoint": "Endereço público"
+        "publicEndpoint": "Endereço público",
+        "nodes": "Entradas"
       }
     },
     "settings": {

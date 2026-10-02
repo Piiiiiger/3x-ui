@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "全部主机",
         "notFound": "该主机不存在",
-        "publicEndpoint": "公网端点"
+        "publicEndpoint": "公网端点",
+        "nodes": "节点"
       }
     },
     "settings": {

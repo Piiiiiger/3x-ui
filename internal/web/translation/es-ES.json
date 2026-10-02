@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Todos los nodos",
         "notFound": "Este nodo ya no existe",
-        "publicEndpoint": "Punto de acceso público"
+        "publicEndpoint": "Punto de acceso público",
+        "nodes": "Entradas"
       }
     },
     "settings": {

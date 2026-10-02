@@ -1368,7 +1368,8 @@
       "host": {
         "allHosts": "All hosts",
         "notFound": "This host no longer exists",
-        "publicEndpoint": "Public endpoint"
+        "publicEndpoint": "Public endpoint",
+        "nodes": "Nodes"
       }
     },
     "settings": {

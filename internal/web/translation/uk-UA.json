@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Усі вузли",
         "notFound": "Цей вузол більше не існує",
-        "publicEndpoint": "Публічна точка доступу"
+        "publicEndpoint": "Публічна точка доступу",
+        "nodes": "Вхідні"
       }
     },
     "settings": {

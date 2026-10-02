@@ -1249,7 +1249,8 @@
       "host": {
         "allHosts": "Tüm düğümler",
         "notFound": "Bu düğüm artık yok",
-        "publicEndpoint": "Genel uç nokta"
+        "publicEndpoint": "Genel uç nokta",
+        "nodes": "Gelen Bağlantılar"
       }
     },
     "settings": {
