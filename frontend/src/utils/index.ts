@@ -747,12 +747,13 @@ export class TimeFormatter {
     return `${hh}:${mm}:${ss}`;
   }
 
+  // Whole units only: rounded, 23 h 48 min read "24h", and "28d 24h" after 28 days.
   static formatSecond(second: number): string {
-    if (second < 60) return second.toFixed(0) + 's';
-    if (second < 3600) return (second / 60).toFixed(0) + 'm';
-    if (second < 3600 * 24) return (second / 3600).toFixed(0) + 'h';
+    if (second < 60) return Math.floor(second) + 's';
+    if (second < 3600) return Math.floor(second / 60) + 'm';
+    if (second < 3600 * 24) return Math.floor(second / 3600) + 'h';
     const day = Math.floor(second / 3600 / 24);
-    const remain = Number((second / 3600 - day * 24).toFixed(0));
+    const remain = Math.floor(second / 3600 - day * 24);
     return day + 'd' + (remain > 0 ? ' ' + remain + 'h' : '');
   }
 }

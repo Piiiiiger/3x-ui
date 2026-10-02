@@ -88,6 +88,17 @@ describe('ProbeServerCard', () => {
     expect(screen.getByText('↓ 1.91 MB')).toBeTruthy();
   });
 
+  // Rounded, the last half hour of every day of uptime read "28d 24h".
+  it.each([
+    [2504912, '28d 23h'],
+    [86399, '23h'],
+    [3599, '59m'],
+  ])('counts only the whole units of an uptime of %i s: %s', (uptime, shown) => {
+    render(<ProbeServerCard server={online({ uptime })} />);
+
+    expect(screen.getByText('Uptime').nextElementSibling?.textContent).toBe(shown);
+  });
+
   // A dead server must not look alive: no bars at 0 % under a red label.
   it('shows when an offline server was last seen, and none of its zeroed figures', () => {
     render(<ProbeServerCard server={silent('offline', NOON_UTC)} />);
