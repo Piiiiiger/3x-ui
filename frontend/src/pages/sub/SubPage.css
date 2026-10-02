@@ -591,6 +591,15 @@ a.sub-row-title:hover {
 }
 
 @media (max-width: 576px) {
+  .sub-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sub-toolbar {
+    flex-wrap: wrap;
+  }
+
   .sub-content {
     padding: 16px 8px;
   }
