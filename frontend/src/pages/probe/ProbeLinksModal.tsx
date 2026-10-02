@@ -26,11 +26,8 @@ interface ProbeLinksFormProps {
 function ProbeLinksForm({ links, servers, onClose, onSaved }: ProbeLinksFormProps) {
   const { t } = useTranslation();
   const { saveLinks } = useProbeMutations();
-  // The hosts the form opened with: a later answer of the query, with a node
-  // added or gone, must not shift the rows under the selects.
-  const [hosts] = useState(links);
   const methods = useForm<LinksFormValues>({
-    defaultValues: { rows: hosts.map(({ nodeId, serverId }) => ({ nodeId, serverId })) },
+    defaultValues: { rows: links.map(({ nodeId, serverId }) => ({ nodeId, serverId })) },
   });
   const rows = useWatch({ control: methods.control, name: 'rows' });
   const [saving, setSaving] = useState(false);
@@ -65,7 +62,7 @@ function ProbeLinksForm({ links, servers, onClose, onSaved }: ProbeLinksFormProp
             style={{ marginBottom: 16 }}
           />
         )}
-        {hosts.map((host, index) => {
+        {links.map((host, index) => {
           const serverId = rows[index]?.serverId ?? '';
           const missing =
             servers !== null &&

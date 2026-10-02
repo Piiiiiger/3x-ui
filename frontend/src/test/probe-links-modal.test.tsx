@@ -107,6 +107,15 @@ function save() {
   fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 }
 
+// The links query answering again under the open form, as on a window focus.
+async function askAgain(queryClient: QueryClient) {
+  await act(async () => {
+    await queryClient.invalidateQueries({ queryKey: keys.probe.links() });
+    // The query tells its observers on the next macrotask.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -286,14 +295,41 @@ describe('ProbeLinksModal', () => {
     await screen.findByText('oracle.example.com');
 
     answer = [stored[0], stored[2]];
-    await act(async () => {
-      await queryClient.invalidateQueries({ queryKey: keys.probe.links() });
-      // The query tells its observers on the next macrotask.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    await askAgain(queryClient);
     chooseSelectOption('probe-link-5', '🇭🇰 香港-Bravo');
     save();
 
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+    expect(post.mock.calls[0][1]).toEqual({
+      links: [
+        { nodeId: 0, serverId: 'uuid-la' },
+        { nodeId: 2, serverId: 'uuid-gone' },
+        { nodeId: 5, serverId: 'uuid-hk' },
+      ],
+    });
+  });
+
+  // Asked again while the panel was briefly unreachable, the error took the
+  // place of the form, and the choices made in it were gone when it came back.
+  it('keeps the form and its unsaved choices when a later request for the links fails', async () => {
+    let failing = false;
+    vi.spyOn(HttpUtil, 'get').mockImplementation(async () =>
+      failing ? new Msg(false, 'Request failed') : new Msg(true, '', stored),
+    );
+    const post = vi.spyOn(HttpUtil, 'post').mockResolvedValue(new Msg(true, '', stored));
+    const queryClient = makeTestQueryClient();
+    renderWithProviders(
+      <ProbeLinksModal open servers={servers} onClose={() => {}} onSaved={() => {}} />,
+      { queryClient },
+    );
+    await screen.findByText('oracle.example.com');
+    chooseSelectOption('probe-link-5', '🇭🇰 香港-Bravo');
+
+    failing = true;
+    await askAgain(queryClient);
+
+    expect(screen.queryByText('Request failed')).toBeNull();
+    save();
     await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
     expect(post.mock.calls[0][1]).toEqual({
       links: [

@@ -3,9 +3,10 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { keys } from '@/api/queryKeys';
 import ProbeSettingsModal from '@/pages/probe/ProbeSettingsModal';
 import { HttpUtil, Msg } from '@/utils';
-import { renderWithProviders } from './test-utils';
+import { makeTestQueryClient, renderWithProviders } from './test-utils';
 
 const stored = { url: 'http://127.0.0.1:27777', publicUrl: 'https://probe.example.com' };
 
@@ -161,6 +162,36 @@ describe('ProbeSettingsModal', () => {
 
     await act(async () => finish(new Msg(true, '', stored)));
     expect((await field('Lite address')).value).toBe('http://127.0.0.1:27777');
+  });
+
+  // Asked again while the panel was briefly unreachable, the error took the
+  // place of the form, and what had been typed was gone when it came back.
+  it('keeps the form and what was typed when a later request for the settings fails', async () => {
+    let failing = false;
+    vi.spyOn(HttpUtil, 'get').mockImplementation(async () =>
+      failing ? new Msg(false, 'Request failed') : new Msg(true, '', stored),
+    );
+    const post = vi.spyOn(HttpUtil, 'post').mockResolvedValue(new Msg(true, '', stored));
+    const queryClient = makeTestQueryClient();
+    renderWithProviders(<ProbeSettingsModal open onClose={() => {}} onSaved={() => {}} />, {
+      queryClient,
+    });
+    type(await field('Lite address'), 'http://127.0.0.1:28888');
+
+    failing = true;
+    await act(async () => {
+      await queryClient.invalidateQueries({ queryKey: keys.probe.settings() });
+      // The query tells its observers on the next macrotask.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.queryByText('Request failed')).toBeNull();
+    save();
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+    expect(post.mock.calls[0][1]).toEqual({
+      url: 'http://127.0.0.1:28888',
+      publicUrl: 'https://probe.example.com',
+    });
   });
 
   // Saved back, a field the form misread would overwrite the stored address.
