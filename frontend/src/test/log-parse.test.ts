@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { parseLogLine } from '@/pages/index/logParse';
+import { parseLogLine } from '@/pages/nodes/local-panel/logParse';
 
 // Fixtures are real lines captured from `journalctl -u x-ui` on a production
 // host (the SysLog view) plus the in-memory app-log format. Each journald entry

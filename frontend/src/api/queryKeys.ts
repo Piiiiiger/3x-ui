@@ -18,7 +18,7 @@ export const keys = {
   },
   traffic: {
     root: () => ['traffic'] as const,
-    overview: () => ['traffic', 'overview'] as const,
+    overview: (period: string) => ['traffic', 'overview', period] as const,
   },
   probe: {
     root: () => ['probe'] as const,

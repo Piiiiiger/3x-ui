@@ -8,7 +8,6 @@ import {
   AreaChartOutlined,
   BarsOutlined,
   CloudDownloadOutlined,
-  CloudServerOutlined,
   ControlOutlined,
   FileTextOutlined,
   PoweroffOutlined,
@@ -18,7 +17,7 @@ import {
 import { formatPanelVersion } from '@/lib/panel-version';
 import type { Status } from '@/models/status';
 
-interface OverviewActionBarProps {
+interface XrayActionBarProps {
   status: Status;
   isMobile: boolean;
   accessLogEnable: boolean;
@@ -31,7 +30,6 @@ interface OverviewActionBarProps {
   onOpenXrayLogs: () => void;
   onOpenAmneziaWGLogs: () => void;
   onOpenConfig: () => void;
-  onOpenBackup: () => void;
   onOpenSystemHistory: () => void;
   onOpenXrayMetrics: () => void;
   onOpenPanelUpdate: () => void;
@@ -52,7 +50,7 @@ const XRAY_STATE_KEYS: Record<string, string> = {
   error: 'pages.index.xrayStatusError',
 };
 
-export default function OverviewActionBar({
+export default function XrayActionBar({
   status,
   isMobile,
   accessLogEnable,
@@ -65,12 +63,11 @@ export default function OverviewActionBar({
   onOpenXrayLogs,
   onOpenAmneziaWGLogs,
   onOpenConfig,
-  onOpenBackup,
   onOpenSystemHistory,
   onOpenXrayMetrics,
   onOpenPanelUpdate,
   onOpenVersionSwitch,
-}: OverviewActionBarProps) {
+}: XrayActionBarProps) {
   const { t } = useTranslation();
   const stateText = t(XRAY_STATE_KEYS[status.xray.state] ?? 'pages.index.xrayStatusUnknown');
   const hasVersion = !!status.xray.version && status.xray.version !== 'Unknown';
@@ -119,12 +116,6 @@ export default function OverviewActionBar({
         icon: <ControlOutlined />,
         text: t('pages.index.config'),
         onClick: onOpenConfig,
-      },
-      {
-        key: 'backup',
-        icon: <CloudServerOutlined />,
-        text: t('pages.index.backupTitle'),
-        onClick: onOpenBackup,
       },
     ],
     [

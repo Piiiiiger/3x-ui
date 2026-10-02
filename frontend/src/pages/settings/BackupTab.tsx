@@ -1,32 +1,17 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Checkbox, Modal } from 'antd';
+import { Button, Checkbox, Spin } from 'antd';
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 
 import { HttpUtil, PromiseUtil } from '@/utils';
-import './BackupModal.css';
+import './BackupTab.css';
 
-interface BusyEvent {
-  busy: boolean;
-  tip?: string;
-}
-
-interface BackupModalProps {
-  open: boolean;
-  basePath: string;
-  onClose: () => void;
-  onBusy: (e: BusyEvent) => void;
-}
-
-export default function BackupModal({
-  open,
-  basePath: _basePath,
-  onClose,
-  onBusy,
-}: BackupModalProps) {
+/** Backing up and restoring the panel's database, a section of the panel settings. */
+export default function BackupTab() {
   const { t } = useTranslation();
   const isPostgres = window.X_UI_DB_TYPE === 'postgres';
   const [keepHostSettings, setKeepHostSettings] = useState(true);
+  const [busyTip, setBusyTip] = useState<string | null>(null);
 
   function exportDb() {
     window.location.href = (window.X_UI_BASE_PATH || '') + 'panel/api/server/getDb';
@@ -48,19 +33,18 @@ export default function BackupModal({
       formData.append('db', dbFile);
       formData.append('keepHostSettings', String(keepHostSettings));
 
-      onClose();
-      onBusy({ busy: true, tip: `${t('pages.index.importDatabase')}…` });
+      setBusyTip(`${t('pages.index.importDatabase')}…`);
 
       const upload = await HttpUtil.post('/panel/api/server/importDB', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (!upload?.success) {
-        onBusy({ busy: false });
+        setBusyTip(null);
         return;
       }
 
       // importDB schedules the panel restart server-side; wait it out, then reload.
-      onBusy({ busy: true, tip: `${t('pages.settings.restartPanel')}…` });
+      setBusyTip(`${t('pages.settings.restartPanel')}…`);
       await PromiseUtil.sleep(5000);
       window.location.reload();
     });
@@ -68,7 +52,8 @@ export default function BackupModal({
   }
 
   return (
-    <Modal open={open} title={t('pages.index.backupTitle')} footer={null} onCancel={onClose}>
+    <>
+      <Spin fullscreen spinning={busyTip !== null} description={busyTip ?? undefined} />
       {isPostgres && (
         <div className="backup-description" style={{ marginBottom: 16 }}>
           {t('pages.index.backupPostgresNote')}
@@ -136,6 +121,6 @@ export default function BackupModal({
           </div>
         </div>
       </div>
-    </Modal>
+    </>
   );
 }

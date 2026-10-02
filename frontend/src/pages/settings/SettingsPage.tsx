@@ -32,6 +32,7 @@ import DiscordTab from './DiscordTab';
 import SubscriptionGeneralTab from './SubscriptionGeneralTab';
 import SubscriptionFormatsTab from './SubscriptionFormatsTab';
 import SubscriptionBalancersTab from './SubscriptionBalancersTab';
+import BackupTab from './BackupTab';
 import './SettingsPage.css';
 
 interface ApiMsg {
@@ -47,6 +48,7 @@ const tabSlugs = [
   'subscription',
   'subscription-formats',
   'subscription-balancers',
+  'backup',
 ];
 
 function isIp(h: string): boolean {
@@ -228,6 +230,8 @@ export default function SettingsPage() {
         return <SubscriptionFormatsTab allSetting={allSetting} updateSetting={updateSetting} />;
       case 'subscription-balancers':
         return <SubscriptionBalancersTab allSetting={allSetting} updateSetting={updateSetting} />;
+      case 'backup':
+        return <BackupTab />;
       default:
         return <GeneralTab allSetting={allSetting} updateSetting={updateSetting} />;
     }
@@ -274,31 +278,34 @@ export default function SettingsPage() {
                   )}
 
                   <Row gutter={[isMobile ? 8 : 16, isMobile ? 0 : 12]}>
-                    <Col span={24}>
-                      <Card hoverable>
-                        <Row className="header-row">
-                          <Col xs={24} sm={10} className="header-actions">
-                            <Space>
-                              <Button type="primary" disabled={saveDisabled} onClick={onSave}>
-                                {t('pages.settings.save')}
-                              </Button>
-                              <Button
-                                type="primary"
-                                danger
-                                disabled={!saveDisabled}
-                                onClick={restartPanel}
-                              >
-                                {t('pages.settings.restartPanel')}
-                              </Button>
-                            </Space>
-                          </Col>
-                          <Col xs={24} sm={14} className="header-info">
-                            <FloatButton.BackTop target={scrollTarget} visibilityHeight={200} />
-                            <Alert type="warning" showIcon title={t('pages.settings.infoDesc')} />
-                          </Col>
-                        </Row>
-                      </Card>
-                    </Col>
+                    {/* Backup and restore act at once and save no setting. */}
+                    {activeSlug !== 'backup' && (
+                      <Col span={24}>
+                        <Card hoverable>
+                          <Row className="header-row">
+                            <Col xs={24} sm={10} className="header-actions">
+                              <Space>
+                                <Button type="primary" disabled={saveDisabled} onClick={onSave}>
+                                  {t('pages.settings.save')}
+                                </Button>
+                                <Button
+                                  type="primary"
+                                  danger
+                                  disabled={!saveDisabled}
+                                  onClick={restartPanel}
+                                >
+                                  {t('pages.settings.restartPanel')}
+                                </Button>
+                              </Space>
+                            </Col>
+                            <Col xs={24} sm={14} className="header-info">
+                              <FloatButton.BackTop target={scrollTarget} visibilityHeight={200} />
+                              <Alert type="warning" showIcon title={t('pages.settings.infoDesc')} />
+                            </Col>
+                          </Row>
+                        </Card>
+                      </Col>
+                    )}
 
                     <Col span={24}>
                       <Card hoverable>{categoryBody}</Card>

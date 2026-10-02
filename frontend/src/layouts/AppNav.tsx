@@ -185,6 +185,11 @@ export default function AppNav() {
         label: t('pages.settings.subBalancers.menu'),
       });
     }
+    children.push({
+      key: '/settings#backup',
+      icon: <CloudServerOutlined />,
+      label: t('pages.index.backupTitle'),
+    });
     return children;
   }, [t, showSubFormats, showSubBalancers]);
 

@@ -4,7 +4,7 @@ import { Card } from 'antd';
 interface StatTileProps {
   icon: ReactNode;
   label: string;
-  value: string;
+  value: ReactNode;
   unit?: string;
   detail: ReactNode;
   children?: ReactNode;

@@ -4,6 +4,7 @@ export type OnlineAPISupport = number;
 export type PlanStart = string;
 export type ProcessState = string;
 export type Protocol = string;
+export type TrafficPeriod = string;
 export type addrFamily = number;
 export type liteBlocks = Record<string, Record<number, ProbePingBlock[]>>;
 export type staticEgressResolver = string;
@@ -404,16 +405,6 @@ export interface ApiTokenView {
   token?: string;
 }
 
-export interface AttentionClient {
-  email: string;
-  enable: boolean;
-  expiryTime: number;
-  planId: number;
-  status: string;
-  totalGB: number;
-  used: number;
-}
-
 export interface Client {
   adTag?: string;
   allowedIPs?: string[];
@@ -667,6 +658,13 @@ export interface HappLinkResult {
 export interface HistoryOfSeeders {
   id: number;
   seederName: string;
+}
+
+export interface HostTraffic {
+  down: number;
+  name: string;
+  nodeId: number;
+  up: number;
 }
 
 export interface HwidSlotStatus {
@@ -1199,19 +1197,33 @@ export interface TrafficDay {
   up: number;
 }
 
+export interface TrafficHost {
+  linked: boolean;
+  name: string;
+  nodeId: number;
+  quotaBytes: number;
+  usedBytes: number;
+}
+
 export interface TrafficOverview {
-  active: number;
-  attention: AttentionClient[];
-  clients: number;
   daily: TrafficDay[];
-  disabled: number;
-  expired: number;
-  expiring: number;
+  hostRanking: HostTraffic[];
+  hosts: TrafficHost[];
+  period: string;
+  periodStart: string;
+  servers: TrafficServers;
+  userRanking: UserTraffic[];
+  users: number;
+}
+
+export interface TrafficServers {
+  configured: boolean;
+  error: string;
   quotaBytes: number;
   remainingBytes: number;
   unlimited: number;
+  unlinked: number;
   usedBytes: number;
-  usedUp: number;
 }
 
 export interface TuicClientSettings {
@@ -1238,5 +1250,11 @@ export interface User {
   id: number;
   password: string;
   username: string;
+}
+
+export interface UserTraffic {
+  down: number;
+  email: string;
+  up: number;
 }
 

@@ -1,0 +1,139 @@
+/* The local panel's Xray bar on its host page; the same tokens as the overview
+   page so it reads the same in light, dark and ultra-dark. */
+
+.local-panel {
+  --ov-line: var(--ant-color-border);
+  --ov-label: var(--ant-color-text-secondary);
+  --ov-faint: var(--ant-color-text-tertiary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ov-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ov-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--ov-line);
+  border-radius: var(--ant-border-radius-sm);
+  font-size: 13px;
+  color: var(--ant-color-text);
+}
+
+.ov-state-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.ov-state[data-state='running'] .ov-state-dot::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  animation: ovPulse 1.6s infinite ease-out;
+}
+
+@keyframes ovPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-state[data-state='running'] .ov-state-dot::after {
+    animation: none;
+  }
+}
+
+.ov-state-version,
+.ov-panel-version {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  color: var(--ov-label);
+  transition: color 0.2s;
+}
+
+.ov-state-version:hover,
+.ov-state-version:focus-visible,
+.ov-panel-version:hover,
+.ov-panel-version:focus-visible {
+  color: var(--ant-color-primary);
+}
+
+.ov-panel-version {
+  font-size: 12px;
+  color: var(--ov-faint);
+}
+
+.ov-update-tag {
+  cursor: pointer;
+  margin-inline-end: 0;
+}
+
+.ov-error-detail {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ov-bar-actions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .ov-bar-actions {
+    margin-inline-start: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.ov-bar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--ov-line);
+  margin: 0 4px;
+}
+
+.ov-health {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.ov-health-mark {
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  flex: none;
+}
+
+.ov-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

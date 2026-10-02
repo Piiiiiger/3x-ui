@@ -39,7 +39,7 @@ test('marks the page the router is on as the current top-bar item', async () => 
   expect(within(nav).getByText('Clients').closest('li')?.className).toContain(
     'ant-menu-item-selected',
   );
-  expect(within(nav).getByText('Overview').closest('li')?.className).not.toContain(
+  expect(within(nav).getByText('Traffic').closest('li')?.className).not.toContain(
     'ant-menu-item-selected',
   );
 });

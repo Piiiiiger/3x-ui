@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import GeodataSection from '@/pages/index/GeodataSection';
+import GeodataSection from '@/pages/nodes/local-panel/GeodataSection';
 import { HttpUtil, Msg } from '@/utils';
 
 const STANDARD_SOURCES = [

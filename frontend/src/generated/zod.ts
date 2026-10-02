@@ -15,6 +15,9 @@ export type ProcessState = z.infer<typeof ProcessStateSchema>;
 export const ProtocolSchema = z.string();
 export type Protocol = z.infer<typeof ProtocolSchema>;
 
+export const TrafficPeriodSchema = z.string();
+export type TrafficPeriod = z.infer<typeof TrafficPeriodSchema>;
+
 export const addrFamilySchema = z.number().int();
 export type addrFamily = z.infer<typeof addrFamilySchema>;
 
@@ -430,17 +433,6 @@ export const ApiTokenViewSchema = z.object({
 });
 export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
 
-export const AttentionClientSchema = z.object({
-  email: z.string(),
-  enable: z.boolean(),
-  expiryTime: z.number().int(),
-  planId: z.number().int(),
-  status: z.string(),
-  totalGB: z.number().int(),
-  used: z.number().int(),
-});
-export type AttentionClient = z.infer<typeof AttentionClientSchema>;
-
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
   allowedIPs: z.array(z.string()).optional(),
@@ -717,6 +709,14 @@ export const HistoryOfSeedersSchema = z.object({
   seederName: z.string(),
 });
 export type HistoryOfSeeders = z.infer<typeof HistoryOfSeedersSchema>;
+
+export const HostTrafficSchema = z.object({
+  down: z.number().int(),
+  name: z.string(),
+  nodeId: z.number().int(),
+  up: z.number().int(),
+});
+export type HostTraffic = z.infer<typeof HostTrafficSchema>;
 
 export const HwidSlotStatusSchema = z.object({
   active: z.boolean(),
@@ -1287,21 +1287,37 @@ export const TrafficDaySchema = z.object({
 });
 export type TrafficDay = z.infer<typeof TrafficDaySchema>;
 
+export const TrafficHostSchema = z.object({
+  linked: z.boolean(),
+  name: z.string(),
+  nodeId: z.number().int(),
+  quotaBytes: z.number().int(),
+  usedBytes: z.number().int(),
+});
+export type TrafficHost = z.infer<typeof TrafficHostSchema>;
+
 export const TrafficOverviewSchema = z.object({
-  active: z.number().int(),
-  attention: z.array(z.lazy(() => AttentionClientSchema)),
-  clients: z.number().int(),
   daily: z.array(z.lazy(() => TrafficDaySchema)),
-  disabled: z.number().int(),
-  expired: z.number().int(),
-  expiring: z.number().int(),
+  hostRanking: z.array(z.lazy(() => HostTrafficSchema)),
+  hosts: z.array(z.lazy(() => TrafficHostSchema)),
+  period: z.enum(['today', 'week', 'month']),
+  periodStart: z.string(),
+  servers: z.lazy(() => TrafficServersSchema),
+  userRanking: z.array(z.lazy(() => UserTrafficSchema)),
+  users: z.number().int(),
+});
+export type TrafficOverview = z.infer<typeof TrafficOverviewSchema>;
+
+export const TrafficServersSchema = z.object({
+  configured: z.boolean(),
+  error: z.string(),
   quotaBytes: z.number().int(),
   remainingBytes: z.number().int(),
   unlimited: z.number().int(),
+  unlinked: z.number().int(),
   usedBytes: z.number().int(),
-  usedUp: z.number().int(),
 });
-export type TrafficOverview = z.infer<typeof TrafficOverviewSchema>;
+export type TrafficServers = z.infer<typeof TrafficServersSchema>;
 
 export const TuicClientSettingsSchema = z.object({
   email: z.string(),
@@ -1331,4 +1347,11 @@ export const UserSchema = z.object({
   username: z.string(),
 });
 export type User = z.infer<typeof UserSchema>;
+
+export const UserTrafficSchema = z.object({
+  down: z.number().int(),
+  email: z.string(),
+  up: z.number().int(),
+});
+export type UserTraffic = z.infer<typeof UserTrafficSchema>;
 

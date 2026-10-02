@@ -38,7 +38,7 @@ import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import NodeFormModal from './NodeFormModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil } from '@/utils';
-import type { PanelUpdateInfo } from '../index/PanelUpdateModal';
+import type { PanelUpdateInfo } from './local-panel/PanelUpdateModal';
 
 // Confirm-dialog body that lets the operator pick the stable or dev channel for
 // a node panel update. Reports changes via onChange so the imperative

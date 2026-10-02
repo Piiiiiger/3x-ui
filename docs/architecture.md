@@ -261,9 +261,9 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │       ├── pages/            # ⭐ Route screens. Mirrors the panel's feature areas:
 │       │   ├── inbounds/     #   inbound list + the big inbound form (protocols/security/transport)
 │       │   ├── clients/      #   client management screens
-│       │   ├── nodes/        #   multi-node UI
+│       │   ├── nodes/        #   hosts; local-panel/ holds this panel's Xray bar, logs and version switch
 │       │   ├── xray/         #   raw Xray config UI (basics, dns, advanced JSON)
-│       │   ├── index/        #   dashboard/home
+│       │   ├── index/        #   流量信息 (home): server quotas, daily chart, host/user rankings
 │       │   └── settings/, sub/, login/, api-docs/
 │       ├── api/              # ⭐ Data layer: http-init, QueryProvider, queryKeys, websocket bridge
 │       │   └── queries/      #   TanStack Query hooks (useNodesQuery, useStatusQuery, …)

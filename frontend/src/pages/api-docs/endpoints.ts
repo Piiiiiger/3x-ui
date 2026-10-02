@@ -1780,13 +1780,23 @@ export const sections: readonly Section[] = [
     id: 'traffic',
     title: 'Traffic',
     description:
-      'Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone.',
+      "The home page's traffic overview. Quotas and billing-cycle use come from the Lite probe for the hosts linked to it (node id 0 is the panel itself); a host without a quota counts as unlimited, and a failed probe leaves every host unlinked with the reason in servers.error. The daily history behind the chart and the rankings is recorded every 10 minutes in the panel time zone.",
     endpoints: [
       {
         method: 'GET',
         path: '/panel/api/traffic/overview',
         summary:
-          'Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.',
+          "Get the servers' quotas and use, 30 days of traffic, and the hosts and clients ranked by what they used in the period (the user ranking lists the busiest 100; users counts every client).",
+        params: [
+          {
+            name: 'period',
+            in: 'query',
+            type: 'string',
+            desc: 'today, week (from Monday) or month (from the 1st), in the panel time zone. Defaults to month; any other value is refused.',
+            optional: true,
+            defaultValue: 'month',
+          },
+        ],
         responseSchema: 'TrafficOverview',
       },
     ],

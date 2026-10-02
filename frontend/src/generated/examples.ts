@@ -403,15 +403,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
-  "AttentionClient": {
-    "email": "alice",
-    "enable": true,
-    "expiryTime": 1735689600000,
-    "planId": 1,
-    "status": "expiring",
-    "totalGB": 107374182400,
-    "used": 53687091200
-  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [
@@ -731,6 +722,12 @@ export const EXAMPLES: Record<string, unknown> = {
   "HistoryOfSeeders": {
     "id": 0,
     "seederName": ""
+  },
+  "HostTraffic": {
+    "down": 4194304,
+    "name": "edge-hk",
+    "nodeId": 2,
+    "up": 1048576
   },
   "HwidSlotStatus": {
     "active": true,
@@ -1402,20 +1399,14 @@ export const EXAMPLES: Record<string, unknown> = {
     "down": 4194304,
     "up": 1048576
   },
+  "TrafficHost": {
+    "linked": true,
+    "name": "edge-hk",
+    "nodeId": 2,
+    "quotaBytes": 1073741824000,
+    "usedBytes": 44023414784
+  },
   "TrafficOverview": {
-    "active": 9,
-    "attention": [
-      {
-        "email": "alice",
-        "enable": true,
-        "expiryTime": 1735689600000,
-        "planId": 1,
-        "status": "expiring",
-        "totalGB": 107374182400,
-        "used": 53687091200
-      }
-    ],
-    "clients": 12,
     "daily": [
       {
         "day": "2026-10-01",
@@ -1423,14 +1414,51 @@ export const EXAMPLES: Record<string, unknown> = {
         "up": 1048576
       }
     ],
-    "disabled": 1,
-    "expired": 1,
-    "expiring": 2,
-    "quotaBytes": 1099511627776,
-    "remainingBytes": 884763262976,
+    "hostRanking": [
+      {
+        "down": 4194304,
+        "name": "edge-hk",
+        "nodeId": 2,
+        "up": 1048576
+      }
+    ],
+    "hosts": [
+      {
+        "linked": true,
+        "name": "edge-hk",
+        "nodeId": 2,
+        "quotaBytes": 1073741824000,
+        "usedBytes": 44023414784
+      }
+    ],
+    "period": "month",
+    "periodStart": "2026-10-01",
+    "servers": {
+      "configured": true,
+      "error": "",
+      "quotaBytes": 5529664757760,
+      "remainingBytes": 5023831121920,
+      "unlimited": 2,
+      "unlinked": 0,
+      "usedBytes": 505833635840
+    },
+    "userRanking": [
+      {
+        "down": 4194304,
+        "email": "alice",
+        "up": 1048576
+      }
+    ],
+    "users": 10
+  },
+  "TrafficServers": {
+    "configured": true,
+    "error": "",
+    "quotaBytes": 5529664757760,
+    "remainingBytes": 5023831121920,
     "unlimited": 2,
-    "usedBytes": 322122547200,
-    "usedUp": 1
+    "unlinked": 0,
+    "usedBytes": 505833635840
   },
   "TuicClientSettings": {
     "email": "",
@@ -1456,5 +1484,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "id": 0,
     "password": "",
     "username": ""
+  },
+  "UserTraffic": {
+    "down": 4194304,
+    "email": "alice",
+    "up": 1048576
   }
 };

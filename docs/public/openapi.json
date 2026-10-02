@@ -1668,52 +1668,6 @@
         ],
         "type": "object"
       },
-      "AttentionClient": {
-        "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
-        "properties": {
-          "email": {
-            "example": "alice",
-            "type": "string"
-          },
-          "enable": {
-            "example": true,
-            "type": "boolean"
-          },
-          "expiryTime": {
-            "example": 1735689600000,
-            "format": "int64",
-            "type": "integer"
-          },
-          "planId": {
-            "example": 1,
-            "type": "integer"
-          },
-          "status": {
-            "example": "expiring",
-            "type": "string"
-          },
-          "totalGB": {
-            "example": 107374182400,
-            "format": "int64",
-            "type": "integer"
-          },
-          "used": {
-            "example": 53687091200,
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "email",
-          "enable",
-          "expiryTime",
-          "planId",
-          "status",
-          "totalGB",
-          "used"
-        ],
-        "type": "object"
-      },
       "Client": {
         "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
         "properties": {
@@ -2887,6 +2841,36 @@
         "required": [
           "id",
           "seederName"
+        ],
+        "type": "object"
+      },
+      "HostTraffic": {
+        "description": "HostTraffic is what one host's inbounds carried in the overview's period.",
+        "properties": {
+          "down": {
+            "example": 4194304,
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "example": "edge-hk",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 2,
+            "type": "integer"
+          },
+          "up": {
+            "example": 1048576,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "down",
+          "name",
+          "nodeId",
+          "up"
         ],
         "type": "object"
       },
@@ -5351,48 +5335,118 @@
         ],
         "type": "object"
       },
-      "TrafficOverview": {
-        "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+      "TrafficHost": {
+        "description": "TrafficHost is one host of the panel (node id 0 is the panel itself) with the\nquota and cycle use of its Lite server; a quota of 0 is unlimited.",
         "properties": {
-          "active": {
-            "example": 9,
+          "linked": {
+            "example": true,
+            "type": "boolean"
+          },
+          "name": {
+            "example": "edge-hk",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 2,
             "type": "integer"
           },
-          "attention": {
-            "items": {
-              "$ref": "#/components/schemas/AttentionClient"
-            },
-            "type": "array"
-          },
-          "clients": {
-            "example": 12,
+          "quotaBytes": {
+            "example": 1073741824000,
+            "format": "int64",
             "type": "integer"
           },
+          "usedBytes": {
+            "example": 44023414784,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "linked",
+          "name",
+          "nodeId",
+          "quotaBytes",
+          "usedBytes"
+        ],
+        "type": "object"
+      },
+      "TrafficOverview": {
+        "description": "TrafficOverview is the home page: the servers' quotas, the daily chart and the\nperiod's rankings, busiest first. Users counts every client, ranked or not.",
+        "properties": {
           "daily": {
             "items": {
               "$ref": "#/components/schemas/TrafficDay"
             },
             "type": "array"
           },
-          "disabled": {
-            "example": 1,
-            "type": "integer"
+          "hostRanking": {
+            "items": {
+              "$ref": "#/components/schemas/HostTraffic"
+            },
+            "type": "array"
           },
-          "expired": {
-            "example": 1,
-            "type": "integer"
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficHost"
+            },
+            "type": "array"
           },
-          "expiring": {
-            "example": 2,
+          "period": {
+            "enum": [
+              "today",
+              "week",
+              "month"
+            ],
+            "example": "month",
+            "type": "string"
+          },
+          "periodStart": {
+            "example": "2026-10-01",
+            "type": "string"
+          },
+          "servers": {
+            "$ref": "#/components/schemas/TrafficServers"
+          },
+          "userRanking": {
+            "items": {
+              "$ref": "#/components/schemas/UserTraffic"
+            },
+            "type": "array"
+          },
+          "users": {
+            "example": 10,
             "type": "integer"
+          }
+        },
+        "required": [
+          "daily",
+          "hostRanking",
+          "hosts",
+          "period",
+          "periodStart",
+          "servers",
+          "userRanking",
+          "users"
+        ],
+        "type": "object"
+      },
+      "TrafficServers": {
+        "description": "TrafficServers adds up the quota and billing-cycle use Lite reports for the\nhosts linked to it. A host without a quota counts as unlimited.",
+        "properties": {
+          "configured": {
+            "example": true,
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
           },
           "quotaBytes": {
-            "example": 1099511627776,
+            "example": 5529664757760,
             "format": "int64",
             "type": "integer"
           },
           "remainingBytes": {
-            "example": 884763262976,
+            "example": 5023831121920,
             "format": "int64",
             "type": "integer"
           },
@@ -5400,29 +5454,24 @@
             "example": 2,
             "type": "integer"
           },
-          "usedBytes": {
-            "example": 322122547200,
-            "format": "int64",
+          "unlinked": {
+            "example": 0,
             "type": "integer"
           },
-          "usedUp": {
-            "example": 1,
+          "usedBytes": {
+            "example": 505833635840,
+            "format": "int64",
             "type": "integer"
           }
         },
         "required": [
-          "active",
-          "attention",
-          "clients",
-          "daily",
-          "disabled",
-          "expired",
-          "expiring",
+          "configured",
+          "error",
           "quotaBytes",
           "remainingBytes",
           "unlimited",
-          "usedBytes",
-          "usedUp"
+          "unlinked",
+          "usedBytes"
         ],
         "type": "object"
       },
@@ -5518,6 +5567,31 @@
         ],
         "type": "object"
       },
+      "UserTraffic": {
+        "description": "UserTraffic is what one client used in the overview's period.",
+        "properties": {
+          "down": {
+            "example": 4194304,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "up": {
+            "example": 1048576,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "down",
+          "email",
+          "up"
+        ],
+        "type": "object"
+      },
       "WebSocketEnvelope": {
         "type": "object",
         "required": [
@@ -5587,7 +5661,7 @@
     },
     {
       "name": "Traffic",
-      "description": "Traffic totals for the home page. Quota and remaining bytes cover clients with a quota; used bytes cover every client. Up to 100 clients need attention: expiring within 7 days or under 10% of their quota, used up, or expired. The daily history is recorded every 10 minutes in the panel time zone."
+      "description": "The home page's traffic overview. Quotas and billing-cycle use come from the Lite probe for the hosts linked to it (node id 0 is the panel itself); a host without a quota counts as unlimited, and a failed probe leaves every host unlinked with the reason in servers.error. The daily history behind the chart and the rankings is recorded every 10 minutes in the panel time zone."
     },
     {
       "name": "Probe",
@@ -12951,8 +13025,20 @@
         "tags": [
           "Traffic"
         ],
-        "summary": "Get quota and usage totals, client counts, clients needing attention and 30 days of traffic.",
+        "summary": "Get the servers' quotas and use, 30 days of traffic, and the hosts and clients ranked by what they used in the period (the user ranking lists the busiest 100; users counts every client).",
         "operationId": "get_panel_api_traffic_overview",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "description": "today, week (from Monday) or month (from the 1st), in the panel time zone. Defaults to month; any other value is refused.",
+            "schema": {
+              "type": "string",
+              "default": "month"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -12975,19 +13061,6 @@
                 "example": {
                   "success": true,
                   "obj": {
-                    "active": 9,
-                    "attention": [
-                      {
-                        "email": "alice",
-                        "enable": true,
-                        "expiryTime": 1735689600000,
-                        "planId": 1,
-                        "status": "expiring",
-                        "totalGB": 107374182400,
-                        "used": 53687091200
-                      }
-                    ],
-                    "clients": 12,
                     "daily": [
                       {
                         "day": "2026-10-01",
@@ -12995,14 +13068,42 @@
                         "up": 1048576
                       }
                     ],
-                    "disabled": 1,
-                    "expired": 1,
-                    "expiring": 2,
-                    "quotaBytes": 1099511627776,
-                    "remainingBytes": 884763262976,
-                    "unlimited": 2,
-                    "usedBytes": 322122547200,
-                    "usedUp": 1
+                    "hostRanking": [
+                      {
+                        "down": 4194304,
+                        "name": "edge-hk",
+                        "nodeId": 2,
+                        "up": 1048576
+                      }
+                    ],
+                    "hosts": [
+                      {
+                        "linked": true,
+                        "name": "edge-hk",
+                        "nodeId": 2,
+                        "quotaBytes": 1073741824000,
+                        "usedBytes": 44023414784
+                      }
+                    ],
+                    "period": "month",
+                    "periodStart": "2026-10-01",
+                    "servers": {
+                      "configured": true,
+                      "error": "",
+                      "quotaBytes": 5529664757760,
+                      "remainingBytes": 5023831121920,
+                      "unlimited": 2,
+                      "unlinked": 0,
+                      "usedBytes": 505833635840
+                    },
+                    "userRanking": [
+                      {
+                        "down": 4194304,
+                        "email": "alice",
+                        "up": 1048576
+                      }
+                    ],
+                    "users": 10
                   }
                 }
               }

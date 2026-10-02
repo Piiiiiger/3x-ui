@@ -21,6 +21,7 @@ import { useNodesQuery, type NodeRecord } from '@/api/queries/useNodesQuery';
 import { InboundsWorkspace } from '@/pages/inbounds/InboundsWorkspace';
 
 import GenerateNodeModal from './GenerateNodeModal';
+import LocalPanelBar from './local-panel/LocalPanelBar';
 
 const STATUS_COLORS: Record<string, string> = { online: 'green', offline: 'red' };
 
@@ -99,7 +100,7 @@ export default function HostPage() {
           description={host?.remark}
           extra={backToHosts}
         />
-        {host && <HostSummary host={host} />}
+        {host ? <HostSummary host={host} /> : <LocalPanelBar />}
         <InboundsWorkspace hostScope={host ? host.id : 0} toolbarExtra={generate} />
         {generateOpen && (
           <GenerateNodeModal

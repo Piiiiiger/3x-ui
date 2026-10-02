@@ -1642,52 +1642,6 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
-  "AttentionClient": {
-    "description": "AttentionClient is a client that ran out, or soon will. Status is expiring,\nusedUp or expired.",
-    "properties": {
-      "email": {
-        "example": "alice",
-        "type": "string"
-      },
-      "enable": {
-        "example": true,
-        "type": "boolean"
-      },
-      "expiryTime": {
-        "example": 1735689600000,
-        "format": "int64",
-        "type": "integer"
-      },
-      "planId": {
-        "example": 1,
-        "type": "integer"
-      },
-      "status": {
-        "example": "expiring",
-        "type": "string"
-      },
-      "totalGB": {
-        "example": 107374182400,
-        "format": "int64",
-        "type": "integer"
-      },
-      "used": {
-        "example": 53687091200,
-        "format": "int64",
-        "type": "integer"
-      }
-    },
-    "required": [
-      "email",
-      "enable",
-      "expiryTime",
-      "planId",
-      "status",
-      "totalGB",
-      "used"
-    ],
-    "type": "object"
-  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {
@@ -2861,6 +2815,36 @@ export const SCHEMAS: Record<string, unknown> = {
     "required": [
       "id",
       "seederName"
+    ],
+    "type": "object"
+  },
+  "HostTraffic": {
+    "description": "HostTraffic is what one host's inbounds carried in the overview's period.",
+    "properties": {
+      "down": {
+        "example": 4194304,
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "example": "edge-hk",
+        "type": "string"
+      },
+      "nodeId": {
+        "example": 2,
+        "type": "integer"
+      },
+      "up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "name",
+      "nodeId",
+      "up"
     ],
     "type": "object"
   },
@@ -5325,48 +5309,118 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
-  "TrafficOverview": {
-    "description": "TrafficOverview sums every client. Quota and remaining cover clients with a\nquota only, so their ratio is the share of sold traffic already consumed.",
+  "TrafficHost": {
+    "description": "TrafficHost is one host of the panel (node id 0 is the panel itself) with the\nquota and cycle use of its Lite server; a quota of 0 is unlimited.",
     "properties": {
-      "active": {
-        "example": 9,
+      "linked": {
+        "example": true,
+        "type": "boolean"
+      },
+      "name": {
+        "example": "edge-hk",
+        "type": "string"
+      },
+      "nodeId": {
+        "example": 2,
         "type": "integer"
       },
-      "attention": {
-        "items": {
-          "$ref": "#/components/schemas/AttentionClient"
-        },
-        "type": "array"
-      },
-      "clients": {
-        "example": 12,
+      "quotaBytes": {
+        "example": 1073741824000,
+        "format": "int64",
         "type": "integer"
       },
+      "usedBytes": {
+        "example": 44023414784,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "linked",
+      "name",
+      "nodeId",
+      "quotaBytes",
+      "usedBytes"
+    ],
+    "type": "object"
+  },
+  "TrafficOverview": {
+    "description": "TrafficOverview is the home page: the servers' quotas, the daily chart and the\nperiod's rankings, busiest first. Users counts every client, ranked or not.",
+    "properties": {
       "daily": {
         "items": {
           "$ref": "#/components/schemas/TrafficDay"
         },
         "type": "array"
       },
-      "disabled": {
-        "example": 1,
-        "type": "integer"
+      "hostRanking": {
+        "items": {
+          "$ref": "#/components/schemas/HostTraffic"
+        },
+        "type": "array"
       },
-      "expired": {
-        "example": 1,
-        "type": "integer"
+      "hosts": {
+        "items": {
+          "$ref": "#/components/schemas/TrafficHost"
+        },
+        "type": "array"
       },
-      "expiring": {
-        "example": 2,
+      "period": {
+        "enum": [
+          "today",
+          "week",
+          "month"
+        ],
+        "example": "month",
+        "type": "string"
+      },
+      "periodStart": {
+        "example": "2026-10-01",
+        "type": "string"
+      },
+      "servers": {
+        "$ref": "#/components/schemas/TrafficServers"
+      },
+      "userRanking": {
+        "items": {
+          "$ref": "#/components/schemas/UserTraffic"
+        },
+        "type": "array"
+      },
+      "users": {
+        "example": 10,
         "type": "integer"
+      }
+    },
+    "required": [
+      "daily",
+      "hostRanking",
+      "hosts",
+      "period",
+      "periodStart",
+      "servers",
+      "userRanking",
+      "users"
+    ],
+    "type": "object"
+  },
+  "TrafficServers": {
+    "description": "TrafficServers adds up the quota and billing-cycle use Lite reports for the\nhosts linked to it. A host without a quota counts as unlimited.",
+    "properties": {
+      "configured": {
+        "example": true,
+        "type": "boolean"
+      },
+      "error": {
+        "type": "string"
       },
       "quotaBytes": {
-        "example": 1099511627776,
+        "example": 5529664757760,
         "format": "int64",
         "type": "integer"
       },
       "remainingBytes": {
-        "example": 884763262976,
+        "example": 5023831121920,
         "format": "int64",
         "type": "integer"
       },
@@ -5374,29 +5428,24 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 2,
         "type": "integer"
       },
-      "usedBytes": {
-        "example": 322122547200,
-        "format": "int64",
+      "unlinked": {
+        "example": 0,
         "type": "integer"
       },
-      "usedUp": {
-        "example": 1,
+      "usedBytes": {
+        "example": 505833635840,
+        "format": "int64",
         "type": "integer"
       }
     },
     "required": [
-      "active",
-      "attention",
-      "clients",
-      "daily",
-      "disabled",
-      "expired",
-      "expiring",
+      "configured",
+      "error",
       "quotaBytes",
       "remainingBytes",
       "unlimited",
-      "usedBytes",
-      "usedUp"
+      "unlinked",
+      "usedBytes"
     ],
     "type": "object"
   },
@@ -5489,6 +5538,31 @@ export const SCHEMAS: Record<string, unknown> = {
       "id",
       "password",
       "username"
+    ],
+    "type": "object"
+  },
+  "UserTraffic": {
+    "description": "UserTraffic is what one client used in the overview's period.",
+    "properties": {
+      "down": {
+        "example": 4194304,
+        "format": "int64",
+        "type": "integer"
+      },
+      "email": {
+        "example": "alice",
+        "type": "string"
+      },
+      "up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "email",
+      "up"
     ],
     "type": "object"
   }

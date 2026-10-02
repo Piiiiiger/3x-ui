@@ -182,7 +182,7 @@ function SubscriptionQrPresentation({
                     happError === 'too_long'
                       ? t('pages.clients.happLinkSourceTooLong')
                       : t('pages.clients.happLinkErrorHint', {
-                          dashboard: t('menu.dashboard'),
+                          page: `${t('menu.nodes')} -> ${t('pages.inbounds.localPanel')}`,
                           logs: t('pages.index.logs'),
                         })
                   }

@@ -81,6 +81,8 @@ function serve() {
     if (url === '/panel/api/nodes/list') return new Msg(true, '', HOSTS);
     if (url === '/panel/api/inbounds/options') return new Msg(true, '', []);
     if (url === '/panel/api/plans/list') return new Msg(true, '', []);
+    if (url === '/panel/api/server/status')
+      return new Msg(true, '', { xray: { state: 'running', version: '26.9.9' } });
     return new Msg(true, '', {});
   });
 }
@@ -119,6 +121,21 @@ describe('HostPage', () => {
     expect(screen.getByRole('heading', { name: 'Local panel' })).toBeTruthy();
     expect(screen.queryByText('香港-Edge')).toBeNull();
     expect(screen.getByText('198.51.100.19:443')).toBeTruthy();
+  });
+
+  // The panel's own Xray left the traffic page for the host it runs on.
+  it("carries the panel's Xray controls on the local host's page only", async () => {
+    renderAt('/nodes/local');
+    await screen.findByText('Xray · Running');
+    expect(screen.getByRole('button', { name: /Restart$/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Logs$/ })).toBeTruthy();
+  });
+
+  it("keeps the panel's Xray controls off a remote host's page", async () => {
+    renderAt('/nodes/2');
+    await screen.findByText('香港-Edge');
+    expect(screen.queryByText('Xray · Running')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Restart$/ })).toBeNull();
   });
 
   // An empty list would read as "this host has no nodes" for a host that is gone.

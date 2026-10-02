@@ -1,8 +1,6 @@
 package service
 
 import (
-	"encoding/json"
-	"strings"
 	"testing"
 	"time"
 
@@ -133,115 +131,5 @@ func TestRecordDailyPrunesDaysPastTheWindow(t *testing.T) {
 	}
 	if _, ok := dailyRow(t, "gone@stats", 20260920); !ok {
 		t.Fatal("a day 11 days old was pruned")
-	}
-}
-
-func TestOverviewTotalsLimitedClientsAndFillsMissingDays(t *testing.T) {
-	setupConflictDB(t)
-	seedTrafficClient(t, "a@stats", 100*planGiB, 10*planGiB, 20*planGiB)
-	seedTrafficClient(t, "b@stats", 50*planGiB, 30*planGiB, 30*planGiB)
-	seedTrafficClient(t, "c@stats", 0, 4*planGiB, 6*planGiB)
-	db := database.GetDB()
-	for _, d := range []model.ClientDailyTraffic{
-		{Email: "a@stats", Day: 20261001, Up: 1, Down: 2},
-		{Email: "c@stats", Day: 20261001, Up: 10, Down: 20},
-		{Email: "a@stats", Day: 20260929, Up: 5, Down: 5},
-	} {
-		if err := db.Create(&d).Error; err != nil {
-			t.Fatalf("seed daily: %v", err)
-		}
-	}
-
-	ov, err := (&TrafficStatsService{}).Overview(statsDay, 7)
-	if err != nil {
-		t.Fatalf("overview: %v", err)
-	}
-	// b is over its 50 GiB, so it adds nothing to what is left; c has no quota.
-	if ov.QuotaBytes != 150*planGiB || ov.RemainingBytes != 70*planGiB || ov.UsedBytes != 100*planGiB {
-		t.Fatalf("totals = %+v, want quota 150, remaining 70, used 100 GiB", ov)
-	}
-	if len(ov.Daily) != 7 || ov.Daily[0].Day != "2026-09-25" || ov.Daily[6].Day != "2026-10-01" {
-		t.Fatalf("daily = %+v, want 7 days from 2026-09-25 to 2026-10-01", ov.Daily)
-	}
-	if ov.Daily[6].Up != 11 || ov.Daily[6].Down != 22 || ov.Daily[4].Up != 5 || ov.Daily[5].Up != 0 {
-		t.Fatalf("daily = %+v, want today summed across clients, 09-29 kept and 09-30 zero", ov.Daily)
-	}
-}
-
-func TestOverviewListsWhoNeedsAttentionMostUrgentFirst(t *testing.T) {
-	setupConflictDB(t)
-	now := statsDay.UnixMilli()
-	day := int64(24 * time.Hour / time.Millisecond)
-	clients := []struct {
-		email           string
-		quota, used     int64
-		expiry          int64
-		enable          bool
-		wantInAttention bool
-	}{
-		{"fine@stats", 100 * planGiB, 10 * planGiB, now + 60*day, true, false},
-		{"gonelong@stats", 0, 0, now - 30*day, true, true},
-		{"low@stats", 100 * planGiB, 95 * planGiB, 0, true, true},
-		{"later@stats", 0, 0, now + 5*day, true, true},
-		{"off@stats", 0, 0, 0, false, false},
-		{"out@stats", 50 * planGiB, 60 * planGiB, 0, true, true},
-		{"firstuse@stats", 0, 0, -30 * day, true, false},
-		{"gone@stats", 0, 0, now - day, true, true},
-		{"soon@stats", 0, 0, now + 2*day, true, true},
-	}
-	db := database.GetDB()
-	for _, c := range clients {
-		seedTrafficClient(t, c.email, c.quota, c.used, 0)
-		if err := db.Model(&model.ClientRecord{}).Where("email = ?", c.email).
-			Updates(map[string]any{"expiry_time": c.expiry, "enable": c.enable}).Error; err != nil {
-			t.Fatalf("set %s: %v", c.email, err)
-		}
-	}
-
-	ov, err := (&TrafficStatsService{}).Overview(statsDay, 1)
-	if err != nil {
-		t.Fatalf("overview: %v", err)
-	}
-	var got []string
-	for _, a := range ov.Attention {
-		got = append(got, a.Email+":"+a.Status)
-	}
-	// Dated endings come before the client that only runs low on traffic.
-	want := []string{
-		"soon@stats:expiring", "later@stats:expiring", "low@stats:expiring",
-		"out@stats:usedUp", "gone@stats:expired", "gonelong@stats:expired",
-	}
-	if len(got) != len(want) {
-		t.Fatalf("attention = %v, want %v", got, want)
-	}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("attention = %v, want %v", got, want)
-		}
-	}
-	counts := []int{ov.Clients, ov.Active, ov.Expiring, ov.UsedUp, ov.Expired, ov.Disabled, ov.Unlimited}
-	wantCounts := []int{9, 5, 3, 1, 2, 1, 6}
-	for i := range counts {
-		if counts[i] != wantCounts[i] {
-			t.Fatalf("clients/active/expiring/usedUp/expired/disabled/unlimited = %v, want %v", counts, wantCounts)
-		}
-	}
-}
-
-// The home page's schema rejects null, so an empty panel must still send lists.
-func TestOverviewOfAnEmptyPanelSendsEmptyLists(t *testing.T) {
-	setupConflictDB(t)
-	ov, err := (&TrafficStatsService{}).Overview(statsDay, 3)
-	if err != nil {
-		t.Fatalf("overview: %v", err)
-	}
-	raw, err := json.Marshal(ov)
-	if err != nil {
-		t.Fatalf("marshal: %v", err)
-	}
-	for _, want := range []string{`"attention":[]`, `"day":"2026-09-29","up":0,"down":0`} {
-		if !strings.Contains(string(raw), want) {
-			t.Fatalf("overview JSON %s lacks %s", raw, want)
-		}
 	}
 }

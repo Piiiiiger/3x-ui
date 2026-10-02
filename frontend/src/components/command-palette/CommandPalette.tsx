@@ -345,7 +345,7 @@ export default function CommandPalette() {
       {
         path: '/',
         title: t('menu.dashboard'),
-        keywords: ['overview', 'dashboard', 'cpu', 'ram', 'memory', 'traffic', 'speed'],
+        keywords: ['overview', 'dashboard', 'traffic', 'quota', 'speed', 'ranking', '流量'],
         icon: <DashboardOutlined />,
       },
       {
@@ -387,6 +387,13 @@ export default function CommandPalette() {
         title: t('menu.nodes'),
         keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],
         icon: <ClusterOutlined />,
+      },
+      {
+        path: '/nodes/local',
+        title: `${t('menu.nodes')} · ${t('pages.inbounds.localPanel')}`,
+        subtitle: t('pages.inbounds.localPanel'),
+        keywords: ['xray', 'restart', 'logs', 'xray version', 'config', 'cpu', 'memory', 'metrics'],
+        icon: <CloudServerOutlined />,
       },
       {
         path: '/settings',
@@ -486,6 +493,13 @@ export default function CommandPalette() {
         subtitle: t('pages.settings.subBalancers.menu'),
         keywords: ['balancers', 'sub balancers', 'balancer nodes'],
         icon: <ApartmentOutlined />,
+      },
+      {
+        path: '/settings#backup',
+        title: `${t('menu.settings')} · ${t('pages.index.backupTitle')}`,
+        subtitle: t('pages.index.backupTitle'),
+        keywords: ['backup', 'restore', 'export database', 'import database', 'db'],
+        icon: <CloudServerOutlined />,
       },
       {
         path: '/xray#basic',
