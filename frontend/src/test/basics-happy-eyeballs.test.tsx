@@ -25,8 +25,6 @@ describe('BasicsTab malformed happyEyeballs', () => {
         <BasicsTab
           templateSettings={settingsWithMalformedHappyEyeballs()}
           setTemplateSettings={vi.fn()}
-          outboundTestUrl=""
-          onChangeOutboundTestUrl={vi.fn()}
           onResetDefault={vi.fn()}
         />,
       ),

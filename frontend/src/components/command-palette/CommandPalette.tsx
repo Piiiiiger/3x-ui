@@ -17,7 +17,6 @@ import {
   DashboardOutlined,
   DatabaseOutlined,
   DiscordOutlined,
-  ExportOutlined,
   FileTextOutlined,
   ImportOutlined,
   LoadingOutlined,
@@ -32,7 +31,6 @@ import {
   SearchOutlined,
   SettingOutlined,
   SunOutlined,
-  SwapOutlined,
   TeamOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
@@ -391,18 +389,6 @@ export default function CommandPalette() {
         icon: <ClusterOutlined />,
       },
       {
-        path: '/outbound',
-        title: t('menu.outbounds'),
-        keywords: ['outbounds', 'freedom', 'blackhole', 'socks', 'http', 'warp', 'nord', 'pia'],
-        icon: <ExportOutlined />,
-      },
-      {
-        path: '/routing',
-        title: t('menu.routing'),
-        keywords: ['routing', 'rules', 'geoip', 'geosite', 'direct', 'block'],
-        icon: <SwapOutlined />,
-      },
-      {
         path: '/settings',
         title: t('menu.settings'),
         keywords: ['settings', 'config', 'port', 'password', 'ssl', 'telegram'],
@@ -538,32 +524,11 @@ export default function CommandPalette() {
         icon: <FileTextOutlined />,
       },
       {
-        path: '/xray#balancer',
-        title: `${t('menu.xray')} · ${t('pages.xray.Balancers')}`,
-        subtitle: t('pages.xray.Balancers'),
-        keywords: ['balancers', 'leastPing', 'roundRobin', 'fallback', 'strategy'],
-        icon: <ClusterOutlined />,
-      },
-      {
         path: '/xray#dns',
         title: `${t('menu.xray')} · DNS`,
         subtitle: 'DNS',
         keywords: ['dns', 'dns servers', 'hosts', 'doh', 'dot', 'cloudflare dns'],
         icon: <DatabaseOutlined />,
-      },
-      {
-        path: '/xray#outbound',
-        title: `${t('menu.xray')} · ${t('pages.xray.Outbounds')}`,
-        subtitle: t('pages.xray.Outbounds'),
-        keywords: ['outbound', 'freedom', 'direct', 'proxy outbounds'],
-        icon: <ExportOutlined />,
-      },
-      {
-        path: '/xray#routing',
-        title: `${t('menu.xray')} · ${t('pages.xray.basicRouting')}`,
-        subtitle: t('pages.xray.basicRouting'),
-        keywords: ['routing', 'routing rules', 'geoip', 'geosite', 'block', 'direct'],
-        icon: <SwapOutlined />,
       },
       {
         path: '/xray#advanced',

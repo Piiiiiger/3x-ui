@@ -17,7 +17,6 @@ const (
 	MessageTypeStatus       MessageType = "status"
 	MessageTypeTraffic      MessageType = "traffic"
 	MessageTypeInbounds     MessageType = "inbounds"
-	MessageTypeOutbounds    MessageType = "outbounds"
 	MessageTypeNodes        MessageType = "nodes"
 	MessageTypeNotification MessageType = "notification"
 	MessageTypeXrayState    MessageType = "xray_state"
@@ -96,7 +95,6 @@ func NewHub() *Hub {
 
 var throttledMessageTypes = map[MessageType]struct{}{
 	MessageTypeInbounds:    {},
-	MessageTypeOutbounds:   {},
 	MessageTypeTraffic:     {},
 	MessageTypeClientStats: {},
 }

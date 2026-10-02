@@ -18,7 +18,6 @@ import {
   DiscordOutlined,
   DownOutlined,
   EllipsisOutlined,
-  ExportOutlined,
   GithubOutlined,
   HeartOutlined,
   ImportOutlined,
@@ -35,7 +34,6 @@ import {
   SearchOutlined,
   SettingOutlined,
   SunOutlined,
-  SwapOutlined,
   TeamOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
@@ -74,9 +72,7 @@ type IconName =
   | 'cluster'
   | 'logout'
   | 'sponsors'
-  | 'apidocs'
-  | 'outbound'
-  | 'routing';
+  | 'apidocs';
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
@@ -90,8 +86,6 @@ const iconByName: Record<IconName, ComponentType> = {
   logout: LogoutOutlined,
   sponsors: CrownOutlined,
   apidocs: ApiOutlined,
-  outbound: ExportOutlined,
-  routing: SwapOutlined,
 };
 
 function ThemeIcon({ isDark, isUltra }: { isDark: boolean; isUltra: boolean }) {
@@ -132,8 +126,6 @@ export default function AppNav() {
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
-      { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },
-      { key: '/routing', icon: 'routing', title: t('menu.routing') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
       { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },
@@ -199,7 +191,6 @@ export default function AppNav() {
   const xrayChildren = useMemo<NonNullable<MenuProps['items']>>(
     () => [
       { key: '/xray#basic', icon: <SettingOutlined />, label: t('pages.xray.basicTemplate') },
-      { key: '/xray#balancer', icon: <ClusterOutlined />, label: t('pages.xray.Balancers') },
       { key: '/xray#dns', icon: <DatabaseOutlined />, label: 'DNS' },
       { key: '/xray#advanced', icon: <CodeOutlined />, label: t('pages.xray.advancedTemplate') },
     ],

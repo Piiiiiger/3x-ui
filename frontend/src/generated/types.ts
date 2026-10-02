@@ -185,7 +185,6 @@ export interface AllSetting {
   trustedProxyCIDRs: string;
   twoFactorEnable: boolean;
   twoFactorToken: string;
-  warpUpdateInterval: number;
   webBasePath: string;
   webCertFile: string;
   webDomain: string;
@@ -214,11 +213,9 @@ export interface AllSettingView {
   hasApiToken: boolean;
   hasDiscordBotToken: boolean;
   hasLdapPassword: boolean;
-  hasNordSecret: boolean;
   hasSmtpPassword: boolean;
   hasTgBotToken: boolean;
   hasTwoFactorToken: boolean;
-  hasWarpSecret: boolean;
   ipLimitAllowlist: string;
   ldapAutoCreate: boolean;
   ldapAutoDelete: boolean;
@@ -373,7 +370,6 @@ export interface AllSettingView {
   trustedProxyCIDRs: string;
   twoFactorEnable: boolean;
   twoFactorToken: string;
-  warpUpdateInterval: number;
   webBasePath: string;
   webCertFile: string;
   webDomain: string;
@@ -899,14 +895,6 @@ export interface NodeView {
   xrayError: string;
   xrayState: string;
   xrayVersion: string;
-}
-
-export interface OutboundTraffics {
-  down: number;
-  id: number;
-  tag: string;
-  total: number;
-  up: number;
 }
 
 export interface PanelUpdateStatus {

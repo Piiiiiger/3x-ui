@@ -49,7 +49,6 @@ file locations when it can answer in one hop.
   over a gVisor userspace netstack, per-inbound reconcile manager, TCP/UDP
   relay into a loopback per-peer-auth SOCKS5 Xray inbound, port-forward
   listeners, per-peer IPv6 egress aliases.
-- `internal/pia/` — PIA WireGuard protocol client (auth, signed server list, `/addKey`).
 - `internal/sub/` — subscription server (raw / JSON / Clash).
 - `cmd/pigger-agent/` + `internal/agent/` — the lightweight agent behind agent nodes
   (embedded Xray, dials the panel); `internal/agentproto/` is its wire format.
@@ -60,8 +59,8 @@ file locations when it can answer in one hop.
 - `internal/web/` — Gin server (embeds `dist/` + `translation/`).
   - `controller/` — panel + REST API handlers; OpenAPI at /panel/api/openapi.json.
   - `service/` — business logic (InboundService, SettingService, XrayService,
-    node sync); subpackages tgbot/, discord/, email/, outbound/, panel/, integration/.
-  - `job/` — 19 cron jobs (traffic, fail2ban IP-limit, node heartbeat/sync, LDAP,
+    node sync); subpackages tgbot/, discord/, email/, panel/.
+  - `job/` — 21 cron jobs (traffic, fail2ban IP-limit, node heartbeat/sync, LDAP,
     CPU/memory watchdogs, …); full table in `docs/architecture.md` §5.4.
   - `middleware/`, `entity/`, `global/`, `session/` (CSRF), `network/`,
     `runtime/` (master/sub-node over mTLS), `websocket/`.

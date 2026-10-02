@@ -27,7 +27,6 @@ func run(root, outDir string) error {
 				"User",
 				"Inbound",
 				"FallbackParentInfo",
-				"OutboundTraffics",
 				"InboundClientIps",
 				"ApiToken",
 				"HistoryOfSeeders",

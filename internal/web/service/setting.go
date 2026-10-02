@@ -194,14 +194,9 @@ var defaultValueMap = map[string]string{
 	"subJsonObservatory":          "",
 	"subThemeDir":                 "",
 	"datepicker":                  "gregorian",
-	"warp":                        "",
-	"warpUpdateInterval":          "0",
-	"nord":                        "",
-	"pia":                         "",
 	"externalTrafficInformEnable": "false",
 	"externalTrafficInformURI":    "",
 	"restartXrayOnClientDisable":  "true",
-	"xrayOutboundTestUrl":         "https://www.google.com/generate_204",
 	"panelOutbound":               "",
 	"devChannelEnable":            "false",
 
@@ -358,8 +353,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 	view.HasTgBotToken = secretConfigured(allSetting.TgBotToken)
 	view.HasTwoFactorToken = secretConfigured(allSetting.TwoFactorToken)
 	view.HasLdapPassword = secretConfigured(allSetting.LdapPassword)
-	view.HasWarpSecret = secretConfigured(mustString(s.GetWarp()))
-	view.HasNordSecret = secretConfigured(mustString(s.GetNord()))
 	view.HasSmtpPassword = secretConfigured(allSetting.SmtpPassword)
 	view.HasDiscordBotToken = secretConfigured(allSetting.DiscordBotToken)
 	var apiTokenCount int64
@@ -376,10 +369,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 
 func secretConfigured(value string) bool {
 	return strings.TrimSpace(value) != ""
-}
-
-func mustString(value string, _ error) string {
-	return value
 }
 
 func getEnv(key, fallback string) string {
@@ -505,42 +494,8 @@ func (s *SettingService) setInt(key string, value int) error {
 	return s.setString(key, strconv.Itoa(value))
 }
 
-func (s *SettingService) GetWarpLastUpdate() (int64, error) {
-	setting, err := s.getSetting("warpLastUpdate")
-	if database.IsNotFound(err) {
-		return 0, nil
-	}
-	if err != nil {
-		return 0, err
-	}
-	if setting.Value == "" {
-		return 0, nil
-	}
-	return strconv.ParseInt(setting.Value, 10, 64)
-}
-
-func (s *SettingService) SetWarpLastUpdate(val int64) error {
-	return s.saveSetting("warpLastUpdate", strconv.FormatInt(val, 10))
-}
-
-func (s *SettingService) SetWarpUpdateInterval(val int) error {
-	return s.setInt("warpUpdateInterval", val)
-}
-
 func (s *SettingService) GetXrayConfigTemplate() (string, error) {
 	return s.getString("xrayTemplateConfig")
-}
-
-func (s *SettingService) GetXrayOutboundTestUrl() (string, error) {
-	return s.getString("xrayOutboundTestUrl")
-}
-
-func (s *SettingService) SetXrayOutboundTestUrl(url string) error {
-	clean, err := SanitizeHTTPURL(url)
-	if err != nil {
-		return err
-	}
-	return s.setString("xrayOutboundTestUrl", clean)
 }
 
 func (s *SettingService) GetListen() (string, error) {
@@ -1294,30 +1249,6 @@ func (s *SettingService) GetSubThemeDir() (string, error) {
 
 func (s *SettingService) GetDatepicker() (string, error) {
 	return s.getString("datepicker")
-}
-
-func (s *SettingService) GetWarp() (string, error) {
-	return s.getString("warp")
-}
-
-func (s *SettingService) SetWarp(data string) error {
-	return s.setString("warp", data)
-}
-
-func (s *SettingService) GetNord() (string, error) {
-	return s.getString("nord")
-}
-
-func (s *SettingService) SetNord(data string) error {
-	return s.setString("nord", data)
-}
-
-func (s *SettingService) GetPia() (string, error) {
-	return s.getString("pia")
-}
-
-func (s *SettingService) SetPia(data string) error {
-	return s.setString("pia", data)
 }
 
 func (s *SettingService) GetExternalTrafficInformEnable() (bool, error) {

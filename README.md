@@ -33,9 +33,8 @@ Built as an enhanced fork of the original X-UI project, 3X-UI adds broader proto
 - **MTProto proxies** — per-client FakeTLS secrets, ad-tags, and quotas, applied live without dropping existing connections.
 - **Fallbacks** — serve multiple protocols on a single port (e.g. VLESS and Trojan on 443) using Xray's fallback support.
 - **Per-client management** — traffic quotas, expiry dates, IP limits with trusted-address exemptions, HWID device limits, scheduled renewal cycles, live online status, and one-click share links, QR codes, and subscriptions.
-- **Traffic statistics** — per inbound, per client, and per outbound, with reset controls.
+- **Traffic statistics** — per inbound and per client, with reset controls.
 - **Multi-node support** — manage and scale across multiple servers from a single panel, including cloning inbounds onto other nodes.
-- **Outbound & routing** — WARP, NordVPN, PIA, custom routing rules, load balancers with balancer-to-balancer fallback, and outbound proxy chaining. Bundled geosite and geoip categories are browsable straight from the rule editor.
 - **Built-in subscription server** — raw, JSON, and Clash output, auto-selected from the client's User-Agent, plus [custom page templates](docs/custom-subscription-templates.md).
 - **Telegram and Discord bots** for remote monitoring and management.
 - **RESTful API** with scoped, optionally expiring tokens and an in-panel API reference.

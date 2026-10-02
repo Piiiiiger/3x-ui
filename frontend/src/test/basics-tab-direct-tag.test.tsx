@@ -10,8 +10,6 @@ function renderBasics(outbounds: Record<string, unknown>[]) {
     <BasicsTab
       templateSettings={{ outbounds } as unknown as XraySettingsValue}
       setTemplateSettings={vi.fn()}
-      outboundTestUrl=""
-      onChangeOutboundTestUrl={vi.fn()}
       onResetDefault={vi.fn()}
     />,
   );

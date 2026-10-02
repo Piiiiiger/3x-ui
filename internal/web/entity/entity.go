@@ -208,8 +208,6 @@ type AllSetting struct {
 	LdapDefaultTotalGB     int    `json:"ldapDefaultTotalGB" form:"ldapDefaultTotalGB" validate:"gte=0"`
 	LdapDefaultExpiryDays  int    `json:"ldapDefaultExpiryDays" form:"ldapDefaultExpiryDays" validate:"gte=0"`
 	LdapDefaultLimitIP     int    `json:"ldapDefaultLimitIP" form:"ldapDefaultLimitIP" validate:"gte=0"`
-
-	WarpUpdateInterval int `json:"warpUpdateInterval" form:"warpUpdateInterval" validate:"gte=0"`
 }
 
 type AllSettingView struct {
@@ -219,8 +217,6 @@ type AllSettingView struct {
 	HasTwoFactorToken  bool `json:"hasTwoFactorToken"`
 	HasLdapPassword    bool `json:"hasLdapPassword"`
 	HasApiToken        bool `json:"hasApiToken"`
-	HasWarpSecret      bool `json:"hasWarpSecret"`
-	HasNordSecret      bool `json:"hasNordSecret"`
 	HasSmtpPassword    bool `json:"hasSmtpPassword"`
 	HasDiscordBotToken bool `json:"hasDiscordBotToken"`
 }

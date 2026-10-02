@@ -69,13 +69,6 @@ func BroadcastNodes(nodes any) {
 	}
 }
 
-// BroadcastOutbounds broadcasts outbounds list update to all connected clients.
-func BroadcastOutbounds(outbounds any) {
-	if hub := GetHub(); hub != nil {
-		hub.Broadcast(MessageTypeOutbounds, outbounds)
-	}
-}
-
 // BroadcastNotification broadcasts a system notification to all connected clients.
 func BroadcastNotification(title, message, level string) {
 	hub := GetHub()

@@ -143,7 +143,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   └── model/              # **ALL GORM models** (model.go ~1.1k lines + siblings:
 │   │                           #   node_client_traffic.go, node_client_ip.go,
 │   │                           #   client_global_traffic.go). ⭐ Start here for data shape.
-│   ├── pia/                    # PIA WireGuard protocol client (auth, signed server list, /addKey)
 │   ├── eventbus/               # In-process pub/sub (buffered channel): outbound.down|up,
 │   │                           #   xray.crash, node.down|up, cpu.high, memory.high, login.attempt
 │   ├── tunnelmonitor/          # Optional tunnel health probe (XUI_TUNNEL_HEALTH_* env vars):
@@ -169,7 +168,7 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   │   ├── node.go         #   /panel/api/nodes   (multi-node management)
 │   │   │   ├── server.go       #   /panel/api/server  (status, xray version, certs, logs, DB import/export)
 │   │   │   ├── setting.go      #   /panel/api/setting (settings + API tokens)
-│   │   │   ├── xray_setting.go #   /panel/api/xray    (raw Xray config editor, WARP/Nord/PIA, geodata)
+│   │   │   ├── xray_setting.go #   /panel/api/xray    (raw Xray config editor, geodata)
 │   │   │   ├── api.go          #   /panel/api gateway (token auth, envelope + CSRF wiring)
 │   │   │   ├── index.go        #   login/logout/csrf/2FA
 │   │   │   ├── spa.go          #   SPA fallback for /panel UI routes
@@ -202,12 +201,9 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   │   ├── metric_history.go       # Historical system/xray metrics
 │   │   │   ├── reality_scan.go         # REALITY target scanner
 │   │   │   ├── url_safety.go           # Outbound URL validation (SSRF guards)
-│   │   │   ├── outbound_subscription.go# Outbound subscription (e.g. Warp/Nord provider configs)
 │   │   │   ├── port_conflict.go        # Detect inbound port collisions
 │   │   │   ├── fallback.go             # Xray fallback (SNI/ALPN routing on shared port)
 │   │   │   ├── email/                  # Email notification service (SMTP)
-│   │   │   ├── integration/            # External providers: warp.go, nord.go, pia.go
-│   │   │   ├── outbound/               # Outbound config service
 │   │   │   ├── panel/                  # Cross-cutting panel services:
 │   │   │   │   ├── panel.go            #   panel-level helpers
 │   │   │   │   ├── user.go             #   admin user auth (bcrypt)
@@ -266,7 +262,7 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │       │   ├── inbounds/     #   inbound list + the big inbound form (protocols/security/transport)
 │       │   ├── clients/      #   client management screens
 │       │   ├── nodes/        #   multi-node UI
-│       │   ├── xray/         #   raw Xray config UI (routing, dns, outbounds, balancers, overrides)
+│       │   ├── xray/         #   raw Xray config UI (basics, dns, advanced JSON)
 │       │   ├── index/        #   dashboard/home
 │       │   └── settings/, sub/, login/, api-docs/
 │       ├── api/              # ⭐ Data layer: http-init, QueryProvider, queryKeys, websocket bridge
@@ -422,9 +418,8 @@ All registered in `web.go` → `startTask()`. Each is a struct with a `Run()` me
 | `@every 10s`        | `check_client_ip_job`                                                                            | Enforce per-client IP limits                                                          |
 | `@every 10s`        | `mtproto_job`                                                                                    | Reconcile `mtg` sidecars against enabled MTProto inbounds                             |
 | `@every 10s`        | `amneziawg_job`                                                                                  | Reconcile embedded AmneziaWG interfaces against enabled local inbounds                |
-| `@every 5m`         | `outbound_subscription_job`                                                                      | Refresh outbound provider configs                                                     |
 | `@every 10m`        | `clear_logs_job` (`PruneXrayLogsJob`)                                                            | Truncate Xray access/error logs once either exceeds 64 MiB                            |
-| `@hourly`           | `warp_ip_job`, `periodic_traffic_reset_job("hourly")`                                            | WARP IP rotation; traffic resets                                                      |
+| `@hourly`           | `periodic_traffic_reset_job("hourly")`                                                           | Hourly traffic resets                                                                 |
 | `@daily`            | `clear_logs_job`, `periodic_traffic_reset_job("daily")`, `periodic_traffic_reset_job("monthly")` | IP-limit and Xray access/error log cleanup; daily resets and due monthly resets       |
 | `@weekly`           | `periodic_traffic_reset_job("weekly")`                                                           | Weekly traffic resets                                                                 |
 | default `@every 1m` | `ldap_sync_job`                                                                                  | Only if LDAP enabled; schedule configurable                                           |
@@ -537,8 +532,6 @@ for AutoMigrate in `internal/database/db.go`.
 | `ClientGlobalTraffic`           | Cross-master usage totals                 | `MasterGuid`, `Email`, `Up`, `Down`                                                                                                                                |
 | `xray.ClientTraffic`            | Per-client counters (`client_traffics`)   | `Email`, `Up`, `Down`, `Total`, `ExpiryTime`, `LastOnline`                                                                                                         |
 | `InboundClientIps`              | IP set per client email                   | drives IP-limit enforcement                                                                                                                                        |
-| `OutboundTraffics`              | Outbound counters                         | per outbound tag                                                                                                                                                   |
-| `OutboundSubscription`          | External provider subs                    | Warp/Nord style                                                                                                                                                    |
 | `Setting`                       | Key/value panel settings                  | everything configurable                                                                                                                                            |
 | `ApiToken`                      | REST API tokens                           | SHA-256 hash (plaintext shown once)                                                                                                                                |
 | `InboundFallback`               | Fallback routing on a shared port         | SNI/ALPN/path → dest                                                                                                                                               |
@@ -578,7 +571,6 @@ for AutoMigrate in `internal/database/db.go`.
 | **Email notifications**                                                           | `service/email/`                                                             | `internal/eventbus/` (consumers)                                                                    |
 | **CPU / memory alerts** not firing                                                | `job/check_cpu_usage.go`, `job/check_memory_usage.go`                        | `internal/eventbus/`, notifier settings in `service/setting.go`                                     |
 | Xray auto-restart on **dead tunnel**                                              | `internal/tunnelmonitor/`                                                    | `XUI_TUNNEL_HEALTH_*` in `internal/config/`                                                         |
-| **WARP / Nord / PIA** outbound integration                                        | `service/integration/warp.go` / `nord.go` / `pia.go`                         | `internal/pia/`, `frontend/src/pages/xray/overrides/`                                               |
 | **MTProto** proxy issues                                                          | `internal/mtproto/manager.go`, `mtproto/process*.go`                         | `job/mtproto_job.go`                                                                                |
 | **DB migration** / new column                                                     | `internal/database/db.go` (AutoMigrate list), `migrate_data.go`              | `model/model.go`                                                                                    |
 | **Cron schedule** changes                                                         | `web.go` → `startTask()`                                                     | the specific `job/*.go`                                                                             |

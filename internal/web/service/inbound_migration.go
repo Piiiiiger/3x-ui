@@ -92,7 +92,7 @@ func (s *InboundService) MigrationRequirements() (err error) {
 					END IF;
 				END $$;`, table, col, table, col, col)).Error
 		}
-		for _, column := range [][2]string{{"inbounds", "enable"}, {"client_traffics", "enable"}, {"nodes", "enable"}, {"clients", "enable"}, {"api_tokens", "enabled"}, {"outbound_subscriptions", "enabled"}} {
+		for _, column := range [][2]string{{"inbounds", "enable"}, {"client_traffics", "enable"}, {"nodes", "enable"}, {"clients", "enable"}, {"api_tokens", "enabled"}} {
 			if err = normalizeBool(column[0], column[1]); err != nil {
 				return
 			}

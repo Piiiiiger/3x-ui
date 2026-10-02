@@ -118,9 +118,8 @@ the server.
 
 Every AmneziaWG inbound's traffic already goes through Xray — each peer
 relays into its own loopback SOCKS5 inbound, tagged with the AmneziaWG
-inbound's own tag, so it shows up as a normal source on the
-[Routing](/docs/operations/outbounds-routing) page like any other protocol's
-inbound. There is no separate toggle for this: unlike a kernel tunnel,
+inbound's own tag, so routing rules in the Xray template match it by that tag
+like any other protocol's inbound. There is no separate toggle for this: unlike a kernel tunnel,
 there's no other way for a peer's traffic to reach the internet once it's
 decapsulated.
 

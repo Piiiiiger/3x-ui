@@ -69,77 +69,6 @@ export interface Section {
 const inboundBody =
   '{\n  "enable": true,\n  "remark": "VLESS-443",\n  "listen": "",\n  "port": 443,\n  "protocol": "vless",\n  "expiryTime": 0,\n  "total": 0,\n  "settings": {\n    "clients": [{ "id": "...", "email": "user1" }],\n    "decryption": "none",\n    "fallbacks": []\n  },\n  "streamSettings": {\n    "network": "tcp",\n    "security": "reality",\n    "realitySettings": { "show": false, "dest": "..." }\n  },\n  "sniffing": {\n    "enabled": true,\n    "destOverride": ["http", "tls"]\n  }\n}';
 
-const outboundSubscriptionBodyParams: EndpointParam[] = [
-  {
-    name: 'remark',
-    in: 'body (form)',
-    type: 'string',
-    desc: 'Optional display label.',
-    optional: true,
-  },
-  {
-    name: 'url',
-    in: 'body (form)',
-    type: 'string',
-    desc: 'Subscription URL (required). Must be a public http(s) address; private/internal targets are blocked unless allowPrivate is true.',
-  },
-  {
-    name: 'tagPrefix',
-    in: 'body (form)',
-    type: 'string',
-    desc: 'Prefix for generated outbound tags. Defaults to the lowest free "sub<N>-" prefix.',
-    optional: true,
-  },
-  {
-    name: 'userAgent',
-    in: 'body (form)',
-    type: 'string',
-    desc: 'Custom User-Agent sent when fetching this subscription. Defaults to "3x-ui-outbound-sub/1.0".',
-    optional: true,
-    defaultValue: '3x-ui-outbound-sub/1.0',
-  },
-  {
-    name: 'updateInterval',
-    in: 'body (form)',
-    type: 'integer',
-    desc: 'Seconds between auto-refreshes. Default 600.',
-    optional: true,
-    defaultValue: 600,
-  },
-  {
-    name: 'enabled',
-    in: 'body (form)',
-    type: 'boolean',
-    desc: 'Whether the subscription is active. Default true.',
-    optional: true,
-    defaultValue: true,
-  },
-  {
-    name: 'allowPrivate',
-    in: 'body (form)',
-    type: 'boolean',
-    desc: 'Allow the URL to point at a private/internal/loopback address. Default false.',
-    optional: true,
-    defaultValue: false,
-  },
-  {
-    name: 'allowInsecure',
-    in: 'body (form)',
-    type: 'boolean',
-    desc: "Skip TLS certificate verification when fetching the subscription's URL. Default false.",
-    optional: true,
-    defaultValue: false,
-  },
-  {
-    name: 'prepend',
-    in: 'body (form)',
-    type: 'boolean',
-    desc: "Place this subscription's outbounds before the manual template outbounds. Default false.",
-    optional: true,
-    defaultValue: false,
-  },
-];
-
 const subBalancerBodyParams: EndpointParam[] = [
   {
     name: 'remark',
@@ -2102,27 +2031,21 @@ export const sections: readonly Section[] = [
     id: 'xray-settings',
     title: 'Xray Settings',
     description:
-      'Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray.',
+      "Xray configuration template, the running core's state, and geodata files. All endpoints under /panel/api/xray.",
     endpoints: [
       {
         method: 'POST',
         path: '/panel/api/xray/',
         summary:
-          'Return the Xray config template (JSON string), available inbound tags, client reverse tags, and the configured outbound test URL in one response.',
+          'Return the Xray config template and the standard geodata sources in one response.',
         response:
-          '{\n  "success": true,\n  "obj": {\n    "xraySetting": "{...raw xray config...}",\n    "inboundTags": "[\\"in-443-tcp\\"]",\n    "clientReverseTags": "[]",\n    "outboundTestUrl": "https://www.google.com/generate_204"\n  }\n}',
+          '{\n  "success": true,\n  "obj": {\n    "xraySetting": "{...raw xray config...}",\n    "geodataSources": [\n      { "url": "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat", "file": "geoip.dat" }\n    ]\n  }\n}',
       },
       {
         method: 'GET',
         path: '/panel/api/xray/getDefaultJsonConfig',
         summary:
           'Return the built-in default Xray config shipped with the panel (identical to /panel/api/setting/getDefaultJsonConfig).',
-      },
-      {
-        method: 'GET',
-        path: '/panel/api/xray/getOutboundsTraffic',
-        summary:
-          'Return traffic statistics for every outbound. Each outbound shows up/down/total counters.',
       },
       {
         method: 'GET',
@@ -2134,7 +2057,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/xray/update',
         summary:
-          'Save the Xray JSON config template and optionally the outbound test URL. Both are sent as form fields.',
+          'Save the Xray JSON config template (a form field) and apply it to a running core.',
         params: [
           {
             name: 'xraySetting',
@@ -2142,295 +2065,7 @@ export const sections: readonly Section[] = [
             type: 'string',
             desc: 'Full Xray JSON config template.',
           },
-          {
-            name: 'outboundTestUrl',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'URL used for outbound reachability tests. Defaults to https://www.google.com/generate_204.',
-            optional: true,
-          },
         ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/warp/:action',
-        summary: 'Manage Cloudflare Warp integration. The action parameter selects the operation.',
-        params: [
-          {
-            name: 'action',
-            in: 'path',
-            type: 'string',
-            desc: 'data — return Warp stats. del — delete Warp data. config — return current config. reg — register (sends keys). changeIp — rotate the endpoint. license — set a Warp+ key. interval — set automatic rotation in hours.',
-          },
-          {
-            name: 'privateKey',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=reg.',
-            optional: true,
-          },
-          {
-            name: 'publicKey',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=reg.',
-            optional: true,
-          },
-          {
-            name: 'license',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=license.',
-            optional: true,
-          },
-          {
-            name: 'interval',
-            in: 'body (form)',
-            type: 'integer',
-            desc: 'Non-negative hours between automatic rotations. Required when action=interval; 0 disables rotation.',
-            optional: true,
-          },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/nord/:action',
-        summary: 'Manage NordVPN integration. The action parameter selects the operation.',
-        params: [
-          {
-            name: 'action',
-            in: 'path',
-            type: 'string',
-            desc: 'countries — list available countries. servers — list servers in a country (sends countryId). reg — get NordVPN credentials (sends token). setKey — store NordVPN API key (sends key). data — return current NordVPN connection data. del — delete NordVPN data.',
-          },
-          {
-            name: 'countryId',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=servers.',
-            optional: true,
-          },
-          {
-            name: 'token',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=reg.',
-            optional: true,
-          },
-          {
-            name: 'key',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=setKey.',
-            optional: true,
-          },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/pia/:action',
-        summary: 'Manage PIA WireGuard integration. The action parameter selects the operation.',
-        params: [
-          {
-            name: 'action',
-            in: 'path',
-            type: 'string',
-            desc: 'countries — list available countries from the signed PIA server list. servers — list regions and WireGuard servers in a country (sends countryCode). reg — sign in with a PIA username and password (sends username, password). data — return the signed-in account hint. del — delete stored PIA credentials. addKey — register a WireGuard key with the selected server (sends hostname) and return fields to build the outbound.',
-          },
-          {
-            name: 'username',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=reg.',
-            optional: true,
-          },
-          {
-            name: 'password',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=reg.',
-            optional: true,
-          },
-          {
-            name: 'countryCode',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=servers.',
-            optional: true,
-          },
-          {
-            name: 'hostname',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Required when action=addKey.',
-            optional: true,
-          },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/resetOutboundsTraffic',
-        summary: 'Reset traffic counters for a specific outbound by tag.',
-        params: [
-          {
-            name: 'tag',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Outbound tag to reset (e.g. "proxy", "direct").',
-          },
-        ],
-        body: 'tag=proxy',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/testOutbound',
-        summary:
-          'Test an outbound configuration. Sends the outbound JSON (required), optionally all outbounds (to resolve sockopt.dialerProxy dependencies), and a mode flag.',
-        params: [
-          {
-            name: 'outbound',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'JSON-encoded single outbound to test (required).',
-          },
-          {
-            name: 'allOutbounds',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'JSON array of all outbounds — used to resolve dialerProxy chains.',
-            optional: true,
-          },
-          {
-            name: 'mode',
-            in: 'body (form)',
-            type: 'string',
-            desc: '"tcp" for a fast dial-only probe (parallel-safe), "real" for a real-delay probe whose delay is the full request time including tunnel establishment. Default/empty uses a full HTTP probe reporting the warm per-request round-trip. Both HTTP variants run through a temp xray instance.',
-            optional: true,
-          },
-        ],
-        body: 'outbound={"protocol":"freedom","settings":{}}&mode=tcp',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/testOutbounds',
-        summary:
-          'Test a batch of outbounds (max 50) through one shared temp xray instance. Returns an array of results in input order, each with the outbound tag, delay, HTTP status and a connect/TLS/TTFB timing breakdown.',
-        params: [
-          {
-            name: 'outbounds',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'JSON array of outbound configs to test (required).',
-          },
-          {
-            name: 'allOutbounds',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'JSON array of all outbounds — used to resolve dialerProxy chains.',
-            optional: true,
-          },
-          {
-            name: 'mode',
-            in: 'body (form)',
-            type: 'string',
-            desc: '"tcp" for fast dial-only probes (UDP-transport outbounds are still probed over HTTP), "real" for real-delay probes whose delay is the full request time including tunnel establishment. Default/empty routes an HTTP request through each outbound and reports the warm per-request round-trip.',
-            optional: true,
-          },
-        ],
-        body: 'outbounds=[{"tag":"direct","protocol":"freedom","settings":{}}]&mode=http',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/balancerStatus',
-        summary:
-          'Live state of routing balancers in the running core (RoutingService.GetBalancerInfo): current override and the targets the strategy prefers. Returns a map keyed by balancer tag.',
-        params: [
-          {
-            name: 'tags',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Comma-separated balancer tags to query (e.g. "b1,b2").',
-          },
-        ],
-        body: 'tags=b1,b2',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/balancerOverride',
-        summary:
-          'Force a balancer in the running core to always pick one outbound (RoutingService.OverrideBalancerTarget). Applied live without a restart; cleared automatically when Xray restarts.',
-        params: [
-          { name: 'tag', in: 'body (form)', type: 'string', desc: 'Balancer tag (required).' },
-          {
-            name: 'target',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Outbound tag to force. Empty clears the override and returns control to the strategy.',
-            optional: true,
-          },
-        ],
-        body: 'tag=b1&target=proxy',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/routeTest',
-        summary:
-          'Ask the running core which outbound its router would pick for a synthetic connection (RoutingService.TestRoute). No traffic is sent.',
-        bodyRequiredOneOf: ['domain', 'ip'],
-        params: [
-          {
-            name: 'domain',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Target domain. Either domain or ip is required.',
-            optional: true,
-            minLength: 1,
-          },
-          {
-            name: 'ip',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Target IP. Either domain or ip is required.',
-            optional: true,
-            minLength: 1,
-          },
-          {
-            name: 'port',
-            in: 'body (form)',
-            type: 'number',
-            desc: 'Target port (optional).',
-            optional: true,
-          },
-          {
-            name: 'network',
-            in: 'body (form)',
-            type: 'string',
-            desc: '"tcp" (default) or "udp".',
-            optional: true,
-          },
-          {
-            name: 'inboundTag',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Simulate arrival on this inbound (optional).',
-            optional: true,
-          },
-          {
-            name: 'protocol',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Sniffed protocol such as http, tls, bittorrent (optional).',
-            optional: true,
-          },
-          {
-            name: 'email',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'User attribution for user-based rules (optional).',
-            optional: true,
-          },
-        ],
-        body: 'domain=example.com&port=443&network=tcp',
       },
       {
         method: 'GET',
@@ -2535,100 +2170,6 @@ export const sections: readonly Section[] = [
           },
         ],
         body: 'kind=domain&tokens=geosite:google,geosite:blabla',
-      },
-      {
-        method: 'GET',
-        path: '/panel/api/xray/outbound-subs',
-        summary:
-          'List all outbound subscriptions (remote URLs that supply additional outbounds), newest first.',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs',
-        summary:
-          'Create an outbound subscription. The URL is fetched, parsed into outbounds with stable tags, and merged additively into the running Xray config.',
-        params: outboundSubscriptionBodyParams,
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs/:id',
-        summary:
-          'Update an existing outbound subscription by id. Accepts the same form fields as create.',
-        params: [
-          { name: 'id', in: 'path', type: 'integer', desc: 'Subscription id.' },
-          ...outboundSubscriptionBodyParams,
-        ],
-      },
-      {
-        method: 'DELETE',
-        path: '/panel/api/xray/outbound-subs/:id',
-        summary: 'Delete an outbound subscription by id.',
-        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Subscription id.' }],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs/:id/del',
-        summary:
-          'Delete an outbound subscription by id (POST alias of DELETE for clients that cannot send DELETE).',
-        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Subscription id.' }],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs/:id/refresh',
-        summary:
-          'Force an immediate re-fetch of the subscription and return the parsed outbounds. Signals Xray to reload.',
-        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Subscription id.' }],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs/:id/move',
-        summary:
-          'Reorder a subscription one step up or down in priority (controls its position in the merged outbounds).',
-        params: [
-          { name: 'id', in: 'path', type: 'integer', desc: 'Subscription id.' },
-          {
-            name: 'dir',
-            in: 'body (form)',
-            type: 'string',
-            desc: '"up" to raise priority, anything else to lower it.',
-            optional: true,
-          },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/xray/outbound-subs/parse',
-        summary:
-          'Preview a subscription URL: fetch and parse it into outbounds without persisting anything.',
-        params: [
-          {
-            name: 'url',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Subscription URL to preview (required).',
-          },
-          {
-            name: 'userAgent',
-            in: 'body (form)',
-            type: 'string',
-            desc: 'Custom User-Agent sent while fetching the preview.',
-            optional: true,
-          },
-          {
-            name: 'allowPrivate',
-            in: 'body (form)',
-            type: 'boolean',
-            desc: 'Allow a private/internal/loopback URL. Default false.',
-            optional: true,
-          },
-          {
-            name: 'allowInsecure',
-            in: 'body (form)',
-            type: 'boolean',
-            desc: 'Skip TLS certificate verification. Default false.',
-            optional: true,
-          },
-        ],
       },
     ],
   },

@@ -402,19 +402,14 @@ export function useInbounds() {
   const fetchError = fetchErrorSource ? (fetchErrorSource as Error).message : '';
 
   const refresh = useCallback(async () => {
-    // Invalidate at the inbounds root so both `slim` (this page's list)
-    // and `options` (the Clients page's inbound picker) refetch. Without
-    // the options bucket, a freshly-created inbound stays invisible in
-    // the client add/edit modal until a full page reload. The xray config
-    // response carries inboundTags for the routing-rule tag picker, so it
-    // needs invalidating too or that list stays stale until a hard refresh.
+    // The root covers `options` too, or a new inbound stays missing from the
+    // client modal's inbound picker until a full reload.
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: keys.inbounds.root() }),
       queryClient.invalidateQueries({ queryKey: keys.clients.onlines() }),
       queryClient.invalidateQueries({ queryKey: keys.clients.onlinesByGuid() }),
       queryClient.invalidateQueries({ queryKey: keys.clients.activeInbounds() }),
       queryClient.invalidateQueries({ queryKey: keys.clients.lastOnline() }),
-      queryClient.invalidateQueries({ queryKey: keys.xray.config() }),
     ]);
   }, [queryClient]);
 

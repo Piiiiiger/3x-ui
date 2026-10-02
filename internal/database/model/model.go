@@ -115,15 +115,6 @@ type FallbackParentInfo struct {
 	Path     string `json:"path,omitempty"`
 }
 
-// OutboundTraffics tracks traffic statistics for Xray outbound connections.
-type OutboundTraffics struct {
-	Id    int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
-	Tag   string `json:"tag" form:"tag" gorm:"unique"`
-	Up    int64  `json:"up" form:"up" gorm:"default:0"`
-	Down  int64  `json:"down" form:"down" gorm:"default:0"`
-	Total int64  `json:"total" form:"total" gorm:"default:0"`
-}
-
 // InboundClientIps stores IP addresses associated with inbound clients for access control.
 type InboundClientIps struct {
 	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
@@ -1211,27 +1202,6 @@ type ClientMergeConflict struct {
 	Old   any
 	New   any
 	Kept  any
-}
-
-type OutboundSubscription struct {
-	Id                   int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
-	Remark               string `json:"remark" form:"remark"`
-	Url                  string `json:"url" form:"url"`
-	Enabled              bool   `json:"enabled" form:"enabled" gorm:"default:true"`
-	AllowPrivate         bool   `json:"allowPrivate" form:"allowPrivate" gorm:"default:false"`
-	AllowInsecure        bool   `json:"allowInsecure" form:"allowInsecure" gorm:"default:false"`
-	UserAgent            string `json:"userAgent" form:"userAgent"`
-	TagPrefix            string `json:"tagPrefix" form:"tagPrefix"`
-	UpdateInterval       int    `json:"updateInterval" form:"updateInterval" gorm:"default:600"` // seconds between refreshes
-	Priority             int    `json:"priority" form:"priority" gorm:"default:0"`               // order among subscriptions in the merged outbounds (lower = earlier)
-	Prepend              bool   `json:"prepend" form:"prepend" gorm:"default:false"`             // place this subscription's outbounds before the manual template outbounds
-	LastUpdated          int64  `json:"lastUpdated" form:"lastUpdated"`
-	LastError            string `json:"lastError" form:"lastError"`
-	LastFetchedOutbounds string `json:"lastFetchedOutbounds" form:"lastFetchedOutbounds" gorm:"type:text"`
-	LinkIdentities       string `json:"-" gorm:"type:text;column:link_identities"`
-	CreatedAt            int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
-	UpdatedAt            int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
-	OutboundCount        int    `json:"outboundCount" gorm:"-"`
 }
 
 // SubBalancer is one extra JSON-subscription config document whose members are

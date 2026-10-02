@@ -33,9 +33,8 @@ Orijinal X-UI projesinin geliştirilmiş bir çatallaması (fork) olarak inşa e
 - **MTProto proxy'leri** — İstemci başına FakeTLS gizli anahtarları, reklam etiketleri (ad-tag) ve kotalar, mevcut bağlantılar kopmadan anlık olarak uygulanır.
 - **Geri Dönüş (Fallbacks)** — Xray'in fallback desteğini kullanarak tek bir port üzerinde birden fazla protokole (ör. 443 üzerinde hem VLESS hem Trojan) hizmet verin.
 - **Kullanıcı başına yönetim** — Trafik kotaları, bitiş tarihleri, güvenilir adreslere muafiyet tanınabilen IP sınırları, HWID cihaz sınırları, zamanlanmış yenileme döngüleri, canlı çevrimiçi (online) durumu ve tek tıkla paylaşım bağlantıları, QR kodları ve abonelikler.
-- **Trafik istatistikleri** — Gelen bağlantı (Inbound), istemci ve giden bağlantı (Outbound) bazında istatistikler ve sıfırlama kontrolleri.
+- **Trafik istatistikleri** — Gelen bağlantı (Inbound) ve istemci bazında istatistikler ve sıfırlama kontrolleri.
 - **Çoklu düğüm (Multi-node) desteği** — Tek bir panel üzerinden birden fazla sunucuyu yönetin ve ölçeklendirin; gelen bağlantıları diğer düğümlere klonlayın.
-- **Giden bağlantı (Outbound) ve yönlendirme** — WARP, NordVPN, PIA, özel yönlendirme kuralları, dengeleyiciler arası yük devretme destekli yük dengeleyiciler (load balancers) ve giden bağlantı proxy zincirleme (proxy chaining). Pakete dahil geosite ve geoip kategorileri doğrudan kural düzenleyicisinden taranabilir.
 - **Dahili abonelik sunucusu** — İstemcinin User-Agent bilgisine göre otomatik seçilen raw, JSON ve Clash çıktısı ve [özel sayfa şablonları](docs/custom-subscription-templates.md).
 - Uzaktan izleme ve yönetim için **Telegram ve Discord botları**.
 - Kapsamı sınırlanmış, isteğe bağlı olarak süresi dolan token'lar ve panel içi API referansı sunan **RESTful API**.

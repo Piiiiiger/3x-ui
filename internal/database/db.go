@@ -66,7 +66,6 @@ func allModels() []any {
 	return []any{
 		&model.User{},
 		&model.Inbound{},
-		&model.OutboundTraffics{},
 		&model.Setting{},
 		&model.InboundClientIps{},
 		&xray.ClientTraffic{},
@@ -82,7 +81,6 @@ func allModels() []any {
 		&model.NodeClientIp{},
 		&model.ClientGlobalTraffic{},
 		&model.NodePendingReset{},
-		&model.OutboundSubscription{},
 		&model.SubBalancer{},
 		&model.Plan{},
 		&model.PlanInbound{},
@@ -101,14 +99,6 @@ func migrateClientTrafficLastSubFetchColumn() error {
 	return migrator.AddColumn(&xray.ClientTraffic{}, "LastSubFetch")
 }
 
-func migrateOutboundSubscriptionUserAgentColumn() error {
-	migrator := db.Migrator()
-	if !migrator.HasTable(&model.OutboundSubscription{}) || migrator.HasColumn(&model.OutboundSubscription{}, "user_agent") {
-		return nil
-	}
-	return migrator.AddColumn(&model.OutboundSubscription{}, "UserAgent")
-}
-
 func migrateInboundExcludeFromSubColumn() error {
 	migrator := db.Migrator()
 	if !migrator.HasTable(&model.Inbound{}) || migrator.HasColumn(&model.Inbound{}, "exclude_from_sub") {
@@ -119,9 +109,6 @@ func migrateInboundExcludeFromSubColumn() error {
 
 func initModels() error {
 	if err := migrateClientTrafficLastSubFetchColumn(); err != nil {
-		return err
-	}
-	if err := migrateOutboundSubscriptionUserAgentColumn(); err != nil {
 		return err
 	}
 	if err := migrateInboundExcludeFromSubColumn(); err != nil {
@@ -202,6 +189,12 @@ func initModels() error {
 		return err
 	}
 	if err := moveHostsOntoInbounds(); err != nil {
+		return err
+	}
+	if err := dropOutboundTables(); err != nil {
+		return err
+	}
+	if err := deleteOutboundIntegrationSettings(); err != nil {
 		return err
 	}
 	if IsPostgres() {
@@ -456,6 +449,26 @@ func moveHostsOntoInbounds() error {
 		}
 		return tx.Migrator().DropTable("hosts")
 	})
+}
+
+// dropOutboundTables removes the tables of the outbound pages Pigger dropped: per
+// outbound traffic counters and outbound subscriptions.
+func dropOutboundTables() error {
+	for _, table := range []string{"outbound_traffics", "outbound_subscriptions"} {
+		if db.Migrator().HasTable(table) {
+			if err := db.Migrator().DropTable(table); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// deleteOutboundIntegrationSettings removes the account credentials the dropped
+// WARP, NordVPN and PIA dialogs stored as settings.
+func deleteOutboundIntegrationSettings() error {
+	keys := []string{"warp", "warpUpdateInterval", "warpLastUpdate", "nord", "pia"}
+	return db.Where("key IN ?", keys).Delete(&model.Setting{}).Error
 }
 
 // dropClientGroups removes what client groups left behind once Pigger dropped
@@ -1003,7 +1016,6 @@ func repairOverflowedTrafficCounters() error {
 	}{
 		{"client_traffics", []string{"up", "down"}},
 		{"inbounds", []string{"up", "down"}},
-		{"outbound_traffics", []string{"up", "down", "total"}},
 		{"node_client_traffics", []string{"up", "down"}},
 	}
 	for _, target := range targets {

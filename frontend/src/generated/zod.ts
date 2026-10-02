@@ -206,7 +206,6 @@ export const AllSettingSchema = z.object({
   trustedProxyCIDRs: z.string(),
   twoFactorEnable: z.boolean(),
   twoFactorToken: z.string(),
-  warpUpdateInterval: z.number().int().min(0),
   webBasePath: z.string(),
   webCertFile: z.string(),
   webDomain: z.string(),
@@ -236,11 +235,9 @@ export const AllSettingViewSchema = z.object({
   hasApiToken: z.boolean(),
   hasDiscordBotToken: z.boolean(),
   hasLdapPassword: z.boolean(),
-  hasNordSecret: z.boolean(),
   hasSmtpPassword: z.boolean(),
   hasTgBotToken: z.boolean(),
   hasTwoFactorToken: z.boolean(),
-  hasWarpSecret: z.boolean(),
   ipLimitAllowlist: z.string(),
   ldapAutoCreate: z.boolean(),
   ldapAutoDelete: z.boolean(),
@@ -395,7 +392,6 @@ export const AllSettingViewSchema = z.object({
   trustedProxyCIDRs: z.string(),
   twoFactorEnable: z.boolean(),
   twoFactorToken: z.string(),
-  warpUpdateInterval: z.number().int().min(0),
   webBasePath: z.string(),
   webCertFile: z.string(),
   webDomain: z.string(),
@@ -963,15 +959,6 @@ export const NodeViewSchema = z.object({
   xrayVersion: z.string(),
 });
 export type NodeView = z.infer<typeof NodeViewSchema>;
-
-export const OutboundTrafficsSchema = z.object({
-  down: z.number().int(),
-  id: z.number().int(),
-  tag: z.string(),
-  total: z.number().int(),
-  up: z.number().int(),
-});
-export type OutboundTraffics = z.infer<typeof OutboundTrafficsSchema>;
 
 export const PanelUpdateStatusSchema = z.object({
   exitCode: z.number().int(),

@@ -10,7 +10,6 @@ import (
 	"net"
 	"regexp"
 	"slices"
-	"sort"
 	"strings"
 	"time"
 
@@ -2207,62 +2206,6 @@ func (s *InboundService) updateClientTraffics(tx *gorm.DB, oldInbound *model.Inb
 		}
 	}
 	return nil
-}
-
-func (s *InboundService) GetInboundTags() (string, error) {
-	db := database.GetDB()
-	var inboundTags []string
-	err := db.Model(model.Inbound{}).Select("tag").Find(&inboundTags).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", err
-	}
-	tags, _ := json.Marshal(inboundTags)
-	return string(tags), nil
-}
-
-func (s *InboundService) GetClientReverseTags() (string, error) {
-	db := database.GetDB()
-	var inbounds []model.Inbound
-	err := db.Model(model.Inbound{}).Select("settings").Where("protocol = ?", "vless").Find(&inbounds).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return "[]", err
-	}
-
-	tagSet := make(map[string]struct{})
-	for _, inbound := range inbounds {
-		var settings map[string]any
-		if err := json.Unmarshal([]byte(inbound.Settings), &settings); err != nil {
-			continue
-		}
-		clients, ok := settings["clients"].([]any)
-		if !ok {
-			continue
-		}
-		for _, client := range clients {
-			clientMap, ok := client.(map[string]any)
-			if !ok {
-				continue
-			}
-			reverse, ok := clientMap["reverse"].(map[string]any)
-			if !ok {
-				continue
-			}
-			tag, _ := reverse["tag"].(string)
-			tag = strings.TrimSpace(tag)
-			if tag != "" {
-				tagSet[tag] = struct{}{}
-			}
-		}
-	}
-
-	rawTags := make([]string, 0, len(tagSet))
-	for tag := range tagSet {
-		rawTags = append(rawTags, tag)
-	}
-	sort.Strings(rawTags)
-
-	result, _ := json.Marshal(rawTags)
-	return string(result), nil
 }
 
 func (s *InboundService) SearchInbounds(query string) ([]*model.Inbound, error) {

@@ -51,8 +51,6 @@ const routes: RouteObject[] = [
       { path: 'nodes/:hostId', element: withSuspense(<HostPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'xray', element: withSuspense(<XrayPage />) },
-      { path: 'outbound', element: withSuspense(<XrayPage />) },
-      { path: 'routing', element: withSuspense(<XrayPage />) },
       { path: 'api-docs', element: withSuspense(<ApiDocsPage />) },
       { path: 'sponsors', element: withSuspense(<SponsorsPage />) },
     ],

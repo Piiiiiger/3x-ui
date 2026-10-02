@@ -559,10 +559,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "twoFactorToken": {
         "type": "string"
       },
-      "warpUpdateInterval": {
-        "minimum": 0,
-        "type": "integer"
-      },
       "webBasePath": {
         "type": "string"
       },
@@ -755,7 +751,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "trustedProxyCIDRs",
       "twoFactorEnable",
       "twoFactorToken",
-      "warpUpdateInterval",
       "webBasePath",
       "webCertFile",
       "webDomain",
@@ -829,9 +824,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "hasLdapPassword": {
         "type": "boolean"
       },
-      "hasNordSecret": {
-        "type": "boolean"
-      },
       "hasSmtpPassword": {
         "type": "boolean"
       },
@@ -839,9 +831,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "boolean"
       },
       "hasTwoFactorToken": {
-        "type": "boolean"
-      },
-      "hasWarpSecret": {
         "type": "boolean"
       },
       "ipLimitAllowlist": {
@@ -1335,10 +1324,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "twoFactorToken": {
         "type": "string"
       },
-      "warpUpdateInterval": {
-        "minimum": 0,
-        "type": "integer"
-      },
       "webBasePath": {
         "type": "string"
       },
@@ -1380,11 +1365,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "hasApiToken",
       "hasDiscordBotToken",
       "hasLdapPassword",
-      "hasNordSecret",
       "hasSmtpPassword",
       "hasTgBotToken",
       "hasTwoFactorToken",
-      "hasWarpSecret",
       "ipLimitAllowlist",
       "ldapAutoCreate",
       "ldapAutoDelete",
@@ -1539,7 +1522,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "trustedProxyCIDRs",
       "twoFactorEnable",
       "twoFactorToken",
-      "warpUpdateInterval",
       "webBasePath",
       "webCertFile",
       "webDomain",
@@ -3949,37 +3931,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "xrayError",
       "xrayState",
       "xrayVersion"
-    ],
-    "type": "object"
-  },
-  "OutboundTraffics": {
-    "description": "OutboundTraffics tracks traffic statistics for Xray outbound connections.",
-    "properties": {
-      "down": {
-        "format": "int64",
-        "type": "integer"
-      },
-      "id": {
-        "type": "integer"
-      },
-      "tag": {
-        "type": "string"
-      },
-      "total": {
-        "format": "int64",
-        "type": "integer"
-      },
-      "up": {
-        "format": "int64",
-        "type": "integer"
-      }
-    },
-    "required": [
-      "down",
-      "id",
-      "tag",
-      "total",
-      "up"
     ],
     "type": "object"
   },

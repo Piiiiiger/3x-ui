@@ -58,17 +58,6 @@ describe('generated OpenAPI request bodies', () => {
       'syslog',
     );
 
-    const outboundTest = requestBody('/panel/api/xray/testOutbound').content[
-      'application/x-www-form-urlencoded'
-    ];
-    expect(outboundTest.schema.required).toEqual(['outbound']);
-
-    const outboundUpdate = requestBody('/panel/api/xray/outbound-subs/{id}').content[
-      'application/x-www-form-urlencoded'
-    ];
-    expect(outboundUpdate.schema.required).toEqual(['url']);
-    expect(outboundUpdate.schema.properties).toHaveProperty('allowInsecure');
-
     const balancerUpdate = requestBody('/panel/api/sub-balancers/{id}').content[
       'application/x-www-form-urlencoded'
     ];
@@ -122,15 +111,6 @@ describe('generated OpenAPI request bodies', () => {
     expect(certSchema.anyOf?.[0].properties?.certContent).not.toHaveProperty('pattern');
     expect(certSchema.anyOf?.[1].properties?.certFile).not.toHaveProperty('pattern');
     expect(certSchema.anyOf?.[1].properties?.certContent.pattern).toBe('.*\\S.*');
-
-    const routeSchema = requestBody('/panel/api/xray/routeTest').content[
-      'application/x-www-form-urlencoded'
-    ].schema;
-    expect(routeSchema.anyOf?.map((branch) => branch.required)).toEqual([['domain'], ['ip']]);
-    expect(routeSchema.anyOf?.[0].properties?.domain?.minLength).toBe(1);
-    expect(routeSchema.anyOf?.[0].properties?.ip).not.toHaveProperty('minLength');
-    expect(routeSchema.anyOf?.[1].properties?.domain).not.toHaveProperty('minLength');
-    expect(routeSchema.anyOf?.[1].properties?.ip?.minLength).toBe(1);
 
     const bulkAttach = requestBody('/panel/api/clients/bulkAttach').content['application/json'];
     expect(bulkAttach.schema.properties?.emails?.items).toEqual({ type: 'string' });

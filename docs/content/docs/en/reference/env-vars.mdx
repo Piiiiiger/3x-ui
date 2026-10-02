@@ -35,9 +35,9 @@ The default SQLite database path is `/etc/x-ui/x-ui.db`. See
 
 ## Node token encryption
 
-Node API bearer tokens — and the stored PIA token — are kept in plaintext by
-default. Encryption at rest is opt-in and fails closed: with any mode other than
-`off`, the panel refuses to start unless it can load a key.
+Node API bearer tokens are kept in plaintext by default. Encryption at rest is
+opt-in and fails closed: with any mode other than `off`, the panel refuses to
+start unless it can load a key.
 
 | Variable                  | Default                         | Description                                                                                                                                                            |
 | ------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,7 +59,6 @@ the database under the active key:
 x-ui encrypt-tokens
 ```
 
-That covers node rows; the PIA token is re-encrypted the next time it is read.
 To rotate, add the new key to `keys`, point `active` at it, keep the old key for
 decryption, and run `x-ui encrypt-tokens` again.
 

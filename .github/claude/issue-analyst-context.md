@@ -47,7 +47,6 @@ question it already answers.
 | Xray child process + config | `internal/xray/` |
 | MTProto inbounds | `internal/mtproto/` |
 | AmneziaWG shape + embedded runtime | `internal/amneziawg/`, `internal/amneziawgnet/` |
-| PIA WireGuard client | `internal/pia/` |
 | subscription server | `internal/sub/` |
 | HTTP handlers | `internal/web/controller/` |
 | business logic | `internal/web/service/` |

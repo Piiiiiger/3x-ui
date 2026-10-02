@@ -177,8 +177,6 @@ export class AllSetting {
   hasTwoFactorToken = false;
   hasLdapPassword = false;
   hasApiToken = false;
-  hasWarpSecret = false;
-  hasNordSecret = false;
   hasSmtpPassword = false;
   clearTgBotToken = false;
   clearLdapPassword = false;

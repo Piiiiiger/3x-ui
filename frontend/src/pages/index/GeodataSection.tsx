@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Form, Input, Modal, Select, Space, Spin, Typography, message } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -42,7 +42,6 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
   const [standardSources, setStandardSources] = useState<GeodataAssetRow[]>([]);
   const [outboundTags, setOutboundTags] = useState<string[]>([]);
   const [template, setTemplate] = useState<Record<string, unknown> | null>(null);
-  const outboundTestUrlRef = useRef('');
 
   const load = useCallback(async () => {
     try {
@@ -53,8 +52,6 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
       const payload = parsed.data;
       const next = payload.xraySetting as Record<string, unknown>;
       setTemplate(next);
-      outboundTestUrlRef.current =
-        typeof payload.outboundTestUrl === 'string' ? payload.outboundTestUrl : '';
 
       const geodata = (next.geodata || {}) as Record<string, unknown>;
       const assets = Array.isArray(geodata.assets) ? geodata.assets : [];
@@ -69,8 +66,7 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
       );
       setStandardSources(payload.geodataSources ?? []);
 
-      // Download outbound candidates: template outbounds + subscription outbounds.
-      // Skip blackhole outbounds — routing a download through one just drops it.
+      // Download outbound candidates; a blackhole would just drop the download.
       const tags = new Set<string>();
       const outbounds = Array.isArray(next.outbounds) ? next.outbounds : [];
       for (const o of outbounds) {
@@ -78,12 +74,6 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
         const rec = o as Record<string, unknown>;
         if (isOutboundProtocol(rec, 'blackhole')) continue;
         const tag = rec.tag;
-        if (typeof tag === 'string' && tag) tags.add(tag);
-      }
-      const subTags = Array.isArray(payload.subscriptionOutboundTags)
-        ? payload.subscriptionOutboundTags
-        : [];
-      for (const tag of subTags) {
         if (typeof tag === 'string' && tag) tags.add(tag);
       }
       setOutboundTags([...tags]);
@@ -161,7 +151,6 @@ export default function GeodataSection({ active, onBusy, onClose }: GeodataSecti
         try {
           const msg = await HttpUtil.post('/panel/api/xray/update', {
             xraySetting: JSON.stringify(next, null, 2),
-            outboundTestUrl: outboundTestUrlRef.current,
           });
           if (msg?.success) {
             await HttpUtil.post('/panel/api/server/restartXrayService');

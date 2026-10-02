@@ -165,8 +165,6 @@ export const AllSettingSchema = z
     hasTwoFactorToken: z.boolean().optional(),
     hasLdapPassword: z.boolean().optional(),
     hasApiToken: z.boolean().optional(),
-    hasWarpSecret: z.boolean().optional(),
-    hasNordSecret: z.boolean().optional(),
     hasSmtpPassword: z.boolean().optional(),
     hasDiscordBotToken: z.boolean().optional(),
     discordBotEnable: z.boolean().optional(),

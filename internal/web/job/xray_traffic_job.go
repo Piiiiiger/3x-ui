@@ -6,7 +6,6 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/outbound"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 
@@ -15,10 +14,9 @@ import (
 
 // XrayTrafficJob collects and processes traffic statistics from Xray, updating the database and optionally informing external APIs.
 type XrayTrafficJob struct {
-	settingService  service.SettingService
-	xrayService     service.XrayService
-	inboundService  service.InboundService
-	outboundService outbound.OutboundService
+	settingService service.SettingService
+	xrayService    service.XrayService
+	inboundService service.InboundService
 }
 
 // clientStatsSnapshotMaxClients caps how many client_traffics rows the job
@@ -83,10 +81,6 @@ func (j *XrayTrafficJob) Run() {
 	if err != nil {
 		logger.Warning("add inbound traffic failed:", err)
 	}
-	err, needRestart1 := j.outboundService.AddTraffic(traffics, clientTraffics)
-	if err != nil {
-		logger.Warning("add outbound traffic failed:", err)
-	}
 	if clientsDisabled {
 		restartOnDisable, settingErr := j.settingService.GetRestartXrayOnClientDisable()
 		if settingErr != nil {
@@ -105,7 +99,7 @@ func (j *XrayTrafficJob) Run() {
 	} else if err != nil {
 		logger.Warning("get ExternalTrafficInformEnable failed:", err)
 	}
-	if needRestart0 || needRestart1 {
+	if needRestart0 {
 		j.xrayService.SetToNeedRestart()
 	}
 
@@ -215,12 +209,6 @@ func (j *XrayTrafficJob) Run() {
 	}
 	if len(clientStatsPayload) > 1 {
 		websocket.BroadcastClientStats(clientStatsPayload)
-	}
-
-	if updatedOutbounds, err := j.outboundService.GetOutboundsTraffic(); err == nil && updatedOutbounds != nil {
-		websocket.BroadcastOutbounds(updatedOutbounds)
-	} else if err != nil {
-		logger.Warning("get all outbounds for websocket failed:", err)
 	}
 }
 

@@ -36,16 +36,12 @@ import {
 interface BasicsTabProps {
   templateSettings: XraySettingsValue | null;
   setTemplateSettings: SetTemplate;
-  outboundTestUrl: string;
-  onChangeOutboundTestUrl: (v: string) => void;
   onResetDefault: () => void;
 }
 
 export default function BasicsTab({
   templateSettings,
   setTemplateSettings,
-  outboundTestUrl,
-  onChangeOutboundTestUrl,
   onResetDefault,
 }: BasicsTabProps) {
   const { t } = useTranslation();
@@ -256,18 +252,6 @@ export default function BasicsTab({
                     if (tt.routing) tt.routing.domainStrategy = next;
                   })
                 }
-              />
-            }
-          />
-          <SettingListItem
-            title={t('pages.xray.outboundTestUrl')}
-            description={t('pages.xray.outboundTestUrlDesc')}
-            paddings="small"
-            control={
-              <Input
-                value={outboundTestUrl}
-                onChange={(e) => onChangeOutboundTestUrl(e.target.value)}
-                placeholder="https://www.google.com/generate_204"
               />
             }
           />

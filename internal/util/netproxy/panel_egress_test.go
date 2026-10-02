@@ -1,4 +1,4 @@
-package integration
+package netproxy_test
 
 import (
 	"net/http"

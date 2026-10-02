@@ -34,7 +34,7 @@ icon: Variable
 
 ## 节点令牌加密
 
-节点 API bearer 令牌以及已保存的 PIA 令牌默认以明文存储。静态加密需显式开启，
+节点 API bearer 令牌默认以明文存储。静态加密需显式开启，
 且采取失败即拒绝的策略：只要模式不是 `off`，面板在无法加载密钥时就拒绝启动。
 
 | Variable                  | Default                         | Description                                                                                                                                                            |
@@ -56,7 +56,7 @@ icon: Variable
 x-ui encrypt-tokens
 ```
 
-该命令处理节点记录；PIA 令牌会在下次读取时重新加密。轮换密钥时，将新密钥加入
+轮换密钥时，将新密钥加入
 `keys`，把 `active` 指向它，保留旧密钥用于解密，然后再次运行 `x-ui encrypt-tokens`。
 
 ## 日志与二进制文件

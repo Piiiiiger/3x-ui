@@ -174,7 +174,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "trustedProxyCIDRs": "",
     "twoFactorEnable": false,
     "twoFactorToken": "",
-    "warpUpdateInterval": 0,
     "webBasePath": "",
     "webCertFile": "",
     "webDomain": "",
@@ -202,11 +201,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "hasApiToken": false,
     "hasDiscordBotToken": false,
     "hasLdapPassword": false,
-    "hasNordSecret": false,
     "hasSmtpPassword": false,
     "hasTgBotToken": false,
     "hasTwoFactorToken": false,
-    "hasWarpSecret": false,
     "ipLimitAllowlist": "",
     "ldapAutoCreate": false,
     "ldapAutoDelete": false,
@@ -361,7 +358,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "trustedProxyCIDRs": "",
     "twoFactorEnable": false,
     "twoFactorToken": "",
-    "warpUpdateInterval": 0,
     "webBasePath": "",
     "webCertFile": "",
     "webDomain": "",
@@ -975,13 +971,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "xrayError": "",
     "xrayState": "running",
     "xrayVersion": "25.10.31"
-  },
-  "OutboundTraffics": {
-    "down": 0,
-    "id": 0,
-    "tag": "",
-    "total": 0,
-    "up": 0
   },
   "PanelUpdateStatus": {
     "exitCode": 0,
