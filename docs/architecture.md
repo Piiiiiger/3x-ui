@@ -384,6 +384,22 @@ Agent bugs: config not reaching the agent → `job/agent_sync_job.go` + `service
 (`SyncAgent`); usage missing or doubled → `AddAgentTraffic` + `internal/agent/outbox.go`;
 agent shown offline → `runtime/agent_hub.go` + `NodeService.probeAgent`.
 
+**Hosts and the nodes on them.** The UI calls a `model.Node` a host (主机) and the inbounds it
+runs its nodes (节点); a `model.Host` row is an entry (入口) that overrides a link's address,
+port or TLS. `/panel/nodes/:id` (`pages/nodes/HostPage.tsx`, `local` for this panel) shows one
+host with the inbounds workspace scoped to it.
+
+- **Generating a node:** `POST inbounds/generate` (`service/inbound_generate.go`) creates the
+  inbound disabled, adds an entry when a NAT public port differs from the listen port, attaches
+  the chosen plans' members (`PlanService.AddInboundToPlans`, limits untouched), and enables it
+  only once the host runs it: the local panel must bind the port and take it live, an agent
+  must accept the pushed config under `AgentService.LockAgent`. `inbounds/freePort/:nodeId`
+  suggests a port. The page's generator copies a REALITY node with fresh keys
+  (`pages/nodes/GenerateNodeModal.tsx`).
+- **Bugs:** a generated node left disabled → the refusal comes from `SyncAgent` (agent) or the
+  local live add (`enableOnLocalPanel`); a NAT link with the wrong port → the entry row and
+  `sub/host_sub.go`.
+
 ### 5.3 Traffic accounting
 
 Per-client and per-inbound up/down counters originate from Xray's stats API and are persisted
