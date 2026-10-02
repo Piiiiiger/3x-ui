@@ -5,9 +5,7 @@
 .settings-page,
 .nodes-page,
 .plans-page,
-.rules-page,
-.api-docs-page,
-.sponsors-page {
+.rules-page {
   --bg-page: #fdfaf8;
   --bg-card: #fffdfc;
   --card-shadow: rgba(39, 22, 16, 0.12);
@@ -28,9 +26,7 @@
 .settings-page.is-dark,
 .nodes-page.is-dark,
 .plans-page.is-dark,
-.rules-page.is-dark,
-.api-docs-page.is-dark,
-.sponsors-page.is-dark {
+.rules-page.is-dark {
   --bg-page: #0d1018;
   --bg-card: #131722;
   --card-shadow: rgba(0, 0, 0, 0.45);
@@ -48,9 +44,7 @@
 .settings-page.is-dark.is-ultra,
 .nodes-page.is-dark.is-ultra,
 .plans-page.is-dark.is-ultra,
-.rules-page.is-dark.is-ultra,
-.api-docs-page.is-dark.is-ultra,
-.sponsors-page.is-dark.is-ultra {
+.rules-page.is-dark.is-ultra {
   --bg-page: #000;
   --bg-card: #0b0b0e;
   --card-shadow: rgba(0, 0, 0, 0.7);
@@ -68,8 +62,6 @@
 .nodes-page::before,
 .plans-page::before,
 .rules-page::before,
-.api-docs-page::before,
-.sponsors-page::before,
 .hosts-page::before {
   content: '';
   position: fixed;
@@ -97,9 +89,7 @@
 .plans-page .ant-layout,
 .rules-page .ant-layout,
 .plans-page .ant-layout-content,
-.rules-page .ant-layout-content,
-.api-docs-page .ant-layout,
-.api-docs-page .ant-layout-content {
+.rules-page .ant-layout-content {
   background: transparent;
 }
 
@@ -110,8 +100,7 @@
 .settings-page .content-shell,
 .nodes-page .content-shell,
 .plans-page .content-shell,
-.rules-page .content-shell,
-.api-docs-page .content-shell {
+.rules-page .content-shell {
   background: transparent;
 }
 
@@ -135,9 +124,7 @@
 .nodes-page .content-area,
 .plans-page .content-area,
 .rules-page .content-area,
-.api-docs-page .content-area,
-.hosts-page .content-area,
-.sponsors-page .content-area {
+.hosts-page .content-area {
   width: 100%;
   max-width: 1440px;
   margin-inline: auto;

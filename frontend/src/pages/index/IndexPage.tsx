@@ -4,7 +4,6 @@ import { ConfigProvider, Layout, message } from 'antd';
 import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import AppNav from '@/layouts/AppNav';
-import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import { setMessageInstance } from '@/utils/messageBus';
 import TrafficOverviewSection from './TrafficOverviewSection';
 import './IndexPage.css';
@@ -28,7 +27,6 @@ export default function IndexPage() {
         <Layout className="content-shell">
           <Layout.Content className="content-area">
             <div className="ov-page">
-              <SponsorSlot slot="dashboard" />
               <TrafficOverviewSection isMobile={isMobile} />
             </div>
           </Layout.Content>

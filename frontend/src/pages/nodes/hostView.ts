@@ -37,6 +37,8 @@ export interface HostView {
   uptimeSecs: number;
   /** Unix seconds; 0 when the host has no heartbeat of its own. */
   lastHeartbeat: number;
+  /** This panel's own version, shown on its card where a host shows its heartbeat. */
+  panelVersion: string;
   transitive: boolean;
 }
 
@@ -106,6 +108,7 @@ export function remoteHostView(
       (heartbeat && typeof node.memPct === 'number' ? { percent: node.memPct } : null),
     uptimeSecs: probe?.status === 'online' ? probe.uptime : node.uptimeSecs || 0,
     lastHeartbeat: node.lastHeartbeat || 0,
+    panelVersion: '',
     transitive: !!node.transitive,
   };
 }
@@ -116,6 +119,7 @@ export function localHostView(
   probe: ProbeServer | undefined,
   nodes: HostNodeFlag[],
   name: string,
+  panelVersion: string,
 ): HostView {
   const figures = probeFigures(probe);
   const ip = String(status.publicIP.ipv4 || '');
@@ -137,6 +141,7 @@ export function localHostView(
     speed: figures.speed ?? { up: status.netIO.up, down: status.netIO.down },
     uptimeSecs: status.uptime,
     lastHeartbeat: 0,
+    panelVersion,
     transitive: false,
   };
 }

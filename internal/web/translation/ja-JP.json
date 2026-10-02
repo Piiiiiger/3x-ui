@@ -136,10 +136,6 @@
     "nodes": "ノード",
     "settings": "パネル設定",
     "xray": "Xray 設定",
-    "apiDocs": "API ドキュメント",
-    "donate": "寄付",
-    "sponsors": "スポンサー",
-    "docs": "ドキュメント",
     "openMenu": "メニューを開く",
     "subFormats": "Sub Formats",
     "rules": "ルール"
@@ -2143,27 +2139,6 @@
         "poolSize": "プールサイズ"
       },
       "intro": "Xray の基本テンプレート、バランサー、DNS、および JSON 設定全体。"
-    },
-    "sponsors": {
-      "title": "スポンサー",
-      "intro": "3X-UI の開発を支援している企業です。スポンサーリンクは新しいタブで開きます。",
-      "become": "スポンサーになる",
-      "tag": "スポンサー",
-      "visit": "訪問",
-      "yourBrand": "ここにあなたのブランドを",
-      "yourBrandText": "毎日 3X-UI を開く何千人ものサーバー管理者に御社をアピールできます。",
-      "placements": "掲載枠",
-      "placementDashboard": "ダッシュボードバナー",
-      "placementDashboardDesc": "ダッシュボード上部のプレミアム枠。一度に 1 社のみ。",
-      "placementSidebar": "サイドバーカード",
-      "placementSidebarDesc": "パネルの全ページに表示され、スポンサー間でローテーションします。",
-      "placementLogin": "ログインページ",
-      "placementLoginDesc": "管理者がログインするたびに表示されます。",
-      "placementPage": "スポンサーページ",
-      "placementPageDesc": "ロゴ、説明、リンク付きでここに掲載されます。",
-      "available": "空きあり",
-      "takenUntil": "{date} まで予約済み",
-      "activeCount": "{count} 件掲載中"
     },
     "probe": {
       "statusUnknown": "データ未受信",

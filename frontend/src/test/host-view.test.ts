@@ -97,7 +97,13 @@ describe('host views', () => {
       publicIP: { ipv4: 'N/A', ipv6: 'N/A' },
       xray: { state: 'error', errorMsg: 'x', version: '25.1', color: 'red' },
     });
-    const view = localHostView(status, undefined, [{ id: 1 }, { id: 2, enable: false }], 'Local');
+    const view = localHostView(
+      status,
+      undefined,
+      [{ id: 1 }, { id: 2, enable: false }],
+      'Local',
+      'v3.1.0',
+    );
     expect(view.address).toBe('');
     expect(view.cpu).toEqual({ percent: 12 });
     expect(view.mem).toEqual({ percent: 50, used: 1 * GIB, total: 2 * GIB });

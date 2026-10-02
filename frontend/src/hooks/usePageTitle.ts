@@ -13,8 +13,6 @@ const TITLE_KEYS: Record<string, string> = {
   '/nodes': 'menu.nodes',
   '/settings': 'menu.settings',
   '/xray': 'menu.xray',
-  '/api-docs': 'menu.apiDocs',
-  '/sponsors': 'menu.sponsors',
 };
 
 export function usePageTitle() {

@@ -44,16 +44,6 @@ test('marks the page the router is on as the current top-bar item', async () => 
   );
 });
 
-test('lights up the more button while on a page it holds', async () => {
-  await renderNav('/api-docs');
-  expect(screen.getByRole('button', { name: 'more' }).className).toContain('is-active');
-});
-
-test('leaves the more button plain on the pages the bar shows directly', async () => {
-  await renderNav('/inbounds');
-  expect(screen.getByRole('button', { name: 'more' }).className).not.toContain('is-active');
-});
-
 test('labels the palette shortcut with the modifier the platform actually uses', async () => {
   const view = await renderNav();
   const chip = view.container.querySelector('.app-nav .nav-search-kbd');
@@ -69,7 +59,7 @@ test('collapses the page buttons into the drawer on narrow screens', async () =>
   await act(async () => {});
 
   const drawerNav = document.querySelector('.drawer-nav') as HTMLElement;
-  expect(within(drawerNav).getByText('API Docs')).not.toBeNull();
+  expect(within(drawerNav).getByText('Rules')).not.toBeNull();
   expect(within(drawerNav).getByText('Nodes').closest('li')?.className).toContain(
     'ant-menu-item-selected',
   );

@@ -136,10 +136,6 @@
     "nodes": "نودها",
     "settings": "تنظیمات پنل",
     "xray": "پیکربندی Xray",
-    "apiDocs": "مستندات API",
-    "donate": "حمایت مالی",
-    "sponsors": "اسپانسرها",
-    "docs": "مستندات",
     "openMenu": "باز کردن منو",
     "subFormats": "Sub Formats",
     "rules": "قوانین"
@@ -2143,27 +2139,6 @@
         "poolSize": "اندازه استخر"
       },
       "intro": "قالب پایه Xray، متعادل‌کننده‌ها، DNS و پیکربندی کامل JSON."
-    },
-    "sponsors": {
-      "title": "اسپانسرها",
-      "intro": "شرکت‌هایی که از توسعه‌ی 3X-UI حمایت می‌کنند. لینک‌های اسپانسر در تب جدید باز می‌شوند.",
-      "become": "اسپانسر شوید",
-      "tag": "اسپانسر",
-      "visit": "مشاهده",
-      "yourBrand": "جای برند شما",
-      "yourBrandText": "شرکت خود را جلوی چشم هزاران ادمین سروری بگذارید که هر روز 3X-UI را باز می‌کنند.",
-      "placements": "جایگاه‌های موجود",
-      "placementDashboard": "بنر داشبورد",
-      "placementDashboardDesc": "جایگاه ویژه بالای صفحه‌ی داشبورد، هر بار فقط یک اسپانسر.",
-      "placementSidebar": "کارت سایدبار",
-      "placementSidebarDesc": "در همه‌ی صفحات پنل نمایش داده می‌شود و بین اسپانسرها چرخش دارد.",
-      "placementLogin": "صفحه‌ی ورود",
-      "placementLoginDesc": "ادمین در هر بار ورود آن را می‌بیند.",
-      "placementPage": "صفحه‌ی اسپانسرها",
-      "placementPageDesc": "همراه با لوگو، توضیحات و لینک در همین صفحه.",
-      "available": "خالی",
-      "takenUntil": "پر شده تا {date}",
-      "activeCount": "{count} فعال"
     },
     "probe": {
       "statusUnknown": "هنوز داده‌ای نیست",

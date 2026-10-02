@@ -2,25 +2,20 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Drawer, Dropdown, Menu } from 'antd';
+import { Drawer, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import {
-  ApiOutlined,
   ApartmentOutlined,
-  AppstoreOutlined,
   CloseOutlined,
   CloudServerOutlined,
   ClusterOutlined,
   CodeOutlined,
-  CrownOutlined,
   DashboardOutlined,
   DatabaseOutlined,
   DiscordOutlined,
   DownOutlined,
   EllipsisOutlined,
   FileTextOutlined,
-  GithubOutlined,
-  HeartOutlined,
   ImportOutlined,
   LogoutOutlined,
   MailOutlined,
@@ -29,7 +24,6 @@ import {
   MoonFilled,
   MoonOutlined,
   ProfileOutlined,
-  ReadOutlined,
   SafetyOutlined,
   SearchOutlined,
   SettingOutlined,
@@ -39,27 +33,20 @@ import {
 } from '@ant-design/icons';
 
 import { HttpUtil } from '@/utils';
-import { formatPanelVersion } from '@/lib/panel-version';
 import { PANEL_NAME } from '@/lib/brand';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAllSettings } from '@/api/queries/useAllSettings';
 import { useCommandPalette } from '@/components/command-palette/useCommandPalette';
-import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import './AppNav.css';
 
-const DONATE_URL = 'https://donate.sanaei.dev/';
 // The palette listens for Ctrl as well as Cmd, so the chip must not show a
 // Mac glyph to the Linux and Windows operators who are most of this panel's.
 const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘' : 'Ctrl';
-const DOCS_URL = 'https://docs.sanaei.dev/';
-const REPO_URL = 'https://github.com/MHSanaei/3x-ui';
 const LOGOUT_KEY = '__logout__';
 // Below this width the page buttons stop fitting beside the actions, so the bar
 // keeps only the brand, search and a menu button that opens the drawer.
 const NAV_COLLAPSE_MAX_PX = 991;
-// Secondary pages live behind the bar's "more" button instead of taking a slot.
-const MORE_PAGES = new Set(['/api-docs', '/sponsors']);
 
 type IconName =
   | 'dashboard'
@@ -70,9 +57,7 @@ type IconName =
   | 'setting'
   | 'tool'
   | 'cluster'
-  | 'logout'
-  | 'sponsors'
-  | 'apidocs';
+  | 'logout';
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
@@ -84,8 +69,6 @@ const iconByName: Record<IconName, ComponentType> = {
   tool: ToolOutlined,
   cluster: ClusterOutlined,
   logout: LogoutOutlined,
-  sponsors: CrownOutlined,
-  apidocs: ApiOutlined,
 };
 
 function ThemeIcon({ isDark, isUltra }: { isDark: boolean; isUltra: boolean }) {
@@ -114,8 +97,6 @@ export default function AppNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const currentTheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
-  const panelVersion = window.X_UI_CUR_VER || '';
-  const versionLabel = panelVersion ? formatPanelVersion(panelVersion) : 'GitHub';
 
   const tabs = useMemo<{ key: string; icon: IconName; title: string }[]>(
     () => [
@@ -128,18 +109,12 @@ export default function AppNav() {
       { key: '/rules', icon: 'rules', title: t('menu.rules') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
-      { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },
-      { key: '/sponsors', icon: 'sponsors', title: t('menu.sponsors') },
       { key: LOGOUT_KEY, icon: 'logout', title: t('logout') },
     ],
     [t],
   );
 
   const drawerItems = useMemo(() => tabs.filter((tab) => tab.icon !== 'logout'), [tabs]);
-  const barItems = useMemo(
-    () => drawerItems.filter((tab) => !MORE_PAGES.has(tab.key)),
-    [drawerItems],
-  );
   const utilItems = useMemo(() => tabs.filter((tab) => tab.icon === 'logout'), [tabs]);
 
   const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
@@ -213,7 +188,6 @@ export default function AppNav() {
         : pathname.startsWith('/nodes/')
           ? '/nodes'
           : pathname;
-  const moreActive = MORE_PAGES.has(selectedKey);
 
   const openSubmenu = settingsActive ? '/settings' : xrayActive ? '/xray' : null;
   const [openKeys, setOpenKeys] = useState<string[]>(() => (openSubmenu ? [openSubmenu] : []));
@@ -278,42 +252,6 @@ export default function AppNav() {
     [isDark, isUltra, toggleTheme, toggleUltra],
   );
 
-  const moreItems = useMemo<NonNullable<MenuProps['items']>>(
-    () => [
-      { key: '/api-docs', icon: <ApiOutlined />, label: t('menu.apiDocs') },
-      { key: '/sponsors', icon: <CrownOutlined />, label: t('menu.sponsors') },
-      { type: 'divider' },
-      {
-        key: 'docs',
-        icon: <ReadOutlined />,
-        label: (
-          <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
-            {t('menu.docs')}
-          </a>
-        ),
-      },
-      {
-        key: 'donate',
-        icon: <HeartOutlined />,
-        label: (
-          <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-            {t('menu.donate')}
-          </a>
-        ),
-      },
-      {
-        key: 'repo',
-        icon: <GithubOutlined />,
-        label: (
-          <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-            {versionLabel}
-          </a>
-        ),
-      },
-    ],
-    [t, versionLabel],
-  );
-
   const searchLabel = t('commandPalette.title') || 'Command Palette (Ctrl + K)';
 
   return (
@@ -327,7 +265,7 @@ export default function AppNav() {
             mode="horizontal"
             className="app-nav-menu"
             selectedKeys={[selectedKey]}
-            items={toMenuItems(barItems, { bar: true })}
+            items={toMenuItems(drawerItems, { bar: true })}
             overflowedIndicator={
               <span className="app-nav-pill">
                 <EllipsisOutlined />
@@ -358,27 +296,6 @@ export default function AppNav() {
                 <ThemeIcon isDark={isDark} isUltra={isUltra} />
                 <span className="app-nav-btn-label">{t('menu.theme')}</span>
               </button>
-              <SponsorSlot slot="sidebar" variant="compact" iconOnly rotate />
-              <Dropdown
-                trigger={['click']}
-                placement="bottomRight"
-                menu={{
-                  items: moreItems,
-                  selectedKeys: moreActive ? [selectedKey] : [],
-                  onClick: ({ key }) => {
-                    if (MORE_PAGES.has(key)) navigate(key);
-                  },
-                }}
-              >
-                <button
-                  type="button"
-                  className={`app-nav-btn app-nav-more${moreActive ? ' is-active' : ''}`}
-                  aria-label={t('more')}
-                  title={t('more')}
-                >
-                  <AppstoreOutlined />
-                </button>
-              </Dropdown>
               <button type="button" className="app-nav-btn app-nav-logout" onClick={logout}>
                 <LogoutOutlined />
                 <span className="app-nav-btn-label">{t('logout')}</span>
@@ -414,26 +331,6 @@ export default function AppNav() {
         <div className="drawer-header">
           <span className="drawer-brand">{PANEL_NAME}</span>
           <div className="drawer-header-actions">
-            <a
-              href={DOCS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="drawer-icon-btn"
-              aria-label={t('menu.docs')}
-              title={t('menu.docs')}
-            >
-              <ReadOutlined />
-            </a>
-            <a
-              href={DONATE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="drawer-icon-btn drawer-donate"
-              aria-label={t('menu.donate')}
-              title={t('menu.donate')}
-            >
-              <HeartOutlined />
-            </a>
             <button
               id="theme-cycle-drawer"
               type="button"
@@ -493,19 +390,6 @@ export default function AppNav() {
             setDrawerOpen(false);
           }}
         />
-        <div className="drawer-footer">
-          <SponsorSlot slot="sidebar" variant="compact" rotate className="drawer-sponsor" />
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="drawer-version"
-            aria-label={`GitHub ${versionLabel}`}
-          >
-            <GithubOutlined />
-            <span>{versionLabel}</span>
-          </a>
-        </div>
       </Drawer>
     </>
   );

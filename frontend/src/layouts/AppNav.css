@@ -104,7 +104,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Actions — search, theme, more, logout, menu
+   Actions — search, theme, logout, menu
    -------------------------------------------------------------------------- */
 
 .app-nav-actions {
@@ -165,16 +165,6 @@
 
 .app-nav-btn-label {
   text-transform: uppercase;
-}
-
-.app-nav-more.is-active {
-  background: var(--ant-color-primary-bg);
-  border-color: color-mix(in srgb, var(--ant-color-primary) 60%, transparent);
-  color: var(--ant-color-link);
-}
-
-.app-nav-actions .sponsor-card {
-  box-shadow: 2px 2px 0 var(--card-shadow, rgba(0, 0, 0, 0.12));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -298,12 +288,6 @@
   outline: none;
 }
 
-.drawer-donate:hover,
-.drawer-donate:focus-visible {
-  background: rgba(236, 72, 153, 0.12);
-  color: #db2777;
-}
-
 .drawer-menu .ant-menu-item {
   height: 48px;
   line-height: 48px;
@@ -326,33 +310,6 @@
 .drawer-utility {
   margin-top: auto;
   border-top: 1px solid var(--ant-color-border-secondary);
-}
-
-.drawer-footer {
-  flex: 0 0 auto;
-  padding: 8px 8px 12px;
-}
-
-.drawer-sponsor {
-  margin-bottom: 6px;
-}
-
-.drawer-version {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  color: var(--ant-color-text-secondary);
-  font-family: var(--ant-font-family-code);
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.drawer-version:hover,
-.drawer-version:focus-visible {
-  color: var(--ant-color-link);
-  outline: none;
 }
 
 body.dark .ant-drawer-content,

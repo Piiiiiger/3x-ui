@@ -48,6 +48,7 @@ import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import NodeFormModal from './NodeFormModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil, TimeFormatter } from '@/utils';
+import { formatPanelVersion } from '@/lib/panel-version';
 import type { PanelUpdateInfo } from './local-panel/PanelUpdateModal';
 import './HostCard.css';
 import './NodesPage.css';
@@ -186,6 +187,7 @@ export default function NodesPage() {
         probeByHost.get(0),
         nodesByHost.get(0) ?? [],
         t('pages.inbounds.localPanel'),
+        window.X_UI_CUR_VER ? formatPanelVersion(window.X_UI_CUR_VER) : '',
       ),
       ...nodes.map((node) =>
         remoteHostView(

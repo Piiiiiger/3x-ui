@@ -395,6 +395,22 @@ describe('the hosts page (服务管理)', () => {
     }
   });
 
+  // The version used to sit in the bar's "…" menu; the panel's own card carries it now.
+  it("shows this panel's version on its own card", async () => {
+    window.X_UI_CUR_VER = 'dev+1a2b3c4d';
+    serve(() => new Msg(true, '', overview()));
+    renderPage();
+    await waitFor(() => expect(hostCards()).toHaveLength(3));
+    const local = hostCard('Local panel');
+    expect(within(local).getByText('Panel Version')).toBeTruthy();
+    expect(within(local).getByText('dev+1a2b3c4d')).toBeTruthy();
+    // A host keeps its heartbeat there; edge-hk has not sent one yet.
+    const hk = hostCard('edge-hk');
+    expect(within(hk).queryByText('dev+1a2b3c4d')).toBeNull();
+    expect(within(hk).getByText('Last Heartbeat').nextElementSibling?.textContent).toBe('never');
+    window.X_UI_CUR_VER = '';
+  });
+
   it('hides the addresses until asked, and remembers the choice', async () => {
     serve(() => new Msg(true, '', overview()));
     renderPage();

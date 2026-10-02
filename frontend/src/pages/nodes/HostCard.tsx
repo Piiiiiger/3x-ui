@@ -233,8 +233,17 @@ const HostCard = memo(function HostCard({
       </div>
 
       <div className="host-card-foot">
-        <span>{t('pages.nodes.lastHeartbeat')}</span>
-        <span>{host.kind === 'local' ? '—' : relativeTime(host.lastHeartbeat)}</span>
+        {host.kind === 'local' ? (
+          <>
+            <span>{t('pages.nodes.panelVersion')}</span>
+            <bdi>{host.panelVersion || '—'}</bdi>
+          </>
+        ) : (
+          <>
+            <span>{t('pages.nodes.lastHeartbeat')}</span>
+            <span>{relativeTime(host.lastHeartbeat)}</span>
+          </>
+        )}
       </div>
     </Card>
   );

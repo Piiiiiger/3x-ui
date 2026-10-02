@@ -139,7 +139,7 @@ The panel UI is a **React 19 + Ant Design 6 + TypeScript** app under `frontend/`
 
 The frontend ships **three Vite bundles**, each emitted into `internal/web/dist/` and embedded into the Go binary at compile time via `embed.FS`:
 
-- **`index.html`** — the admin panel, a **single-page app**. `src/main.tsx` mounts a `react-router` `createBrowserRouter` (see `src/routes.tsx`) under the `/panel` basename; every route (`/panel`, `/panel/inbounds`, `/panel/clients`, `/panel/groups`, `/panel/nodes`, `/panel/settings`, `/panel/xray`, `/panel/api-docs`) is lazy-loaded inside a shared `PanelLayout` (sidebar + header + `<Outlet>`).
+- **`index.html`** — the admin panel, a **single-page app**. `src/main.tsx` mounts a `react-router` `createBrowserRouter` (see `src/routes.tsx`) under the `/panel` basename; every route (`/panel`, `/panel/inbounds`, `/panel/clients`, `/panel/plans`, `/panel/rules`, `/panel/nodes`, `/panel/settings`, `/panel/xray`) is lazy-loaded inside a shared `PanelLayout` (sidebar + header + `<Outlet>`).
 - **`login.html`** — the login + 2FA screen (`src/entries/login.tsx`), a standalone bundle.
 - **`subpage.html`** — the public subscription viewer (`src/entries/subpage.tsx`), a standalone bundle.
 
