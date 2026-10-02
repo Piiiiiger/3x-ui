@@ -206,10 +206,14 @@ func TestEnsureMasterClientCertConcurrentFirstUseMintsOneCredential(t *testing.T
 func TestEnsureMasterClientCert_PersistsCredentialAtomically(t *testing.T) {
 	s := setupSettingMtlsDB(t)
 	db := database.GetDB()
-	trigger := `CREATE TRIGGER fail_master_pin_insert
+	// The save ranges over a map, so the failure hits whichever key is written
+	// second: only then is there a first one that a missing rollback would keep.
+	trigger := `CREATE TRIGGER fail_second_credential_insert
 		BEFORE INSERT ON settings
-		WHEN NEW.key = 'nodeMtlsClientCertSha256'
-		BEGIN SELECT RAISE(ABORT, 'injected pin failure'); END`
+		WHEN NEW.key IN ('nodeMtlsClientCertPem', 'nodeMtlsClientKeyPem', 'nodeMtlsClientCertSha256')
+			AND EXISTS (SELECT 1 FROM settings
+				WHERE key IN ('nodeMtlsClientCertPem', 'nodeMtlsClientKeyPem', 'nodeMtlsClientCertSha256'))
+		BEGIN SELECT RAISE(ABORT, 'injected failure'); END`
 	if err := db.Exec(trigger).Error; err != nil {
 		t.Fatalf("create failure trigger: %v", err)
 	}
@@ -227,7 +231,7 @@ func TestEnsureMasterClientCert_PersistsCredentialAtomically(t *testing.T) {
 		}
 	}
 
-	if err := db.Exec("DROP TRIGGER fail_master_pin_insert").Error; err != nil {
+	if err := db.Exec("DROP TRIGGER fail_second_credential_insert").Error; err != nil {
 		t.Fatalf("drop failure trigger: %v", err)
 	}
 	if _, err := s.EnsureMasterClientCert(); err != nil {

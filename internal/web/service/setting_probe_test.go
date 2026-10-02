@@ -113,17 +113,20 @@ func TestSaveProbeSettingsValidatesThePublicPageURL(t *testing.T) {
 func TestSaveProbeSettingsWritesBothKeysOrNeither(t *testing.T) {
 	s := setupSettingMtlsDB(t)
 	db := database.GetDB()
-	trigger := `CREATE TRIGGER fail_probe_public_url
+	// The save ranges over a map, so the failure hits whichever key is written
+	// second: only then is there a first one that a missing rollback would keep.
+	trigger := `CREATE TRIGGER fail_second_probe_setting
 		BEFORE INSERT ON settings
-		WHEN NEW.key = 'probeLitePublicURL'
+		WHEN NEW.key IN ('probeLiteURL', 'probeLitePublicURL')
+			AND EXISTS (SELECT 1 FROM settings WHERE key IN ('probeLiteURL', 'probeLitePublicURL'))
 		BEGIN SELECT RAISE(ABORT, 'injected failure'); END`
 	if err := db.Exec(trigger).Error; err != nil {
 		t.Fatalf("create failure trigger: %v", err)
 	}
 
 	in := ProbeSettings{URL: "http://127.0.0.1:27777", PublicURL: "https://probe.example.com"}
-	if _, err := s.SaveProbeSettings(in); err == nil {
-		t.Fatal("the injected failure did not fail the save")
+	if _, err := s.SaveProbeSettings(in); err == nil || err.Error() != "injected failure" {
+		t.Fatalf("save: err = %v, want the injected failure", err)
 	}
 	if got := storedProbeSettings(t, s); got != (ProbeSettings{}) {
 		t.Fatalf("half of the settings survived a failed save: %+v", got)
