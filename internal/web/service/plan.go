@@ -101,31 +101,59 @@ func (s *PlanService) Create(in PlanInput) (*model.Plan, error) {
 	return plan, nil
 }
 
-// Update saves the plan and, when applyToMembers is set, re-stamps its quota,
-// limits, reset schedule and inbounds onto every member without moving expiries.
-func (s *PlanService) Update(inboundSvc *InboundService, id int, in PlanInput, applyToMembers bool) (bool, error) {
-	err := database.GetDB().Transaction(func(tx *gorm.DB) error {
-		var plan model.Plan
-		if err := tx.First(&plan, id).Error; err != nil {
-			return common.NewError("plan not found:", id)
-		}
-		if err := validatePlanInput(tx, id, &in); err != nil {
-			return err
-		}
-		applyPlanInput(&plan, in)
-		if err := tx.Save(&plan).Error; err != nil {
-			return err
-		}
-		return replacePlanInbounds(tx, id, in.InboundIds)
-	})
-	if err != nil || !applyToMembers {
+// Update attaches the plan's members to the inbounds it gains and detaches them from those
+// it loses, then saves the plan; reapplyLimits also re-stamps its limits but not expiries.
+func (s *PlanService) Update(inboundSvc *InboundService, id int, in PlanInput, reapplyLimits bool) (bool, error) {
+	db := database.GetDB()
+	var plan model.Plan
+	if err := db.First(&plan, id).Error; err != nil {
+		return false, common.NewError("plan not found:", id)
+	}
+	if err := validatePlanInput(db, id, &in); err != nil {
+		return false, err
+	}
+	before, err := planInboundIds(db, id)
+	if err != nil {
 		return false, err
 	}
 	members, err := planMemberEmails(id)
 	if err != nil {
 		return false, err
 	}
-	return s.Assign(inboundSvc, members, id, PlanStartKeep, false)
+	applyPlanInput(&plan, in)
+	gained := idsMissingFrom(in.InboundIds, before)
+	lost := idsMissingFrom(before, in.InboundIds)
+	needRestart := false
+	for _, email := range members {
+		nr, err := s.updateMember(inboundSvc, &plan, email, gained, lost, reapplyLimits)
+		needRestart = needRestart || nr
+		if err != nil {
+			return needRestart, err
+		}
+	}
+	// Saved last: a save that fails on a member leaves the plan as it was, so saving
+	// again works out the same gained and lost inbounds and skips members already done.
+	return needRestart, db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&plan).Error; err != nil {
+			return err
+		}
+		return replacePlanInbounds(tx, id, in.InboundIds)
+	})
+}
+
+func (s *PlanService) updateMember(inboundSvc *InboundService, plan *model.Plan, email string, gained, lost []int, reapplyLimits bool) (bool, error) {
+	needRestart := false
+	if reapplyLimits {
+		rec, err := s.clientService.GetRecordByEmail(nil, email)
+		if err != nil {
+			return false, err
+		}
+		if needRestart, err = s.stampPlanLimits(inboundSvc, plan, rec, PlanStartKeep); err != nil {
+			return needRestart, err
+		}
+	}
+	nr, err := s.attachAndDetach(inboundSvc, email, gained, lost)
+	return needRestart || nr, err
 }
 
 func (s *PlanService) Delete(id int) error {

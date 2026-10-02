@@ -1947,7 +1947,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/update/:id',
         summary:
-          'Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.',
+          'Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id.' }],
         body: '{\n  "name": "Monthly 200G",\n  "totalGB": 214748364800,\n  "durationDays": 30,\n  "trafficReset": "monthly",\n  "trafficResetDay": 1,\n  "limitIp": 0,\n  "remark": "",\n  "clashRules": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "inboundIds": [1, 2],\n  "applyToMembers": true\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "id": 1\n  }\n}',

@@ -33,7 +33,8 @@ func (a *PlanController) initRouter(g *gin.RouterGroup) {
 
 type planUpdateRequest struct {
 	service.PlanInput
-	ApplyToMembers bool `json:"applyToMembers"`
+	// The wire name predates the narrower meaning and stays for API clients.
+	ReapplyLimits bool `json:"applyToMembers"`
 }
 
 type planAssignRequest struct {
@@ -81,7 +82,7 @@ func (a *PlanController) update(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	needRestart, err := a.planService.Update(&a.inboundService, id, req.PlanInput, req.ApplyToMembers)
+	needRestart, err := a.planService.Update(&a.inboundService, id, req.PlanInput, req.ReapplyLimits)
 	a.restartIf(needRestart)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)

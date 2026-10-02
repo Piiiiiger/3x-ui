@@ -19,8 +19,8 @@ import { useInboundChoices } from './planText';
 
 const GIB = 1024 ** 3;
 
-// applyToMembers and clashMode ride along in the form so reopening the modal resets them too.
-type PlanFormState = PlanFormValues & { applyToMembers: boolean; clashMode: PlanClashMode };
+// reapplyLimits and clashMode ride along in the form so reopening the modal resets them too.
+type PlanFormState = PlanFormValues & { reapplyLimits: boolean; clashMode: PlanClashMode };
 
 const CLASH_MODE_LABEL_KEYS: Record<PlanClashMode, string> = {
   inherit: 'pages.plans.clashInherit',
@@ -42,7 +42,7 @@ function initialState(plan: PlanSummary | null): PlanFormState {
     remark: plan?.remark ?? '',
     clashRules: plan?.clashRules ?? '',
     inboundIds: [...(plan?.inboundIds ?? [])],
-    applyToMembers: true,
+    reapplyLimits: false,
     clashMode: plan?.clashRules ? 'custom' : 'inherit',
   };
 }
@@ -51,7 +51,7 @@ interface PlanFormModalProps {
   open: boolean;
   plan: PlanSummary | null;
   onClose: () => void;
-  onConfirm: (values: PlanFormValues, applyToMembers: boolean) => Promise<void> | void;
+  onConfirm: (values: PlanFormValues, reapplyLimits: boolean) => Promise<void> | void;
 }
 
 export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFormModalProps) {
@@ -76,14 +76,14 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
     label: t(`pages.inbounds.periodicTrafficReset.${value}`),
   }));
 
-  async function onFinish({ applyToMembers, clashMode: mode, ...values }: PlanFormState) {
+  async function onFinish({ reapplyLimits, clashMode: mode, ...values }: PlanFormState) {
     setSaving(true);
     try {
       const parsed = PlanFormSchema.parse({
         ...values,
         clashRules: mode === 'custom' ? values.clashRules : '',
       });
-      await onConfirm(parsed, isEdit && members > 0 && applyToMembers);
+      await onConfirm(parsed, isEdit && members > 0 && reapplyLimits);
     } finally {
       setSaving(false);
     }
@@ -199,8 +199,12 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
           </FormField>
 
           {isEdit && members > 0 && (
-            <FormField name="applyToMembers" valueProp="checked">
-              <Checkbox>{t('pages.plans.applyToMembers', { count: members })}</Checkbox>
+            <FormField
+              name="reapplyLimits"
+              valueProp="checked"
+              extra={t('pages.plans.serverChangesApply')}
+            >
+              <Checkbox>{t('pages.plans.reapplyLimits', { count: members })}</Checkbox>
             </FormField>
           )}
         </Form>

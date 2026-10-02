@@ -14060,7 +14060,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Replace a plan. With applyToMembers, its quota, IP limit, reset schedule and inbounds are re-stamped onto every client on the plan; their expiry and usage are left alone.",
+        "summary": "Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan quota, IP limit and reset schedule are also re-stamped onto them; their expiry and usage are left alone.",
         "operationId": "post_panel_api_plans_update_id",
         "parameters": [
           {

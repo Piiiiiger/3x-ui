@@ -44,14 +44,14 @@ export function usePlanMutations() {
   });
 
   const updateMut = useMutation({
-    mutationFn: (args: { id: number; values: PlanFormValues; applyToMembers: boolean }) =>
+    mutationFn: (args: { id: number; values: PlanFormValues; reapplyLimits: boolean }) =>
       HttpUtil.post(
         `/panel/api/plans/update/${args.id}`,
-        { ...toPlanInput(args.values), applyToMembers: args.applyToMembers },
+        { ...toPlanInput(args.values), applyToMembers: args.reapplyLimits },
         JSON_HEADERS,
       ),
-    onSuccess: (msg, args) => {
-      if (msg?.success) (args.applyToMembers ? invalidateMembers : invalidatePlans)();
+    onSuccess: (msg) => {
+      if (msg?.success) invalidateMembers();
     },
   });
 
@@ -88,8 +88,8 @@ export function usePlanMutations() {
 
   return {
     create: (values: PlanFormValues) => createMut.mutateAsync(values),
-    update: (id: number, values: PlanFormValues, applyToMembers: boolean) =>
-      updateMut.mutateAsync({ id, values, applyToMembers }),
+    update: (id: number, values: PlanFormValues, reapplyLimits: boolean) =>
+      updateMut.mutateAsync({ id, values, reapplyLimits }),
     remove: (id: number) => removeMut.mutateAsync(id),
     assign: (req: PlanAssignRequest) => assignMut.mutateAsync(req),
     unassign: (emails: string[]) => unassignMut.mutateAsync(emails),
