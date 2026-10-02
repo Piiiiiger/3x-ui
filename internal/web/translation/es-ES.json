@@ -1251,6 +1251,21 @@
         "notFound": "Este nodo ya no existe",
         "publicEndpoint": "Punto de acceso público",
         "nodes": "Entradas"
+      },
+      "generate": {
+        "button": "Generar entrada",
+        "title": "Generar una entrada en {host}",
+        "submit": "Generar",
+        "publicPort": "Puerto público",
+        "publicPortHint": "Solo cuando el proveedor reenvía otro puerto público a este (NAT).",
+        "publicPortNeeded": "Introduce el puerto público que el proveedor reenvía a esta entrada",
+        "needNameAndPort": "Introduce un nombre y un puerto",
+        "target": "Destino REALITY",
+        "plans": "Planes que reciben esta entrada",
+        "reach": "{count} cliente(s) recibirán esta entrada",
+        "noTemplate": "Aún no hay ninguna entrada VLESS REALITY que copiar; crea la primera con Agregar entrada.",
+        "done": "La nueva entrada funciona en {host}",
+        "hostOffline": "El nodo está desconectado; genera la entrada cuando su agente se conecte."
       }
     },
     "settings": {

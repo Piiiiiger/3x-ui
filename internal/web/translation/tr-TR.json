@@ -1251,6 +1251,21 @@
         "notFound": "Bu düğüm artık yok",
         "publicEndpoint": "Genel uç nokta",
         "nodes": "Gelen Bağlantılar"
+      },
+      "generate": {
+        "button": "Bağlantı oluştur",
+        "title": "{host} üzerinde bağlantı oluştur",
+        "submit": "Oluştur",
+        "publicPort": "Genel port",
+        "publicPortHint": "Yalnızca sağlayıcı başka bir genel portu bu porta yönlendiriyorsa (NAT).",
+        "publicPortNeeded": "Sağlayıcının bu bağlantıya yönlendirdiği genel portu girin",
+        "needNameAndPort": "Bir ad ve port girin",
+        "target": "REALITY hedefi",
+        "plans": "Bu bağlantıyı alan planlar",
+        "reach": "{count} istemci bu bağlantıyı alacak",
+        "noTemplate": "Kopyalanacak VLESS REALITY bağlantısı henüz yok; ilkini Gelen Bağlantı Ekle ile kurun.",
+        "done": "Yeni bağlantı {host} üzerinde çalışıyor",
+        "hostOffline": "Düğüm çevrimdışı; ajanı bağlandıktan sonra bağlantıyı oluşturun."
       }
     },
     "settings": {

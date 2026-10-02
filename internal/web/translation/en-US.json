@@ -1370,6 +1370,21 @@
         "notFound": "This host no longer exists",
         "publicEndpoint": "Public endpoint",
         "nodes": "Nodes"
+      },
+      "generate": {
+        "button": "Generate node",
+        "title": "Generate a node on {host}",
+        "submit": "Generate",
+        "publicPort": "Public port",
+        "publicPortHint": "Only when the provider forwards another public port to this one (NAT).",
+        "publicPortNeeded": "Enter the public port the provider forwards to this node",
+        "needNameAndPort": "Enter a name and a port",
+        "target": "REALITY target",
+        "plans": "Plans that get this node",
+        "reach": "{count} client(s) will get this node",
+        "noTemplate": "There is no VLESS REALITY node to copy yet; set up the first one with Add Inbound.",
+        "done": "The new node runs on {host}",
+        "hostOffline": "The host is offline; generate the node once its agent is connected."
       }
     },
     "settings": {

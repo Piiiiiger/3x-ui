@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import type { HostRecord } from '@/schemas/api/host';
 
@@ -87,4 +88,6 @@ export interface InboundListProps {
   /** One host's list: no host filter and no panel-wide import or export. */
   scoped?: boolean;
   publicEndpointsOf?: (dbInbound: DBInboundRecord) => string[];
+  /** Extra buttons beside Add, such as a host page's node generator. */
+  toolbarExtra?: ReactNode;
 }

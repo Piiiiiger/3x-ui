@@ -27,6 +27,15 @@ const HOSTS = [
     kind: 'agent',
     address: '203.0.113.17',
     enable: true,
+    status: 'offline',
+  },
+  {
+    id: 4,
+    name: 'old-panel',
+    remark: '3x-ui',
+    kind: 'panel',
+    address: '198.51.100.4',
+    enable: true,
     status: 'online',
   },
 ];
@@ -76,6 +85,7 @@ function serve() {
     if (url === '/panel/api/nodes/list') return new Msg(true, '', HOSTS);
     if (url === '/panel/api/hosts/list') return new Msg(true, '', ENTRIES);
     if (url === '/panel/api/inbounds/options') return new Msg(true, '', []);
+    if (url === '/panel/api/plans/list') return new Msg(true, '', []);
     return new Msg(true, '', {});
   });
 }
@@ -131,6 +141,28 @@ describe('HostPage', () => {
     await waitFor(() => expect(within(dialog).getByTitle('edge-hk')).toBeTruthy());
     expect(within(dialog).getByTitle('edge-hk').closest('.ant-select')?.className).toContain(
       'ant-select-disabled',
+    );
+  });
+
+  it('offers to generate a node on a connected agent host', async () => {
+    renderAt('/nodes/2');
+    await screen.findByText('香港-Edge');
+    fireEvent.click(screen.getByRole('button', { name: /Generate node$/ }));
+    await screen.findByText('Generate a node on edge-hk');
+  });
+
+  // Only the local panel and a connected agent can report that they run a new node.
+  it('offers no generator on a panel host', async () => {
+    renderAt('/nodes/4');
+    await screen.findByRole('heading', { name: 'old-panel' });
+    expect(screen.queryByRole('button', { name: /Generate node$/ })).toBeNull();
+  });
+
+  it('holds the generator while an agent host is offline', async () => {
+    renderAt('/nodes/3');
+    await screen.findByText('美国-Edge');
+    expect(screen.getByRole('button', { name: /Generate node$/ }).hasAttribute('disabled')).toBe(
+      true,
     );
   });
 });

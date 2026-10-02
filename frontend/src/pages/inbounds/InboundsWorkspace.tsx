@@ -1,4 +1,4 @@
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Col, Modal, Result, Row, Spin, Statistic, message } from 'antd';
 
@@ -74,9 +74,11 @@ interface ClientMatchTarget {
 interface InboundsWorkspaceProps {
   /** Show only this host's inbounds: a node id, or 0 for the local panel. */
   hostScope?: number;
+  /** Extra buttons beside Add in the list's toolbar. */
+  toolbarExtra?: ReactNode;
 }
 
-export function InboundsWorkspace({ hostScope }: InboundsWorkspaceProps = {}) {
+export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspaceProps = {}) {
   const { t } = useTranslation();
   const { isMobile } = useMediaQuery();
 
@@ -832,6 +834,7 @@ export function InboundsWorkspace({ hostScope }: InboundsWorkspaceProps = {}) {
                 hasActiveNode={hostScope === undefined && showNodeInfo}
                 scoped={hostScope !== undefined}
                 publicEndpointsOf={hostScope === undefined ? undefined : publicEndpointsFor}
+                toolbarExtra={toolbarExtra}
                 hosts={hosts}
                 onAddInbound={onAddInbound}
                 onGeneralAction={onGeneralAction}

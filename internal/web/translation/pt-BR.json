@@ -1251,6 +1251,21 @@
         "notFound": "Este nó não existe mais",
         "publicEndpoint": "Endereço público",
         "nodes": "Entradas"
+      },
+      "generate": {
+        "button": "Gerar entrada",
+        "title": "Gerar uma entrada em {host}",
+        "submit": "Gerar",
+        "publicPort": "Porta pública",
+        "publicPortHint": "Somente quando o provedor encaminha outra porta pública para esta (NAT).",
+        "publicPortNeeded": "Informe a porta pública que o provedor encaminha para esta entrada",
+        "needNameAndPort": "Informe um nome e uma porta",
+        "target": "Destino REALITY",
+        "plans": "Planos que recebem esta entrada",
+        "reach": "{count} cliente(s) receberão esta entrada",
+        "noTemplate": "Ainda não há entrada VLESS REALITY para copiar; crie a primeira com Adicionar entrada.",
+        "done": "A nova entrada roda em {host}",
+        "hostOffline": "O nó está offline; gere a entrada quando o agente se conectar."
       }
     },
     "settings": {

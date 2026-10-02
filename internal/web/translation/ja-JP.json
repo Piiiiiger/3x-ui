@@ -1251,6 +1251,21 @@
         "notFound": "このノードは存在しません",
         "publicEndpoint": "公開エンドポイント",
         "nodes": "インバウンド"
+      },
+      "generate": {
+        "button": "インバウンドを生成",
+        "title": "{host} にインバウンドを生成",
+        "submit": "生成",
+        "publicPort": "公開ポート",
+        "publicPortHint": "プロバイダーが別の公開ポートをこのポートに転送する場合（NAT）のみ入力します。",
+        "publicPortNeeded": "プロバイダーがこのインバウンドに転送する公開ポートを入力してください",
+        "needNameAndPort": "名前とポートを入力してください",
+        "target": "REALITY ターゲット",
+        "plans": "このインバウンドを受け取るプラン",
+        "reach": "{count} 人のクライアントがこのインバウンドを受け取ります",
+        "noTemplate": "コピーできる VLESS REALITY インバウンドがまだありません。「インバウンドを追加」で最初のものを作成してください。",
+        "done": "新しいインバウンドが {host} で動作しています",
+        "hostOffline": "ノードがオフラインです。エージェントが接続してから生成してください。"
       }
     },
     "settings": {

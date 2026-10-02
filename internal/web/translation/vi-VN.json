@@ -1251,6 +1251,21 @@
         "notFound": "Nút này không còn tồn tại",
         "publicEndpoint": "Điểm truy cập công khai",
         "nodes": "Inbound"
+      },
+      "generate": {
+        "button": "Tạo inbound",
+        "title": "Tạo inbound trên {host}",
+        "submit": "Tạo",
+        "publicPort": "Cổng công khai",
+        "publicPortHint": "Chỉ khi nhà cung cấp chuyển tiếp một cổng công khai khác về cổng này (NAT).",
+        "publicPortNeeded": "Nhập cổng công khai mà nhà cung cấp chuyển tiếp tới inbound này",
+        "needNameAndPort": "Nhập tên và cổng",
+        "target": "Đích REALITY",
+        "plans": "Các gói nhận inbound này",
+        "reach": "{count} khách hàng sẽ nhận inbound này",
+        "noTemplate": "Chưa có inbound VLESS REALITY nào để sao chép; hãy tạo cái đầu tiên bằng Thêm inbound.",
+        "done": "Inbound mới đang chạy trên {host}",
+        "hostOffline": "Nút đang ngoại tuyến; hãy tạo inbound sau khi agent kết nối."
       }
     },
     "settings": {

@@ -1251,6 +1251,21 @@
         "notFound": "该主机不存在",
         "publicEndpoint": "公网端点",
         "nodes": "节点"
+      },
+      "generate": {
+        "button": "生成节点",
+        "title": "在 {host} 上生成节点",
+        "submit": "生成",
+        "publicPort": "公网端口",
+        "publicPortHint": "仅当服务商把另一个公网端口转发到此端口（NAT）时填写。",
+        "publicPortNeeded": "请填写服务商转发到此节点的公网端口",
+        "needNameAndPort": "请填写名称和端口",
+        "target": "REALITY 目标",
+        "plans": "获得此节点的套餐",
+        "reach": "{count} 个用户将获得此节点",
+        "noTemplate": "还没有可参照的 VLESS REALITY 节点，请用“添加入站”建立第一个。",
+        "done": "新节点已在 {host} 上运行",
+        "hostOffline": "主机离线，请在其 agent 连接后再生成节点。"
       }
     },
     "settings": {

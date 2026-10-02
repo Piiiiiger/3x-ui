@@ -1251,6 +1251,21 @@
         "notFound": "此主機不存在",
         "publicEndpoint": "公網端點",
         "nodes": "節點"
+      },
+      "generate": {
+        "button": "產生節點",
+        "title": "在 {host} 上產生節點",
+        "submit": "產生",
+        "publicPort": "公網連接埠",
+        "publicPortHint": "僅當服務商把另一個公網連接埠轉發到此連接埠（NAT）時填寫。",
+        "publicPortNeeded": "請填寫服務商轉發到此節點的公網連接埠",
+        "needNameAndPort": "請填寫名稱和連接埠",
+        "target": "REALITY 目標",
+        "plans": "取得此節點的方案",
+        "reach": "{count} 位使用者將取得此節點",
+        "noTemplate": "還沒有可參照的 VLESS REALITY 節點，請用「新增入站」建立第一個。",
+        "done": "新節點已在 {host} 上執行",
+        "hostOffline": "主機離線，請在其 agent 連線後再產生節點。"
       }
     },
     "settings": {

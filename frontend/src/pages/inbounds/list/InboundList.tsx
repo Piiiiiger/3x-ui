@@ -66,6 +66,7 @@ export default function InboundList({
   onBulkDelete,
   scoped = false,
   publicEndpointsOf,
+  toolbarExtra,
 }: InboundListProps) {
   const { t } = useTranslation();
   const [statsRecord, setStatsRecord] = useState<DBInboundRecord | null>(null);
@@ -229,6 +230,7 @@ export default function InboundList({
           >
             {!isMobile && t('pages.inbounds.addInbound')}
           </Button>
+          {toolbarExtra}
           {!scoped && (
             <Dropdown trigger={['click']} menu={generalActionsMenu}>
               <Button
