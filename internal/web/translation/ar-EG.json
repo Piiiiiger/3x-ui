@@ -1259,8 +1259,8 @@
       "probeNotLinked": "غير مرتبط بخادم في المراقبة",
       "hideIp": "إخفاء IP",
       "showIp": "إظهار IP",
-      "monitorOnly": "مراقبة فقط",
-      "monitorOnlyHint": "خوادم يراقبها Lite ولا تشغّل أي وارد من هذه اللوحة."
+      "resetToday": "يُعاد الضبط اليوم",
+      "resetInDays": "يُعاد الضبط بعد {count} يوم"
     },
     "settings": {
       "defaultTag": "افتراضي",
@@ -2179,7 +2179,6 @@
       "linkNodes": "ربط العقد",
       "master": "بانل محلي",
       "notLinked": "غير مرتبط",
-      "cores": "الأنوية: {count}",
       "quota": "حصة البيانات",
       "notConfigured": "لم يتم إعداد المراقبة بعد",
       "notConfiguredHint": "أدخل عنوان Lite الذي يعمل على هذا المضيف لتظهر خوادمه هنا.",

@@ -35,6 +35,7 @@ function liteServer(id: string, name: string, region: string): ProbeServer {
     uptime: 0,
     trafficLimit: 0,
     trafficUsed: 0,
+    trafficResetDay: 0,
     pings: [],
     linked: false,
     nodeId: 0,

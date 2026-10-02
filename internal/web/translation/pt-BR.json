@@ -1259,8 +1259,8 @@
       "probeNotLinked": "Sem servidor do monitoramento vinculado",
       "hideIp": "Ocultar IP",
       "showIp": "Mostrar IP",
-      "monitorOnly": "Somente monitorados",
-      "monitorOnlyHint": "Servidores que o Lite acompanha e que não executam nenhuma entrada deste painel."
+      "resetToday": "reinicia hoje",
+      "resetInDays": "reinicia em {count} d"
     },
     "settings": {
       "defaultTag": "Padrão",
@@ -2179,7 +2179,6 @@
       "linkNodes": "Vincular nós",
       "master": "Painel local",
       "notLinked": "Não vinculado",
-      "cores": "núcleos: {count}",
       "quota": "Cota de tráfego",
       "notConfigured": "O monitoramento ainda não foi configurado",
       "notConfiguredHint": "Informe o endereço do monitor Lite que roda neste host e os servidores dele aparecerão aqui.",

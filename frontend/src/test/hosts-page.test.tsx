@@ -45,6 +45,7 @@ function server(overrides: Partial<ProbeServer>): ProbeServer {
     uptime: 0,
     trafficLimit: 0,
     trafficUsed: 0,
+    trafficResetDay: 0,
     pings: [],
     linked: false,
     nodeId: 0,
@@ -70,6 +71,7 @@ const losAngeles = server({
   uptime: 86400,
   trafficLimit: 100 * GIB,
   trafficUsed: 25 * GIB,
+  trafficResetDay: 1,
   linked: true,
   nodeId: 0,
 });
@@ -195,8 +197,12 @@ function hostCards(): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>('.host-card'));
 }
 
-function monitorCards(): HTMLElement[] {
-  return Array.from(document.querySelectorAll<HTMLElement>('.probe-card'));
+// Lite's figures reach the page through the local panel's card, linked to 洛杉矶-Alpha.
+function localQuota(): HTMLElement | null {
+  const card = screen
+    .queryByText('Local panel', { selector: '.host-card-name' })
+    ?.closest<HTMLElement>('.host-card');
+  return card ? within(card).queryByRole('progressbar', { name: 'Traffic quota 25.0 %' }) : null;
 }
 
 function hostCard(name: string): HTMLElement {
@@ -229,7 +235,7 @@ describe('the hosts page (服务管理)', () => {
       '.ant-alert',
     ) as HTMLElement;
     await waitFor(() => expect(hostCards()).toHaveLength(3));
-    expect(monitorCards()).toHaveLength(0);
+    expect(localQuota()).toBeNull();
     expect(within(hostCard('edge-hk')).getByText('Not linked to a probe server')).toBeTruthy();
     expect(screen.queryByText('Open public page')).toBeNull();
     // Without a Lite address there is no server to link a host to.
@@ -253,7 +259,7 @@ describe('the hosts page (服务管理)', () => {
     ) as HTMLElement;
     expect(within(alert).getByText('Lite is not reachable')).toBeTruthy();
     expect(alert.className).toContain('ant-alert-error');
-    expect(monitorCards()).toHaveLength(0);
+    expect(localQuota()).toBeNull();
   });
 
   // The modal would call every stored link lost, and clearing them would lose them.
@@ -282,14 +288,14 @@ describe('the hosts page (服务管理)', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toMatch(/Showing data from \d{2}:\d{2}:\d{2}/);
     expect(alert.textContent).toContain('Lite did not answer in 3s');
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
   });
 
-  it("puts each linked server's figures on its host, and the rest under 仅监控", async () => {
+  it("puts each linked server's figures on its host, and leaves out the servers it does not use", async () => {
     serve(() => new Msg(true, '', overview({ publicUrl: 'https://probe.example.com' })));
     renderPage();
     await waitFor(() => expect(hostCards()).toHaveLength(3));
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
     expect(screen.queryByRole('alert')).toBeNull();
 
     const local = hostCard('Local panel');
@@ -310,10 +316,8 @@ describe('the hosts page (服务管理)', () => {
     expect(within(sg).getByRole('progressbar', { name: 'CPU 7.5 %' })).toBeTruthy();
     expect(within(sg).getByText('Not linked to a probe server')).toBeTruthy();
 
-    const [uk] = monitorCards();
-    expect(within(uk).getByText('英国-Charlie')).toBeTruthy();
-    // The usage of a server that is not online is not known: no bar at 0 of 850 GB.
-    expect(within(uk).queryAllByRole('progressbar')).toHaveLength(0);
+    // Lite also watches 英国-Charlie, but no host runs on it, so the panel does not show it.
+    expect(screen.queryByText('英国-Charlie')).toBeNull();
 
     const link = screen.getByRole('link', { name: /Open public page$/ });
     expect(link.getAttribute('href')).toBe('https://probe.example.com');
@@ -372,6 +376,25 @@ describe('the hosts page (服务管理)', () => {
     );
   });
 
+  // Lite resets 洛杉矶-Alpha's quota on the 1st; the card counts the days as Lite's page does.
+  it.each([
+    [2, '25.0 % · resets in 30 d'],
+    [1, '25.0 % · resets today'],
+  ])('says when Lite next resets the quota, on October %i', async (day, text) => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, day, 12, 0));
+    try {
+      serve(() => new Msg(true, '', overview()));
+      renderPage();
+      await waitFor(() => expect(localQuota()).not.toBeNull());
+      expect(within(hostCard('Local panel')).getByText(text)).toBeTruthy();
+      // edge-hk's server has no reset day, so its card states none.
+      expect(within(hostCard('edge-hk')).queryByText(/resets/)).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('hides the addresses until asked, and remembers the choice', async () => {
     serve(() => new Msg(true, '', overview()));
     renderPage();
@@ -393,17 +416,6 @@ describe('the hosts page (服务管理)', () => {
     const table = await screen.findByRole('table');
     expect(within(table).getByRole('link', { name: 'edge-hk' })).toBeTruthy();
     expect(hostCards()).toHaveLength(0);
-    // The monitored servers stay below either view.
-    expect(monitorCards()).toHaveLength(1);
-  });
-
-  it('lists no monitored servers when Lite has none, without an error', async () => {
-    serve(() => new Msg(true, '', overview({ servers: [] })));
-    renderPage();
-    await waitFor(() => expect(hostCards()).toHaveLength(3));
-
-    expect(screen.queryByText('Monitored only')).toBeNull();
-    expect(screen.queryByText('The Lite monitor could not be read')).toBeNull();
   });
 
   it('reports a failed request with its message, and asks again on Refresh', async () => {
@@ -418,11 +430,11 @@ describe('the hosts page (服务管理)', () => {
     const alert = (await screen.findByText('Something went wrong (database is locked)')).closest(
       '.ant-alert',
     ) as HTMLElement;
-    expect(monitorCards()).toHaveLength(0);
+    expect(localQuota()).toBeNull();
 
     failing = false;
     fireEvent.click(within(alert).getByRole('button', { name: 'Refresh' }));
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
   });
 
   // A tab left open across an upgrade may be sent a status its code has never heard of.
@@ -433,7 +445,7 @@ describe('the hosts page (服务管理)', () => {
     renderPage();
 
     expect(await screen.findByText('probe/servers response failed validation')).toBeTruthy();
-    expect(monitorCards()).toHaveLength(0);
+    expect(localQuota()).toBeNull();
   });
 
   // The page polls every 3 s: one dropped request must not blank a screen of servers.
@@ -442,7 +454,7 @@ describe('the hosts page (服务管理)', () => {
     serve(() => (failing ? new Msg(false, 'Request failed') : new Msg(true, '', overview())));
     const queryClient = makeTestQueryClient();
     renderPage({ queryClient });
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
 
     failing = true;
     await act(async () => {
@@ -452,7 +464,7 @@ describe('the hosts page (服务管理)', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toMatch(/Showing data from \d{2}:\d{2}:\d{2}/);
     expect(alert.textContent).toContain('Request failed');
-    expect(monitorCards()).toHaveLength(1);
+    expect(localQuota()).not.toBeNull();
   });
 
   // The figures are live: a page that asked once would show the load of minutes ago.
@@ -460,7 +472,7 @@ describe('the hosts page (服务管理)', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const get = serve(() => new Msg(true, '', overview()));
     renderPage();
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
     expect(pollsOf(get)).toBe(1);
 
     await act(async () => {
@@ -482,7 +494,7 @@ describe('the hosts page (服务管理)', () => {
       defaultOptions: { queries: { retry: false, staleTime: 30_000 } },
     });
     const first = renderPage({ queryClient });
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
     first.unmount();
 
     renderPage({ queryClient });
@@ -495,7 +507,7 @@ describe('the hosts page (服务管理)', () => {
   ])('closes the "%s" modal when the admin cancels it', async (title, button) => {
     serve(() => new Msg(true, '', overview()));
     renderPage();
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
 
     fireEvent.click(screen.getByRole('button', { name: button }));
     const dialog = await screen.findByRole('dialog', { name: title });
@@ -522,7 +534,7 @@ describe('the hosts page (服务管理)', () => {
     });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
+    await waitFor(() => expect(localQuota()).not.toBeNull());
     expect(await screen.findByText('Probe settings saved')).toBeTruthy();
     expect(isClosing(dialog)).toBe(true);
   });
@@ -549,8 +561,8 @@ describe('the hosts page (服务管理)', () => {
       return new Msg(true, '', links);
     });
     renderPage();
-    await waitFor(() => expect(monitorCards()).toHaveLength(1));
-    expect(within(monitorCards()[0]).getByText('香港-Bravo')).toBeTruthy();
+    await waitFor(() => expect(localQuota()).not.toBeNull());
+    expect(screen.queryByText('香港-Bravo')).toBeNull();
     expect(within(hostCard('edge-hk')).getByText('Not linked to a probe server')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /Link hosts$/ }));
@@ -559,7 +571,9 @@ describe('the hosts page (服务管理)', () => {
     chooseSelectOption('probe-link-2', '🇭🇰 香港-Bravo');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(monitorCards()).toHaveLength(0));
+    await waitFor(() =>
+      expect(within(hostCard('edge-hk')).queryByText('Not linked to a probe server')).toBeNull(),
+    );
     expect(
       within(hostCard('edge-hk')).getByRole('progressbar', {
         name: 'Traffic quota 3.00 GB / Unlimited',

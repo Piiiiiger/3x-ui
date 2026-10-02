@@ -84,6 +84,7 @@ type liteNode struct {
 	DiskTotal        int64  `json:"disk_total"`
 	TrafficLimit     int64  `json:"traffic_limit"`
 	TrafficLimitType string `json:"traffic_limit_type"`
+	TrafficResetDay  int    `json:"traffic_reset_day"`
 	Weight           int    `json:"weight"`
 }
 
@@ -272,16 +273,17 @@ func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus, b
 	for _, id := range ids {
 		node := nodes[id]
 		server := ProbeServer{
-			Id:             id,
-			Name:           node.Name,
-			Region:         node.Region,
-			OS:             node.OS,
-			Arch:           node.Arch,
-			Virtualization: node.Virtualization,
-			CpuCores:       node.CPUCores,
-			Status:         probeStatusUnknown,
-			TrafficLimit:   node.TrafficLimit,
-			Pings:          []ProbePing{},
+			Id:              id,
+			Name:            node.Name,
+			Region:          node.Region,
+			OS:              node.OS,
+			Arch:            node.Arch,
+			Virtualization:  node.Virtualization,
+			CpuCores:        node.CPUCores,
+			Status:          probeStatusUnknown,
+			TrafficLimit:    node.TrafficLimit,
+			TrafficResetDay: node.TrafficResetDay,
+			Pings:           []ProbePing{},
 		}
 		if status, reported := statuses[id]; reported {
 			server.Status = probeStatusOffline

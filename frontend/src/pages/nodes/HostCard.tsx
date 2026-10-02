@@ -6,6 +6,7 @@ import { EditOutlined, ExportOutlined, PoweroffOutlined, ReloadOutlined } from '
 
 import { NetworkQuality, ProbeMeter } from '@/components/probe/ProbeServerCard';
 import { RainbowBar } from '@/components/ui';
+import { daysUntilReset } from '@/lib/traffic/resetDay';
 import { SizeFormatter, TimeFormatter } from '@/utils';
 import type { HostMeter, HostView } from './hostView';
 import { useRelativeTime } from './relativeTime';
@@ -25,6 +26,16 @@ interface HostCardProps extends HostCardHandlers {
 function meterDetail(meter: HostMeter | null): string | undefined {
   if (!meter || meter.used === undefined || meter.total === undefined) return undefined;
   return `${SizeFormatter.sizeFormat(meter.used)} / ${SizeFormatter.sizeFormat(meter.total)}`;
+}
+
+// Read at render time so the count turns over at midnight like Lite's own page.
+function resetLabel(
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  day: number,
+): string {
+  const days = daysUntilReset(day, new Date());
+  if (days === null) return '';
+  return days === 0 ? t('pages.nodes.resetToday') : t('pages.nodes.resetInDays', { count: days });
 }
 
 function statusOf(host: HostView): { tone: string; color?: string; key: string } {
@@ -66,6 +77,12 @@ const HostCard = memo(function HostCard({
   const trafficDetail = traffic
     ? `${size(traffic.used)} / ${traffic.limit > 0 ? size(traffic.limit) : t('unlimited')}`
     : '—';
+  const trafficValue = [
+    trafficPercent === null ? '' : `${trafficPercent.toFixed(1)} %`,
+    traffic ? resetLabel(t, traffic.resetDay) : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <Card size="small" className={`host-card${host.enabled ? '' : ' is-disabled'}`}>
@@ -169,9 +186,7 @@ const HostCard = memo(function HostCard({
               <span className="probe-card-meter-label">{t('pages.probe.quota')}</span>
               <bdi className="probe-card-meter-detail">{trafficDetail}</bdi>
             </span>
-            {trafficPercent !== null && (
-              <bdi className="probe-card-meter-value">{`${trafficPercent.toFixed(1)} %`}</bdi>
-            )}
+            {trafficValue && <bdi className="probe-card-meter-value">{trafficValue}</bdi>}
           </div>
           {traffic ? (
             <RainbowBar

@@ -4771,6 +4771,11 @@
             "format": "int64",
             "type": "integer"
           },
+          "trafficResetDay": {
+            "description": "TrafficResetDay is the day of the month Lite resets the usage on; 0 for none.",
+            "example": 22,
+            "type": "integer"
+          },
           "trafficUsed": {
             "example": 3000000,
             "format": "int64",
@@ -4816,6 +4821,7 @@
           "region",
           "status",
           "trafficLimit",
+          "trafficResetDay",
           "trafficUsed",
           "updatedAt",
           "uptime",
@@ -13906,6 +13912,7 @@
                         "region": "🇭🇰",
                         "status": "online",
                         "trafficLimit": 107374182400,
+                        "trafficResetDay": 22,
                         "trafficUsed": 3000000,
                         "updatedAt": 1735689600000,
                         "uptime": 86400,

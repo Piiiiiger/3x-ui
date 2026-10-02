@@ -1259,8 +1259,8 @@
       "probeNotLinked": "未关联探针服务器",
       "hideIp": "隐藏 IP",
       "showIp": "显示 IP",
-      "monitorOnly": "仅监控",
-      "monitorOnlyHint": "Lite 监控中、但没有运行本面板节点的服务器。"
+      "resetToday": "今天重置",
+      "resetInDays": "{count} 天后重置"
     },
     "settings": {
       "defaultTag": "默认",
@@ -2179,7 +2179,6 @@
       "linkNodes": "关联主机",
       "master": "本地面板",
       "notLinked": "未关联",
-      "cores": "{count} 核",
       "quota": "流量配额",
       "notConfigured": "探针尚未配置",
       "notConfiguredHint": "填写本机上运行的 Lite 监控地址，这里就会显示它的服务器。",

@@ -1259,8 +1259,8 @@
       "probeNotLinked": "Not linked to a probe server",
       "hideIp": "Hide IP",
       "showIp": "Show IP",
-      "monitorOnly": "Monitored only",
-      "monitorOnlyHint": "Servers the Lite monitor watches that run no node of this panel."
+      "resetToday": "resets today",
+      "resetInDays": "resets in {count} d"
     },
     "settings": {
       "defaultTag": "Default",
@@ -2179,7 +2179,6 @@
       "linkNodes": "Link hosts",
       "master": "Local panel",
       "notLinked": "Not linked",
-      "cores": "{count}-core",
       "quota": "Traffic quota",
       "notConfigured": "The probe is not set up yet",
       "notConfiguredHint": "Enter the address of the Lite monitor that runs on this host, and its servers appear here.",

@@ -42,7 +42,6 @@ import ProbeLinksModal from '@/pages/probe/ProbeLinksModal';
 import ProbeSettingsModal from '@/pages/probe/ProbeSettingsModal';
 import NodeList from './NodeList';
 import HostCard from './HostCard';
-import MonitorOnlySection from './MonitorOnlySection';
 import { LocalPanelCard, nodesByHostOf } from './HostNodeChips';
 import { localHostView, remoteHostView, type HostView } from './hostView';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
@@ -179,7 +178,6 @@ export default function NodesPage() {
     for (const server of probeServers) if (server.linked) byHost.set(server.nodeId, server);
     return byHost;
   }, [probeServers]);
-  const monitorOnly = useMemo(() => probeServers.filter((s) => !s.linked), [probeServers]);
 
   const hosts = useMemo<HostView[]>(
     () => [
@@ -592,7 +590,6 @@ export default function NodesPage() {
                       />
                     </>
                   )}
-                  <MonitorOnlySection servers={monitorOnly} />
                 </div>
               )}
             </Spin>

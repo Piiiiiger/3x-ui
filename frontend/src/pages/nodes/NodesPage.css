@@ -43,21 +43,6 @@
   background: var(--ant-color-error);
 }
 
-.hosts-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.hosts-section-head h4.ant-typography {
-  margin: 0 0 2px;
-}
-
-.nodes-page .probe-card-footer .probe-card-meter {
-  margin-top: 10px;
-}
-
 @media (max-width: 768px) {
   .hosts-toolbar-counters {
     margin-inline-start: 0;

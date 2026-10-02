@@ -1259,8 +1259,8 @@
       "probeNotLinked": "Chưa liên kết máy chủ giám sát",
       "hideIp": "Ẩn IP",
       "showIp": "Hiện IP",
-      "monitorOnly": "Chỉ giám sát",
-      "monitorOnlyHint": "Các máy chủ Lite giám sát nhưng không chạy inbound nào của bảng này."
+      "resetToday": "đặt lại hôm nay",
+      "resetInDays": "đặt lại sau {count} ngày"
     },
     "settings": {
       "defaultTag": "Mặc định",
@@ -2179,7 +2179,6 @@
       "linkNodes": "Liên kết nút",
       "master": "Panel cục bộ",
       "notLinked": "Chưa liên kết",
-      "cores": "{count} nhân",
       "quota": "Hạn mức lưu lượng",
       "notConfigured": "Chưa thiết lập giám sát",
       "notConfiguredHint": "Nhập địa chỉ của Lite đang chạy trên máy này, các máy chủ của nó sẽ hiện ở đây.",

@@ -1071,6 +1071,7 @@ export interface ProbeServer {
   region: string;
   status: string;
   trafficLimit: number;
+  trafficResetDay: number;
   trafficUsed: number;
   updatedAt: number;
   uptime: number;

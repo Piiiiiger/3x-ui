@@ -1259,8 +1259,8 @@
       "probeNotLinked": "İzlemedeki bir sunucuya bağlı değil",
       "hideIp": "IP'yi gizle",
       "showIp": "IP'yi göster",
-      "monitorOnly": "Yalnızca izlenen",
-      "monitorOnlyHint": "Lite'ın izlediği ama bu panelin hiçbir gelen bağlantısını çalıştırmayan sunucular."
+      "resetToday": "bugün sıfırlanır",
+      "resetInDays": "{count} gün sonra sıfırlanır"
     },
     "settings": {
       "defaultTag": "Varsayılan",
@@ -2179,7 +2179,6 @@
       "linkNodes": "Düğümleri bağla",
       "master": "Yerel Panel",
       "notLinked": "Bağlı değil",
-      "cores": "{count} çekirdek",
       "quota": "Trafik kotası",
       "notConfigured": "İzleme henüz ayarlanmadı",
       "notConfiguredHint": "Bu sunucuda çalışan Lite izleyicisinin adresini girin; sunucuları burada görünür.",

@@ -1151,6 +1151,7 @@ export const ProbeServerSchema = z.object({
   region: z.string(),
   status: z.enum(['online', 'offline', 'unknown']),
   trafficLimit: z.number().int(),
+  trafficResetDay: z.number().int(),
   trafficUsed: z.number().int(),
   updatedAt: z.number().int(),
   uptime: z.number().int(),

@@ -1259,8 +1259,8 @@
       "probeNotLinked": "サーバー監視のサーバーに未関連付け",
       "hideIp": "IP を隠す",
       "showIp": "IP を表示",
-      "monitorOnly": "監視のみ",
-      "monitorOnlyHint": "Lite が監視しているが、このパネルのインバウンドを動かしていないサーバー。"
+      "resetToday": "本日リセット",
+      "resetInDays": "{count} 日後にリセット"
     },
     "settings": {
       "defaultTag": "デフォルト",
@@ -2179,7 +2179,6 @@
       "linkNodes": "ノードを紐付け",
       "master": "ローカルパネル",
       "notLinked": "未紐付け",
-      "cores": "{count} コア",
       "quota": "通信量クォータ",
       "notConfigured": "サーバー監視はまだ設定されていません",
       "notConfiguredHint": "このホストで動作している Lite のアドレスを入力すると、そのサーバーがここに表示されます。",

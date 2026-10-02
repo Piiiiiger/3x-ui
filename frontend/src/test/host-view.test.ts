@@ -53,6 +53,7 @@ function probe(status: ProbeServer['status']): ProbeServer {
     uptime: 999,
     trafficLimit: 0,
     trafficUsed: 3 * GIB,
+    trafficResetDay: 22,
     pings: [ping],
     linked: true,
     nodeId: 7,
@@ -65,7 +66,7 @@ describe('host views', () => {
     const view = remoteHostView(node, probe('online'), []);
     expect(view.cpu).toEqual({ percent: 55 });
     expect(view.mem).toEqual({ percent: 25, used: 1 * GIB, total: 4 * GIB });
-    expect(view.traffic).toEqual({ used: 3 * GIB, limit: 0 });
+    expect(view.traffic).toEqual({ used: 3 * GIB, limit: 0, resetDay: 22 });
     expect(view.uptimeSecs).toBe(999);
   });
 

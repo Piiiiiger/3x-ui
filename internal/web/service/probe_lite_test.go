@@ -19,7 +19,7 @@ const liteTestNodes = `{
     "region":"🇭🇰","region_override":"","mem_total":2069692416,"swap_total":0,"disk_total":21046689792,"weight":2,
     "price":188,"billing_cycle":30,"auto_renewal":true,"currency":"¥","expired_at":"2026-10-27T16:00:00Z","group":"main",
     "tags":"fast","bandwidth":"","hidden":false,"traffic_limit":1610612736000,"traffic_limit_type":"sum",
-    "effective_traffic_limit":1610612736000,"effective_traffic_type":"sum"},
+    "effective_traffic_limit":1610612736000,"effective_traffic_type":"sum","traffic_reset_day":27},
   "srv-offline": {"uuid":"srv-offline","name":"b offline","virtualization":"lxc","arch":"arm64","cpu_cores":1,
     "os":"Alpine Linux v3.23","region":"🇬🇧","mem_total":268435456,"disk_total":1083179008,"weight":1,
     "traffic_limit":0,"traffic_limit_type":"max"},
@@ -65,7 +65,7 @@ func liteTestServers() []ProbeServer {
 			Cpu: 12.5, MemUsed: 858993459, MemTotal: 2147483648, DiskUsed: 8589934592, DiskTotal: 42949672960,
 			Load1: 0.31, Load5: 0.22, Load15: 0.18, NetIn: 5678, NetOut: 1234,
 			NetTotalUp: 1000000, NetTotalDown: 2000000, Uptime: 86400,
-			TrafficLimit: 1610612736000, TrafficUsed: 3000000,
+			TrafficLimit: 1610612736000, TrafficUsed: 3000000, TrafficResetDay: 27,
 			Pings: []ProbePing{
 				{Id: 2, Name: "China Telecom", Latency: 32, Loss: 25, Blocks: []ProbePingBlock{}},
 				{Id: 7, Name: "Beijing Mobile", Latency: -1, Loss: 100, Blocks: []ProbePingBlock{}},

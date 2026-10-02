@@ -4745,6 +4745,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "trafficResetDay": {
+        "description": "TrafficResetDay is the day of the month Lite resets the usage on; 0 for none.",
+        "example": 22,
+        "type": "integer"
+      },
       "trafficUsed": {
         "example": 3000000,
         "format": "int64",
@@ -4790,6 +4795,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "region",
       "status",
       "trafficLimit",
+      "trafficResetDay",
       "trafficUsed",
       "updatedAt",
       "uptime",

@@ -63,34 +63,36 @@ type ProbePing struct {
 // ProbeServer is one server of the Lite monitor. Its metrics are zero unless
 // status is online; linked with nodeId 0 means the panel's own host.
 type ProbeServer struct {
-	Id             string      `json:"id" example:"00000000-0000-4000-8000-000000000001"`
-	Name           string      `json:"name" example:"hk-1"`
-	Region         string      `json:"region" example:"🇭🇰"`
-	OS             string      `json:"os" example:"Debian GNU/Linux 13 (trixie)"`
-	Arch           string      `json:"arch" example:"amd64"`
-	Virtualization string      `json:"virtualization" example:"kvm"`
-	CpuCores       int         `json:"cpuCores" example:"2"`
-	Status         string      `json:"status" validate:"oneof=online offline unknown" example:"online"`
-	UpdatedAt      int64       `json:"updatedAt" example:"1735689600000"`
-	Cpu            float64     `json:"cpu" example:"12.5"`
-	MemUsed        int64       `json:"memUsed" example:"858993459"`
-	MemTotal       int64       `json:"memTotal" example:"2147483648"`
-	DiskUsed       int64       `json:"diskUsed" example:"8589934592"`
-	DiskTotal      int64       `json:"diskTotal" example:"42949672960"`
-	Load1          float64     `json:"load1" example:"0.31"`
-	Load5          float64     `json:"load5" example:"0.22"`
-	Load15         float64     `json:"load15" example:"0.18"`
-	NetIn          int64       `json:"netIn" example:"5678"`
-	NetOut         int64       `json:"netOut" example:"1234"`
-	NetTotalUp     int64       `json:"netTotalUp" example:"1000000"`
-	NetTotalDown   int64       `json:"netTotalDown" example:"2000000"`
-	Uptime         int64       `json:"uptime" example:"86400"`
-	TrafficLimit   int64       `json:"trafficLimit" example:"107374182400"`
-	TrafficUsed    int64       `json:"trafficUsed" example:"3000000"`
-	Pings          []ProbePing `json:"pings"`
-	Linked         bool        `json:"linked" example:"true"`
-	NodeId         int         `json:"nodeId" example:"2"`
-	NodeName       string      `json:"nodeName" example:"edge-hk"`
+	Id             string  `json:"id" example:"00000000-0000-4000-8000-000000000001"`
+	Name           string  `json:"name" example:"hk-1"`
+	Region         string  `json:"region" example:"🇭🇰"`
+	OS             string  `json:"os" example:"Debian GNU/Linux 13 (trixie)"`
+	Arch           string  `json:"arch" example:"amd64"`
+	Virtualization string  `json:"virtualization" example:"kvm"`
+	CpuCores       int     `json:"cpuCores" example:"2"`
+	Status         string  `json:"status" validate:"oneof=online offline unknown" example:"online"`
+	UpdatedAt      int64   `json:"updatedAt" example:"1735689600000"`
+	Cpu            float64 `json:"cpu" example:"12.5"`
+	MemUsed        int64   `json:"memUsed" example:"858993459"`
+	MemTotal       int64   `json:"memTotal" example:"2147483648"`
+	DiskUsed       int64   `json:"diskUsed" example:"8589934592"`
+	DiskTotal      int64   `json:"diskTotal" example:"42949672960"`
+	Load1          float64 `json:"load1" example:"0.31"`
+	Load5          float64 `json:"load5" example:"0.22"`
+	Load15         float64 `json:"load15" example:"0.18"`
+	NetIn          int64   `json:"netIn" example:"5678"`
+	NetOut         int64   `json:"netOut" example:"1234"`
+	NetTotalUp     int64   `json:"netTotalUp" example:"1000000"`
+	NetTotalDown   int64   `json:"netTotalDown" example:"2000000"`
+	Uptime         int64   `json:"uptime" example:"86400"`
+	TrafficLimit   int64   `json:"trafficLimit" example:"107374182400"`
+	// TrafficResetDay is the day of the month Lite resets the usage on; 0 for none.
+	TrafficResetDay int         `json:"trafficResetDay" example:"22"`
+	TrafficUsed     int64       `json:"trafficUsed" example:"3000000"`
+	Pings           []ProbePing `json:"pings"`
+	Linked          bool        `json:"linked" example:"true"`
+	NodeId          int         `json:"nodeId" example:"2"`
+	NodeName        string      `json:"nodeName" example:"edge-hk"`
 }
 
 // ProbeOverview is the admin page's data: every server Lite lists. A failed

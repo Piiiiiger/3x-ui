@@ -30,7 +30,8 @@ export interface HostView {
   mem: HostMeter | null;
   disk: HostMeter | null;
   speed: { up: number; down: number } | null;
-  traffic: { used: number; limit: number } | null;
+  /** resetDay is Lite's monthly reset day, 0 for none. */
+  traffic: { used: number; limit: number; resetDay: number } | null;
   /** null when no probe server is linked to the host. */
   pings: ProbePing[] | null;
   uptimeSecs: number;
@@ -64,7 +65,9 @@ function probeFigures(probe: ProbeServer | undefined) {
     mem: live ? share(live.memUsed, live.memTotal) : null,
     disk: live ? share(live.diskUsed, live.diskTotal) : null,
     speed: live ? { up: live.netOut, down: live.netIn } : null,
-    traffic: live ? { used: live.trafficUsed, limit: live.trafficLimit } : null,
+    traffic: live
+      ? { used: live.trafficUsed, limit: live.trafficLimit, resetDay: live.trafficResetDay }
+      : null,
     pings: probe ? probe.pings : null,
   };
 }

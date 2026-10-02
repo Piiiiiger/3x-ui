@@ -1259,8 +1259,8 @@
       "probeNotLinked": "Belum ditautkan ke server pemantauan",
       "hideIp": "Sembunyikan IP",
       "showIp": "Tampilkan IP",
-      "monitorOnly": "Hanya dipantau",
-      "monitorOnlyHint": "Server yang dipantau Lite tetapi tidak menjalankan inbound panel ini."
+      "resetToday": "reset hari ini",
+      "resetInDays": "reset dalam {count} hari"
     },
     "settings": {
       "defaultTag": "Bawaan",
@@ -2179,7 +2179,6 @@
       "linkNodes": "Tautkan node",
       "master": "Panel lokal",
       "notLinked": "Belum ditautkan",
-      "cores": "{count} inti",
       "quota": "Kuota trafik",
       "notConfigured": "Pemantauan belum diatur",
       "notConfiguredHint": "Masukkan alamat Lite yang berjalan di host ini, dan server-servernya akan muncul di sini.",

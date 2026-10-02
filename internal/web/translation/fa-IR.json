@@ -1259,8 +1259,8 @@
       "probeNotLinked": "به سروری در پایش متصل نیست",
       "hideIp": "پنهان کردن IP",
       "showIp": "نمایش IP",
-      "monitorOnly": "فقط پایش",
-      "monitorOnlyHint": "سرورهایی که Lite پایش می‌کند اما هیچ ورودی از این پنل روی آن‌ها اجرا نمی‌شود."
+      "resetToday": "امروز بازنشانی می‌شود",
+      "resetInDays": "{count} روز تا بازنشانی"
     },
     "settings": {
       "defaultTag": "پیش‌فرض",
@@ -2179,7 +2179,6 @@
       "linkNodes": "اتصال نودها",
       "master": "پنل لوکال",
       "notLinked": "وصل نشده",
-      "cores": "{count} هسته",
       "quota": "سهمیهٔ ترافیک",
       "notConfigured": "پایش هنوز راه‌اندازی نشده است",
       "notConfiguredHint": "نشانی Lite را که روی همین میزبان اجرا می‌شود وارد کنید تا سرورهایش اینجا دیده شوند.",
