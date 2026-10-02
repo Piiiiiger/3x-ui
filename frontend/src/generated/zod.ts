@@ -457,7 +457,6 @@ export const ClientSchema = z.object({
   expiryTime: z.number().int(),
   flow: z.string().optional(),
   forwardedPorts: z.string().optional(),
-  group: z.string().optional(),
   id: z.string().optional(),
   keepAlive: z.number().int().nullable().optional(),
   limitIp: z.number().int(),
@@ -491,7 +490,6 @@ export type ClientInbound = z.infer<typeof ClientInboundSchema>;
 
 export const ClientPageResponseSchema = z.object({
   filtered: z.number().int(),
-  groups: z.array(z.string()),
   items: z.array(z.lazy(() => ClientSlimSchema)),
   page: z.number().int(),
   pageSize: z.number().int(),
@@ -517,7 +515,6 @@ export const ClientRecordSchema = z.object({
   expiryTime: z.number().int(),
   flow: z.string(),
   forwardedPorts: z.string(),
-  group: z.string(),
   id: z.number().int(),
   keepAlive: z.number().int(),
   limitHwid: z.number().int(),
@@ -578,7 +575,6 @@ export const ClientSlimSchema = z.object({
   email: z.string(),
   enable: z.boolean(),
   expiryTime: z.number().int(),
-  group: z.string().optional(),
   inboundIds: z.array(z.number().int()),
   limitHwid: z.number().int(),
   limitIp: z.number().int(),

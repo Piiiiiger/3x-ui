@@ -44,7 +44,7 @@ func TestAllAPIsPostgresScale(t *testing.T) {
 	for _, n := range sizes {
 		t.Run(fmt.Sprintf("N=%d", n), func(t *testing.T) {
 			db := database.GetDB()
-			resetScaleTables(t, db, "inbounds", "clients", "client_inbounds", "client_traffics", "client_groups")
+			resetScaleTables(t, db, "inbounds", "clients", "client_inbounds", "client_traffics")
 
 			clients := makeScaleClients(n)
 			exp := time.Now().AddDate(1, 0, 0).UnixMilli()
@@ -98,12 +98,6 @@ func TestAllAPIsPostgresScale(t *testing.T) {
 			run("GetClientsLastOnline", func() error { _, err := inboundSvc.GetClientsLastOnline(); return err })
 			run("GetClientTrafficByEmail", func() error { _, err := inboundSvc.GetClientTrafficByEmail(emails[n/2]); return err })
 			run("GetRecordByEmail", func() error { _, err := svc.GetRecordByEmail(nil, emails[n/2]); return err })
-
-			run("ListGroups", func() error { _, err := svc.ListGroups(); return err })
-			run("AddToGroup(M)", func() error { _, err := svc.AddToGroup(emailsM, "g1"); return err })
-			run("EmailsByGroup", func() error { _, err := svc.EmailsByGroup("g1"); return err })
-			run("RenameGroup", func() error { _, err := svc.RenameGroup("g1", "g2"); return err })
-			run("DeleteGroup", func() error { _, err := svc.DeleteGroup("g2"); return err })
 
 			run("ResetInboundTraffic", func() error { return inboundSvc.ResetInboundTraffic(ib.Id) })
 			run("Inbound.ResetAllTraffics", func() error { return inboundSvc.ResetAllTraffics() })

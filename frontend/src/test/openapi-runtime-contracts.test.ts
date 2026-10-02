@@ -189,7 +189,7 @@ describe('generated OpenAPI runtime contracts', () => {
     expect(mlkemFields).toEqual(expect.arrayContaining(['seed', 'client']));
   });
 
-  it('documents every paged-client query and the groups response', () => {
+  it('documents every paged-client query', () => {
     const paged = operation('/panel/api/clients/list/paged', 'get');
     expect(paged.parameters?.map((param) => param.name)).toEqual([
       'page',
@@ -207,13 +207,12 @@ describe('generated OpenAPI runtime contracts', () => {
       'autoRenew',
       'hasTgId',
       'hasComment',
-      'group',
       'plan',
     ]);
     expect(paged.parameters?.every((param) => param.required === false)).toBe(true);
 
     const params = Object.fromEntries((paged.parameters ?? []).map((param) => [param.name, param]));
-    for (const name of ['filter', 'protocol', 'inbound', 'group', 'plan']) {
+    for (const name of ['filter', 'protocol', 'inbound', 'plan']) {
       expect(params[name].description).toContain('CSV');
     }
     expect(params.sort.schema.enum).toEqual([
@@ -230,10 +229,6 @@ describe('generated OpenAPI runtime contracts', () => {
 
     expect(responseObjectSchema('/panel/api/clients/list/paged')).toEqual({
       $ref: '#/components/schemas/ClientPageResponse',
-    });
-    expect(spec.components.schemas.ClientPageResponse.properties?.groups).toMatchObject({
-      type: 'array',
-      items: { type: 'string' },
     });
   });
 

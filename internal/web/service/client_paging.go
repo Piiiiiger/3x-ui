@@ -1,7 +1,6 @@
 package service
 
 import (
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +28,6 @@ type ClientSlim struct {
 	ResetDay     int                 `json:"resetDay" example:"0"`
 	ResetWeekday int                 `json:"resetWeekday" example:"0"`
 	ResetMax     int                 `json:"resetMax" example:"0"`
-	Group        string              `json:"group,omitempty" example:"staff"`
 	PlanId       int                 `json:"planId,omitempty" example:"1"`
 	Comment      string              `json:"comment,omitempty" example:"Primary device"`
 	InboundIds   []int               `json:"inboundIds" example:"[3,5]"`
@@ -62,7 +60,6 @@ type ClientPageParams struct {
 	AutoRenew  string `form:"autoRenew"`
 	HasTgID    string `form:"hasTgId"`
 	HasComment string `form:"hasComment"`
-	Group      string `form:"group"`
 	// Plan takes plan ids; 0 matches clients on no plan.
 	Plan string `form:"plan"`
 }
@@ -79,7 +76,6 @@ type ClientPageResponse struct {
 	Page     int            `json:"page" example:"1"`
 	PageSize int            `json:"pageSize" example:"25"`
 	Summary  ClientsSummary `json:"summary"`
-	Groups   []string       `json:"groups" example:"[\"staff\",\"trial\"]"`
 }
 
 // ClientsSummary collects per-bucket counts plus the matching email lists so
@@ -271,9 +267,6 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 	case "no":
 		where("TRIM(COALESCE(c.comment, '')) = ''")
 	}
-	if groups := parseCSVStrings(params.Group); len(groups) > 0 {
-		where("LOWER(TRIM(COALESCE(c.group_name, ''))) IN ?", groups)
-	}
 	if planIds := parsePlanFilter(params.Plan); len(planIds) > 0 {
 		where("COALESCE(c.plan_id, 0) IN ?", planIds)
 	}
@@ -399,11 +392,6 @@ func (s *ClientService) ListPaged(inboundSvc *InboundService, settingSvc *Settin
 		}
 	}
 
-	groups, err := s.listGroupNames()
-	if err != nil {
-		return nil, err
-	}
-
 	return &ClientPageResponse{
 		Items:    items,
 		Total:    int(total),
@@ -411,7 +399,6 @@ func (s *ClientService) ListPaged(inboundSvc *InboundService, settingSvc *Settin
 		Page:     page,
 		PageSize: pageSize,
 		Summary:  summary,
-		Groups:   groups,
 	}, nil
 }
 
@@ -567,43 +554,6 @@ func (q clientQuery) onlineEmails(onlines []string) ([]string, int, error) {
 	return matched, count, nil
 }
 
-// listGroupNames returns the group names the clients page offers as filters:
-// the stored groups plus any name a client still carries. ListGroups also sums
-// per-client traffic per group, which this page never reads and which costs a
-// full join over client_traffics on every poll.
-func (s *ClientService) listGroupNames() ([]string, error) {
-	db := database.GetDB()
-	var stored []string
-	if err := db.Model(&model.ClientGroup{}).Pluck("name", &stored).Error; err != nil {
-		return nil, err
-	}
-	var used []string
-	if err := db.Model(&model.ClientRecord{}).
-		Where("group_name <> ''").
-		Distinct().
-		Pluck("group_name", &used).Error; err != nil {
-		return nil, err
-	}
-	seen := make(map[string]struct{}, len(stored)+len(used))
-	out := make([]string, 0, len(stored)+len(used))
-	for _, list := range [][]string{stored, used} {
-		for _, name := range list {
-			if name == "" {
-				continue
-			}
-			if _, dup := seen[name]; dup {
-				continue
-			}
-			seen[name] = struct{}{}
-			out = append(out, name)
-		}
-	}
-	sort.Slice(out, func(i, j int) bool {
-		return strings.ToLower(out[i]) < strings.ToLower(out[j])
-	})
-	return out, nil
-}
-
 func sqlInt(v int64) string {
 	return strconv.FormatInt(v, 10)
 }
@@ -621,7 +571,6 @@ func toClientSlim(c ClientWithAttachments) ClientSlim {
 		ResetDay:     c.ResetDay,
 		ResetWeekday: c.ResetWeekday,
 		ResetMax:     c.ResetMax,
-		Group:        c.Group,
 		PlanId:       c.PlanId,
 		Comment:      c.Comment,
 		InboundIds:   c.InboundIds,

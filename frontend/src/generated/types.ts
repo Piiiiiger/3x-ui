@@ -430,7 +430,6 @@ export interface Client {
   expiryTime: number;
   flow?: string;
   forwardedPorts?: string;
-  group?: string;
   id?: string;
   keepAlive?: number | null;
   limitIp: number;
@@ -462,7 +461,6 @@ export interface ClientInbound {
 
 export interface ClientPageResponse {
   filtered: number;
-  groups: string[];
   items: ClientSlim[];
   page: number;
   pageSize: number;
@@ -486,7 +484,6 @@ export interface ClientRecord {
   expiryTime: number;
   flow: string;
   forwardedPorts: string;
-  group: string;
   id: number;
   keepAlive: number;
   limitHwid: number;
@@ -543,7 +540,6 @@ export interface ClientSlim {
   email: string;
   enable: boolean;
   expiryTime: number;
-  group?: string;
   inboundIds: number[];
   limitHwid: number;
   limitIp: number;

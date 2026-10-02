@@ -1763,10 +1763,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "AmneziaWG per-client port-forwarding spec, e.g. \"80,443,8000-8100\"",
         "type": "string"
       },
-      "group": {
-        "description": "Logical grouping label",
-        "type": "string"
-      },
       "id": {
         "description": "Unique client identifier",
         "type": "string"
@@ -1910,16 +1906,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 47,
         "type": "integer"
       },
-      "groups": {
-        "example": [
-          "staff",
-          "trial"
-        ],
-        "items": {
-          "type": "string"
-        },
-        "type": "array"
-      },
       "items": {
         "items": {
           "$ref": "#/components/schemas/ClientSlim"
@@ -1944,7 +1930,6 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "filtered",
-      "groups",
       "items",
       "page",
       "pageSize",
@@ -2004,9 +1989,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "forwardedPorts": {
-        "type": "string"
-      },
-      "group": {
         "type": "string"
       },
       "id": {
@@ -2091,7 +2073,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "expiryTime",
       "flow",
       "forwardedPorts",
-      "group",
       "id",
       "keepAlive",
       "limitHwid",
@@ -2244,10 +2225,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 1735689600000,
         "format": "int64",
         "type": "integer"
-      },
-      "group": {
-        "example": "staff",
-        "type": "string"
       },
       "inboundIds": {
         "example": [

@@ -10,7 +10,6 @@ import {
   BlockOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
-  TagsOutlined,
   UsergroupAddOutlined,
   UsergroupDeleteOutlined,
 } from '@ant-design/icons';
@@ -90,11 +89,6 @@ export function buildRowActionsMenu({
       key: 'detachClients',
       icon: <UsergroupDeleteOutlined />,
       label: t('pages.inbounds.detachClients'),
-    });
-    items.push({
-      key: 'addToGroup',
-      icon: <TagsOutlined />,
-      label: t('pages.inbounds.addClientsToGroup'),
     });
     items.push({ type: 'divider' });
     items.push({

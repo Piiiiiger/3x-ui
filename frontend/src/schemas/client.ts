@@ -36,7 +36,6 @@ export const ClientRecordSchema = z
     limitIp: z.number().optional(),
     limitHwid: z.number().optional(),
     tgId: z.union([z.number(), z.string()]).optional(),
-    group: z.string().optional(),
     comment: z.string().optional(),
     planId: z.number().int().optional(),
     enable: z.boolean().optional(),
@@ -178,7 +177,6 @@ export const ClientPageResponseSchema = z.object({
   page: z.number(),
   pageSize: z.number(),
   summary: ClientsSummarySchema.nullable().optional(),
-  groups: nullableStringArray.optional(),
 });
 
 // A per-client external link surfaced in the client's subscription:
@@ -337,7 +335,6 @@ export const ClientFormSchema = z.object({
   limitIp: z.number().int().min(0),
   limitHwid: z.number().int().min(0),
   tgId: z.number().int().min(0),
-  group: z.string(),
   comment: z.string(),
   enable: z.boolean(),
   inboundIds: z.array(z.number()),
@@ -386,7 +383,6 @@ export const ClientBulkAddFormSchema = z.object({
   emailPostfix: z.string(),
   quantity: z.number().int().min(1).max(1000),
   subId: z.string(),
-  group: z.string(),
   comment: z.string(),
   flow: z.string(),
   limitIp: z.number().int().min(0),

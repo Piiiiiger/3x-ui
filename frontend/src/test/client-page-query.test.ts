@@ -21,7 +21,6 @@ test('every filter the clients page can set reaches the list request', () => {
     autoRenew: 'on',
     hasTgId: 'yes',
     hasComment: 'no',
-    group: 'vip',
     plan: '3',
   } satisfies Required<ClientQueryParams>;
 

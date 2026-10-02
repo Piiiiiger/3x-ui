@@ -45,7 +45,6 @@ const QrCodeModal = lazy(() => import('./qr/QrCodeModal'));
 const AttachClientsModal = lazy(() => import('./clients/AttachClientsModal'));
 const AttachExistingClientsModal = lazy(() => import('./clients/AttachExistingClientsModal'));
 const DetachClientsModal = lazy(() => import('./clients/DetachClientsModal'));
-const AddClientsToGroupModal = lazy(() => import('./clients/AddClientsToGroupModal'));
 
 type RowAction =
   | 'edit'
@@ -60,7 +59,6 @@ type RowAction =
   | 'attachClients'
   | 'attachExisting'
   | 'detachClients'
-  | 'addToGroup'
   | 'clone';
 
 type GeneralAction = 'import' | 'export' | 'subs' | 'resetInbounds';
@@ -192,9 +190,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
   const [attachExistingTarget, setAttachExistingTarget] = useState<DBInbound | null>(null);
   const [detachOpen, setDetachOpen] = useState(false);
   const [detachSource, setDetachSource] = useState<DBInbound | null>(null);
-
-  const [groupOpen, setGroupOpen] = useState(false);
-  const [groupSource, setGroupSource] = useState<DBInbound | null>(null);
 
   const [cloneOpen, setCloneOpen] = useState(false);
   const [cloneSource, setCloneSource] = useState<DBInbound | null>(null);
@@ -676,7 +671,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
         'clipboard',
         'clone',
         'attachClients',
-        'addToGroup',
       ];
       let target = dbInbound;
       if (hydratingKeys.includes(key)) {
@@ -725,10 +719,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
         case 'detachClients':
           setDetachSource(target);
           setDetachOpen(true);
-          break;
-        case 'addToGroup':
-          setGroupSource(target);
-          setGroupOpen(true);
           break;
         case 'clone':
           confirmClone(target);
@@ -911,14 +901,6 @@ export function InboundsWorkspace({ hostScope, toolbarExtra }: InboundsWorkspace
           onClose={() => setDetachOpen(false)}
           onDetached={refresh}
           source={detachSource}
-        />
-      </LazyMount>
-      <LazyMount when={groupOpen}>
-        <AddClientsToGroupModal
-          open={groupOpen}
-          onClose={() => setGroupOpen(false)}
-          onAdded={refresh}
-          source={groupSource}
         />
       </LazyMount>
       <LazyMount when={cloneOpen}>

@@ -166,7 +166,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   ├── controller/         # HTTP handlers (thin). One file per resource:
 │   │   │   ├── inbound.go      #   /panel/api/inbounds
 │   │   │   ├── client.go       #   /panel/api/clients (CRUD + bulk + ips + onlines)
-│   │   │   ├── group.go        #   client-group endpoints
 │   │   │   ├── node.go         #   /panel/api/nodes   (multi-node management)
 │   │   │   ├── host.go         #   /panel/api/hosts   (per-inbound subscription host overrides)
 │   │   │   ├── server.go       #   /panel/api/server  (status, xray version, certs, logs, DB import/export)
@@ -186,7 +185,6 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │   │   │   ├── client_crud.go          # Client create/read/update/delete
 │   │   │   ├── client_bulk.go          # Bulk client ops (~1.6k lines)
 │   │   │   ├── client_inbound_apply.go # ⭐ Apply client changes to runtime (Local/Remote) (~1.2k lines)
-│   │   │   ├── client_groups.go        # Client grouping
 │   │   │   ├── client_link.go          # Per-client share-link generation
 │   │   │   ├── client_external_link.go # External links attached to clients
 │   │   │   ├── client_wireguard.go     # WireGuard client specifics
@@ -274,7 +272,7 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 │       │   ├── hosts/        #   subscription host-override UI
 │       │   ├── xray/         #   raw Xray config UI (routing, dns, outbounds, balancers, overrides)
 │       │   ├── index/        #   dashboard/home
-│       │   └── settings/, groups/, sub/, login/, api-docs/
+│       │   └── settings/, sub/, login/, api-docs/
 │       ├── api/              # ⭐ Data layer: http-init, QueryProvider, queryKeys, websocket bridge
 │       │   └── queries/      #   TanStack Query hooks (useNodesQuery, useStatusQuery, …)
 │       ├── schemas/          # Zod schemas: protocols, forms, api, primitives
@@ -532,8 +530,8 @@ for AutoMigrate in `internal/database/db.go`.
 | `User`                          | Admin login                               | bcrypt password, `LoginEpoch` (invalidates sessions)                                                                                                               |
 | `Inbound`                       | An Xray inbound                           | `Tag` (unique), `Port`, `Protocol`, `Settings`/`StreamSettings`/`Sniffing` (JSON), `Enable`, `TrafficReset`, `NodeID`, **`OriginNodeGuid`**, `ClientStats` (assoc) |
 | `Client`                        | In-memory client view                     | UUID/email/flow/limits (parsed from inbound JSON; not persisted)                                                                                                   |
-| `ClientRecord`                  | Persisted client (`clients`)              | `Email` (unique), `SubID`, `UUID`, `TotalGB`, `ExpiryTime`, `LimitIP`, `Group`, `Reset`                                                                            |
-| `ClientGroup` / `ClientInbound` | Grouping + client↔inbound join            | many-to-many wiring, `FlowOverride`                                                                                                                                |
+| `ClientRecord`                  | Persisted client (`clients`)              | `Email` (unique), `SubID`, `UUID`, `TotalGB`, `ExpiryTime`, `LimitIP`, `Reset`                                                                                     |
+| `ClientInbound`                 | Client↔inbound join                       | many-to-many wiring, `FlowOverride`                                                                                                                                |
 | `ClientExternalLink`            | Extra links attached to a client          | `Kind`, `Value`, `Remark`, `SortIndex`                                                                                                                             |
 | `Host`                          | Subscription host overrides (per inbound) | `Address`, `Port`, `Sni`, `Path`, `Security`, `Fingerprint`, `SortOrder`, visibility/exclusion flags                                                               |
 | `Node`                          | A managed child panel                     | `Guid`, `Address`, `Status`, `TlsVerifyMode`, `PinnedCertSha256`, `ConfigDirty`, version/heartbeat/metric fields                                                   |

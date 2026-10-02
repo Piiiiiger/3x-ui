@@ -985,9 +985,6 @@ func (s *ClientService) BulkDelete(inboundSvc *InboundService, emails []string, 
 		// Serialize the row cleanup against the traffic poll to avoid the
 		// cross-transaction lock-order deadlock on client_traffics/inbounds.
 		if err := runSerializedTx(func(tx *gorm.DB) error {
-			if e := adjustGroupBaselinesForRemovedTraffic(tx, successEmails); e != nil {
-				return e
-			}
 			if e := clearClientHwidsBySubIDTx(tx, successSubIDs...); e != nil {
 				return e
 			}

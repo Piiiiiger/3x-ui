@@ -37,7 +37,6 @@ import {
   SettingOutlined,
   SunOutlined,
   SwapOutlined,
-  TagsOutlined,
   TeamOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
@@ -70,7 +69,6 @@ type IconName =
   | 'probe'
   | 'inbound'
   | 'team'
-  | 'groups'
   | 'plans'
   | 'setting'
   | 'tool'
@@ -87,7 +85,6 @@ const iconByName: Record<IconName, ComponentType> = {
   probe: RadarChartOutlined,
   inbound: ImportOutlined,
   team: TeamOutlined,
-  groups: TagsOutlined,
   plans: ProfileOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
@@ -137,7 +134,6 @@ export default function AppNav() {
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
-      { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
       { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },

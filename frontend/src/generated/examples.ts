@@ -430,7 +430,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "expiryTime": 0,
     "flow": "",
     "forwardedPorts": "",
-    "group": "",
     "id": "",
     "keepAlive": null,
     "limitIp": 0,
@@ -460,10 +459,6 @@ export const EXAMPLES: Record<string, unknown> = {
   },
   "ClientPageResponse": {
     "filtered": 47,
-    "groups": [
-      "staff",
-      "trial"
-    ],
     "items": [
       {
         "comment": "Primary device",
@@ -471,7 +466,6 @@ export const EXAMPLES: Record<string, unknown> = {
         "email": "alice@example.com",
         "enable": true,
         "expiryTime": 1735689600000,
-        "group": "staff",
         "inboundIds": [
           3,
           5
@@ -524,7 +518,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "expiryTime": 0,
     "flow": "",
     "forwardedPorts": "",
-    "group": "",
     "id": 0,
     "keepAlive": 0,
     "limitHwid": 0,
@@ -577,7 +570,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "email": "alice@example.com",
     "enable": true,
     "expiryTime": 1735689600000,
-    "group": "staff",
     "inboundIds": [
       3,
       5

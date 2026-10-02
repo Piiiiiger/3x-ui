@@ -9,7 +9,6 @@ const TITLE_KEYS: Record<string, string> = {
   '/probe': 'menu.probe',
   '/inbounds': 'menu.inbounds',
   '/clients': 'menu.clients',
-  '/groups': 'menu.groups',
   '/plans': 'menu.plans',
   '/nodes': 'menu.nodes',
   '/hosts': 'menu.hosts',

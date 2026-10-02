@@ -235,14 +235,12 @@ func applyPortableTraffics(inboundSvc *InboundService, items []ClientCreatePaylo
 	for start := 0; start < len(withTraffic); start += batchSize {
 		batch := withTraffic[start:min(start+batchSize, len(withTraffic))]
 		if err := runSerializedTx(func(tx *gorm.DB) error {
-			emails := make([]string, 0, len(batch))
 			for _, i := range batch {
 				if err := applyPortableTraffic(tx, inboundSvc, items[i]); err != nil {
 					return err
 				}
-				emails = append(emails, strings.TrimSpace(items[i].Client.Email))
 			}
-			return adjustGroupBaselinesForRestoredTraffic(tx, emails)
+			return nil
 		}); err != nil {
 			return err
 		}
@@ -295,9 +293,6 @@ func (s *ClientService) DeleteOrphans() (int, error) {
 	tombstoneClientEmails(emails)
 
 	if err := runSerializedTx(func(tx *gorm.DB) error {
-		if e := adjustGroupBaselinesForRemovedTraffic(tx, emails); e != nil {
-			return e
-		}
 		if e := clearClientHwidsBySubIDTx(tx, subIDs...); e != nil {
 			return e
 		}

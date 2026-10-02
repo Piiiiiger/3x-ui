@@ -77,7 +77,6 @@ func allModels() []any {
 		&model.ClientInbound{},
 		&model.ClientHwid{},
 		&model.ClientExternalLink{},
-		&model.ClientGroup{},
 		&model.InboundFallback{},
 		&model.Host{},
 		&model.NodeClientTraffic{},
@@ -204,6 +203,9 @@ func initModels() error {
 		return err
 	}
 	if err := migrateClientEmailLowerIndex(); err != nil {
+		return err
+	}
+	if err := dropClientGroups(); err != nil {
 		return err
 	}
 	if IsPostgres() {
@@ -406,6 +408,28 @@ func migrateClientPlanColumn() error {
 		return nil
 	}
 	return db.Exec("UPDATE clients SET plan_id = 0 WHERE plan_id IS NULL").Error
+}
+
+// dropClientGroups removes what client groups left behind once Pigger dropped
+// them: their table, and the clients column with its index.
+func dropClientGroups() error {
+	migrator := db.Migrator()
+	if migrator.HasTable("client_groups") {
+		if err := migrator.DropTable("client_groups"); err != nil {
+			return err
+		}
+	}
+	if migrator.HasIndex(&model.ClientRecord{}, "idx_client_record_group") {
+		if err := migrator.DropIndex(&model.ClientRecord{}, "idx_client_record_group"); err != nil {
+			return err
+		}
+	}
+	if migrator.HasColumn(&model.ClientRecord{}, "group_name") {
+		// A native DROP COLUMN: gorm's SQLite DropColumn rebuilds the table from parsed
+		// DDL and silently keeps a column added by ALTER TABLE.
+		return db.Exec("ALTER TABLE clients DROP COLUMN group_name").Error
+	}
+	return nil
 }
 
 // The client identity checks match emails case-insensitively; without an

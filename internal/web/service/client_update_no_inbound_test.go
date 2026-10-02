@@ -173,7 +173,6 @@ func TestApplyClientRecordMerge_MirrorsSyncInboundRules(t *testing.T) {
 		Password: "kept-pw",
 		Flow:     "kept-flow",
 		TotalGB:  9,
-		Group:    "kept-group",
 		Comment:  "kept-comment",
 	}
 	incoming := &model.ClientRecord{
@@ -195,9 +194,6 @@ func TestApplyClientRecordMerge_MirrorsSyncInboundRules(t *testing.T) {
 	}
 	if row.TotalGB != 0 {
 		t.Fatalf("incoming TotalGB is unconditional and should overwrite with zero, got %v", row.TotalGB)
-	}
-	if row.Group != "kept-group" {
-		t.Fatalf("empty incoming Group should preserve stored group, got %q", row.Group)
 	}
 	if row.Comment != "new-comment" {
 		t.Fatalf("incoming Comment is unconditional and should overwrite, got %q", row.Comment)

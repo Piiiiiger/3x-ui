@@ -27,7 +27,6 @@ type pagingSeed struct {
 	password   string
 	auth       string
 	comment    string
-	group      string
 	tgID       int64
 	reset      int
 	lastOnline int64
@@ -60,8 +59,8 @@ func seedPagingClients(t *testing.T) (int64, []pagingSeed) {
 		{email: "golf@x", enable: true, totalGB: 10 * pagingGB, expiryTime: now + 2*pagingDay, inbounds: []int{vless.Id}},
 		{email: "hotel@x", enable: true, totalGB: 10 * pagingGB, expiryTime: now + 30*pagingDay, used: 10*pagingGB - pagingGB/2, inbounds: []int{vless.Id}},
 		{email: "india@x", enable: true, totalGB: 0, expiryTime: -5 * pagingDay, inbounds: []int{vless.Id}},
-		{email: "juliet@x", enable: true, comment: " vip customer ", group: "VIP", tgID: 555, reset: 7, inbounds: []int{vless.Id}},
-		{email: "kilo_1@x", enable: true, group: "vip", inbounds: nil},
+		{email: "juliet@x", enable: true, comment: " vip customer ", tgID: 555, reset: 7, inbounds: []int{vless.Id}},
+		{email: "kilo_1@x", enable: true, inbounds: nil},
 		{email: "kilo1@x", enable: true, inbounds: []int{trojan.Id}},
 	}
 
@@ -73,7 +72,6 @@ func seedPagingClients(t *testing.T) (int64, []pagingSeed) {
 			Password:   s.password,
 			Auth:       s.auth,
 			Comment:    s.comment,
-			Group:      s.group,
 			TgID:       s.tgID,
 			Reset:      s.reset,
 			Enable:     s.enable,
@@ -230,11 +228,6 @@ func TestListPagedFilters(t *testing.T) {
 			name:   "search matches the telegram id",
 			params: ClientPageParams{PageSize: 50, Search: "555"},
 			want:   []string{"juliet@x"},
-		},
-		{
-			name:   "group filter is case insensitive",
-			params: ClientPageParams{PageSize: 50, Group: "vip"},
-			want:   []string{"juliet@x", "kilo_1@x"},
 		},
 		{
 			name:   "hasComment yes",
@@ -435,12 +428,6 @@ func TestListPagedRowContents(t *testing.T) {
 			t.Fatalf("used = %d, want %d", got.Up+got.Down, want)
 		}
 	})
-
-	t.Run("groups list every name in use", func(t *testing.T) {
-		if !slices.Equal(resp.Groups, []string{"vip", "VIP"}) && !slices.Equal(resp.Groups, []string{"VIP", "vip"}) {
-			t.Fatalf("groups = %v, want VIP and vip", resp.Groups)
-		}
-	})
 }
 
 func TestListPagedSummary(t *testing.T) {
@@ -630,8 +617,5 @@ func TestListPagedEmptyPanel(t *testing.T) {
 	}
 	if resp.Summary.Active != 0 || resp.Summary.DepletedCount != 0 {
 		t.Fatalf("summary = %+v, want zeroed counters", resp.Summary)
-	}
-	if resp.Groups == nil {
-		t.Fatal("groups = nil, want an empty list so the filter drawer renders")
 	}
 }

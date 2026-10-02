@@ -1789,10 +1789,6 @@
             "description": "AmneziaWG per-client port-forwarding spec, e.g. \"80,443,8000-8100\"",
             "type": "string"
           },
-          "group": {
-            "description": "Logical grouping label",
-            "type": "string"
-          },
           "id": {
             "description": "Unique client identifier",
             "type": "string"
@@ -1936,16 +1932,6 @@
             "example": 47,
             "type": "integer"
           },
-          "groups": {
-            "example": [
-              "staff",
-              "trial"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/ClientSlim"
@@ -1970,7 +1956,6 @@
         },
         "required": [
           "filtered",
-          "groups",
           "items",
           "page",
           "pageSize",
@@ -2030,9 +2015,6 @@
             "type": "string"
           },
           "forwardedPorts": {
-            "type": "string"
-          },
-          "group": {
             "type": "string"
           },
           "id": {
@@ -2117,7 +2099,6 @@
           "expiryTime",
           "flow",
           "forwardedPorts",
-          "group",
           "id",
           "keepAlive",
           "limitHwid",
@@ -2270,10 +2251,6 @@
             "example": 1735689600000,
             "format": "int64",
             "type": "integer"
-          },
-          "group": {
-            "example": "staff",
-            "type": "string"
           },
           "inboundIds": {
             "example": [
@@ -9652,15 +9629,6 @@
             }
           },
           {
-            "name": "group",
-            "in": "query",
-            "required": false,
-            "description": "CSV group names, matched case-insensitively after trimming. Values are ORed.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "plan",
             "in": "query",
             "required": false,
@@ -9693,10 +9661,6 @@
                   "success": true,
                   "obj": {
                     "filtered": 47,
-                    "groups": [
-                      "staff",
-                      "trial"
-                    ],
                     "items": [
                       {
                         "comment": "Primary device",
@@ -9704,7 +9668,6 @@
                         "email": "alice@example.com",
                         "enable": true,
                         "expiryTime": 1735689600000,
-                        "group": "staff",
                         "inboundIds": [
                           3,
                           5
@@ -11042,111 +11005,6 @@
         }
       }
     },
-    "/panel/api/clients/groups/bulkAdd": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Add many clients to a group in one call. Updates clients.group_name and patches the matching client entry inside every owning inbound's settings JSON in a single transaction. If the group name does not yet exist (in client_groups or as a derived label), it is auto-created as a persistent group. To clear the group label, use /groups/bulkRemove instead.",
-        "operationId": "post_panel_api_clients_groups_bulkAdd",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "emails": [
-                  "alice",
-                  "bob"
-                ],
-                "group": "customer-a"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "affected": 2
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/bulkRemove": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Clear the group label on many clients in one call. Inverse of /groups/bulkAdd. Clients themselves are kept — only the group label is cleared from clients.group_name and from each owning inbound's settings JSON. Groups become empty if all their members are removed.",
-        "operationId": "post_panel_api_clients_groups_bulkRemove",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "emails": [
-                  "alice",
-                  "bob"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "affected": 2
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/panel/api/clients/bulkAttach": {
       "post": {
         "tags": [
@@ -11355,295 +11213,6 @@
                   "success": true,
                   "obj": {
                     "affected": 2
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups": {
-      "get": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "List all client groups with their member counts. Merges persisted groups (rows in client_groups, including empty placeholders) with the distinct group_name values currently set on clients. Sorted alphabetically (case-insensitive).",
-        "operationId": "get_panel_api_clients_groups",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "name": "customer-a",
-                      "clientCount": 5
-                    },
-                    {
-                      "name": "internal",
-                      "clientCount": 0
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/{name}/emails": {
-      "get": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Return just the email list of clients that currently belong to the given group. Useful for fanning a single bulk action over an entire group without round-tripping the full client list.",
-        "operationId": "get_panel_api_clients_groups_name_emails",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "description": "Group name (URL-encoded).",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    "alice",
-                    "bob",
-                    "carol"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/create": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Create a new empty (placeholder) group. The group becomes selectable in client forms and the filter drawer even before any client is added to it. Errors if a group with the same name already exists.",
-        "operationId": "post_panel_api_clients_groups_create",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "name": "customer-a"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "name": "customer-a"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/rename": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Rename a group. The new name is applied to the client_groups row AND propagated to every matching client (both clients.group_name and the client entry inside every owning inbound's settings JSON) in a single transaction. Returns the number of clients whose label was updated.",
-        "operationId": "post_panel_api_clients_groups_rename",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "oldName": "customer-a",
-                "newName": "tier-1"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "affected": 5
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/delete": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Remove a group. Deletes the client_groups row and clears the group label from every matching client (both clients.group_name and the inbound settings JSON). The clients themselves are NOT deleted — use /bulkDel after filtering by group for that. Returns the count of clients whose label was cleared.",
-        "operationId": "post_panel_api_clients_groups_delete",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "name": "customer-a"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "affected": 5
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/resetTraffic": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Reset only the group-level traffic counter shown on the groups page. Snapshots the current up/down sum of the group's members as a baseline so the group total reads zero, while leaving each client's own counters (and their quotas) untouched. No Xray restart is triggered. Creates the client_groups row if the group exists only as a derived label.",
-        "operationId": "post_panel_api_clients_groups_resetTraffic",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "name": "customer-a"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "name": "customer-a"
                   }
                 }
               }

@@ -51,7 +51,6 @@ export const keys = {
     onlinesByGuid: () => ['clients', 'onlinesByGuid'] as const,
     activeInbounds: () => ['clients', 'activeInbounds'] as const,
     lastOnline: () => ['clients', 'lastOnline'] as const,
-    groups: () => ['clients', 'groups'] as const,
     portal: (email: string) => ['clients', 'portal', email] as const,
   },
   portal: {

@@ -5,7 +5,6 @@ export interface ClientFilters {
   // Node ids to filter by; 0 is the "local panel" sentinel (inbounds with
   // no nodeId). Mapped onto inbound ids client-side — see ClientsPage.
   nodeIds: number[];
-  groups: string[];
   // Plan ids; 0 matches clients on no plan.
   plans: number[];
   expiryFrom?: number;
@@ -23,7 +22,6 @@ export function emptyFilters(): ClientFilters {
     protocols: [],
     inboundIds: [],
     nodeIds: [],
-    groups: [],
     plans: [],
     autoRenew: '',
     hasTgId: '',
@@ -37,7 +35,6 @@ export function activeFilterCount(f: ClientFilters): number {
   if (f.protocols.length) n++;
   if (f.inboundIds.length) n++;
   if (f.nodeIds.length) n++;
-  if (f.groups.length) n++;
   if (f.plans.length) n++;
   if (f.expiryFrom || f.expiryTo) n++;
   if (f.usageFromGB || f.usageToGB) n++;

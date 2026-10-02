@@ -11,9 +11,8 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
-// AutoMigrate must create the hot-path indexes added for client group filters
-// and client_traffics inbound lookups. gorm creates missing indexes on migrate,
-// so this also protects existing DBs after upgrade.
+// AutoMigrate must create the hot-path indexes for traffic lookups; gorm creates
+// missing indexes on migrate, so this also covers existing DBs after an upgrade.
 func TestAutoMigrateCreatesHotPathIndexes(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
@@ -29,7 +28,6 @@ func TestAutoMigrateCreatesHotPathIndexes(t *testing.T) {
 		model any
 		index string
 	}{
-		{&model.ClientRecord{}, "idx_client_record_group"},
 		{&xray.ClientTraffic{}, "idx_client_traffics_inbound"},
 		{&xray.ClientTraffic{}, "idx_client_traffics_renew"},
 		{&model.ClientGlobalTraffic{}, "idx_client_global_email"},

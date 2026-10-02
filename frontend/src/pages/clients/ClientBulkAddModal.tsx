@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AutoComplete,
   Button,
   Form,
   Input,
@@ -49,7 +48,6 @@ const EMPTY: ClientBulkAddFormValues = {
   emailPostfix: '',
   quantity: 1,
   subId: '',
-  group: '',
   comment: '',
   flow: '',
   limitIp: 0,
@@ -68,7 +66,6 @@ const EMPTY: ClientBulkAddFormValues = {
 interface ClientBulkAddModalProps {
   open: boolean;
   inbounds: InboundOption[];
-  groups?: string[];
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
 }
@@ -76,7 +73,6 @@ interface ClientBulkAddModalProps {
 export default function ClientBulkAddModal({
   open,
   inbounds,
-  groups = [],
   onOpenChange,
   onSaved,
 }: ClientBulkAddModalProps) {
@@ -223,7 +219,6 @@ export default function ClientBulkAddModal({
           trafficResetDay: Number(current.trafficResetDay) || 1,
           limitIp: Number(current.limitIp) || 0,
           limitHwid: Number(current.limitHwid) || 0,
-          group: current.group,
           comment: current.comment,
           enable: true,
         },
@@ -349,19 +344,6 @@ export default function ClientBulkAddModal({
                 />
               </Space.Compact>
             </Form.Item>
-
-            <FormField
-              name="group"
-              label={t('pages.clients.group')}
-              tooltip={t('pages.clients.groupDesc')}
-              transform={{ output: (v) => v ?? '' }}
-            >
-              <AutoComplete
-                placeholder={t('pages.clients.groupPlaceholder')}
-                options={groups.map((g) => ({ value: g }))}
-                allowClear
-              />
-            </FormField>
 
             <FormField
               name="limitHwid"

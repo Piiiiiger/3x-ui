@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AutoComplete,
   Button,
   Col,
   Form,
@@ -117,7 +116,6 @@ interface ClientFormModalProps {
   attachedIds?: number[];
   tunnelAllowedIPs?: Record<number, string>;
   tgBotEnable?: boolean;
-  groups?: string[];
   save: (
     payload: Record<string, unknown> | SaveCreatePayload,
     meta: SaveMetaEdit | SaveMetaCreate,
@@ -163,7 +161,6 @@ const EMPTY: Values = {
   limitIp: 0,
   limitHwid: 0,
   tgId: 0,
-  group: '',
   comment: '',
   enable: true,
   inboundIds: [],
@@ -249,7 +246,6 @@ export default function ClientFormModal({
   attachedIds = [],
   tunnelAllowedIPs = {},
   tgBotEnable = false,
-  groups = [],
   save,
   resetTraffic,
   onOpenChange,
@@ -376,7 +372,6 @@ export default function ClientFormModal({
         limitIp: client.limitIp || 0,
         limitHwid: client.limitHwid || 0,
         tgId: Number(client.tgId) || 0,
-        group: client.group || '',
         comment: client.comment || '',
         enable: !!client.enable,
         inboundIds: Array.isArray(attachedIds) ? [...attachedIds] : [],
@@ -674,7 +669,6 @@ export default function ClientFormModal({
       limitIp: values.limitIp,
       limitHwid: values.limitHwid,
       tgId: values.tgId,
-      group: values.group,
       comment: values.comment,
       enable: values.enable,
       inboundIds: values.inboundIds,
@@ -708,7 +702,6 @@ export default function ClientFormModal({
       limitIp: Number(values.limitIp) || 0,
       limitHwid: Number(values.limitHwid) || 0,
       tgId: Number(values.tgId) || 0,
-      group: values.group,
       comment: values.comment,
       enable: !!values.enable,
     };
@@ -1030,23 +1023,9 @@ export default function ClientFormModal({
                       </Row>
 
                       <Row gutter={16}>
-                        <Col xs={24} md={12}>
+                        <Col xs={24}>
                           <FormField name="comment" label={t('pages.clients.comment')}>
                             <Input />
-                          </FormField>
-                        </Col>
-                        <Col xs={24} md={12}>
-                          <FormField
-                            name="group"
-                            label={t('pages.clients.group')}
-                            tooltip={t('pages.clients.groupDesc')}
-                            transform={{ output: (v) => v ?? '' }}
-                          >
-                            <AutoComplete
-                              placeholder={t('pages.clients.groupPlaceholder')}
-                              options={groups.map((g) => ({ value: g }))}
-                              allowClear
-                            />
                           </FormField>
                         </Col>
                       </Row>

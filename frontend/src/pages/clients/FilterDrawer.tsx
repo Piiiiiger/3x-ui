@@ -30,7 +30,6 @@ interface FilterDrawerProps {
   onChange: (next: ClientFilters) => void;
   inbounds: InboundOption[];
   protocols: string[];
-  groups: string[];
   nodes: NodeRecord[];
   plans: PlanSummary[];
 }
@@ -44,7 +43,6 @@ export default function FilterDrawer({
   onChange,
   inbounds,
   protocols,
-  groups,
   nodes,
   plans,
 }: FilterDrawerProps) {
@@ -67,8 +65,6 @@ export default function FilterDrawer({
     () => protocols.map((p) => ({ value: p, label: p })),
     [protocols],
   );
-
-  const groupOptions = useMemo(() => groups.map((g) => ({ value: g, label: g })), [groups]);
 
   const planOptions = useMemo(
     () => [
@@ -165,20 +161,6 @@ export default function FilterDrawer({
             />
           </Form.Item>
         )}
-
-        <Form.Item label={t('pages.clients.group')}>
-          <Select
-            mode="multiple"
-            value={filters.groups}
-            onChange={(v) => patch('groups', v as string[])}
-            options={groupOptions}
-            placeholder={t('pages.clients.groupPlaceholder')}
-            maxTagCount="responsive"
-            allowClear
-            showSearch={{ optionFilterProp: 'label' }}
-            listHeight={220}
-          />
-        </Form.Item>
 
         {plans.length > 0 && (
           <Form.Item label={t('menu.plans')}>

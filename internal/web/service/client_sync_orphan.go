@@ -62,9 +62,6 @@ func (s *ClientService) ReapSyncOrphans() (int, error) {
 	reaped := 0
 	for _, batch := range chunkStrings(emails, sqlInChunk) {
 		if err := runSerializedTx(func(tx *gorm.DB) error {
-			if err := adjustGroupBaselinesForRemovedTraffic(tx, batch); err != nil {
-				return err
-			}
 			if err := tx.Where("email IN ?", batch).Delete(&model.ClientRecord{}).Error; err != nil {
 				return err
 			}

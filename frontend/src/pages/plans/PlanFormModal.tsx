@@ -104,7 +104,7 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
       <FormProvider {...methods}>
         <Form layout="vertical">
           <FormField
-            label={t('pages.groups.name')}
+            label={t('pages.plans.name')}
             name="name"
             required
             rules={{ validate: rhfZodValidate(PlanFormSchema.shape.name) }}

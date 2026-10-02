@@ -34,7 +34,6 @@ import {
   SettingOutlined,
   SunOutlined,
   SwapOutlined,
-  TagsOutlined,
   TeamOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
@@ -379,12 +378,6 @@ export default function CommandPalette() {
         title: t('menu.clients'),
         keywords: ['clients', 'users', 'sub', 'traffic', 'quota'],
         icon: <TeamOutlined />,
-      },
-      {
-        path: '/groups',
-        title: t('menu.groups'),
-        keywords: ['groups', 'tags', 'batch'],
-        icon: <TagsOutlined />,
       },
       {
         path: '/plans',

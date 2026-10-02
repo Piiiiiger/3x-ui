@@ -24,7 +24,6 @@ import {
   Table,
   Tag,
   Tooltip,
-  Typography,
   message,
 } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
@@ -50,7 +49,6 @@ import {
   SearchOutlined,
   SortAscendingOutlined,
   StopOutlined,
-  TagsOutlined,
   TeamOutlined,
   UploadOutlined,
   UsergroupAddOutlined,
@@ -96,7 +94,6 @@ const ClientBulkAdjustModal = lazy(() => import('./ClientBulkAdjustModal'));
 const FilterDrawer = lazy(() => import('./FilterDrawer'));
 const SubLinksModal = lazy(() => import('./SubLinksModal'));
 const ClientPortalModal = lazy(() => import('./ClientPortalModal'));
-const BulkAddToGroupModal = lazy(() => import('./BulkAddToGroupModal'));
 const BulkAttachInboundsModal = lazy(() => import('./BulkAttachInboundsModal'));
 const BulkDetachInboundsModal = lazy(() => import('./BulkDetachInboundsModal'));
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
@@ -109,45 +106,6 @@ import './ClientsPage.css';
 const FILTER_STATE_KEY = 'clientsFilterState';
 const DISABLED_PAGE_SIZE = 200;
 const DEFAULT_TABLE_PAGE_SIZE = 25;
-
-function UngroupIcon() {
-  return (
-    <span
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '1em',
-        height: '1em',
-      }}
-    >
-      <TagsOutlined />
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          pointerEvents: 'none',
-        }}
-      >
-        <span
-          style={{
-            display: 'block',
-            width: '125%',
-            height: '1.5px',
-            background: 'currentColor',
-            transform: 'rotate(-45deg)',
-            borderRadius: '1px',
-          }}
-        />
-      </span>
-    </span>
-  );
-}
 
 // The server sends exact counters but caps the email arrays behind them, so a
 // panel with thousands of depleted clients neither ships nor renders them all.
@@ -242,7 +200,6 @@ function readFilterState(): PersistedFilterState {
         protocols: Array.isArray(fromRaw.protocols) ? fromRaw.protocols : [],
         inboundIds: Array.isArray(fromRaw.inboundIds) ? fromRaw.inboundIds : [],
         nodeIds: Array.isArray(fromRaw.nodeIds) ? fromRaw.nodeIds : [],
-        groups: Array.isArray(fromRaw.groups) ? fromRaw.groups : [],
         plans: Array.isArray(fromRaw.plans) ? fromRaw.plans : [],
       },
       sort: typeof raw.sort === 'string' ? raw.sort : '',
@@ -343,7 +300,6 @@ export default function ClientsPage() {
     total,
     filtered,
     summary,
-    allGroups,
     setQuery,
     inbounds,
     onlines,
@@ -363,8 +319,6 @@ export default function ClientsPage() {
     bulkAdjust,
     bulkEnable,
     bulkDisable,
-    bulkAddToGroup,
-    bulkRemoveFromGroup,
     attach,
     setExternalLinks,
     bulkAttach,
@@ -423,7 +377,6 @@ export default function ClientsPage() {
   const [bulkAddOpen, setBulkAddOpen] = useState(false);
   const [bulkAdjustOpen, setBulkAdjustOpen] = useState(false);
   const [subLinksOpen, setSubLinksOpen] = useState(false);
-  const [bulkGroupOpen, setBulkGroupOpen] = useState(false);
   const [bulkAttachOpen, setBulkAttachOpen] = useState(false);
   const [bulkDetachOpen, setBulkDetachOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
@@ -548,7 +501,6 @@ export default function ClientsPage() {
       autoRenew: filters.autoRenew || undefined,
       hasTgId: filters.hasTgId || undefined,
       hasComment: filters.hasComment || undefined,
-      group: filters.groups.join(',') || undefined,
       plan: filters.plans.join(',') || undefined,
       sort: sortColumn || undefined,
       order: sortOrder || undefined,
@@ -592,12 +544,6 @@ export default function ClientsPage() {
     );
     return [...values].sort();
   }, [inbounds]);
-
-  const groupOptions = useMemo(() => {
-    const values = new Set<string>(allGroups);
-    for (const g of filters.groups) values.add(g);
-    return [...values].sort((a, b) => a.localeCompare(b));
-  }, [allGroups, filters.groups]);
 
   const isOnline = useCallback((email: string) => !!email && onlineSet.has(email), [onlineSet]);
 
@@ -931,27 +877,6 @@ export default function ClientsPage() {
     });
   }
 
-  function onBulkUngroup() {
-    const emails = [...selectedRowKeys];
-    if (emails.length === 0) return;
-    modal.confirm({
-      title: t('pages.clients.ungroupConfirmTitle', { count: emails.length }),
-      content: t('pages.clients.ungroupConfirmContent'),
-      okText: t('confirm'),
-      okType: 'danger',
-      cancelText: t('cancel'),
-      onOk: async () => {
-        const msg = await bulkRemoveFromGroup(emails);
-        if (msg?.success) {
-          setSelectedRowKeys([]);
-          const affected =
-            (msg.obj as { affected?: number } | undefined)?.affected ?? emails.length;
-          messageApi.success(t('pages.clients.ungroupSuccessToast', { count: affected }));
-        }
-      },
-    });
-  }
-
   function onBulkRenewPlan() {
     const emails = [...selectedRowKeys];
     if (emails.length === 0) return;
@@ -1193,30 +1118,6 @@ export default function ClientsPage() {
         ),
       },
       {
-        title: t('pages.clients.group'),
-        key: 'group',
-        width: 130,
-        hidden: allGroups.length === 0,
-        render: (_v, record) => {
-          if (!record.group) return <Typography.Text type="secondary">—</Typography.Text>;
-          const isActive = filters.groups.includes(record.group);
-          return (
-            <Tag
-              color="geekblue"
-              style={{ margin: 0, cursor: 'pointer', opacity: isActive ? 0.6 : 1 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isActive) {
-                  setFilters({ ...filters, groups: [...filters.groups, record.group!] });
-                }
-              }}
-            >
-              {record.group}
-            </Tag>
-          );
-        },
-      },
-      {
         title: t('menu.plans'),
         key: 'plan',
         width: 130,
@@ -1310,7 +1211,6 @@ export default function ClientsPage() {
       isOnline,
       inboundsById,
       filters,
-      allGroups,
       datepicker,
       trafficDiff,
       clientSpeed,
@@ -1510,19 +1410,6 @@ export default function ClientsPage() {
                                         label: t('pages.clients.detach'),
                                         danger: true,
                                         onClick: () => setBulkDetachOpen(true),
-                                      },
-                                      {
-                                        key: 'addToGroup',
-                                        icon: <TagsOutlined />,
-                                        label: t('pages.clients.addToGroup'),
-                                        onClick: () => setBulkGroupOpen(true),
-                                      },
-                                      {
-                                        key: 'ungroup',
-                                        icon: <UngroupIcon />,
-                                        label: t('pages.clients.ungroup'),
-                                        danger: true,
-                                        onClick: onBulkUngroup,
                                       },
                                       ...(plans.length > 0
                                         ? [
@@ -1734,21 +1621,6 @@ export default function ClientsPage() {
                               }
                             >
                               {inboundLabel(id)}
-                            </Tag>
-                          ))}
-                          {filters.groups.map((g) => (
-                            <Tag
-                              key={`g-${g}`}
-                              closable
-                              color="geekblue"
-                              onClose={() =>
-                                setFilters({
-                                  ...filters,
-                                  groups: filters.groups.filter((x) => x !== g),
-                                })
-                              }
-                            >
-                              {t('pages.clients.group')}: {g}
                             </Tag>
                           ))}
                           {filters.plans.map((id) => (
@@ -2031,7 +1903,6 @@ export default function ClientsPage() {
             tunnelAllowedIPs={editingTunnelAllowedIPs}
             inbounds={inbounds}
             tgBotEnable={tgBotEnable}
-            groups={allGroups}
             save={onSave}
             resetTraffic={resetTraffic}
             onOpenChange={setFormOpen}
@@ -2064,7 +1935,6 @@ export default function ClientsPage() {
           <ClientBulkAddModal
             open={bulkAddOpen}
             inbounds={inbounds}
-            groups={allGroups}
             onOpenChange={setBulkAddOpen}
             onSaved={() => setBulkAddOpen(false)}
           />
@@ -2109,22 +1979,6 @@ export default function ClientsPage() {
             onOpenChange={setSubLinksOpen}
           />
         </LazyMount>
-        <LazyMount when={bulkGroupOpen}>
-          <BulkAddToGroupModal
-            open={bulkGroupOpen}
-            count={selectedRowKeys.length}
-            groups={allGroups}
-            onOpenChange={setBulkGroupOpen}
-            onSubmit={async (group) => {
-              const msg = await bulkAddToGroup([...selectedRowKeys], group);
-              if (msg?.success) {
-                setSelectedRowKeys([]);
-                return (msg.obj as { affected?: number } | undefined) ?? { affected: 0 };
-              }
-              return null;
-            }}
-          />
-        </LazyMount>
         <LazyMount when={bulkAttachOpen}>
           <BulkAttachInboundsModal
             open={bulkAttachOpen}
@@ -2165,7 +2019,6 @@ export default function ClientsPage() {
             onChange={setFilters}
             inbounds={inbounds}
             protocols={protocolOptions}
-            groups={groupOptions}
             nodes={nodes}
             plans={plans}
           />

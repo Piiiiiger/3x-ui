@@ -76,7 +76,6 @@ export interface ClientQueryParams {
   autoRenew?: 'on' | 'off' | '';
   hasTgId?: 'yes' | 'no' | '';
   hasComment?: 'yes' | 'no' | '';
-  group?: string;
   plan?: string;
 }
 
@@ -132,7 +131,6 @@ export function buildClientPageQuery(p: ClientQueryParams): string {
   if (p.autoRenew) sp.set('autoRenew', p.autoRenew);
   if (p.hasTgId) sp.set('hasTgId', p.hasTgId);
   if (p.hasComment) sp.set('hasComment', p.hasComment);
-  if (p.group) sp.set('group', p.group);
   if (p.plan) sp.set('plan', p.plan);
   return sp.toString();
 }
@@ -165,10 +163,8 @@ async function fetchDefaults(): Promise<Record<string, unknown>> {
 }
 
 export interface UseClientsOptions {
-  // Callers that only need the mutations — the bulk modals, the groups page —
-  // pass false. Mounting them used to start a second 5-second poll of the paged
-  // list whose result they never read, which on a large panel means a full
-  // summary aggregate every 5 seconds for nothing.
+  // Mutation-only callers (the bulk modals) pass false, so they don't start a second
+  // 5-second poll of the paged list, which costs a full summary aggregate each time.
   list?: boolean;
 }
 
@@ -202,8 +198,7 @@ export function useClients(options: UseClientsOptions = {}) {
         (prev.usageTo ?? 0) === (next.usageTo ?? 0) &&
         (prev.autoRenew ?? '') === (next.autoRenew ?? '') &&
         (prev.hasTgId ?? '') === (next.hasTgId ?? '') &&
-        (prev.hasComment ?? '') === (next.hasComment ?? '') &&
-        (prev.group ?? '') === (next.group ?? '')
+        (prev.hasComment ?? '') === (next.hasComment ?? '')
       )
         return prev;
       return next;
@@ -250,7 +245,6 @@ export function useClients(options: UseClientsOptions = {}) {
   const clients = listQuery.data?.items ?? [];
   const total = listQuery.data?.total ?? 0;
   const filtered = listQuery.data?.filtered ?? 0;
-  const allGroups = listQuery.data?.groups ?? [];
   const fetched = listQuery.data !== undefined || listQuery.isError;
   const fetchError = listQuery.error ? (listQuery.error as Error).message : '';
   // isFetching is deliberately NOT read here. Touching it makes it a tracked
@@ -328,22 +322,6 @@ export function useClients(options: UseClientsOptions = {}) {
   const createMut = useMutation({
     mutationFn: (payload: unknown) =>
       HttpUtil.post('/panel/api/clients/add', payload, JSON_HEADERS),
-    onSuccess: (msg) => {
-      if (msg?.success) invalidateAll();
-    },
-  });
-
-  const bulkAddToGroupMut = useMutation({
-    mutationFn: (body: { emails: string[]; group: string }) =>
-      HttpUtil.post('/panel/api/clients/groups/bulkAdd', body, JSON_HEADERS),
-    onSuccess: (msg) => {
-      if (msg?.success) invalidateAll();
-    },
-  });
-
-  const bulkRemoveFromGroupMut = useMutation({
-    mutationFn: (body: { emails: string[] }) =>
-      HttpUtil.post('/panel/api/clients/groups/bulkRemove', body, JSON_HEADERS),
     onSuccess: (msg) => {
       if (msg?.success) invalidateAll();
     },
@@ -597,20 +575,6 @@ export function useClients(options: UseClientsOptions = {}) {
     },
     [bulkSetEnableMut],
   );
-  const bulkAddToGroup = useCallback(
-    (emails: string[], group: string) => {
-      if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null);
-      return bulkAddToGroupMut.mutateAsync({ emails, group });
-    },
-    [bulkAddToGroupMut],
-  );
-  const bulkRemoveFromGroup = useCallback(
-    (emails: string[]) => {
-      if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null);
-      return bulkRemoveFromGroupMut.mutateAsync({ emails });
-    },
-    [bulkRemoveFromGroupMut],
-  );
   const attach = useCallback(
     (email: string, inboundIds: number[]) => {
       if (!email) return Promise.resolve(null as unknown as Msg<unknown>);
@@ -702,7 +666,6 @@ export function useClients(options: UseClientsOptions = {}) {
         resetMax: Number(base.resetMax) || 0,
         trafficReset: base.trafficReset || 'never',
         trafficResetDay: Number(base.trafficResetDay) || 1,
-        group: base.group || '',
         comment: base.comment || '',
         enable: !!enable,
       };
@@ -799,7 +762,6 @@ export function useClients(options: UseClientsOptions = {}) {
     total,
     filtered,
     summary,
-    allGroups,
     hydrate,
     query,
     setQuery,
@@ -824,8 +786,6 @@ export function useClients(options: UseClientsOptions = {}) {
     bulkAdjust,
     bulkEnable,
     bulkDisable,
-    bulkAddToGroup,
-    bulkRemoveFromGroup,
     attach,
     setExternalLinks,
     bulkAttach,

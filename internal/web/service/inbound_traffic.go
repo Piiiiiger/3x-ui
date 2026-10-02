@@ -665,9 +665,6 @@ func (s *InboundService) UpdateClientStat(tx *gorm.DB, email string, client *mod
 }
 
 func (s *InboundService) DelClientStat(tx *gorm.DB, email string) error {
-	if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{email}); err != nil {
-		return err
-	}
 	if err := tx.Where("email = ?", email).Delete(xray.ClientTraffic{}).Error; err != nil {
 		return err
 	}
@@ -678,9 +675,6 @@ func (s *InboundService) DelClientStat(tx *gorm.DB, email string) error {
 }
 
 func (s *InboundService) delClientStatsByEmails(tx *gorm.DB, emails []string) error {
-	if err := adjustGroupBaselinesForRemovedTraffic(tx, emails); err != nil {
-		return err
-	}
 	const chunk = 400
 	for start := 0; start < len(emails); start += chunk {
 		end := min(start+chunk, len(emails))
@@ -701,9 +695,6 @@ func (s *InboundService) delClientStatsByEmails(tx *gorm.DB, emails []string) er
 func (s *InboundService) ResetClientTrafficByEmail(clientEmail string) error {
 	err := submitTrafficWrite(func() error {
 		return database.GetDB().Transaction(func(tx *gorm.DB) error {
-			if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{clientEmail}); err != nil {
-				return err
-			}
 			if err := clearGlobalTraffic(tx, clientEmail); err != nil {
 				return err
 			}
@@ -799,9 +790,6 @@ func (s *InboundService) resetClientTrafficLocked(id int, clientEmail string) (b
 		return false, nil, err
 	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
-		if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{clientEmail}); err != nil {
-			return err
-		}
 		if err := tx.Save(traffic).Error; err != nil {
 			return err
 		}

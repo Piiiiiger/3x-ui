@@ -216,7 +216,7 @@ func TestAddDelClientPostgresScale(t *testing.T) {
 	}
 }
 
-func TestGroupAndListPostgresScale(t *testing.T) {
+func TestClientListPostgresScale(t *testing.T) {
 	setupScaleDB(t)
 
 	svc := &ClientService{}
@@ -235,24 +235,7 @@ func TestGroupAndListPostgresScale(t *testing.T) {
 				t.Fatalf("seed SyncInbound: %v", err)
 			}
 			db.Exec("ANALYZE")
-			emails := make([]string, n)
-			for i := range n {
-				emails[i] = clients[i].Email
-			}
-
 			start := time.Now()
-			if _, err := svc.AddToGroup(emails, "benchgroup"); err != nil {
-				t.Fatalf("AddToGroup: %v", err)
-			}
-			addDur := time.Since(start)
-
-			start = time.Now()
-			if _, err := svc.RemoveFromGroup(emails); err != nil {
-				t.Fatalf("RemoveFromGroup: %v", err)
-			}
-			rmDur := time.Since(start)
-
-			start = time.Now()
 			list, err := svc.List()
 			if err != nil {
 				t.Fatalf("List: %v", err)
@@ -262,8 +245,7 @@ func TestGroupAndListPostgresScale(t *testing.T) {
 				t.Fatalf("List returned %d, want %d", len(list), n)
 			}
 
-			t.Logf("N=%-7d bulkAdd=%-9v bulkRemove=%-9v list=%-9v", n,
-				addDur.Round(time.Millisecond), rmDur.Round(time.Millisecond), listDur.Round(time.Millisecond))
+			t.Logf("N=%-7d list=%-9v", n, listDur.Round(time.Millisecond))
 		})
 	}
 }
