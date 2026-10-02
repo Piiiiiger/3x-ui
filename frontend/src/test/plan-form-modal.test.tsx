@@ -39,7 +39,7 @@ describe('PlanFormModal', () => {
     expect(reapply.checked).toBe(false);
     expect(
       screen.getByText(
-        "Servers you add or remove always reach this plan's clients, with or without this option.",
+        "Nodes you add or remove always reach this plan's clients, with or without this option.",
       ),
     ).toBeTruthy();
 

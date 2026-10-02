@@ -171,7 +171,7 @@ describe('ProbePage', () => {
     expect(cards()).toHaveLength(0);
     expect(screen.queryByText('Open public page')).toBeNull();
     // Without a Lite address there is no server to link a host to.
-    expect(screen.getByRole('button', { name: /Link nodes$/ }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: /Link hosts$/ }).hasAttribute('disabled')).toBe(true);
 
     fireEvent.click(
       within(resultOf('The probe is not set up yet')).getByRole('button', { name: /Settings$/ }),
@@ -196,7 +196,7 @@ describe('ProbePage', () => {
   });
 
   // The modal would call every stored link lost, and clearing them would lose them.
-  it('tells Link nodes that the servers of Lite are not known while it cannot be read', async () => {
+  it('tells Link hosts that the servers of Lite are not known while it cannot be read', async () => {
     serve(
       () =>
         new Msg(true, '', overview({ error: 'Lite is not reachable', fetchedAt: 0, servers: [] })),
@@ -204,8 +204,8 @@ describe('ProbePage', () => {
     renderWithProviders(<ProbePage />);
     await screen.findByText('The Lite monitor could not be read');
 
-    fireEvent.click(screen.getByRole('button', { name: /Link nodes$/ }));
-    const dialog = await screen.findByRole('dialog', { name: 'Link nodes' });
+    fireEvent.click(screen.getByRole('button', { name: /Link hosts$/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Link hosts' });
     await within(dialog).findByText('203.0.113.7');
 
     expect(
@@ -361,7 +361,7 @@ describe('ProbePage', () => {
   });
 
   it.each([
-    ['Link nodes', /Link nodes$/],
+    ['Link hosts', /Link hosts$/],
     ['Probe settings', /Settings$/],
   ])('closes the "%s" modal when the admin cancels it', async (title, button) => {
     serve(() => new Msg(true, '', overview()));
@@ -421,8 +421,8 @@ describe('ProbePage', () => {
     await waitFor(() => expect(cards()).toHaveLength(2));
     expect(within(cards()[1]).getByText('Not linked')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: /Link nodes$/ }));
-    const dialog = await screen.findByRole('dialog', { name: 'Link nodes' });
+    fireEvent.click(screen.getByRole('button', { name: /Link hosts$/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Link hosts' });
     await within(dialog).findByText('203.0.113.7');
     chooseSelectOption('probe-link-2', '🇭🇰 香港-Bravo');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));

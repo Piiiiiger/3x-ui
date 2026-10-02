@@ -243,7 +243,7 @@ describe('InboundFormModal', () => {
     // Baseline: nodes already loaded, so the node option is offered and selected.
     render(modal([node], true));
     await flush();
-    expect(strategyItem('Node address')).toBeTruthy();
+    expect(strategyItem('Host address')).toBeTruthy();
     cleanup();
 
     // Race: the modal mounts before /nodes/list resolves (empty placeholder),
@@ -253,7 +253,7 @@ describe('InboundFormModal', () => {
     await flush();
     rerender(modal([node], true));
     await flush();
-    expect(strategyItem('Node address')).toBeTruthy();
+    expect(strategyItem('Host address')).toBeTruthy();
     expect(strategyItem('Inbound listen')).toBeFalsy();
   });
 
