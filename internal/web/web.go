@@ -259,7 +259,17 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)
-	controller.NewAgentController(g)
+	legacyAgentPath, err := s.settingService.GetAgentLegacyBasePath()
+	if err != nil {
+		return nil, err
+	}
+	agentPaths := map[string]bool{}
+	for _, path := range []string{basePath, "/", legacyAgentPath} {
+		if path != "" && !agentPaths[path] {
+			controller.NewAgentController(engine.Group(path))
+			agentPaths[path] = true
+		}
+	}
 
 	// Initialize WebSocket hub
 	s.wsHub = websocket.NewHub()

@@ -73,6 +73,7 @@ var defaultValueMap = map[string]string{
 	"nodeMtlsClientCertSha256":    "",
 	"nodeMtlsClientCAPem":         "",
 	"webBasePath":                 normalizeBasePath(getEnv("XUI_INIT_WEB_BASE_PATH", "/")),
+	"agentLegacyBasePath":         "",
 	"sessionMaxAge":               "360",
 	"trustedProxyCIDRs":           DefaultTrustedProxyCIDRs,
 	"realityScanCandidates":       DefaultRealityScanCandidatesCSV,
@@ -1630,6 +1631,19 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears 
 		for _, st := range existing {
 			byKey[st.Key] = st
 		}
+		// Existing agents keep their configured URL when 2FA moves the panel to /.
+		if old := byKey["webBasePath"]; allSetting.TwoFactorEnable && old != nil && normalizeBasePath(old.Value) != "/" {
+			legacy := byKey["agentLegacyBasePath"]
+			if legacy == nil {
+				legacy = &model.Setting{Key: "agentLegacyBasePath"}
+			}
+			if legacy.Value == "" {
+				legacy.Value = normalizeBasePath(old.Value)
+				if err := tx.Save(legacy).Error; err != nil {
+					return err
+				}
+			}
+		}
 		for _, field := range fields {
 			key := field.Tag.Get("json")
 			fieldV := v.FieldByName(field.Name)
@@ -1650,6 +1664,10 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears 
 		}
 		return nil
 	})
+}
+
+func (s *SettingService) GetAgentLegacyBasePath() (string, error) {
+	return s.getString("agentLegacyBasePath")
 }
 
 func validateSubUserAgentRegexes(allSetting *entity.AllSetting) error {
