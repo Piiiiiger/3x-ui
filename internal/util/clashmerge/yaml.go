@@ -1,5 +1,3 @@
-// Package clashmerge holds what the subscription renderer and the rule template
-// service share about Clash documents.
 package clashmerge
 
 import (

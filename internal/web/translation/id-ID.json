@@ -2211,7 +2211,32 @@
         "saved": "Templat disimpan",
         "deleted": "Templat dihapus",
         "defaultSet": "Templat bawaan ditetapkan",
-        "restored": "Versi dipulihkan"
+        "restored": "Versi dipulihkan",
+        "converted": "Disimpan sebagai varian",
+        "folded": "Digabung ke dasarnya"
+      },
+      "base": "Dasar",
+      "basedOn": "Berdasarkan {name}",
+      "addVariant": "Varian baru",
+      "addVariantTitle": "Varian baru dari {name}",
+      "variantHint": "Hanya yang berbeda dari dasar: kunci tingkat atas (dns, proxy-groups, listeners…) menggantikan kunci dasar; prepend-rules / append-rules dan prepend-proxy-groups / append-proxy-groups menambahkan sebelum atau sesudah daftarnya.",
+      "makeVariant": "Jadikan varian",
+      "makeVariantTitle": "Jadikan {name} varian",
+      "baseTemplate": "Templat dasar",
+      "pickBase": "Pilih templat yang menjadi dasarnya",
+      "convert": "Ubah",
+      "noChanges": "Sama dengan dasar",
+      "changeKeys": {
+        "rules": "Aturan",
+        "groups": "Grup proxy",
+        "dns": "DNS",
+        "listeners": "Listener"
+      },
+      "conversion": {
+        "identical": "{name} sama dengan {base}: {count} paketnya akan langsung memakai {base}, dan {name} akan dihapus.",
+        "keeps": "{name} hanya akan menyimpan bagian yang berbeda dari {base} ({size}):",
+        "moved": "{count} aturannya berada di antara aturan {base} dan akan dipindah ke atas. Aturan yang lebih atas bisa cocok lebih dulu, jadi periksa sebelum mengubah.",
+        "allowMove": "Pindahkan ke atas"
       }
     }
   },

@@ -89,6 +89,8 @@ func run(root, outDir string) error {
 				"InboundOption",
 				"PlanInput",
 				"PlanSummary",
+				"RuleTemplateChange",
+				"RuleTemplateConversion",
 				"RuleTemplateInput",
 				"RuleTemplateSummary",
 				"RuleTemplateVersionView",

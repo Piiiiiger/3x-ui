@@ -2211,7 +2211,32 @@
         "saved": "تم حفظ القالب",
         "deleted": "تم حذف القالب",
         "defaultSet": "تم تعيين القالب الافتراضي",
-        "restored": "تمت استعادة الإصدار"
+        "restored": "تمت استعادة الإصدار",
+        "converted": "حُفظ كنسخة فرعية",
+        "folded": "دُمج في القالب الأساسي"
+      },
+      "base": "أساسي",
+      "basedOn": "مبني على {name}",
+      "addVariant": "نسخة فرعية جديدة",
+      "addVariantTitle": "نسخة فرعية جديدة من {name}",
+      "variantHint": "ما يختلف عن القالب الأساسي فقط: المفتاح العلوي (dns و proxy-groups و listeners…) يحل محل مفتاح القالب الأساسي، و prepend-rules / append-rules و prepend-proxy-groups / append-proxy-groups تضيف قبل قوائمه أو بعدها.",
+      "makeVariant": "تحويل إلى نسخة فرعية",
+      "makeVariantTitle": "تحويل {name} إلى نسخة فرعية",
+      "baseTemplate": "القالب الأساسي",
+      "pickBase": "اختر القالب الذي يُبنى عليه",
+      "convert": "تحويل",
+      "noChanges": "مطابق للقالب الأساسي",
+      "changeKeys": {
+        "rules": "القواعد",
+        "groups": "مجموعات البروكسي",
+        "dns": "DNS",
+        "listeners": "المستمعون"
+      },
+      "conversion": {
+        "identical": "{name} مطابق لـ {base}: ستستخدم باقاته ({count}) {base} مباشرةً، وسيُحذف {name}.",
+        "keeps": "سيحتفظ {name} بما يختلف فيه عن {base} فقط ({size}):",
+        "moved": "{count} من قواعده تقع بين قواعد {base} وستنتقل إلى الأعلى. القاعدة الأعلى قد تطابق أولًا، فراجعها قبل التحويل.",
+        "allowMove": "انقلها إلى الأعلى"
       }
     }
   },

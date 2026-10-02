@@ -2211,7 +2211,32 @@
         "saved": "テンプレートを保存しました",
         "deleted": "テンプレートを削除しました",
         "defaultSet": "既定のテンプレートを設定しました",
-        "restored": "バージョンを復元しました"
+        "restored": "バージョンを復元しました",
+        "converted": "バリアントとして保存しました",
+        "folded": "ベースに統合しました"
+      },
+      "base": "ベース",
+      "basedOn": "ベース: {name}",
+      "addVariant": "新しいバリアント",
+      "addVariantTitle": "{name} の新しいバリアント",
+      "variantHint": "ベースとの違いだけを書きます。トップレベルのキー（dns、proxy-groups、listeners など）はベースの同じキーを置き換え、prepend-rules / append-rules と prepend-proxy-groups / append-proxy-groups はベースのリストの前後に追加します。",
+      "makeVariant": "バリアントにする",
+      "makeVariantTitle": "{name} をバリアントにする",
+      "baseTemplate": "ベーステンプレート",
+      "pickBase": "元にするテンプレートを選択",
+      "convert": "変換",
+      "noChanges": "ベースと同じ",
+      "changeKeys": {
+        "rules": "ルール",
+        "groups": "プロキシグループ",
+        "dns": "DNS",
+        "listeners": "リスナー"
+      },
+      "conversion": {
+        "identical": "{name} は {base} と同じです。{count} 件のプランは {base} を直接使い、{name} は削除されます。",
+        "keeps": "{name} は {base} との違いだけを残します（{size}）：",
+        "moved": "{count} 件のルールが {base} のルールの間にあり、変換すると先頭に移動します。上にあるルールが先にマッチするため、変換前に確認してください。",
+        "allowMove": "先頭に移動する"
       }
     }
   },

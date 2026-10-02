@@ -4964,8 +4964,13 @@
         "type": "object"
       },
       "RuleTemplate": {
-        "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document\n(妙妙屋X's templates, whose groups list __PROXY_NODES__) or an HTTPS URL.",
+        "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document whose\ngroups list __PROXY_NODES__, an HTTPS URL, or a variant's changes to its base.",
         "properties": {
+          "baseId": {
+            "description": "BaseId is the template a variant changes; 0 for a full template.",
+            "example": 0,
+            "type": "integer"
+          },
           "content": {
             "example": "DOMAIN-SUFFIX,example.com,DIRECT",
             "type": "string"
@@ -4994,6 +4999,7 @@
           }
         },
         "required": [
+          "baseId",
           "content",
           "createdAt",
           "id",
@@ -5003,9 +5009,71 @@
         ],
         "type": "object"
       },
-      "RuleTemplateInput": {
-        "description": "RuleTemplateInput is the editable part of a template.",
+      "RuleTemplateChange": {
+        "description": "RuleTemplateChange is a key of its base a variant replaces, adds entries to, or both.",
         "properties": {
+          "added": {
+            "example": 5,
+            "type": "integer"
+          },
+          "key": {
+            "example": "rules",
+            "type": "string"
+          },
+          "replaced": {
+            "example": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "added",
+          "key",
+          "replaced"
+        ],
+        "type": "object"
+      },
+      "RuleTemplateConversion": {
+        "description": "RuleTemplateConversion is what making a template a variant does: an identical one\nis folded into the base; moved counts rules between the base's that must go first.",
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/RuleTemplateChange"
+            },
+            "type": "array"
+          },
+          "identical": {
+            "example": false,
+            "type": "boolean"
+          },
+          "moved": {
+            "example": 5,
+            "type": "integer"
+          },
+          "planCount": {
+            "example": 1,
+            "type": "integer"
+          },
+          "size": {
+            "example": 2048,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "changes",
+          "identical",
+          "moved",
+          "planCount",
+          "size"
+        ],
+        "type": "object"
+      },
+      "RuleTemplateInput": {
+        "description": "RuleTemplateInput is the editable part of a template. BaseId makes it a variant:\ncontent then holds only what it changes in that template.",
+        "properties": {
+          "baseId": {
+            "example": 0,
+            "type": "integer"
+          },
           "content": {
             "example": "DOMAIN-SUFFIX,example.com,DIRECT",
             "type": "string"
@@ -5016,6 +5084,7 @@
           }
         },
         "required": [
+          "baseId",
           "content",
           "name"
         ],
@@ -5024,6 +5093,17 @@
       "RuleTemplateSummary": {
         "description": "RuleTemplateSummary is a template in the list, without its content. Kind says\nhow its content reads; planCount includes the plans the default serves.",
         "properties": {
+          "baseId": {
+            "description": "BaseId and Changes describe a variant: its base and what it changes there.",
+            "example": 0,
+            "type": "integer"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/RuleTemplateChange"
+            },
+            "type": "array"
+          },
           "id": {
             "example": 1,
             "type": "integer"
@@ -5060,6 +5140,8 @@
           }
         },
         "required": [
+          "baseId",
+          "changes",
           "id",
           "isDefault",
           "kind",
@@ -5712,7 +5794,7 @@
     },
     {
       "name": "Rule templates",
-      "description": "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template."
+      "description": "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A variant (baseId set) holds only what it changes in a full YAML template, as a Clash Verge Merge document: a top-level key replaces the base's, prepend-rules / append-rules and prepend-proxy-groups / append-proxy-groups add before or after the base's lists. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template."
     },
     {
       "name": "Plans",
@@ -12737,7 +12819,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "List the templates without their content: kind (rules, yaml or remote), size in bytes, whether it is the default, and how many plans use it (the default also counts the plans that name none).",
+        "summary": "List the templates without their content: kind (rules, yaml or remote), size in bytes, whether it is the default, how many plans use it (the default also counts the plans that name none), and for a variant its base and the keys it changes.",
         "operationId": "get_panel_api_ruleTemplates_list",
         "responses": {
           "200": {
@@ -12765,6 +12847,14 @@
                   "success": true,
                   "obj": [
                     {
+                      "baseId": 0,
+                      "changes": [
+                        {
+                          "added": 5,
+                          "key": "rules",
+                          "replaced": false
+                        }
+                      ],
                       "id": 1,
                       "isDefault": false,
                       "kind": "yaml",
@@ -12821,6 +12911,7 @@
                 "example": {
                   "success": true,
                   "obj": {
+                    "baseId": 0,
                     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
                     "createdAt": 1735689600000,
                     "id": 1,
@@ -12840,7 +12931,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "Create a template. Names are unique. Content that could not render is refused: broken YAML, a URL with credentials or not HTTPS, or proxy groups none of which lists __PROXY_NODES__ or a filter.",
+        "summary": "Create a template. Names are unique. Content that could not render is refused: broken YAML, a URL with credentials or not HTTPS, or proxy groups none of which lists __PROXY_NODES__ or a filter. With baseId it is a variant: its content must be a YAML map, the base a full YAML template, and the merge is checked as above.",
         "operationId": "post_panel_api_ruleTemplates_add",
         "requestBody": {
           "required": true,
@@ -12851,7 +12942,8 @@
               },
               "example": {
                 "name": "alpha_v3",
-                "content": "DOMAIN-SUFFIX,example.com,DIRECT"
+                "content": "prepend-rules:\n  - DOMAIN-SUFFIX,example.com,DIRECT\n",
+                "baseId": 1
               }
             }
           }
@@ -12878,6 +12970,7 @@
                 "example": {
                   "success": true,
                   "obj": {
+                    "baseId": 0,
                     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
                     "createdAt": 1735689600000,
                     "id": 1,
@@ -12897,7 +12990,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "Rename a template or replace its content, checked as on create. A changed content is kept as a new version.",
+        "summary": "Rename a template or replace its content, checked as on create. A changed content is kept as a new version. A base must stay a YAML document its variants merge onto, and cannot become a variant itself.",
         "operationId": "post_panel_api_ruleTemplates_update_id",
         "parameters": [
           {
@@ -12946,6 +13039,7 @@
                 "example": {
                   "success": true,
                   "obj": {
+                    "baseId": 0,
                     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
                     "createdAt": 1735689600000,
                     "id": 1,
@@ -12965,7 +13059,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "Delete a template and its versions. Refused for the default template and while any plan uses it.",
+        "summary": "Delete a template and its versions. Refused for the default template, for a base with variants, and while any plan uses it.",
         "operationId": "post_panel_api_ruleTemplates_del_id",
         "parameters": [
           {
@@ -13138,6 +13232,7 @@
                 "example": {
                   "success": true,
                   "obj": {
+                    "baseId": 0,
                     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
                     "createdAt": 1735689600000,
                     "id": 1,
@@ -13157,7 +13252,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "Render the Clash config the plan's first member would get with this content as their template, checked as on save. Refused for a plan without members.",
+        "summary": "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. Refused for a plan without members.",
         "operationId": "post_panel_api_ruleTemplates_preview",
         "requestBody": {
           "required": true,
@@ -13168,7 +13263,8 @@
               },
               "example": {
                 "planId": 1,
-                "content": "DOMAIN-SUFFIX,example.com,DIRECT"
+                "content": "DOMAIN-SUFFIX,example.com,DIRECT",
+                "baseId": 0
               }
             }
           }
@@ -13193,6 +13289,80 @@
                 "example": {
                   "success": true,
                   "obj": "proxies:\n  - name: ...\nrules:\n  - DOMAIN-SUFFIX,example.com,DIRECT\n"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleTemplates/variantOf/{id}": {
+      "post": {
+        "tags": [
+          "Rule templates"
+        ],
+        "summary": "Keep a full YAML template as a variant of baseId, holding only what differs. A template identical to the base is folded into it instead: its plans and default star move to the base and it is deleted. Rules added between the base's own can only move to the front: moved counts them, and applying then needs allowReorder. Without apply nothing changes and the answer says what would. Refused for a template without a key the base sets, or one whose differences would not read back the same.",
+        "operationId": "post_panel_api_ruleTemplates_variantOf_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Template id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "baseId": 1,
+                "allowReorder": false,
+                "apply": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RuleTemplateConversion"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "changes": [
+                      {
+                        "added": 5,
+                        "key": "rules",
+                        "replaced": false
+                      }
+                    ],
+                    "identical": false,
+                    "moved": 5,
+                    "planCount": 1,
+                    "size": 2048
+                  }
                 }
               }
             }

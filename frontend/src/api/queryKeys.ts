@@ -22,6 +22,8 @@ export const keys = {
     versions: (id: number) => ['ruleTemplates', 'versions', id] as const,
     preview: (requestId: number, planId: number) =>
       ['ruleTemplates', 'preview', requestId, planId] as const,
+    conversion: (id: number, baseId: number) =>
+      ['ruleTemplates', 'conversion', id, baseId] as const,
   },
   traffic: {
     root: () => ['traffic'] as const,

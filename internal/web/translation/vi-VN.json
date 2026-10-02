@@ -2211,7 +2211,32 @@
         "saved": "Đã lưu mẫu",
         "deleted": "Đã xóa mẫu",
         "defaultSet": "Đã đặt mẫu mặc định",
-        "restored": "Đã khôi phục phiên bản"
+        "restored": "Đã khôi phục phiên bản",
+        "converted": "Đã lưu thành biến thể",
+        "folded": "Đã gộp vào mẫu gốc"
+      },
+      "base": "Gốc",
+      "basedOn": "Dựa trên {name}",
+      "addVariant": "Biến thể mới",
+      "addVariantTitle": "Biến thể mới của {name}",
+      "variantHint": "Chỉ ghi phần khác với mẫu gốc: khóa cấp cao nhất (dns, proxy-groups, listeners…) thay thế khóa cùng tên của mẫu gốc; prepend-rules / append-rules và prepend-proxy-groups / append-proxy-groups thêm vào trước hoặc sau các danh sách của nó.",
+      "makeVariant": "Chuyển thành biến thể",
+      "makeVariantTitle": "Chuyển {name} thành biến thể",
+      "baseTemplate": "Mẫu gốc",
+      "pickBase": "Chọn mẫu mà nó dựa trên",
+      "convert": "Chuyển đổi",
+      "noChanges": "Giống mẫu gốc",
+      "changeKeys": {
+        "rules": "Quy tắc",
+        "groups": "Nhóm proxy",
+        "dns": "DNS",
+        "listeners": "Listener"
+      },
+      "conversion": {
+        "identical": "{name} giống hệt {base}: {count} gói của nó sẽ dùng thẳng {base}, và {name} sẽ bị xóa.",
+        "keeps": "{name} sẽ chỉ giữ phần khác với {base} ({size}):",
+        "moved": "{count} quy tắc của nó nằm giữa các quy tắc của {base} và sẽ được chuyển lên đầu. Quy tắc ở trên có thể khớp trước, hãy kiểm tra trước khi chuyển đổi.",
+        "allowMove": "Chuyển chúng lên đầu"
       }
     }
   },

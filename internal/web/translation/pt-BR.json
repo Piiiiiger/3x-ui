@@ -2211,7 +2211,32 @@
         "saved": "Modelo salvo",
         "deleted": "Modelo excluído",
         "defaultSet": "Modelo padrão definido",
-        "restored": "Versão restaurada"
+        "restored": "Versão restaurada",
+        "converted": "Salvo como variante",
+        "folded": "Mesclado à base"
+      },
+      "base": "Base",
+      "basedOn": "Baseada em {name}",
+      "addVariant": "Nova variante",
+      "addVariantTitle": "Nova variante de {name}",
+      "variantHint": "Só o que difere da base: uma chave de primeiro nível (dns, proxy-groups, listeners…) substitui a da base; prepend-rules / append-rules e prepend-proxy-groups / append-proxy-groups adicionam antes ou depois das listas dela.",
+      "makeVariant": "Tornar variante",
+      "makeVariantTitle": "Tornar {name} uma variante",
+      "baseTemplate": "Modelo base",
+      "pickBase": "Escolha o modelo do qual ela varia",
+      "convert": "Converter",
+      "noChanges": "Igual à base",
+      "changeKeys": {
+        "rules": "Regras",
+        "groups": "Grupos de proxy",
+        "dns": "DNS",
+        "listeners": "Ouvintes"
+      },
+      "conversion": {
+        "identical": "{name} é igual a {base}: seus {count} plano(s) usarão {base} diretamente, e {name} será excluído.",
+        "keeps": "{name} manterá só o que difere de {base} ({size}):",
+        "moved": "{count} das suas regras ficam entre as de {base} e irão para o topo. Uma regra mais acima pode corresponder antes; confira-as antes de converter.",
+        "allowMove": "Movê-las para o topo"
       }
     }
   },

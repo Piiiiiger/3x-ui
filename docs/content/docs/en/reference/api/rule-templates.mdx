@@ -2,9 +2,13 @@
 title: Rule templates
 description: "Clash rule templates plans share: rule lines, a YAML document
   (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or
-  select them with a filter) or one HTTPS URL. A plan names its template by id;
-  plans with templateId 0 and clients without a plan get the default template.
-  Each content change is kept as a version, the newest 20 per template."
+  select them with a filter) or one HTTPS URL. A variant (baseId set) holds only
+  what it changes in a full YAML template, as a Clash Verge Merge document: a
+  top-level key replaces the base's, prepend-rules / append-rules and
+  prepend-proxy-groups / append-proxy-groups add before or after the base's
+  lists. A plan names its template by id; plans with templateId 0 and clients
+  without a plan get the default template. Each content change is kept as a
+  version, the newest 20 per template."
 full: true
 _openapi:
   preload:
@@ -12,25 +16,29 @@ _openapi:
   toc:
     - depth: 2
       title: 'List the templates without their content: kind (rules, yaml or remote),
-        size in bytes, whether it is the default, and how many plans use it (the
-        default also counts the plans that name none).'
-      url: '#list-the-templates-without-their-content-kind-rules-yaml-or-remote-size-in-bytes-whether-it-is-the-default-and-how-many-plans-use-it-the-default-also-counts-the-plans-that-name-none'
+        size in bytes, whether it is the default, how many plans use it (the
+        default also counts the plans that name none), and for a variant its
+        base and the keys it changes.'
+      url: '#list-the-templates-without-their-content-kind-rules-yaml-or-remote-size-in-bytes-whether-it-is-the-default-how-many-plans-use-it-the-default-also-counts-the-plans-that-name-none-and-for-a-variant-its-base-and-the-keys-it-changes'
     - depth: 2
       title: Get one template with its content.
       url: '#get-one-template-with-its-content'
     - depth: 2
       title: 'Create a template. Names are unique. Content that could not render is
         refused: broken YAML, a URL with credentials or not HTTPS, or proxy
-        groups none of which lists __PROXY_NODES__ or a filter.'
-      url: '#create-a-template-names-are-unique-content-that-could-not-render-is-refused-broken-yaml-a-url-with-credentials-or-not-https-or-proxy-groups-none-of-which-lists-__proxy_nodes__-or-a-filter'
+        groups none of which lists __PROXY_NODES__ or a filter. With baseId it
+        is a variant: its content must be a YAML map, the base a full YAML
+        template, and the merge is checked as above.'
+      url: '#create-a-template-names-are-unique-content-that-could-not-render-is-refused-broken-yaml-a-url-with-credentials-or-not-https-or-proxy-groups-none-of-which-lists-__proxy_nodes__-or-a-filter-with-baseid-it-is-a-variant-its-content-must-be-a-yaml-map-the-base-a-full-yaml-template-and-the-merge-is-checked-as-above'
     - depth: 2
       title: Rename a template or replace its content, checked as on create. A changed
-        content is kept as a new version.
-      url: '#rename-a-template-or-replace-its-content-checked-as-on-create-a-changed-content-is-kept-as-a-new-version'
+        content is kept as a new version. A base must stay a YAML document its
+        variants merge onto, and cannot become a variant itself.
+      url: '#rename-a-template-or-replace-its-content-checked-as-on-create-a-changed-content-is-kept-as-a-new-version-a-base-must-stay-a-yaml-document-its-variants-merge-onto-and-cannot-become-a-variant-itself'
     - depth: 2
-      title: Delete a template and its versions. Refused for the default template and
-        while any plan uses it.
-      url: '#delete-a-template-and-its-versions-refused-for-the-default-template-and-while-any-plan-uses-it'
+      title: Delete a template and its versions. Refused for the default template, for
+        a base with variants, and while any plan uses it.
+      url: '#delete-a-template-and-its-versions-refused-for-the-default-template-for-a-base-with-variants-and-while-any-plan-uses-it'
     - depth: 2
       title: 'Make the template the default: the one plans without their own, and
         clients without a plan, get.'
@@ -44,27 +52,41 @@ _openapi:
       url: '#put-a-kept-version-back-as-its-templates-content-the-restore-is-itself-a-new-version'
     - depth: 2
       title: Render the Clash config the plan's first member would get with this
-        content as their template, checked as on save. Refused for a plan
-        without members.
-      url: '#render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-refused-for-a-plan-without-members'
+        content as their template, checked as on save; with baseId the content
+        is a variant merged onto that template. Refused for a plan without
+        members.
+      url: '#render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-refused-for-a-plan-without-members'
+    - depth: 2
+      title: "Keep a full YAML template as a variant of baseId, holding only what
+        differs. A template identical to the base is folded into it instead: its
+        plans and default star move to the base and it is deleted. Rules added
+        between the base's own can only move to the front: moved counts them,
+        and applying then needs allowReorder. Without apply nothing changes and
+        the answer says what would. Refused for a template without a key the
+        base sets, or one whose differences would not read back the same."
+      url: '#keep-a-full-yaml-template-as-a-variant-of-baseid-holding-only-what-differs-a-template-identical-to-the-base-is-folded-into-it-instead-its-plans-and-default-star-move-to-the-base-and-it-is-deleted-rules-added-between-the-bases-own-can-only-move-to-the-front-moved-counts-them-and-applying-then-needs-allowreorder-without-apply-nothing-changes-and-the-answer-says-what-would-refused-for-a-template-without-a-key-the-base-sets-or-one-whose-differences-would-not-read-back-the-same'
   structuredData:
     headings:
       - content: 'List the templates without their content: kind (rules, yaml or
-          remote), size in bytes, whether it is the default, and how many plans
-          use it (the default also counts the plans that name none).'
-        id: list-the-templates-without-their-content-kind-rules-yaml-or-remote-size-in-bytes-whether-it-is-the-default-and-how-many-plans-use-it-the-default-also-counts-the-plans-that-name-none
+          remote), size in bytes, whether it is the default, how many plans use
+          it (the default also counts the plans that name none), and for a
+          variant its base and the keys it changes.'
+        id: list-the-templates-without-their-content-kind-rules-yaml-or-remote-size-in-bytes-whether-it-is-the-default-how-many-plans-use-it-the-default-also-counts-the-plans-that-name-none-and-for-a-variant-its-base-and-the-keys-it-changes
       - content: Get one template with its content.
         id: get-one-template-with-its-content
       - content: 'Create a template. Names are unique. Content that could not render is
           refused: broken YAML, a URL with credentials or not HTTPS, or proxy
-          groups none of which lists __PROXY_NODES__ or a filter.'
-        id: create-a-template-names-are-unique-content-that-could-not-render-is-refused-broken-yaml-a-url-with-credentials-or-not-https-or-proxy-groups-none-of-which-lists-__proxy_nodes__-or-a-filter
+          groups none of which lists __PROXY_NODES__ or a filter. With baseId it
+          is a variant: its content must be a YAML map, the base a full YAML
+          template, and the merge is checked as above.'
+        id: create-a-template-names-are-unique-content-that-could-not-render-is-refused-broken-yaml-a-url-with-credentials-or-not-https-or-proxy-groups-none-of-which-lists-__proxy_nodes__-or-a-filter-with-baseid-it-is-a-variant-its-content-must-be-a-yaml-map-the-base-a-full-yaml-template-and-the-merge-is-checked-as-above
       - content: Rename a template or replace its content, checked as on create. A
-          changed content is kept as a new version.
-        id: rename-a-template-or-replace-its-content-checked-as-on-create-a-changed-content-is-kept-as-a-new-version
-      - content: Delete a template and its versions. Refused for the default template
-          and while any plan uses it.
-        id: delete-a-template-and-its-versions-refused-for-the-default-template-and-while-any-plan-uses-it
+          changed content is kept as a new version. A base must stay a YAML
+          document its variants merge onto, and cannot become a variant itself.
+        id: rename-a-template-or-replace-its-content-checked-as-on-create-a-changed-content-is-kept-as-a-new-version-a-base-must-stay-a-yaml-document-its-variants-merge-onto-and-cannot-become-a-variant-itself
+      - content: Delete a template and its versions. Refused for the default template,
+          for a base with variants, and while any plan uses it.
+        id: delete-a-template-and-its-versions-refused-for-the-default-template-for-a-base-with-variants-and-while-any-plan-uses-it
       - content: 'Make the template the default: the one plans without their own, and
           clients without a plan, get.'
         id: make-the-template-the-default-the-one-plans-without-their-own-and-clients-without-a-plan-get
@@ -74,9 +96,19 @@ _openapi:
           itself a new version.
         id: put-a-kept-version-back-as-its-templates-content-the-restore-is-itself-a-new-version
       - content: Render the Clash config the plan's first member would get with this
-          content as their template, checked as on save. Refused for a plan
-          without members.
-        id: render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-refused-for-a-plan-without-members
+          content as their template, checked as on save; with baseId the content
+          is a variant merged onto that template. Refused for a plan without
+          members.
+        id: render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-refused-for-a-plan-without-members
+      - content: "Keep a full YAML template as a variant of baseId, holding only what
+          differs. A template identical to the base is folded into it instead:
+          its plans and default star move to the base and it is deleted. Rules
+          added between the base's own can only move to the front: moved counts
+          them, and applying then needs allowReorder. Without apply nothing
+          changes and the answer says what would. Refused for a template without
+          a key the base sets, or one whose differences would not read back the
+          same."
+        id: keep-a-full-yaml-template-as-a-variant-of-baseid-holding-only-what-differs-a-template-identical-to-the-base-is-folded-into-it-instead-its-plans-and-default-star-move-to-the-base-and-it-is-deleted-rules-added-between-the-bases-own-can-only-move-to-the-front-moved-counts-them-and-applying-then-needs-allowreorder-without-apply-nothing-changes-and-the-answer-says-what-would-refused-for-a-template-without-a-key-the-base-sets-or-one-whose-differences-would-not-read-back-the-same
     contents: []
 ---
 
@@ -89,7 +121,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/ruleTemplates/list","method":"get"},{"path":"/panel/api/ruleTemplates/get/{id}","method":"get"},{"path":"/panel/api/ruleTemplates/add","method":"post"},{"path":"/panel/api/ruleTemplates/update/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/del/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/setDefault/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/versions/{id}","method":"get"},{"path":"/panel/api/ruleTemplates/restore/{versionId}","method":"post"},{"path":"/panel/api/ruleTemplates/preview","method":"post"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/ruleTemplates/list","method":"get"},{"path":"/panel/api/ruleTemplates/get/{id}","method":"get"},{"path":"/panel/api/ruleTemplates/add","method":"post"},{"path":"/panel/api/ruleTemplates/update/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/del/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/setDefault/{id}","method":"post"},{"path":"/panel/api/ruleTemplates/versions/{id}","method":"get"},{"path":"/panel/api/ruleTemplates/restore/{versionId}","method":"post"},{"path":"/panel/api/ruleTemplates/preview","method":"post"},{"path":"/panel/api/ruleTemplates/variantOf/{id}","method":"post"}]} showTitle />
     </>
   );
 }

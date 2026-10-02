@@ -2211,7 +2211,32 @@
         "saved": "قالب ذخیره شد",
         "deleted": "قالب حذف شد",
         "defaultSet": "قالب پیش‌فرض تنظیم شد",
-        "restored": "نسخه بازگردانی شد"
+        "restored": "نسخه بازگردانی شد",
+        "converted": "به‌صورت گونه ذخیره شد",
+        "folded": "در پایه ادغام شد"
+      },
+      "base": "پایه",
+      "basedOn": "بر پایهٔ {name}",
+      "addVariant": "گونهٔ جدید",
+      "addVariantTitle": "گونهٔ جدید از {name}",
+      "variantHint": "فقط آنچه با پایه فرق دارد: هر کلید سطح بالا (dns، proxy-groups، listeners…) جای کلید هم‌نام پایه را می‌گیرد، و prepend-rules / append-rules و prepend-proxy-groups / append-proxy-groups پیش یا پس از فهرست‌های پایه می‌افزایند.",
+      "makeVariant": "تبدیل به گونه",
+      "makeVariantTitle": "تبدیل {name} به گونه",
+      "baseTemplate": "قالب پایه",
+      "pickBase": "قالبی را که بر آن بنا می‌شود برگزینید",
+      "convert": "تبدیل",
+      "noChanges": "همانند پایه",
+      "changeKeys": {
+        "rules": "قوانین",
+        "groups": "گروه‌های پروکسی",
+        "dns": "DNS",
+        "listeners": "شنونده‌ها"
+      },
+      "conversion": {
+        "identical": "{name} با {base} یکسان است: {count} پلن آن مستقیماً از {base} استفاده می‌کنند و {name} حذف می‌شود.",
+        "keeps": "{name} فقط تفاوت‌هایش با {base} را نگه می‌دارد ({size}):",
+        "moved": "{count} قانون آن میان قوانین {base} قرار دارند و به بالای فهرست می‌روند. قانون بالاتر زودتر تطبیق می‌یابد؛ پیش از تبدیل آن‌ها را بررسی کنید.",
+        "allowMove": "انتقال به بالای فهرست"
       }
     }
   },

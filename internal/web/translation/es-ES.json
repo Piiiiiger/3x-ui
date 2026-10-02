@@ -2211,7 +2211,32 @@
         "saved": "Plantilla guardada",
         "deleted": "Plantilla eliminada",
         "defaultSet": "Plantilla predeterminada establecida",
-        "restored": "Versión restaurada"
+        "restored": "Versión restaurada",
+        "converted": "Guardada como variante",
+        "folded": "Fusionada con su base"
+      },
+      "base": "Base",
+      "basedOn": "Basada en {name}",
+      "addVariant": "Nueva variante",
+      "addVariantTitle": "Nueva variante de {name}",
+      "variantHint": "Solo lo que difiere de la base: una clave de primer nivel (dns, proxy-groups, listeners…) sustituye la de la base; prepend-rules / append-rules y prepend-proxy-groups / append-proxy-groups añaden antes o después de sus listas.",
+      "makeVariant": "Convertir en variante",
+      "makeVariantTitle": "Convertir {name} en variante",
+      "baseTemplate": "Plantilla base",
+      "pickBase": "Elige la plantilla de la que varía",
+      "convert": "Convertir",
+      "noChanges": "Igual que la base",
+      "changeKeys": {
+        "rules": "Reglas",
+        "groups": "Grupos de proxy",
+        "dns": "DNS",
+        "listeners": "Escuchas"
+      },
+      "conversion": {
+        "identical": "{name} es igual que {base}: sus {count} plan(es) usarán {base} directamente y {name} se eliminará.",
+        "keeps": "{name} conservará solo lo que difiere de {base} ({size}):",
+        "moved": "{count} de sus reglas están entre las de {base} y pasarán al principio. Una regla más arriba puede coincidir antes; revísalas antes de convertir.",
+        "allowMove": "Moverlas al principio"
       }
     }
   },

@@ -29,13 +29,24 @@ func NewRuleTemplateController(g *gin.RouterGroup) *RuleTemplateController {
 	g.GET("/versions/:id", a.versions)
 	g.POST("/restore/:versionId", a.restore)
 	g.POST("/preview", a.preview)
+	g.POST("/variantOf/:id", a.variantOf)
 	return a
 }
 
-// ruleTemplatePreviewRequest is a template's content tried on one plan's member.
+// ruleTemplatePreviewRequest is a template's content tried on one plan's member;
+// BaseId previews it as a variant of that template.
 type ruleTemplatePreviewRequest struct {
 	PlanId  int    `json:"planId"`
 	Content string `json:"content"`
+	BaseId  int    `json:"baseId"`
+}
+
+// ruleTemplateVariantRequest turns a template into a variant of BaseId; without
+// Apply it only reports what that would do.
+type ruleTemplateVariantRequest struct {
+	BaseId       int  `json:"baseId"`
+	AllowReorder bool `json:"allowReorder"`
+	Apply        bool `json:"apply"`
 }
 
 func pathId(c *gin.Context, name string) (int, bool) {
@@ -147,7 +158,7 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	subId, err := a.templateService.PreviewSubId(in.PlanId, in.Content)
+	subId, base, err := a.templateService.PreviewSubId(in.PlanId, in.Content, in.BaseId)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
@@ -156,9 +167,34 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 	if err != nil {
 		remark = ""
 	}
-	out, err := sub.PreviewClash(subId, resolveHost(c), remark, in.Content)
+	source := sub.RuleTemplateSource{Content: in.Content, Base: base, Variant: in.BaseId != 0}
+	out, err := sub.PreviewClash(subId, resolveHost(c), remark, source)
 	if err == nil && strings.TrimSpace(out) == "" {
 		err = common.NewError("the plan's first user has no enabled nodes to show")
 	}
 	jsonObj(c, out, err)
+}
+
+// variantOf keeps a template as only what it changes in a base, or folds it into
+// the base when it changes nothing.
+func (a *RuleTemplateController) variantOf(c *gin.Context) {
+	id, ok := pathId(c, "id")
+	if !ok {
+		return
+	}
+	var in ruleTemplateVariantRequest
+	if err := c.ShouldBindJSON(&in); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	out, err := a.templateService.ConvertToVariant(id, in.BaseId, in.AllowReorder, in.Apply)
+	if err != nil || !in.Apply {
+		jsonObj(c, out, err)
+		return
+	}
+	toast := "pages.rules.toasts.converted"
+	if out.Identical {
+		toast = "pages.rules.toasts.folded"
+	}
+	jsonMsgObj(c, I18nWeb(c, toast), out, nil)
 }

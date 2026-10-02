@@ -1728,13 +1728,13 @@ export const sections: readonly Section[] = [
     id: 'rule-templates',
     title: 'Rule templates',
     description:
-      "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template.",
+      "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A variant (baseId set) holds only what it changes in a full YAML template, as a Clash Verge Merge document: a top-level key replaces the base's, prepend-rules / append-rules and prepend-proxy-groups / append-proxy-groups add before or after the base's lists. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template.",
     endpoints: [
       {
         method: 'GET',
         path: '/panel/api/ruleTemplates/list',
         summary:
-          'List the templates without their content: kind (rules, yaml or remote), size in bytes, whether it is the default, and how many plans use it (the default also counts the plans that name none).',
+          'List the templates without their content: kind (rules, yaml or remote), size in bytes, whether it is the default, how many plans use it (the default also counts the plans that name none), and for a variant its base and the keys it changes.',
         responseSchema: 'RuleTemplateSummary',
         responseSchemaArray: true,
       },
@@ -1749,15 +1749,15 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/ruleTemplates/add',
         summary:
-          'Create a template. Names are unique. Content that could not render is refused: broken YAML, a URL with credentials or not HTTPS, or proxy groups none of which lists __PROXY_NODES__ or a filter.',
-        body: '{\n  "name": "alpha_v3",\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
+          'Create a template. Names are unique. Content that could not render is refused: broken YAML, a URL with credentials or not HTTPS, or proxy groups none of which lists __PROXY_NODES__ or a filter. With baseId it is a variant: its content must be a YAML map, the base a full YAML template, and the merge is checked as above.',
+        body: '{\n  "name": "alpha_v3",\n  "content": "prepend-rules:\\n  - DOMAIN-SUFFIX,example.com,DIRECT\\n",\n  "baseId": 1\n}',
         responseSchema: 'RuleTemplate',
       },
       {
         method: 'POST',
         path: '/panel/api/ruleTemplates/update/:id',
         summary:
-          'Rename a template or replace its content, checked as on create. A changed content is kept as a new version.',
+          'Rename a template or replace its content, checked as on create. A changed content is kept as a new version. A base must stay a YAML document its variants merge onto, and cannot become a variant itself.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
         body: '{\n  "name": "alpha_v3",\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
         responseSchema: 'RuleTemplate',
@@ -1766,7 +1766,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/ruleTemplates/del/:id',
         summary:
-          'Delete a template and its versions. Refused for the default template and while any plan uses it.',
+          'Delete a template and its versions. Refused for the default template, for a base with variants, and while any plan uses it.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
       },
       {
@@ -1796,10 +1796,19 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/ruleTemplates/preview',
         summary:
-          "Render the Clash config the plan's first member would get with this content as their template, checked as on save. Refused for a plan without members.",
-        body: '{\n  "planId": 1,\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT"\n}',
+          "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. Refused for a plan without members.",
+        body: '{\n  "planId": 1,\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "baseId": 0\n}',
         response:
           '{\n  "success": true,\n  "obj": "proxies:\\n  - name: ...\\nrules:\\n  - DOMAIN-SUFFIX,example.com,DIRECT\\n"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleTemplates/variantOf/:id',
+        summary:
+          "Keep a full YAML template as a variant of baseId, holding only what differs. A template identical to the base is folded into it instead: its plans and default star move to the base and it is deleted. Rules added between the base's own can only move to the front: moved counts them, and applying then needs allowReorder. Without apply nothing changes and the answer says what would. Refused for a template without a key the base sets, or one whose differences would not read back the same.",
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
+        body: '{\n  "baseId": 1,\n  "allowReorder": false,\n  "apply": false\n}',
+        responseSchema: 'RuleTemplateConversion',
       },
     ],
   },

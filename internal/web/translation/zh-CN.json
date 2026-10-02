@@ -2211,7 +2211,32 @@
         "saved": "模板已保存",
         "deleted": "模板已删除",
         "defaultSet": "已设为默认模板",
-        "restored": "已还原该版本"
+        "restored": "已还原该版本",
+        "converted": "已保存为变体",
+        "folded": "已合并到基础规则"
+      },
+      "base": "基础",
+      "basedOn": "基于 {name}",
+      "addVariant": "新建变体",
+      "addVariantTitle": "{name} 的新变体",
+      "variantHint": "只写与基础规则不同的部分：顶层键（dns、proxy-groups、listeners……）整体替换基础规则的同名键；prepend-rules / append-rules 与 prepend-proxy-groups / append-proxy-groups 加在基础规则的列表之前或之后。",
+      "makeVariant": "改为变体",
+      "makeVariantTitle": "将 {name} 改为变体",
+      "baseTemplate": "基础规则",
+      "pickBase": "选择它所基于的规则",
+      "convert": "转换",
+      "noChanges": "与基础规则相同",
+      "changeKeys": {
+        "rules": "规则",
+        "groups": "代理组",
+        "dns": "DNS",
+        "listeners": "监听"
+      },
+      "conversion": {
+        "identical": "{name} 与 {base} 完全相同：它的 {count} 个套餐将直接使用 {base}，{name} 将被删除。",
+        "keeps": "{name} 将只保留与 {base} 不同的部分（{size}）：",
+        "moved": "它有 {count} 条规则位于 {base} 的规则中间，转换后会移到最前面。靠前的规则会先匹配，转换前请确认这些规则。",
+        "allowMove": "移到最前面"
       }
     }
   },

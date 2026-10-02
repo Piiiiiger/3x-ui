@@ -1191,6 +1191,7 @@ export const RealityScanResultSchema = z.object({
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
 
 export const RuleTemplateSchema = z.object({
+  baseId: z.number().int(),
   content: z.string(),
   createdAt: z.number().int(),
   id: z.number().int(),
@@ -1200,13 +1201,32 @@ export const RuleTemplateSchema = z.object({
 });
 export type RuleTemplate = z.infer<typeof RuleTemplateSchema>;
 
+export const RuleTemplateChangeSchema = z.object({
+  added: z.number().int(),
+  key: z.string(),
+  replaced: z.boolean(),
+});
+export type RuleTemplateChange = z.infer<typeof RuleTemplateChangeSchema>;
+
+export const RuleTemplateConversionSchema = z.object({
+  changes: z.array(z.lazy(() => RuleTemplateChangeSchema)),
+  identical: z.boolean(),
+  moved: z.number().int(),
+  planCount: z.number().int(),
+  size: z.number().int(),
+});
+export type RuleTemplateConversion = z.infer<typeof RuleTemplateConversionSchema>;
+
 export const RuleTemplateInputSchema = z.object({
+  baseId: z.number().int(),
   content: z.string(),
   name: z.string(),
 });
 export type RuleTemplateInput = z.infer<typeof RuleTemplateInputSchema>;
 
 export const RuleTemplateSummarySchema = z.object({
+  baseId: z.number().int(),
+  changes: z.array(z.lazy(() => RuleTemplateChangeSchema)),
   id: z.number().int(),
   isDefault: z.boolean(),
   kind: z.enum(['rules', 'yaml', 'remote']),

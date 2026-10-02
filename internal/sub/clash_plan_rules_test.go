@@ -115,7 +115,7 @@ func TestLegacyClashLeavesThePlanTemplateOut(t *testing.T) {
 func TestPreviewClashRendersTheGivenRulesInsteadOfTheTemplate(t *testing.T) {
 	seedPlanSub(t, model.VLESS, vlessPlanSettings, tcpStream)
 	putS1OnPlan(t, seedRuleTemplate(t, "plan", planClashRule, false))
-	out, err := PreviewClash("s1", "req.example.com", "", "DOMAIN-SUFFIX,preview.example,DIRECT")
+	out, err := PreviewClash("s1", "req.example.com", "", RuleTemplateSource{Content: "DOMAIN-SUFFIX,preview.example,DIRECT"})
 	if err != nil {
 		t.Fatalf("PreviewClash: %v", err)
 	}

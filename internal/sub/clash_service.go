@@ -17,13 +17,22 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/clashmerge"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
 )
 
 type SubClashService struct {
 	SubService *SubService
-	// rulesOverride, when set, stands in for the subscription's template (a preview).
-	rulesOverride *string
+	// templateOverride, when set, stands in for the subscription's template (a preview).
+	templateOverride *RuleTemplateSource
+}
+
+// RuleTemplateSource is the rule template a subscription renders with: its content
+// and, for a variant, the content of the template it changes.
+type RuleTemplateSource struct {
+	Content string
+	Base    string
+	Variant bool
 }
 
 var errNoLegacyClashProxies = errors.New("no Clash for Windows-compatible proxies found; use the Mihomo subscription for modern proxy types")
@@ -32,10 +41,10 @@ func NewSubClashService(subService *SubService) *SubClashService {
 	return &SubClashService{SubService: subService}
 }
 
-// PreviewClash renders the Clash config subId would get with rules in place of its
+// PreviewClash renders the Clash config subId would get with source in place of its
 // plan's template, for the rule templates page.
-func PreviewClash(subId, host, remarkTemplate, rules string) (string, error) {
-	s := &SubClashService{SubService: NewSubService(remarkTemplate), rulesOverride: &rules}
+func PreviewClash(subId, host, remarkTemplate string, source RuleTemplateSource) (string, error) {
+	s := &SubClashService{SubService: NewSubService(remarkTemplate), templateOverride: &source}
 	out, _, err := s.GetClash(subId, host)
 	return out, err
 }
@@ -174,12 +183,15 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
 	if !legacy {
-		rules, err := s.routingRules(subId)
+		source, err := s.routingRules(subId)
 		if err != nil {
 			return "", "", err
 		}
-		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(rules)
-		if resolveErr == nil && strings.TrimSpace(resolved) != "" {
+		if source.Variant {
+			if err := mergeClashTemplateVariant(config, source.Base, source.Content); err != nil {
+				return "", "", err
+			}
+		} else if resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(source.Content); resolveErr == nil && strings.TrimSpace(resolved) != "" {
 			if remote {
 				if err := mergeRemoteClashRules(config, remoteDocument); err != nil {
 					return "", "", err
@@ -200,24 +212,36 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 
 // routingRules picks the rule template of the subscription's plan, else the default
 // template: for a plan that names none, and for clients without a plan.
-func (s *SubClashService) routingRules(subId string) (string, error) {
-	if s.rulesOverride != nil {
-		return *s.rulesOverride, nil
+func (s *SubClashService) routingRules(subId string) (RuleTemplateSource, error) {
+	if s.templateOverride != nil {
+		return *s.templateOverride, nil
 	}
 	db := database.GetDB()
-	var rules []string
+	const columns = "t.content AS content, COALESCE(b.content, '') AS base, t.base_id <> 0 AS variant"
+	var found []RuleTemplateSource
 	err := db.Table("clients AS c").
 		Joins("JOIN plans AS p ON p.id = c.plan_id").
 		Joins("JOIN rule_templates AS t ON t.id = p.template_id").
+		Joins("LEFT JOIN rule_templates AS b ON b.id = t.base_id").
 		Where("c.sub_id = ?", subId).
 		Order("p.id").Limit(1).
-		Pluck("t.content", &rules).Error
-	if err != nil || len(rules) > 0 {
-		return strings.Join(rules, ""), err
+		Select(columns).Scan(&found).Error
+	if err != nil || len(found) > 0 {
+		return firstSource(found), err
 	}
-	err = db.Model(&model.RuleTemplate{}).Where("is_default = ?", true).
-		Order("id").Limit(1).Pluck("content", &rules).Error
-	return strings.Join(rules, ""), err
+	err = db.Table("rule_templates AS t").
+		Joins("LEFT JOIN rule_templates AS b ON b.id = t.base_id").
+		Where("t.is_default = ?", true).
+		Order("t.id").Limit(1).
+		Select(columns).Scan(&found).Error
+	return firstSource(found), err
+}
+
+func firstSource(found []RuleTemplateSource) RuleTemplateSource {
+	if len(found) == 0 {
+		return RuleTemplateSource{}
+	}
+	return found[0]
 }
 
 func legacyClashProxies(proxies []map[string]any) []map[string]any {
@@ -1296,25 +1320,61 @@ func mergeClashRulesYAML(base map[string]any, raw string) error {
 	case []any:
 		mergeClashRules(base, typed)
 	case map[string]any:
-		for key, value := range typed {
-			if key == "rules" {
-				if ruleList, ok := asAnySlice(value); ok {
-					mergeClashRules(base, ruleList)
-				}
-				continue
-			}
-			// A key left null (templates ship `proxies: null`) means "not set".
-			if value == nil {
-				continue
-			}
-			base[key] = value
-		}
-		expandClashTemplateGroups(base)
+		mergeClashTemplateDocument(base, typed)
 	default:
 		mergeClashRules(base, linesToClashRules(raw))
 	}
 
 	return nil
+}
+
+// mergeClashTemplateDocument puts a YAML template's keys into the config and fills
+// its groups with the subscription's proxies.
+func mergeClashTemplateDocument(base map[string]any, template map[string]any) {
+	for key, value := range template {
+		if key == "rules" {
+			if ruleList, ok := asAnySlice(value); ok {
+				mergeClashRules(base, ruleList)
+			}
+			continue
+		}
+		// A key left null (templates ship `proxies: null`) means "not set".
+		if value == nil {
+			continue
+		}
+		base[key] = value
+	}
+	expandClashTemplateGroups(base)
+}
+
+// mergeClashTemplateVariant renders a variant as the full template it stands for:
+// its base with its changes applied (see clashmerge).
+func mergeClashTemplateVariant(config map[string]any, base, variant string) error {
+	baseDoc, err := parseClashTemplateMap(base)
+	if err != nil {
+		return fmt.Errorf("the variant's base: %w", err)
+	}
+	variantDoc, err := parseClashTemplateMap(variant)
+	if err != nil {
+		return fmt.Errorf("the variant: %w", err)
+	}
+	mergeClashTemplateDocument(config, clashmerge.Apply(baseDoc, variantDoc))
+	return nil
+}
+
+func parseClashTemplateMap(content string) (map[string]any, error) {
+	if strings.TrimSpace(content) == "" {
+		return map[string]any{}, nil
+	}
+	var doc any
+	if err := yaml.Unmarshal([]byte(content), &doc); err != nil {
+		return nil, err
+	}
+	m, ok := doc.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("not a YAML map")
+	}
+	return m, nil
 }
 
 // clashProxyNodesPlaceholder stands for every generated proxy in a template group,

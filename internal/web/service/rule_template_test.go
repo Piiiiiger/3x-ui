@@ -224,13 +224,13 @@ func TestRuleTemplatePreviewPicksThePlansFirstMember(t *testing.T) {
 		}
 	}
 	s := &RuleTemplateService{}
-	if subId, err := s.PreviewSubId(plan.Id, "MATCH,DIRECT"); err != nil || subId != "sub-zed" {
+	if subId, _, err := s.PreviewSubId(plan.Id, "MATCH,DIRECT", 0); err != nil || subId != "sub-zed" {
 		t.Errorf("preview member = %q (err %v), want the first one added, sub-zed", subId, err)
 	}
-	if _, err := s.PreviewSubId(empty.Id, "MATCH,DIRECT"); err == nil || !strings.Contains(err.Error(), "no users") {
+	if _, _, err := s.PreviewSubId(empty.Id, "MATCH,DIRECT", 0); err == nil || !strings.Contains(err.Error(), "no users") {
 		t.Errorf("preview on an empty plan: err = %v, want it refused", err)
 	}
-	if _, err := s.PreviewSubId(plan.Id, "proxy-groups:\n  - name: [PROXY\n"); err == nil {
+	if _, _, err := s.PreviewSubId(plan.Id, "proxy-groups:\n  - name: [PROXY\n", 0); err == nil {
 		t.Error("preview of broken YAML was accepted")
 	}
 }

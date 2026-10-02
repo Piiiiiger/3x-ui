@@ -2211,7 +2211,32 @@
         "saved": "Template saved",
         "deleted": "Template deleted",
         "defaultSet": "Default template set",
-        "restored": "Version restored"
+        "restored": "Version restored",
+        "converted": "Saved as a variant",
+        "folded": "Merged into its base"
+      },
+      "base": "Base",
+      "basedOn": "Based on {name}",
+      "addVariant": "New variant",
+      "addVariantTitle": "New variant of {name}",
+      "variantHint": "Only what differs from the base: a top-level key (dns, proxy-groups, listeners…) replaces the base's; prepend-rules / append-rules and prepend-proxy-groups / append-proxy-groups add before or after its lists.",
+      "makeVariant": "Make variant",
+      "makeVariantTitle": "Make {name} a variant",
+      "baseTemplate": "Base template",
+      "pickBase": "Pick the template it varies",
+      "convert": "Convert",
+      "noChanges": "Same as the base",
+      "changeKeys": {
+        "rules": "Rules",
+        "groups": "Proxy groups",
+        "dns": "DNS",
+        "listeners": "Listeners"
+      },
+      "conversion": {
+        "identical": "{name} is the same as {base}: its {count} plan(s) will use {base} directly, and {name} will be deleted.",
+        "keeps": "{name} will keep only what differs from {base} ({size}):",
+        "moved": "{count} of its rules sit between {base}'s own and will move to the top. A rule higher up can match first, so check them before converting.",
+        "allowMove": "Move them to the top"
       }
     }
   },

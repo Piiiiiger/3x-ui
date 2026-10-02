@@ -1301,6 +1301,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "x25519": true
   },
   "RuleTemplate": {
+    "baseId": 0,
     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
     "createdAt": 1735689600000,
     "id": 1,
@@ -1308,11 +1309,38 @@ export const EXAMPLES: Record<string, unknown> = {
     "name": "alpha_v3",
     "updatedAt": 1735689600000
   },
+  "RuleTemplateChange": {
+    "added": 5,
+    "key": "rules",
+    "replaced": false
+  },
+  "RuleTemplateConversion": {
+    "changes": [
+      {
+        "added": 5,
+        "key": "rules",
+        "replaced": false
+      }
+    ],
+    "identical": false,
+    "moved": 5,
+    "planCount": 1,
+    "size": 2048
+  },
   "RuleTemplateInput": {
+    "baseId": 0,
     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
     "name": "alpha_v3"
   },
   "RuleTemplateSummary": {
+    "baseId": 0,
+    "changes": [
+      {
+        "added": 5,
+        "key": "rules",
+        "replaced": false
+      }
+    ],
     "id": 1,
     "isDefault": false,
     "kind": "yaml",

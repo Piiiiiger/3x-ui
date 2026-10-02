@@ -2211,7 +2211,32 @@
         "saved": "Şablon kaydedildi",
         "deleted": "Şablon silindi",
         "defaultSet": "Varsayılan şablon ayarlandı",
-        "restored": "Sürüm geri yüklendi"
+        "restored": "Sürüm geri yüklendi",
+        "converted": "Varyant olarak kaydedildi",
+        "folded": "Temeline birleştirildi"
+      },
+      "base": "Temel",
+      "basedOn": "{name} tabanlı",
+      "addVariant": "Yeni varyant",
+      "addVariantTitle": "{name} için yeni varyant",
+      "variantHint": "Yalnızca temelden farklı olanlar: üst düzey bir anahtar (dns, proxy-groups, listeners…) temelinkini değiştirir; prepend-rules / append-rules ve prepend-proxy-groups / append-proxy-groups temelin listelerinin önüne veya arkasına ekler.",
+      "makeVariant": "Varyanta dönüştür",
+      "makeVariantTitle": "{name} varyanta dönüştürülsün",
+      "baseTemplate": "Temel şablon",
+      "pickBase": "Dayandığı şablonu seçin",
+      "convert": "Dönüştür",
+      "noChanges": "Temelle aynı",
+      "changeKeys": {
+        "rules": "Kurallar",
+        "groups": "Proxy grupları",
+        "dns": "DNS",
+        "listeners": "Dinleyiciler"
+      },
+      "conversion": {
+        "identical": "{name}, {base} ile aynı: {count} paketi doğrudan {base} kullanacak ve {name} silinecek.",
+        "keeps": "{name} yalnızca {base} ile farklarını tutacak ({size}):",
+        "moved": "{count} kuralı {base} kurallarının arasında ve en üste taşınacak. Daha üstteki kural önce eşleşebilir; dönüştürmeden önce kontrol edin.",
+        "allowMove": "En üste taşı"
       }
     }
   },

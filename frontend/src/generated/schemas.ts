@@ -4938,8 +4938,13 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "RuleTemplate": {
-    "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document\n(妙妙屋X's templates, whose groups list __PROXY_NODES__) or an HTTPS URL.",
+    "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document whose\ngroups list __PROXY_NODES__, an HTTPS URL, or a variant's changes to its base.",
     "properties": {
+      "baseId": {
+        "description": "BaseId is the template a variant changes; 0 for a full template.",
+        "example": 0,
+        "type": "integer"
+      },
       "content": {
         "example": "DOMAIN-SUFFIX,example.com,DIRECT",
         "type": "string"
@@ -4968,6 +4973,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "baseId",
       "content",
       "createdAt",
       "id",
@@ -4977,9 +4983,71 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
-  "RuleTemplateInput": {
-    "description": "RuleTemplateInput is the editable part of a template.",
+  "RuleTemplateChange": {
+    "description": "RuleTemplateChange is a key of its base a variant replaces, adds entries to, or both.",
     "properties": {
+      "added": {
+        "example": 5,
+        "type": "integer"
+      },
+      "key": {
+        "example": "rules",
+        "type": "string"
+      },
+      "replaced": {
+        "example": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "added",
+      "key",
+      "replaced"
+    ],
+    "type": "object"
+  },
+  "RuleTemplateConversion": {
+    "description": "RuleTemplateConversion is what making a template a variant does: an identical one\nis folded into the base; moved counts rules between the base's that must go first.",
+    "properties": {
+      "changes": {
+        "items": {
+          "$ref": "#/components/schemas/RuleTemplateChange"
+        },
+        "type": "array"
+      },
+      "identical": {
+        "example": false,
+        "type": "boolean"
+      },
+      "moved": {
+        "example": 5,
+        "type": "integer"
+      },
+      "planCount": {
+        "example": 1,
+        "type": "integer"
+      },
+      "size": {
+        "example": 2048,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "changes",
+      "identical",
+      "moved",
+      "planCount",
+      "size"
+    ],
+    "type": "object"
+  },
+  "RuleTemplateInput": {
+    "description": "RuleTemplateInput is the editable part of a template. BaseId makes it a variant:\ncontent then holds only what it changes in that template.",
+    "properties": {
+      "baseId": {
+        "example": 0,
+        "type": "integer"
+      },
       "content": {
         "example": "DOMAIN-SUFFIX,example.com,DIRECT",
         "type": "string"
@@ -4990,6 +5058,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "baseId",
       "content",
       "name"
     ],
@@ -4998,6 +5067,17 @@ export const SCHEMAS: Record<string, unknown> = {
   "RuleTemplateSummary": {
     "description": "RuleTemplateSummary is a template in the list, without its content. Kind says\nhow its content reads; planCount includes the plans the default serves.",
     "properties": {
+      "baseId": {
+        "description": "BaseId and Changes describe a variant: its base and what it changes there.",
+        "example": 0,
+        "type": "integer"
+      },
+      "changes": {
+        "items": {
+          "$ref": "#/components/schemas/RuleTemplateChange"
+        },
+        "type": "array"
+      },
       "id": {
         "example": 1,
         "type": "integer"
@@ -5034,6 +5114,8 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "baseId",
+      "changes",
       "id",
       "isDefault",
       "kind",

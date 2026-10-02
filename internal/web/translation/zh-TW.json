@@ -2211,7 +2211,32 @@
         "saved": "範本已儲存",
         "deleted": "範本已刪除",
         "defaultSet": "已設為預設範本",
-        "restored": "已還原該版本"
+        "restored": "已還原該版本",
+        "converted": "已儲存為變體",
+        "folded": "已合併到基礎規則"
+      },
+      "base": "基礎",
+      "basedOn": "基於 {name}",
+      "addVariant": "新增變體",
+      "addVariantTitle": "{name} 的新變體",
+      "variantHint": "只寫與基礎規則不同的部分：頂層鍵（dns、proxy-groups、listeners……）整體取代基礎規則的同名鍵；prepend-rules / append-rules 與 prepend-proxy-groups / append-proxy-groups 加在基礎規則的清單之前或之後。",
+      "makeVariant": "改為變體",
+      "makeVariantTitle": "將 {name} 改為變體",
+      "baseTemplate": "基礎規則",
+      "pickBase": "選擇它所基於的規則",
+      "convert": "轉換",
+      "noChanges": "與基礎規則相同",
+      "changeKeys": {
+        "rules": "規則",
+        "groups": "代理組",
+        "dns": "DNS",
+        "listeners": "監聽"
+      },
+      "conversion": {
+        "identical": "{name} 與 {base} 完全相同：它的 {count} 個方案將直接使用 {base}，{name} 將被刪除。",
+        "keeps": "{name} 將只保留與 {base} 不同的部分（{size}）：",
+        "moved": "它有 {count} 條規則位於 {base} 的規則中間，轉換後會移到最前面。靠前的規則會先比對，轉換前請確認這些規則。",
+        "allowMove": "移到最前面"
       }
     }
   },

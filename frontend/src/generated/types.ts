@@ -1108,6 +1108,7 @@ export interface RealityScanResult {
 }
 
 export interface RuleTemplate {
+  baseId: number;
   content: string;
   createdAt: number;
   id: number;
@@ -1116,12 +1117,29 @@ export interface RuleTemplate {
   updatedAt: number;
 }
 
+export interface RuleTemplateChange {
+  added: number;
+  key: string;
+  replaced: boolean;
+}
+
+export interface RuleTemplateConversion {
+  changes: RuleTemplateChange[];
+  identical: boolean;
+  moved: number;
+  planCount: number;
+  size: number;
+}
+
 export interface RuleTemplateInput {
+  baseId: number;
   content: string;
   name: string;
 }
 
 export interface RuleTemplateSummary {
+  baseId: number;
+  changes: RuleTemplateChange[];
   id: number;
   isDefault: boolean;
   kind: string;

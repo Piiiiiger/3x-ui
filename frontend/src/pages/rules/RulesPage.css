@@ -8,3 +8,14 @@
 .rule-template-star {
   color: var(--ant-color-warning);
 }
+
+.rule-template-branch {
+  color: var(--ant-color-text-quaternary);
+  padding-inline: 4px 2px;
+}
+
+.rule-template-changes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+}
