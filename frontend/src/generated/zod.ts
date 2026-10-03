@@ -1235,6 +1235,12 @@ export const RuleTemplateInputSchema = z.object({
 });
 export type RuleTemplateInput = z.infer<typeof RuleTemplateInputSchema>;
 
+export const RuleTemplatePreviewSchema = z.object({
+  content: z.string(),
+  username: z.string(),
+});
+export type RuleTemplatePreview = z.infer<typeof RuleTemplatePreviewSchema>;
+
 export const RuleTemplateSummarySchema = z.object({
   baseId: z.number().int(),
   changes: z.array(z.lazy(() => RuleTemplateChangeSchema)),
@@ -1245,6 +1251,7 @@ export const RuleTemplateSummarySchema = z.object({
   planCount: z.number().int(),
   size: z.number().int(),
   updatedAt: z.number().int(),
+  users: z.array(z.string()),
 });
 export type RuleTemplateSummary = z.infer<typeof RuleTemplateSummarySchema>;
 

@@ -36,13 +36,14 @@ type RuleTemplateInput struct {
 // RuleTemplateSummary is a template in the list, without its content. Kind says
 // how its content reads; planCount includes the plans the default serves.
 type RuleTemplateSummary struct {
-	Id        int    `json:"id" example:"1"`
-	Name      string `json:"name" example:"alpha_v3"`
-	IsDefault bool   `json:"isDefault" example:"false"`
-	Kind      string `json:"kind" validate:"oneof=rules yaml remote" example:"yaml"`
-	Size      int    `json:"size" example:"389305"`
-	PlanCount int    `json:"planCount" example:"2"`
-	UpdatedAt int64  `json:"updatedAt" example:"1735689600000"`
+	Id        int      `json:"id" example:"1"`
+	Name      string   `json:"name" example:"alpha_v3"`
+	IsDefault bool     `json:"isDefault" example:"false"`
+	Kind      string   `json:"kind" validate:"oneof=rules yaml remote" example:"yaml"`
+	Size      int      `json:"size" example:"389305"`
+	PlanCount int      `json:"planCount" example:"2"`
+	Users     []string `json:"users"`
+	UpdatedAt int64    `json:"updatedAt" example:"1735689600000"`
 	// BaseId and Changes describe a variant: its base and what it changes there.
 	BaseId  int                  `json:"baseId" example:"0"`
 	Changes []RuleTemplateChange `json:"changes"`
@@ -90,6 +91,10 @@ func (s *RuleTemplateService) List() ([]RuleTemplateSummary, error) {
 	for _, c := range counts {
 		plansOf[c.TemplateId] = c.Plans
 	}
+	usersOf, err := ruleTemplateUsers(db, templates)
+	if err != nil {
+		return nil, err
+	}
 	out := make([]RuleTemplateSummary, 0, len(templates))
 	for _, tpl := range templates {
 		plans := plansOf[tpl.Id]
@@ -99,7 +104,7 @@ func (s *RuleTemplateService) List() ([]RuleTemplateSummary, error) {
 		summary := RuleTemplateSummary{
 			Id: tpl.Id, Name: tpl.Name, IsDefault: tpl.IsDefault, Kind: ruleTemplateKind(tpl.Content),
 			Size: len(tpl.Content), PlanCount: plans, UpdatedAt: tpl.UpdatedAt,
-			BaseId: tpl.BaseId, Changes: []RuleTemplateChange{},
+			BaseId: tpl.BaseId, Changes: []RuleTemplateChange{}, Users: usersOf[tpl.Id],
 		}
 		if tpl.BaseId != 0 {
 			if doc, err := templateMap(tpl.Content); err == nil {
@@ -109,6 +114,46 @@ func (s *RuleTemplateService) List() ([]RuleTemplateSummary, error) {
 		out = append(out, summary)
 	}
 	return out, nil
+}
+
+// Include fallback users and the users of variants that inherit a base's rules.
+func ruleTemplateUsers(db *gorm.DB, templates []model.RuleTemplate) (map[int][]string, error) {
+	users := make(map[int][]string, len(templates))
+	bases := make(map[int]int, len(templates))
+	defaultId := 0
+	for _, tpl := range templates {
+		users[tpl.Id] = []string{}
+		bases[tpl.Id] = tpl.BaseId
+		if tpl.IsDefault {
+			defaultId = tpl.Id
+		}
+	}
+	var assignments []struct {
+		Email      string
+		TemplateId int
+	}
+	err := db.Table("clients AS c").
+		Joins("LEFT JOIN plans AS p ON p.id = c.plan_id").
+		Joins("LEFT JOIN rule_templates AS t ON t.id = p.template_id").
+		Select("c.email, COALESCE(t.id, 0) AS template_id").
+		Order("c.email ASC, c.id ASC").Scan(&assignments).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, assignment := range assignments {
+		id := assignment.TemplateId
+		if id == 0 {
+			id = defaultId
+		}
+		if id == 0 {
+			continue
+		}
+		users[id] = append(users[id], assignment.Email)
+		if base := bases[id]; base != 0 {
+			users[base] = append(users[base], assignment.Email)
+		}
+	}
+	return users, nil
 }
 
 func (s *RuleTemplateService) Get(id int) (*model.RuleTemplate, error) {
@@ -245,30 +290,35 @@ func (s *RuleTemplateService) Contents() ([]string, error) {
 	return contents, err
 }
 
-// PreviewSubId checks content as a save would (a variant of baseId when set) and picks
-// the plan's first member to render for, returning the base's content to merge onto.
-func (s *RuleTemplateService) PreviewSubId(planId int, content string, baseId int) (string, string, error) {
+// PreviewMember validates the template and returns the exact member whose config is rendered.
+func (s *RuleTemplateService) PreviewMember(planId int, content string, baseId int) (*model.ClientRecord, string, error) {
 	db := database.GetDB()
 	base := ""
 	if baseId != 0 {
 		tpl, err := validateVariant(db, 0, baseId, content)
 		if err != nil {
-			return "", "", err
+			return nil, "", err
 		}
 		base = tpl.Content
 	} else if err := validateRuleTemplateContent(content); err != nil {
-		return "", "", err
+		return nil, "", err
 	}
-	var subIds []string
-	if err := db.Model(&model.ClientRecord{}).
+	var clients []model.ClientRecord
+	if err := db.Select("id", "email", "sub_id").
 		Where("plan_id = ? AND sub_id <> ''", planId).Order("id").Limit(1).
-		Pluck("sub_id", &subIds).Error; err != nil {
-		return "", "", err
+		Find(&clients).Error; err != nil {
+		return nil, "", err
 	}
-	if len(subIds) == 0 {
-		return "", "", common.NewError("the plan has no users to preview with")
+	if len(clients) == 0 {
+		return nil, "", common.NewError("the plan has no users to preview with")
 	}
-	return subIds[0], base, nil
+	return &clients[0], base, nil
+}
+
+// RuleTemplatePreview identifies the user whose subscription produced the preview.
+type RuleTemplatePreview struct {
+	Username string `json:"username" example:"alice"`
+	Content  string `json:"content" example:"proxies: []\nrules: [MATCH,DIRECT]"`
 }
 
 // ConvertToVariant keeps a full template as only what differs from baseId, or folds it

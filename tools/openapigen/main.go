@@ -95,6 +95,7 @@ func run(root, outDir string) error {
 				"RuleTemplateConversion",
 				"RuleTemplateInput",
 				"RuleTemplateSummary",
+				"RuleTemplatePreview",
 				"RuleTemplateVersionView",
 				"TrafficOverview",
 				"ClientPortalStatus",

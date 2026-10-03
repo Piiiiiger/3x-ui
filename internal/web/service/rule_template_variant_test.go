@@ -326,11 +326,11 @@ func TestPreviewChecksAVariantAsItsMerge(t *testing.T) {
 	}
 	base := mustCreateTemplate(t, "base", baseRules)
 	s := &RuleTemplateService{}
-	subId, baseContent, err := s.PreviewSubId(plan.Id, "mode: global\n", base.Id)
-	if err != nil || subId != "sub-amy" || baseContent != baseRules {
-		t.Fatalf("preview = %q, base %q, err %v", subId, baseContent, err)
+	subId, baseContent, err := s.PreviewMember(plan.Id, "mode: global\n", base.Id)
+	if err != nil || subId == nil || subId.SubID != "sub-amy" || subId.Email != "amy" || baseContent != baseRules {
+		t.Fatalf("preview = %+v, base %q, err %v", subId, baseContent, err)
 	}
-	if _, _, err := s.PreviewSubId(plan.Id, "proxy-groups:\n  - name: P\n    type: select\n    proxies: [DIRECT]\n", base.Id); err == nil {
+	if _, _, err := s.PreviewMember(plan.Id, "proxy-groups:\n  - name: P\n    type: select\n    proxies: [DIRECT]\n", base.Id); err == nil {
 		t.Error("previewing a variant whose merge loses the nodes was accepted")
 	}
 }

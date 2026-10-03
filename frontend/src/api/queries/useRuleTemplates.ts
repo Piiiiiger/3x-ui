@@ -8,6 +8,8 @@ import { keys } from '@/api/queryKeys';
 import {
   RuleTemplateConversionSchema,
   RuleTemplateSchema,
+  RuleTemplatePreviewSchema,
+  type RuleTemplatePreview,
   RuleTemplateSummarySchema,
   RuleTemplateVersionViewSchema,
   type RuleTemplate,
@@ -92,14 +94,14 @@ export interface RuleTemplatePreviewQuery {
 async function fetchRuleTemplatePreview(
   planId: number,
   query: RuleTemplatePreviewQuery,
-): Promise<string> {
-  const msg = await HttpUtil.post<string>(
+): Promise<RuleTemplatePreview> {
+  const msg = await HttpUtil.post(
     `${BASE}/preview`,
     { planId, content: query.content, baseId: query.baseId },
     { ...JSON_HEADERS, silent: true },
   );
   if (!msg?.success) throw new Error(msg?.msg || 'Failed to preview the template');
-  return typeof msg.obj === 'string' ? msg.obj : '';
+  return parseMsg(msg, RuleTemplatePreviewSchema, 'ruleTemplates/preview').obj!;
 }
 
 /** The Clash config the plan's first member would get with this content, or why not. */

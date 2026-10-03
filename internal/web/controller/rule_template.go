@@ -158,7 +158,7 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	subId, base, err := a.templateService.PreviewSubId(in.PlanId, in.Content, in.BaseId)
+	member, base, err := a.templateService.PreviewMember(in.PlanId, in.Content, in.BaseId)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
@@ -168,11 +168,11 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 		remark = ""
 	}
 	source := sub.RuleTemplateSource{Content: in.Content, Base: base, Variant: in.BaseId != 0}
-	out, err := sub.PreviewClash(subId, resolveHost(c), remark, source)
+	out, err := sub.PreviewClash(member.SubID, resolveHost(c), remark, source)
 	if err == nil && strings.TrimSpace(out) == "" {
 		err = common.NewError("the plan's first user has no enabled nodes to show")
 	}
-	jsonObj(c, out, err)
+	jsonObj(c, service.RuleTemplatePreview{Username: member.Email, Content: out}, err)
 }
 
 // variantOf keeps a template as only what it changes in a base, or folds it into

@@ -5106,6 +5106,24 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "RuleTemplatePreview": {
+    "description": "RuleTemplatePreview identifies the user whose subscription produced the preview.",
+    "properties": {
+      "content": {
+        "example": "proxies: []\nrules: [MATCH,DIRECT]",
+        "type": "string"
+      },
+      "username": {
+        "example": "alice",
+        "type": "string"
+      }
+    },
+    "required": [
+      "content",
+      "username"
+    ],
+    "type": "object"
+  },
   "RuleTemplateSummary": {
     "description": "RuleTemplateSummary is a template in the list, without its content. Kind says\nhow its content reads; planCount includes the plans the default serves.",
     "properties": {
@@ -5153,6 +5171,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 1735689600000,
         "format": "int64",
         "type": "integer"
+      },
+      "users": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
       }
     },
     "required": [
@@ -5164,7 +5188,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "name",
       "planCount",
       "size",
-      "updatedAt"
+      "updatedAt",
+      "users"
     ],
     "type": "object"
   },

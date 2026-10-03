@@ -60,9 +60,19 @@ export default function RuleTemplatePreviewModal({
           />
           <Typography.Text type="secondary">{t('pages.rules.previewHint')}</Typography.Text>
         </Space>
+        {preview.data && (
+          <Typography.Text>
+            {t('subscription.portal.username')}: <strong>{preview.data.username}</strong>
+          </Typography.Text>
+        )}
         {preview.error && <Alert type="error" showIcon title={(preview.error as Error).message} />}
         <Spin spinning={preview.isFetching}>
-          <YamlEditor value={preview.data ?? ''} readOnly minHeight="50vh" maxHeight="60vh" />
+          <YamlEditor
+            value={preview.data?.content ?? ''}
+            readOnly
+            minHeight="50vh"
+            maxHeight="60vh"
+          />
         </Spin>
       </Space>
     </Modal>

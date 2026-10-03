@@ -1859,8 +1859,7 @@ export const sections: readonly Section[] = [
         summary:
           "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. Refused for a plan without members.",
         body: '{\n  "planId": 1,\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "baseId": 0\n}',
-        response:
-          '{\n  "success": true,\n  "obj": "proxies:\\n  - name: ...\\nrules:\\n  - DOMAIN-SUFFIX,example.com,DIRECT\\n"\n}',
+        responseSchema: 'RuleTemplatePreview',
       },
       {
         method: 'POST',

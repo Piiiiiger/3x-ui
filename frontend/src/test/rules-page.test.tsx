@@ -17,6 +17,7 @@ const TEMPLATES = [
     kind: 'yaml',
     size: 2048,
     planCount: 2,
+    users: ['alice', 'bob'],
     updatedAt: 0,
     baseId: 0,
     changes: [],
@@ -28,6 +29,7 @@ const TEMPLATES = [
     kind: 'remote',
     size: 40,
     planCount: 0,
+    users: [],
     updatedAt: 0,
     baseId: 0,
     changes: [],
@@ -39,6 +41,7 @@ const TEMPLATES = [
     kind: 'yaml',
     size: 120,
     planCount: 1,
+    users: ['alice'],
     updatedAt: 0,
     baseId: 3,
     changes: [
@@ -54,6 +57,7 @@ const TEMPLATES = [
     kind: 'yaml',
     size: 2000,
     planCount: 1,
+    users: ['alice'],
     updatedAt: 0,
     baseId: 0,
     changes: [],
@@ -93,7 +97,10 @@ function serve() {
   });
   postStub.mockImplementation(async (url: string, body?: unknown) => {
     if (url === '/panel/api/ruleTemplates/preview')
-      return new Msg(true, '', 'proxies:\n  - name: preview-node\nrules:\n  - MATCH,PROXY\n');
+      return new Msg(true, '', {
+        username: 'alice',
+        content: 'proxies:\n  - name: preview-node\nrules:\n  - MATCH,PROXY\n',
+      });
     if (url === '/panel/api/ruleTemplates/variantOf/8') return conversion(body);
     return new Msg(true, '', { id: 9 });
   });
@@ -107,6 +114,7 @@ const keepsListeners = () =>
     moved: 0,
     size: 300,
     planCount: 1,
+    users: ['alice'],
   });
 let conversion: (body: unknown) => Msg = keepsListeners;
 
@@ -186,6 +194,9 @@ describe('RulesPage', () => {
     fireEvent.click(within(rowOf('alpha_v3')).getByRole('button', { name: /Preview/ }));
 
     await screen.findByText('preview-node', { exact: false });
+    expect(
+      screen.getAllByRole('dialog').some((dialog) => within(dialog).queryByText('alice')),
+    ).toBe(true);
     expect(postStub).toHaveBeenCalledWith(
       '/panel/api/ruleTemplates/preview',
       { planId: 2, content: 'rules:\n  - MATCH,PROXY\n', baseId: 0 },
@@ -237,6 +248,9 @@ describe('RulesPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /Preview/ }));
 
     await screen.findByText('preview-node', { exact: false });
+    expect(
+      screen.getAllByRole('dialog').some((dialog) => within(dialog).queryByText('alice')),
+    ).toBe(true);
     expect(postStub).toHaveBeenCalledWith(
       '/panel/api/ruleTemplates/preview',
       { planId: 2, content: MINE_CONTENT, baseId: 3 },

@@ -1343,6 +1343,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "content": "DOMAIN-SUFFIX,example.com,DIRECT",
     "name": "alpha_v3"
   },
+  "RuleTemplatePreview": {
+    "content": "proxies: []\nrules: [MATCH,DIRECT]",
+    "username": "alice"
+  },
   "RuleTemplateSummary": {
     "baseId": 0,
     "changes": [
@@ -1358,7 +1362,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "name": "alpha_v3",
     "planCount": 2,
     "size": 389305,
-    "updatedAt": 1735689600000
+    "updatedAt": 1735689600000,
+    "users": [
+      ""
+    ]
   },
   "RuleTemplateVersionView": {
     "id": 7,

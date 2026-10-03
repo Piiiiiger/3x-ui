@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -224,13 +225,65 @@ func TestRuleTemplatePreviewPicksThePlansFirstMember(t *testing.T) {
 		}
 	}
 	s := &RuleTemplateService{}
-	if subId, _, err := s.PreviewSubId(plan.Id, "MATCH,DIRECT", 0); err != nil || subId != "sub-zed" {
-		t.Errorf("preview member = %q (err %v), want the first one added, sub-zed", subId, err)
+	if subId, _, err := s.PreviewMember(plan.Id, "MATCH,DIRECT", 0); err != nil || (subId == nil || subId.SubID != "sub-zed" || subId.Email != "zed") {
+		t.Errorf("preview member = %+v (err %v), want the first one added, sub-zed", subId, err)
 	}
-	if _, _, err := s.PreviewSubId(empty.Id, "MATCH,DIRECT", 0); err == nil || !strings.Contains(err.Error(), "no users") {
+	if _, _, err := s.PreviewMember(empty.Id, "MATCH,DIRECT", 0); err == nil || !strings.Contains(err.Error(), "no users") {
 		t.Errorf("preview on an empty plan: err = %v, want it refused", err)
 	}
-	if _, _, err := s.PreviewSubId(plan.Id, "proxy-groups:\n  - name: [PROXY\n", 0); err == nil {
+	if _, _, err := s.PreviewMember(plan.Id, "proxy-groups:\n  - name: [PROXY\n", 0); err == nil {
 		t.Error("preview of broken YAML was accepted")
+	}
+}
+
+func TestRuleTemplateUsageNamesDirectDefaultAndInheritedUsers(t *testing.T) {
+	setupConflictDB(t)
+	db := database.GetDB()
+	base := mustCreateTemplate(t, "base", groupTemplate)
+	variant := &model.RuleTemplate{Name: "variant", Content: "mode: global\n", BaseId: base.Id}
+	if err := db.Create(variant).Error; err != nil {
+		t.Fatal(err)
+	}
+	spare := mustCreateTemplate(t, "spare", "MATCH,DIRECT")
+	service := &RuleTemplateService{}
+	if err := service.SetDefault(base.Id); err != nil {
+		t.Fatal(err)
+	}
+	direct := &model.Plan{Name: "Direct", TemplateId: variant.Id}
+	fallback := &model.Plan{Name: "Default"}
+	for _, p := range []*model.Plan{direct, fallback} {
+		if err := db.Create(p).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, client := range []model.ClientRecord{
+		{Email: "alice", SubID: "a", PlanId: direct.Id, Enable: true},
+		{Email: "bob", SubID: "b", PlanId: fallback.Id, Enable: true},
+		{Email: "carol", SubID: "c", Enable: false},
+	} {
+		if err := db.Create(&client).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	list, err := service.List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rows []struct {
+		Id    int
+		Users []string
+	}
+	if err := json.Unmarshal(data, &rows); err != nil {
+		t.Fatal(err)
+	}
+	want := map[int]string{base.Id: "[alice bob carol]", variant.Id: "[alice]", spare.Id: "[]"}
+	for _, row := range rows {
+		if fmt.Sprint(row.Users) != want[row.Id] {
+			t.Fatalf("template %d users %v, want %s", row.Id, row.Users, want[row.Id])
+		}
 	}
 }

@@ -1148,6 +1148,11 @@ export interface RuleTemplateInput {
   name: string;
 }
 
+export interface RuleTemplatePreview {
+  content: string;
+  username: string;
+}
+
 export interface RuleTemplateSummary {
   baseId: number;
   changes: RuleTemplateChange[];
@@ -1158,6 +1163,7 @@ export interface RuleTemplateSummary {
   planCount: number;
   size: number;
   updatedAt: number;
+  users: string[];
 }
 
 export interface RuleTemplateVersionView {

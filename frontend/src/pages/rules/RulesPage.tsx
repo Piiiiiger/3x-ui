@@ -13,6 +13,7 @@ import {
   Table,
   Tag,
   Tooltip,
+  Typography,
 } from 'antd';
 import {
   BranchesOutlined,
@@ -196,7 +197,23 @@ export default function RulesPage() {
                       {
                         title: t('pages.rules.usage'),
                         key: 'usage',
-                        render: (_, tpl) => t('pages.rules.usedBy', { count: tpl.planCount }),
+                        render: (_, tpl) => (
+                          <div style={{ maxWidth: 280 }}>
+                            <div>{t('pages.rules.usedBy', { count: tpl.planCount })}</div>
+                            <Typography.Text type="secondary">
+                              {t('pages.plans.members', { count: tpl.users.length })}
+                            </Typography.Text>
+                            <div
+                              style={{ maxHeight: 96, overflowY: 'auto', overflowWrap: 'anywhere' }}
+                            >
+                              {tpl.users.map((username) => (
+                                <div key={username}>
+                                  <bdi>{username}</bdi>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ),
                       },
                       {
                         title: t('pages.rules.updated'),
