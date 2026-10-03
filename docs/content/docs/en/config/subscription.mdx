@@ -50,9 +50,17 @@ Existing users can choose **Use activation code** to change plan or renew:
 validity is added from the later of today and the existing expiry, and usage
 is reset. If an update fails, retry the same code; its days are granted once.
 
-The overview shows usage, expiry and the next scheduled reset. The **Probe**
-view shows only hosts behind the user's subscription. The ordinary subscription
-page offers the same probe view; app subscription URLs continue to work.
+The account overview uses one traffic bar, remaining quota, expiry, next reset,
+and a labeled green/red status indicator. The username is shown prominently.
+The **Probe** view shows one card per subscription node, using its node name;
+the host provider appears beneath it. The provider uses the panel host name,
+falling back to the linked probe name for the local host. Nodes on the same host share metrics.
+
+Browser visits to token-based subscription URLs redirect to `<subPath>portal`.
+The signed-in session identifies the account, so the account page has no token
+suffix. Subscription apps still use their private feed URL: they do not have the
+browser login cookie. Redeeming a code keeps the browser at the portal and does
+not rotate or invalidate existing feed URLs. Explicit raw downloads remain available.
 
 **Administrator sign in** requires an enabled authenticator and its current
 code. Serve the portal and panel on the same public origin, routing their paths
@@ -73,8 +81,8 @@ The **format is chosen by path**, each with its own enable toggle:
 
 Only enabled inbounds using **VLESS, VMess, Trojan, Shadowsocks, WireGuard, AmneziaWG, MTProto, TUIC, or Hysteria2**
 appear in a subscription, ordered by their sub-sort index (TUIC and AmneziaWG are included in raw links and Clash/Mihomo profiles, but omitted from JSON endpoints; MTProto is included in raw links). Requesting `subPath`
-with an `Accept: text/html` header (or `?html=1`) returns a human-readable info
-page instead of the raw body.
+with an `Accept: text/html` header (or `?html=1`) redirects to the session portal.
+Use `?view=raw` to request the feed explicitly in a browser.
 
 Use `/mihomo/<sub-id>` for Clash Verge Rev, Mihomo, and other maintained
 Mihomo-based clients. Use `/clash-legacy/<sub-id>` only for the discontinued
@@ -130,9 +138,8 @@ URL becomes **No link**; an existing nonempty URL remains a **Custom website**.
 To restore the built-in link, select **Built-in subscription page** above and
 save the settings.
 
-The built-in page exposes subscription URLs and node configurations, including
-for Happ encrypted subscriptions. Enable it only if you intend to provide that
-access.
+The built-in link opens the session portal. After login, users can view their
+own subscription URLs and node configurations, including Happ subscriptions.
 
 ### Optional month-end expiry display
 
@@ -161,9 +168,9 @@ date. Cached subscription information changes only after the app refreshes it.
 
 ## Custom page templates
 
-Point `subThemeDir` at a folder containing a custom info-page template to brand
-the HTML subscription page. The per-client remark on each link is fully
-templated — see [Share links → remark variables](/docs/config/share-links#remark-template-variables).
+The session portal uses the shared Pigger frontend. The legacy `subThemeDir`
+setting does not replace it. The per-client remark on each subscription link
+remains templated — see [Share links → remark variables](/docs/config/share-links#remark-template-variables).
 
 <Callout type="info">
   Put the subscription server behind TLS (set `subCertFile`/`subKeyFile`, or a

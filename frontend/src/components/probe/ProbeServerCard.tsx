@@ -9,7 +9,7 @@ import { regionFlag } from './regionFlag';
 import './ProbeServerCard.css';
 
 // The portal's server is exactly what the card draws; the admin's carries the same fields.
-export type ProbeCardServer = Omit<PortalProbeServer, 'id'>;
+export type ProbeCardServer = Omit<PortalProbeServer, 'id' | 'provider'>;
 type ProbeCardPing = ProbeCardServer['pings'][number];
 
 // Lite's own thresholds, so a route has the same colour here as on Lite's page.

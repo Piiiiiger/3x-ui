@@ -614,11 +614,8 @@ func TestFormatEndpointsRawViewBypassesBrowserPage(t *testing.T) {
 			req.Header.Set("Accept", "text/html")
 			resp := httptest.NewRecorder()
 			router.ServeHTTP(resp, req)
-			if resp.Code != http.StatusOK {
-				t.Fatalf("status = %d, want 200; body=%s", resp.Code, resp.Body.String())
-			}
-			if got := resp.Header().Get("Content-Type"); got != "text/html; charset=utf-8" {
-				t.Fatalf("Content-Type = %q, want HTML", got)
+			if resp.Code != http.StatusFound || resp.Header().Get("Location") != "/sub/portal" {
+				t.Fatalf("browser must open portal: %d %q", resp.Code, resp.Header().Get("Location"))
 			}
 		})
 	}

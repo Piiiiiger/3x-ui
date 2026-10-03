@@ -137,8 +137,8 @@ func TestSubscriptionHwidGateSkipsHtmlInfoPage(t *testing.T) {
 	router, subID := initHwidSubRouter(t, 1)
 
 	rec := requestSub(t, router, http.MethodGet, "/sub/"+subID, "", "text/html")
-	if rec.Code != http.StatusOK {
-		t.Fatalf("HTML sub page status = %d, want 200, body=%q", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusFound || rec.Header().Get("Location") != "/sub/portal" {
+		t.Fatalf("browser must open portal without HWID: %d %q", rec.Code, rec.Header().Get("Location"))
 	}
 	if rec.Header().Get("X-Hwid-Not-Supported") != "" {
 		t.Fatalf("HTML sub page should not be HWID-gated: %#v", rec.Header())

@@ -98,7 +98,7 @@ func TestSubInfoEndpoint_UnknownSubIs404(t *testing.T) {
 	}
 }
 
-func TestSubInfoEndpoint_HTMLPageStillWinsWithoutFormatParam(t *testing.T) {
+func TestBrowserSubscriptionOpensSessionPortalWithoutExposingToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	initSubDB(t)
 	seedInfoEndpointSub(t, "html-sub", "html@x")
@@ -115,16 +115,13 @@ func TestSubInfoEndpoint_HTMLPageStillWinsWithoutFormatParam(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200; body=%s", w.Code, w.Body.String())
+	if w.Code != http.StatusFound || w.Header().Get("Location") != "/sub/portal" {
+		t.Fatalf("browser must open the session portal: status=%d location=%q", w.Code, w.Header().Get("Location"))
 	}
-	if ct := w.Header().Get("Content-Type"); !strings.Contains(ct, "text/html") {
-		t.Fatalf("Content-Type = %q, want text/html for a browser request", ct)
+	if strings.Contains(w.Body.String(), "html-sub") || strings.Contains(w.Body.String(), "html@x") {
+		t.Fatal("redirect exposed subscription identity")
 	}
-	if !strings.Contains(w.Body.String(), "__SUB_PAGE_DATA__") {
-		t.Fatal("browser request must still get the SPA page with injected page data")
-	}
-	if !strings.Contains(w.Body.String(), `"isOnline":false`) {
-		t.Fatalf("injected page data must carry isOnline; body=%s", w.Body.String())
+	if w.Header().Get("Cache-Control") != "no-store" {
+		t.Fatal("account redirect must not be cached")
 	}
 }

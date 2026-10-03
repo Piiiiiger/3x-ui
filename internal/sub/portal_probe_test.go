@@ -101,7 +101,7 @@ func TestPortalProbeNeedsTheSessionOfThatClient(t *testing.T) {
 }
 
 // The privacy whitelist: a client gets the hosts behind its own inbounds with
-// exactly these fields, and nothing that identifies or prices a server in Lite.
+// exactly these fields, without Lite IDs, addresses, billing or system details.
 func TestPortalProbeSendsOnlyTheClientsHostsAndWhitelistedFields(t *testing.T) {
 	router, node := seedPortalProbe(t)
 	linkProbe(t, service.ProbeLinkInput{NodeId: 0, ServerId: "uuid-a"}, service.ProbeLinkInput{NodeId: node, ServerId: "uuid-b"})
@@ -124,18 +124,18 @@ func TestPortalProbeSendsOnlyTheClientsHostsAndWhitelistedFields(t *testing.T) {
 	}
 	wantKeys := []string{
 		"cpu", "diskTotal", "diskUsed", "id", "load1", "load15", "load5", "memTotal", "memUsed", "name",
-		"netIn", "netOut", "netTotalDown", "netTotalUp", "pings", "region", "status", "updatedAt", "uptime",
+		"netIn", "netOut", "netTotalDown", "netTotalUp", "pings", "provider", "region", "status", "updatedAt", "uptime",
 	}
 	if got := sortedKeys(servers[0]); !slices.Equal(got, wantKeys) {
 		t.Fatalf("server keys = %v\nwant       %v", got, wantKeys)
 	}
-	const wantServer = `{"id":0,"name":"pa","status":"online","region":"🇺🇸","updatedAt":1790927998000,"cpu":11,` +
+	const wantServer = `{"id":1,"name":"pa","provider":"lite a","status":"online","region":"🇺🇸","updatedAt":1790927998000,"cpu":11,` +
 		`"memUsed":100,"memTotal":200,"diskUsed":0,"diskTotal":0,"load1":0,"load5":0,"load15":0,"netIn":0,"netOut":0,` +
 		`"netTotalUp":0,"netTotalDown":0,"uptime":50,"pings":[{"id":3,"name":"cn","latency":21,"loss":1.5,"blocks":[]}]}`
 	if got := string(body["servers"]); got != "["+wantServer+"]" {
 		t.Fatalf("servers =\n %s\nwant\n [%s]", got, wantServer)
 	}
-	for _, secret := range []string{"uuid-", "lite a", "lite b", "Debian", "secret", "¥", "2026-10-27", "203.0.113.11", `"pb"`} {
+	for _, secret := range []string{"uuid-", "lite b", "Debian", "secret", "¥", "2026-10-27", "203.0.113.11", `"pb"`} {
 		if strings.Contains(res.Body.String(), secret) {
 			t.Fatalf("the answer contains %q:\n%s", secret, res.Body)
 		}
@@ -148,7 +148,7 @@ func TestPortalProbeAnswersWithArraysEvenWhenEmpty(t *testing.T) {
 	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
 
 	unlinked := portalRequest(router, http.MethodGet, "/sub/portal/probe", "", "198.51.100.1", cookie)
-	const wantUnlinked = `"servers":[{"id":0,"name":"pa","status":"unmonitored","region":"","updatedAt":0,"cpu":0,` +
+	const wantUnlinked = `"servers":[{"id":1,"name":"pa","status":"unmonitored","region":"","updatedAt":0,"cpu":0,` +
 		`"memUsed":0,"memTotal":0,"diskUsed":0,"diskTotal":0,"load1":0,"load5":0,"load15":0,"netIn":0,"netOut":0,` +
 		`"netTotalUp":0,"netTotalDown":0,"uptime":0,"pings":[]}]`
 	if unlinked.Code != http.StatusOK || !strings.Contains(unlinked.Body.String(), wantUnlinked) {

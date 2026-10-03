@@ -68,7 +68,7 @@ func TestSubscriptionProbeFiltersOtherUsersHosts(t *testing.T) {
 		token string
 		node  int
 		cpu   float64
-	}{{"s1", 0, 11}, {"s2", node, 22}} {
+	}{{"s1", 1, 11}, {"s2", 2, 22}} {
 		res := portalRequest(router, http.MethodGet, "/sub/"+tc.token+"/probe", "", "198.51.100.8", nil)
 		var probe service.PortalProbe
 		if err := json.Unmarshal(res.Body.Bytes(), &probe); err != nil || res.Code != http.StatusOK || len(probe.Servers) != 1 || probe.Servers[0].Id != tc.node || probe.Servers[0].Cpu != tc.cpu {

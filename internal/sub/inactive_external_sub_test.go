@@ -101,14 +101,14 @@ func TestInactiveExternalOnlySubRemainsKnownWithoutExposingLinks(t *testing.T) {
 			req.Header.Set("Accept", "text/html")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			if w.Code != http.StatusOK {
-				t.Fatalf("HTML status = %d, want 200; body=%s", w.Code, w.Body.String())
+			if w.Code != http.StatusFound || w.Header().Get("Location") != "/sub/portal" {
+				t.Fatalf("inactive browser must open portal: %d %q", w.Code, w.Header().Get("Location"))
 			}
 			if strings.Contains(w.Body.String(), "11111111-1111-1111-1111-111111111111") {
 				t.Fatalf("HTML page exposed inactive external link: %s", w.Body.String())
 			}
-			if !strings.Contains(w.Body.String(), `"links":[]`) {
-				t.Fatalf("HTML page did not render an empty links list: %s", w.Body.String())
+			if strings.Contains(w.Body.String(), "__SUB_PAGE_DATA__") {
+				t.Fatalf("redirect exposed subscription data: %s", w.Body.String())
 			}
 		})
 	}

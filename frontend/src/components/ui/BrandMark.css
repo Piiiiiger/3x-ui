@@ -14,6 +14,13 @@
   user-select: none;
 }
 
+.brand-mark-rest {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
 .brand-mark-letter,
 .brand-mark-glow {
   background: linear-gradient(

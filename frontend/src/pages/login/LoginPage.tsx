@@ -24,7 +24,7 @@ import {
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { HttpUtil, LanguageManager } from '@/utils';
-import { BrandMark } from '@/components/ui';
+import { BrandIcon, BrandMark } from '@/components/ui';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { setMessageInstance } from '@/utils/messageBus';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
@@ -178,6 +178,7 @@ export default function LoginPage() {
             ) : (
               <div className="login-card">
                 <div className="brand">
+                  <BrandIcon />
                   <span className="brand-name">
                     <BrandMark />
                   </span>

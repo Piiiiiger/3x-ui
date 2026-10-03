@@ -4321,7 +4321,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "PortalProbeServer": {
-    "description": "PortalProbeServer is one host of the signed-in client, named by its inbound\nremarks. The field list is the privacy whitelist: nothing else of Lite is sent.",
+    "description": "PortalProbeServer is one subscription node, identified and named by its inbound.\nIts host supplies the provider label and whitelisted metrics.",
     "properties": {
       "cpu": {
         "example": 12.5,
@@ -4392,6 +4392,10 @@ export const SCHEMAS: Record<string, unknown> = {
           "$ref": "#/components/schemas/ProbePing"
         },
         "type": "array"
+      },
+      "provider": {
+        "example": "Azure",
+        "type": "string"
       },
       "region": {
         "example": "🇭🇰",

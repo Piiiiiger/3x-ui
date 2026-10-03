@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -127,11 +128,12 @@ type ProbeLinksInput struct {
 	Links []ProbeLinkInput `json:"links"`
 }
 
-// PortalProbeServer is one host of the signed-in client, named by its inbound
-// remarks. The field list is the privacy whitelist: nothing else of Lite is sent.
+// PortalProbeServer is one subscription node, identified and named by its inbound.
+// Its host supplies the provider label and whitelisted metrics.
 type PortalProbeServer struct {
 	Id           int         `json:"id" example:"2"`
 	Name         string      `json:"name" example:"Hong Kong"`
+	Provider     string      `json:"provider,omitempty" example:"Azure"`
 	Status       string      `json:"status" validate:"oneof=online offline unknown unmonitored" example:"online"`
 	Region       string      `json:"region" example:"🇭🇰"`
 	UpdatedAt    int64       `json:"updatedAt" example:"1735689600000"`
@@ -464,37 +466,43 @@ func clientSubInbounds(db *gorm.DB, clientId int) *gorm.DB {
 			clientId, true, false, model.SubscriptionProtocols())
 }
 
-// clientProbeHosts groups those inbounds by host in subscription order and
-// names each host by its inbound remarks.
-func clientProbeHosts(db *gorm.DB, clientId int) ([]probeHost, error) {
+type clientProbeNode struct {
+	id       int
+	nodeId   int
+	name     string
+	provider string
+}
+
+// Each subscription node keeps its own name and order even when hosts are shared.
+func clientProbeNodes(db *gorm.DB, clientId int) ([]clientProbeNode, error) {
 	var inbounds []model.Inbound
 	if err := clientSubInbounds(db, clientId).
-		Select("inbounds.node_id", "inbounds.remark").
+		Select("inbounds.id", "inbounds.node_id", "inbounds.remark").
 		Order("inbounds.sub_sort_index ASC, inbounds.id ASC").
 		Find(&inbounds).Error; err != nil {
 		return nil, err
 	}
-	var hosts []probeHost
-	position := make(map[int]int, len(inbounds))
-	for _, inbound := range inbounds {
-		nodeId := 0
-		if inbound.NodeID != nil {
-			nodeId = *inbound.NodeID
-		}
-		at, seen := position[nodeId]
-		if !seen {
-			at = len(hosts)
-			position[nodeId] = at
-			hosts = append(hosts, probeHost{nodeId: nodeId})
-		}
-		if remark := strings.TrimSpace(inbound.Remark); remark != "" {
-			if hosts[at].name != "" {
-				hosts[at].name += " / "
-			}
-			hosts[at].name += remark
-		}
+	var providers []model.Node
+	if err := db.Select("id", "name").Find(&providers).Error; err != nil {
+		return nil, err
 	}
-	return hosts, nil
+	providerNames := make(map[int]string, len(providers))
+	for _, provider := range providers {
+		providerNames[provider.Id] = strings.TrimSpace(provider.Name)
+	}
+	nodes := make([]clientProbeNode, 0, len(inbounds))
+	for _, inbound := range inbounds {
+		node := clientProbeNode{id: inbound.Id, name: strings.TrimSpace(inbound.Remark)}
+		if inbound.NodeID != nil {
+			node.nodeId = *inbound.NodeID
+			node.provider = providerNames[node.nodeId]
+		}
+		if node.name == "" {
+			node.name = fmt.Sprintf("Node %d", inbound.Id)
+		}
+		nodes = append(nodes, node)
+	}
+	return nodes, nil
 }
 
 // ClientServers is the portal's view and fails closed: a client sees the hosts
@@ -510,7 +518,7 @@ func (s *ProbeService) ClientServers(ctx context.Context, client *model.ClientRe
 		return probe, nil
 	}
 	db := database.GetDB()
-	hosts, err := clientProbeHosts(db, client.Id)
+	hosts, err := clientProbeNodes(db, client.Id)
 	if err != nil {
 		return PortalProbe{}, err
 	}
@@ -530,7 +538,7 @@ func (s *ProbeService) ClientServers(ctx context.Context, client *model.ClientRe
 		listed[server.Id] = server
 	}
 	for _, host := range hosts {
-		entry := PortalProbeServer{Id: host.nodeId, Name: host.name, Status: probeStatusUnmonitored, Pings: []ProbePing{}}
+		entry := PortalProbeServer{Id: host.id, Name: host.name, Provider: host.provider, Status: probeStatusUnmonitored, Pings: []ProbePing{}}
 		if serverId, linked := links[host.nodeId]; linked {
 			if server, found := listed[serverId]; found {
 				entry = portalProbeServer(host, server)
@@ -546,10 +554,15 @@ func (s *ProbeService) ClientServers(ctx context.Context, client *model.ClientRe
 
 // portalProbeServer copies the whitelisted fields. The figures of a server
 // that is not online are already zero in the snapshot.
-func portalProbeServer(host probeHost, server ProbeServer) PortalProbeServer {
+func portalProbeServer(host clientProbeNode, server ProbeServer) PortalProbeServer {
+	provider := host.provider
+	if provider == "" {
+		provider = server.Name
+	}
 	return PortalProbeServer{
-		Id:           host.nodeId,
+		Id:           host.id,
 		Name:         host.name,
+		Provider:     provider,
 		Status:       server.Status,
 		Region:       server.Region,
 		UpdatedAt:    server.UpdatedAt,

@@ -996,6 +996,7 @@ export interface PortalProbeServer {
   netTotalDown: number;
   netTotalUp: number;
   pings: ProbePing[];
+  provider?: string;
   region: string;
   status: string;
   updatedAt: number;

@@ -13,7 +13,7 @@ export default function BrandMark({ className }: { className?: string }) {
         </span>
         <span className="brand-mark-sparkles" aria-hidden="true" />
       </span>
-      {PANEL_NAME.slice(1)}
+      <span className="brand-mark-rest">{PANEL_NAME.slice(1)}</span>
     </span>
   );
 }

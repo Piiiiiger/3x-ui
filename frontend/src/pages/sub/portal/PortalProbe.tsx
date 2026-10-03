@@ -79,7 +79,7 @@ export default function PortalProbe({ base, email, onSessionEnded }: PortalProbe
         ) : (
           <div className="probe-grid">
             {data.servers.map((server) => (
-              <ProbeServerCard key={server.id} server={server} />
+              <ProbeServerCard key={server.id} server={server} subtitle={server.provider} />
             ))}
           </div>
         ))}

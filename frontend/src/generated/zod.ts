@@ -1068,6 +1068,7 @@ export const PortalProbeServerSchema = z.object({
   netTotalDown: z.number().int(),
   netTotalUp: z.number().int(),
   pings: z.array(z.lazy(() => ProbePingSchema)),
+  provider: z.string().optional(),
   region: z.string(),
   status: z.enum(['online', 'offline', 'unknown', 'unmonitored']),
   updatedAt: z.number().int(),

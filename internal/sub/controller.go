@@ -3,7 +3,6 @@ package sub
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -392,23 +391,16 @@ func (a *SUBController) configuredSubscriptionPathOwner(candidate string) string
 	return ""
 }
 
-// maybeServeSubPage renders the HTML info page when the request comes from a
-// browser (Accept: text/html) or explicitly asks for it (?html=1 or ?view=html).
-// It reports whether the request was handled. The remark template's per-client
-// info is for the content a client app imports — the raw subscription body. A
-// browser viewing the HTML info page gets clean, name-only remarks (usage is
-// shown in the page summary).
+// Browser visits use the signed-in portal; subscription apps keep their feeds.
 func (a *SUBController) maybeServeSubPage(c *gin.Context) bool {
 	accept := c.GetHeader("Accept")
 	wantsHTML := strings.Contains(strings.ToLower(accept), "text/html") || c.Query("html") == "1" || strings.EqualFold(c.Query("view"), "html")
 	if !wantsHTML {
 		return false
 	}
-	page, ok := a.buildSubPageData(c)
-	if !ok {
-		return true
-	}
-	a.serveSubPage(c, page.BasePath, page)
+	c.Header("Cache-Control", "no-store")
+	c.Header("Referrer-Policy", "no-referrer")
+	c.Redirect(http.StatusFound, a.portalPath())
 	return true
 }
 
@@ -634,56 +626,6 @@ var jsStringEscaper = strings.NewReplacer(
 	">", `\u003e`,
 	"&", `\u0026`,
 )
-
-// serveSubPage renders internal/web/dist/subpage.html for the current subscription
-// request. The Vite-built SPA reads window.__SUB_PAGE_DATA__ on mount —
-// we inject that here, along with window.X_UI_BASE_PATH so the
-// page's static asset references resolve correctly when the panel runs
-// behind a URL prefix.
-func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageData) {
-	body, err := subPageHTML(basePath)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "missing embedded subpage")
-		return
-	}
-
-	subData := a.subPageContext(page)
-
-	// When an admin has configured a custom subscription theme, render it
-	// instead of the default SPA. We render into a buffer first so a template
-	// that fails mid-execution can't leave a partially-written (corrupt)
-	// response — on any error we log and fall through to the default page.
-	if themeDir, _ := a.settingService.GetSubThemeDir(); themeDir != "" {
-		if tmpl, err := a.loadSubTemplate(themeDir); err != nil {
-			logger.Error("sub: custom template parse failed, using default page:", err)
-		} else if tmpl == nil {
-			logger.Warning("sub: subThemeDir set but no usable template found, using default page:", themeDir)
-		} else {
-			var buf bytes.Buffer
-			if execErr := tmpl.Execute(&buf, subData); execErr != nil {
-				logger.Error("sub: custom template execution failed, using default page:", execErr)
-			} else {
-				setNoCacheHeaders(c)
-				c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
-				return
-			}
-		}
-	}
-
-	subDataJSON, err := json.Marshal(subData)
-	if err != nil {
-		subDataJSON = []byte("{}")
-	}
-
-	escapedBase := jsStringEscaper.Replace(basePath)
-
-	inject := []byte(`<script>window.X_UI_BASE_PATH="` + escapedBase + `";` +
-		`window.__SUB_PAGE_DATA__=` + string(subDataJSON) + `;</script></head>`)
-	out := bytes.Replace(body, []byte("</head>"), inject, 1)
-
-	setNoCacheHeaders(c)
-	c.Data(http.StatusOK, "text/html; charset=utf-8", out)
-}
 
 // subPageContext builds the shared view-model map: the template context for
 // custom sub themes, the window.__SUB_PAGE_DATA__ payload the SPA reads, and

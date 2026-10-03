@@ -153,7 +153,7 @@ describe('the portal probe view', () => {
       probe: () =>
         json(
           probeOf([
-            host({ id: 0, name: 'Hong Kong / Hong Kong hy2' }),
+            host({ id: 0, name: 'Hong Kong Backup', provider: 'Azure' }),
             host({ id: 2, name: 'Tokyo', status: 'unmonitored', region: '', updatedAt: 0 }),
           ]),
         ),
@@ -164,7 +164,8 @@ describe('the portal probe view', () => {
     expect(server.countOf('probe')).toBe(0);
 
     await openProbeView();
-    await waitFor(() => expect(cardNames()).toEqual(['Hong Kong / Hong Kong hy2', 'Tokyo']));
+    await waitFor(() => expect(cardNames()).toEqual(['Hong Kong Backup', 'Tokyo']));
+    expect(screen.getByText('Azure')).toBeTruthy();
     expect(screen.getByText('Not monitored')).toBeTruthy();
     expect(screen.queryByText('My plan')).toBeNull();
     expect(screen.queryByRole('alert')).toBeNull();

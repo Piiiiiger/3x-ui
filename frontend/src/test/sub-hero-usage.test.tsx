@@ -32,6 +32,8 @@ describe("the usage bar on a person's page", () => {
     renderHero(25 * GIB, 100 * GIB, '25.00GB', '100.00GB');
     const bar = screen.getByRole('progressbar', { name: 'Usage 25.0 %' });
     expect(bar.getAttribute('aria-valuetext')).toBe('25.00GB / 100.00GB');
+    expect(screen.getAllByRole('progressbar')).toHaveLength(1);
+    expect(screen.getByRole('status').textContent).toBe('Active');
   });
 
   it('runs full without a quota and says there is none', () => {

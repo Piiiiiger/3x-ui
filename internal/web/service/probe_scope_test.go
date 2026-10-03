@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -98,7 +99,7 @@ func scopeLite(t *testing.T, s *ProbeService) *probetest.Lite {
 }
 
 // The whole point of the portal view: a client is shown the hosts behind its
-// own inbounds, the master's under node id 0, and nothing of anyone else's.
+// own inbounds, using inbound IDs, and nothing of anyone else's.
 func TestClientServersListsOnlyTheHostsTheClientOwns(t *testing.T) {
 	s, _ := setupProbe(t)
 	scopeLite(t, s)
@@ -119,18 +120,18 @@ func TestClientServersListsOnlyTheHostsTheClientOwns(t *testing.T) {
 		Enabled: true, FetchedAt: scopeFetchedAt,
 		Servers: []PortalProbeServer{
 			{
-				Id: 0, Name: "洛杉矶-Alpha", Status: "online", Region: "🇺🇸", UpdatedAt: 1790927998000,
+				Id: 1, Name: "洛杉矶-Alpha", Provider: "lite master", Status: "online", Region: "🇺🇸", UpdatedAt: 1790927998000,
 				Cpu: 11, MemUsed: 100, MemTotal: 200, DiskUsed: 300, DiskTotal: 400,
 				Load1: 0.1, Load5: 0.2, Load15: 0.3, NetIn: 10, NetOut: 20, NetTotalUp: 30, NetTotalDown: 40, Uptime: 50,
 				Pings: []ProbePing{{Id: 3, Name: "cn", Latency: 21, Loss: 1.5, Blocks: []ProbePingBlock{}}},
 			},
-			{Id: hk, Name: "香港-Bravo", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
+			{Id: onHK.Id, Name: "香港-Bravo", Provider: "edge-hk", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
 		},
 	})
 	assertPortalProbe(t, clientServers(t, s, bob), PortalProbe{
 		Enabled: true, FetchedAt: scopeFetchedAt,
 		Servers: []PortalProbeServer{
-			{Id: sg, Name: "新加坡-Charlie", Status: "online", Region: "🇸🇬", UpdatedAt: 1790927996000, Cpu: 33, Pings: []ProbePing{}},
+			{Id: onSG.Id, Name: "新加坡-Charlie", Provider: "edge-sg", Status: "online", Region: "🇸🇬", UpdatedAt: 1790927996000, Cpu: 33, Pings: []ProbePing{}},
 		},
 	})
 }
@@ -158,6 +159,7 @@ func TestClientServersReportsOneStatusPerHost(t *testing.T) {
 			setProbeLinks(t, s, ProbeLinkInput{NodeId: node, ServerId: tc.serverId})
 
 			tc.want.Id, tc.want.Name, tc.want.Pings = node, "香港-Bravo", []ProbePing{}
+			tc.want.Provider = "edge-hk"
 			assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 				Enabled: true, FetchedAt: scopeFetchedAt, Servers: []PortalProbeServer{tc.want},
 			})
@@ -178,8 +180,8 @@ func TestClientServersMarksTheUnlinkedMasterUnmonitoredNextToALinkedNode(t *test
 	assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 		Enabled: true, FetchedAt: scopeFetchedAt,
 		Servers: []PortalProbeServer{
-			{Id: 0, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
-			{Id: node, Name: "香港-Bravo", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
+			{Id: 1, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
+			{Id: 2, Name: "香港-Bravo", Provider: "edge-hk", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
 		},
 	})
 }
@@ -203,9 +205,8 @@ func TestClientServersSeesARelinkWhileTheLiteAnswerIsCached(t *testing.T) {
 	}
 }
 
-// A host is one card however many inbounds the client has on it, named and
-// ordered the way the subscription lists them.
-func TestClientServersGroupsInboundsByHostInSubscriptionOrder(t *testing.T) {
+// Every subscription node gets its own card, including nodes sharing a host.
+func TestClientServersShowsSeparateNamedNodesSharingAHost(t *testing.T) {
 	s, _ := setupProbe(t)
 	scopeLite(t, s)
 	node := seedProbeNode(t, "edge-hk", "", "203.0.113.11")
@@ -225,7 +226,7 @@ func TestClientServersGroupsInboundsByHostInSubscriptionOrder(t *testing.T) {
 	for _, server := range got {
 		hosts = append(hosts, host{server.Id, server.Name})
 	}
-	want := []host{{node, "香港-A / 香港-B"}, {0, "洛杉矶-Alpha"}}
+	want := []host{{3, "香港-A"}, {1, "洛杉矶-Alpha"}, {4, "Node 4"}, {2, "香港-B"}}
 	if !reflect.DeepEqual(hosts, want) {
 		t.Fatalf("hosts = %+v, want %+v", hosts, want)
 	}
@@ -255,7 +256,7 @@ func TestClientServersSkipsHostsWhoseInboundsTheSubscriptionSkips(t *testing.T) 
 
 	assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 		Enabled: true, FetchedAt: scopeFetchedAt,
-		Servers: []PortalProbeServer{{Id: 0, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}}},
+		Servers: []PortalProbeServer{{Id: 1, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}}},
 	})
 	if linked, err := s.ClientHasLinkedHost(client); err != nil || linked {
 		t.Fatalf("has a linked host = %v, %v; want false: only skipped inbounds sit on linked hosts", linked, err)
@@ -305,8 +306,8 @@ func TestClientServersNamesTheHostsWhenLiteIsDownWithNothingCached(t *testing.T)
 	assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 		Enabled: true, Stale: true,
 		Servers: []PortalProbeServer{
-			{Id: 0, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
-			{Id: node, Name: "香港-Bravo", Status: "unknown", Pings: []ProbePing{}},
+			{Id: 1, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
+			{Id: 2, Name: "香港-Bravo", Provider: "edge-hk", Status: "unknown", Pings: []ProbePing{}},
 		},
 	})
 }
@@ -327,8 +328,8 @@ func TestClientServersKeepsTheLastFiguresDuringAShortOutage(t *testing.T) {
 	assertPortalProbe(t, clientServers(t, s, client), PortalProbe{
 		Enabled: true, FetchedAt: scopeFetchedAt, Stale: true,
 		Servers: []PortalProbeServer{
-			{Id: 0, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
-			{Id: node, Name: "香港-Bravo", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
+			{Id: 1, Name: "洛杉矶-Alpha", Status: "unmonitored", Pings: []ProbePing{}},
+			{Id: 2, Name: "香港-Bravo", Provider: "edge-hk", Status: "online", Region: "🇭🇰", UpdatedAt: 1790927997000, Cpu: 22, Pings: []ProbePing{}},
 		},
 	})
 }
@@ -365,5 +366,26 @@ func TestClientHasLinkedHostNeedsALinkOnOneOfTheClientsHosts(t *testing.T) {
 
 	if n := lite.Requests(); n != 0 {
 		t.Fatalf("the check asked Lite %d times, want 0", n)
+	}
+}
+
+func TestClientServersSeparatesProviderFromSubscriptionNodeName(t *testing.T) {
+	s, _ := setupProbe(t)
+	scopeLite(t, s)
+	provider := seedProbeNode(t, "Azure", "Los Angeles-Azure", "203.0.113.11")
+	node := seedProbeInbound(t, provider, "backup", "Hong Kong Backup", 1)
+	client := seedProbeClient(t, "alice", node)
+	setProbeLinks(t, s, ProbeLinkInput{NodeId: provider, ServerId: "uuid-1"})
+	result := clientServers(t, s, client)
+	data, err := json.Marshal(result.Servers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cards []map[string]any
+	if err := json.Unmarshal(data, &cards); err != nil {
+		t.Fatal(err)
+	}
+	if len(cards) != 1 || cards[0]["name"] != "Hong Kong Backup" || cards[0]["provider"] != "Azure" {
+		t.Fatalf("probe must pair the subscription name with its provider: %s", data)
 	}
 }

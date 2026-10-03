@@ -3,7 +3,6 @@ package sub
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -85,8 +84,8 @@ func TestSubscriptionProfileModesFromSavedSettings(t *testing.T) {
 							// The restored link must open the page, even when copied from a raw download.
 							page := httptest.NewRecorder()
 							router.ServeHTTP(page, httptest.NewRequest(http.MethodGet, want, nil))
-							if page.Code != http.StatusOK || !strings.Contains(page.Header().Get("Content-Type"), "text/html") {
-								t.Fatalf("builtin link did not serve HTML: status=%d, type=%q", page.Code, page.Header().Get("Content-Type"))
+							if page.Code != http.StatusFound || page.Header().Get("Location") != "/sub/portal" {
+								t.Fatalf("builtin link did not redirect to portal: status=%d, type=%q", page.Code, page.Header().Get("Content-Type"))
 							}
 						}
 					})

@@ -1084,6 +1084,7 @@ export const EXAMPLES: Record<string, unknown> = {
             "name": "China Telecom"
           }
         ],
+        "provider": "Azure",
         "region": "🇭🇰",
         "status": "online",
         "updatedAt": 1735689600000,
@@ -1123,6 +1124,7 @@ export const EXAMPLES: Record<string, unknown> = {
         "name": "China Telecom"
       }
     ],
+    "provider": "Azure",
     "region": "🇭🇰",
     "status": "online",
     "updatedAt": 1735689600000,

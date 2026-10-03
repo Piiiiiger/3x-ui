@@ -156,18 +156,20 @@
 }
 
 .sub-brand-mark {
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--ant-border-radius-lg);
-  background: linear-gradient(135deg, var(--sub-grad-from), var(--sub-grad-to));
-  box-shadow: 2px 2px 0 var(--sub-row-shadow);
-  color: #fff;
-  font-size: 20px;
-  font-weight: 600;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(241, 140, 110, 0.2));
+}
+
+.sub-account-name {
+  margin: 6px 0 0;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  color: var(--ant-color-text);
 }
 
 .sub-brand-text {
@@ -230,33 +232,67 @@
 
 /* usage hero */
 .sub-hero {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 32px;
-  align-items: center;
+  padding: 16px 0 4px;
 }
 
-.sub-ring .ant-progress-text {
+.sub-traffic-heading,
+.sub-traffic-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sub-traffic-caption {
+  margin: 24px 0 10px;
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+}
+
+.sub-traffic-caption bdi {
+  font-weight: 600;
   color: var(--ant-color-text);
 }
 
-.sub-ring-center {
-  display: flex;
-  flex-direction: column;
+.sub-hero .sub-usage-bar {
+  height: 18px;
+  border: 1px solid var(--sub-row-border);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.sub-account-status {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  line-height: 1.1;
-}
-
-.sub-ring-value {
-  font-size: 26px;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 14px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
-.sub-ring-label {
-  font-size: 12px;
-  color: var(--ant-color-text-tertiary);
+.sub-account-status.is-on {
+  color: #238636;
+}
+.sub-account-status.is-off {
+  color: #c53030;
+}
+.is-dark .sub-account-status.is-on {
+  color: #7ee787;
+}
+.is-dark .sub-account-status.is-off {
+  color: #ff8585;
+}
+
+.sub-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow:
+    0 0 6px currentColor,
+    0 0 16px color-mix(in srgb, currentColor 45%, transparent);
 }
 
 .sub-big {
@@ -294,9 +330,9 @@
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 20px 0 0;
-  padding-top: 20px;
+  gap: 24px 20px;
+  margin: 28px 0 0;
+  padding-top: 24px;
 }
 
 .sub-stats::before {
@@ -304,10 +340,8 @@
 }
 
 .sub-stat {
-  padding: 10px 12px;
-  border-radius: var(--ant-border-radius-lg);
-  border: 1px solid var(--sub-tile-border);
-  background: var(--sub-tile-bg);
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid var(--sub-row-border);
 }
 
 .sub-stat-value {
@@ -613,10 +647,6 @@ a.sub-row-title:hover {
     gap: 20px;
   }
 
-  .sub-ring {
-    justify-self: center;
-  }
-
   .sub-big-num {
     font-size: 36px;
   }
@@ -641,5 +671,6 @@ a.sub-row-title:hover {
 .sub-usage-bar {
   height: 8px;
   margin-top: 10px;
-  max-width: 420px;
+  width: 100%;
+  max-width: none;
 }

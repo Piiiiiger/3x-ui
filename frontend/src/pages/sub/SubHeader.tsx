@@ -2,16 +2,10 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Menu, Popover, Space } from 'antd';
-import {
-  MoonFilled,
-  MoonOutlined,
-  SunOutlined,
-  TranslationOutlined,
-  WifiOutlined,
-} from '@ant-design/icons';
+import { MoonFilled, MoonOutlined, SunOutlined, TranslationOutlined } from '@ant-design/icons';
 
 import { LanguageManager } from '@/utils';
-import { BrandMark } from '@/components/ui';
+import { BrandIcon, BrandMark } from '@/components/ui';
 import { PANEL_NAME } from '@/lib/brand';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 
@@ -24,14 +18,7 @@ interface SubHeaderProps {
   extra?: ReactNode;
 }
 
-export default function SubHeader({
-  title,
-  sId,
-  email,
-  lang,
-  onLangChange,
-  extra,
-}: SubHeaderProps) {
+export default function SubHeader({ title, email, lang, onLangChange, extra }: SubHeaderProps) {
   const { t } = useTranslation();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
 
@@ -65,21 +52,20 @@ export default function SubHeader({
   );
 
   const themeIcon = !isDark ? <SunOutlined /> : !isUltra ? <MoonOutlined /> : <MoonFilled />;
-  const initial = Array.from(title)[0]?.toUpperCase();
 
   return (
     <header className="sub-header">
       <div className="sub-brand">
-        <span className="sub-brand-mark" aria-hidden="true">
-          {initial ?? <WifiOutlined />}
-        </span>
+        <BrandIcon className="sub-brand-mark" />
         <div className="sub-brand-text">
           <div className="sub-brand-title" dir="auto">
-            {title === PANEL_NAME ? <BrandMark /> : title || t('subscription.title')}
+            {!title || title === PANEL_NAME ? <BrandMark /> : title}
           </div>
-          <div className="sub-brand-id">
-            <bdi>{email ? `${sId} - ${email}` : sId}</bdi>
-          </div>
+          {email && (
+            <h1 className="sub-account-name">
+              <bdi>{email}</bdi>
+            </h1>
+          )}
         </div>
       </div>
       <div className="sub-toolbar">
