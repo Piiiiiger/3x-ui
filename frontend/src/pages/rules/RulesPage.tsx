@@ -6,6 +6,7 @@ import {
   ConfigProvider,
   Empty,
   Layout,
+  Popover,
   Popconfirm,
   Result,
   Space,
@@ -13,7 +14,6 @@ import {
   Table,
   Tag,
   Tooltip,
-  Typography,
 } from 'antd';
 import {
   BranchesOutlined,
@@ -25,6 +25,8 @@ import {
   PlusOutlined,
   StarFilled,
   StarOutlined,
+  AppstoreOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 
 import AppNav from '@/layouts/AppNav';
@@ -85,6 +87,63 @@ export default function RulesPage() {
   const previewCount = useRef(0);
   const { rows, variantsOf } = useMemo(() => inBaseOrder(templates), [templates]);
   const nameOf = (id: number) => templates.find((tpl) => tpl.id === id)?.name ?? '';
+
+  function usageCell(tpl: RuleTemplateSummary) {
+    const preview = tpl.users.slice(0, 3);
+    const hidden = tpl.users.length - preview.length;
+    const people = (
+      <div className="rule-template-usage-popover">
+        {tpl.users.map((username) => (
+          <span className="rule-template-usage-popover-user" key={username}>
+            {username}
+          </span>
+        ))}
+      </div>
+    );
+
+    return (
+      <div className="rule-template-usage">
+        <div className="rule-template-usage-metrics">
+          <Tooltip title={t('pages.rules.usedBy', { count: tpl.planCount })}>
+            <span className="rule-template-usage-metric">
+              <AppstoreOutlined aria-hidden="true" />
+              <strong>{tpl.planCount}</strong>
+              <span className="rule-template-usage-metric-label">
+                {t('pages.rules.usedBy', { count: tpl.planCount })}
+              </span>
+            </span>
+          </Tooltip>
+          <Tooltip title={t('pages.plans.members', { count: tpl.users.length })}>
+            <span className="rule-template-usage-metric">
+              <UserOutlined aria-hidden="true" />
+              <strong>{tpl.users.length}</strong>
+              <span className="rule-template-usage-metric-label">
+                {t('pages.plans.members', { count: tpl.users.length })}
+              </span>
+            </span>
+          </Tooltip>
+        </div>
+        {tpl.users.length > 0 ? (
+          <Popover title={t('pages.rules.usage')} content={people} placement="bottomLeft">
+            <button
+              className="rule-template-usage-users"
+              type="button"
+              aria-label={t('pages.plans.members', { count: tpl.users.length })}
+            >
+              {preview.map((username) => (
+                <span className="rule-template-usage-user" key={username}>
+                  {username}
+                </span>
+              ))}
+              {hidden > 0 && <span className="rule-template-usage-more">+{hidden}</span>}
+            </button>
+          </Popover>
+        ) : (
+          <span className="rule-template-usage-empty">—</span>
+        )}
+      </div>
+    );
+  }
 
   function openPreview(name: string, content: string, baseId: number) {
     previewCount.current += 1;
@@ -197,23 +256,7 @@ export default function RulesPage() {
                       {
                         title: t('pages.rules.usage'),
                         key: 'usage',
-                        render: (_, tpl) => (
-                          <div style={{ maxWidth: 280 }}>
-                            <div>{t('pages.rules.usedBy', { count: tpl.planCount })}</div>
-                            <Typography.Text type="secondary">
-                              {t('pages.plans.members', { count: tpl.users.length })}
-                            </Typography.Text>
-                            <div
-                              style={{ maxHeight: 96, overflowY: 'auto', overflowWrap: 'anywhere' }}
-                            >
-                              {tpl.users.map((username) => (
-                                <div key={username}>
-                                  <bdi>{username}</bdi>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ),
+                        render: (_, tpl) => usageCell(tpl),
                       },
                       {
                         title: t('pages.rules.updated'),
