@@ -3,11 +3,17 @@ import { Alert, Button, Modal, Space, Tag, Typography } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import type { PortalData } from '@/schemas/portal';
 
-export default function PortalAccountCode({ data }: { data: PortalData }) {
+export default function PortalAccountCode({
+  data,
+  label = '我的激活码',
+}: {
+  data: PortalData;
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button onClick={() => setOpen(true)}>我的激活码</Button>
+      <Button onClick={() => setOpen(true)}>{label}</Button>
       <Modal
         title="我的激活码与 Telegram"
         open={open}

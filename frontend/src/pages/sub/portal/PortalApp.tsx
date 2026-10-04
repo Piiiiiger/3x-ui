@@ -15,6 +15,7 @@ import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
 import PortalAccountCode from './PortalAccountCode';
+import PortalReminders from './PortalReminders';
 import PortalCustomize from './PortalCustomize';
 import './Portal.css';
 
@@ -146,23 +147,26 @@ export default function PortalApp({ base }: { base: string }) {
         </>
       }
       nav={
-        <Segmented<PortalView>
-          className="portal-views"
-          value={customizeOpen ? 'customize' : probeOpen ? 'probe' : 'overview'}
-          options={[
-            { value: 'overview', label: t('subscription.portal.viewOverview') },
-            ...(data.probe
-              ? [{ value: 'probe' as const, label: t('subscription.portal.viewProbe') }]
-              : []),
-            { value: 'customize' as const, label: '自定义订阅' },
-          ]}
-          onChange={(next) => {
-            if (!customizationDirty || window.confirm('自定义订阅有未保存修改，确定离开？')) {
-              setCustomizationDirty(false);
-              showView(next);
-            }
-          }}
-        />
+        <>
+          <PortalReminders data={data} />
+          <Segmented<PortalView>
+            className="portal-views"
+            value={customizeOpen ? 'customize' : probeOpen ? 'probe' : 'overview'}
+            options={[
+              { value: 'overview', label: t('subscription.portal.viewOverview') },
+              ...(data.probe
+                ? [{ value: 'probe' as const, label: t('subscription.portal.viewProbe') }]
+                : []),
+              { value: 'customize' as const, label: '自定义订阅' },
+            ]}
+            onChange={(next) => {
+              if (!customizationDirty || window.confirm('自定义订阅有未保存修改，确定离开？')) {
+                setCustomizationDirty(false);
+                showView(next);
+              }
+            }}
+          />
+        </>
       }
       body={
         customizeOpen ? (
