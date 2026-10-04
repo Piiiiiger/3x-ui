@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type Key } from 'react';
+import { useCallback, useEffect, useMemo, useState, type Key } from 'react';
 import { useLocation, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -58,6 +58,9 @@ export default function InboundList({
 }: InboundListProps) {
   const { t } = useTranslation();
   const [statsRecord, setStatsRecord] = useState<DBInboundRecord | null>(null);
+  const [chainByInbound, setChainByInbound] = useState<
+    Map<number, { role: 'target' | 'relay'; peerName: string; enabled: boolean }>
+  >(new Map());
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   // Node filter (#4997): 'all' shows everything, 0 is the local-panel
   // sentinel (inbounds without a nodeId), otherwise a node id. Session-only.
@@ -67,6 +70,53 @@ export default function InboundList({
   const searchParam = searchParams.get('search');
   const [searchKey, setSearchKey] = useState(() => searchParam || '');
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.all([
+      HttpUtil.get<Array<{ targetInboundId: number; relayInboundId: number; enabled: boolean }>>(
+        '/panel/api/proxyChains/list',
+        undefined,
+        { silent: true },
+      ),
+      HttpUtil.get<Array<{ id: number; remark?: string }>>(
+        '/panel/api/inbounds/options',
+        undefined,
+        {
+          silent: true,
+        },
+      ),
+    ])
+      .then(([chainMsg, inboundMsg]) => {
+        if (!active || !chainMsg?.success || !inboundMsg?.success) return;
+        const names = new Map(
+          (inboundMsg.obj ?? []).map((item) => [item.id, item.remark || `#${item.id}`]),
+        );
+        const next = new Map<
+          number,
+          { role: 'target' | 'relay'; peerName: string; enabled: boolean }
+        >();
+        for (const chain of chainMsg.obj ?? []) {
+          next.set(chain.targetInboundId, {
+            role: 'target',
+            peerName: names.get(chain.relayInboundId) || `#${chain.relayInboundId}`,
+            enabled: chain.enabled,
+          });
+          next.set(chain.relayInboundId, {
+            role: 'relay',
+            peerName: names.get(chain.targetInboundId) || `#${chain.targetInboundId}`,
+            enabled: chain.enabled,
+          });
+        }
+        setChainByInbound(next);
+      })
+      .catch(() => {
+        // Chain metadata is supplemental; the inbound list must still render.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
@@ -164,6 +214,7 @@ export default function InboundList({
     onRowAction,
     onSwitchEnable,
     publicEndpointsOf,
+    chainByInbound,
   });
 
   const tableScrollX = useMemo(

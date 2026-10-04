@@ -109,6 +109,7 @@ export default function AppNav() {
       { key: '/rules', icon: 'rules', title: t('menu.rules') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
+      { key: '/chains', icon: 'tool', title: '链式管理' },
       { key: LOGOUT_KEY, icon: 'logout', title: t('logout') },
     ],
     [t],

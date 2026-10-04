@@ -5,7 +5,7 @@ import { Button, Menu, Popover, Space } from 'antd';
 import { MoonFilled, MoonOutlined, SunOutlined, TranslationOutlined } from '@ant-design/icons';
 
 import { LanguageManager } from '@/utils';
-import { BrandIcon, BrandMark } from '@/components/ui';
+import { BrandMark } from '@/components/ui';
 import { PANEL_NAME } from '@/lib/brand';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 
@@ -56,17 +56,9 @@ export default function SubHeader({ title, email, lang, onLangChange, extra }: S
   return (
     <header className="sub-header">
       <div className="sub-brand">
-        <BrandIcon className="sub-brand-mark" />
-        <div className="sub-brand-text">
-          <div className="sub-brand-title" dir="auto">
-            {!title || title === PANEL_NAME ? <BrandMark /> : title}
-          </div>
-          {email && (
-            <h1 className="sub-account-name">
-              <bdi>{email}</bdi>
-            </h1>
-          )}
-        </div>
+        <h1 className="sub-account-name sub-account-wordmark" dir="auto">
+          <BrandMark name={email || title || PANEL_NAME} />
+        </h1>
       </div>
       <div className="sub-toolbar">
         <Button

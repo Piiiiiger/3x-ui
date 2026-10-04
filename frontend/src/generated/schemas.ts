@@ -2644,7 +2644,8 @@ export const SCHEMAS: Record<string, unknown> = {
           "tun",
           "mtproto",
           "amneziawg",
-          "tuic"
+          "tuic",
+          "snell"
         ],
         "example": "vless",
         "type": "string"
@@ -2652,6 +2653,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "remark": {
         "description": "Human-readable remark",
         "example": "VLESS-443",
+        "type": "string"
+      },
+      "runtimeError": {
+        "type": "string"
+      },
+      "runtimeState": {
         "type": "string"
       },
       "settings": {},
@@ -3069,7 +3076,8 @@ export const SCHEMAS: Record<string, unknown> = {
           "tun",
           "mtproto",
           "amneziawg",
-          "tuic"
+          "tuic",
+          "snell"
         ],
         "example": "vless",
         "type": "string"
@@ -3077,6 +3085,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "remark": {
         "description": "Human-readable remark",
         "example": "VLESS-443",
+        "type": "string"
+      },
+      "runtimeError": {
+        "type": "string"
+      },
+      "runtimeState": {
         "type": "string"
       },
       "settings": {},
@@ -4204,6 +4218,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "Monthly 100G",
         "type": "string"
       },
+      "nodeKeys": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "proxyGroups": {
+        "items": {
+          "$ref": "#/components/schemas/PlanProxyGroup"
+        },
+        "type": "array"
+      },
       "remark": {
         "example": "Hong Kong and Singapore",
         "type": "string"
@@ -4219,6 +4245,36 @@ export const SCHEMAS: Record<string, unknown> = {
       "name",
       "remark",
       "templateId"
+    ],
+    "type": "object"
+  },
+  "PlanProxyGroup": {
+    "description": "PlanProxyGroup assigns a plan's inbounds to one proxy group from its rule template.",
+    "properties": {
+      "inboundIds": {
+        "example": [
+          1,
+          2
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "name": {
+        "example": "🔰 节点选择",
+        "type": "string"
+      },
+      "nodeKeys": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "inboundIds",
+      "name"
     ],
     "type": "object"
   },
@@ -4255,6 +4311,24 @@ export const SCHEMAS: Record<string, unknown> = {
       "name": {
         "example": "Monthly 100G",
         "type": "string"
+      },
+      "nodeKeys": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "proxyGroupNames": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "proxyGroups": {
+        "items": {
+          "$ref": "#/components/schemas/PlanProxyGroup"
+        },
+        "type": "array"
       },
       "remark": {
         "example": "Hong Kong and Singapore",
@@ -5135,6 +5209,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "changes": {
         "items": {
           "$ref": "#/components/schemas/RuleTemplateChange"
+        },
+        "type": "array"
+      },
+      "groups": {
+        "items": {
+          "type": "string"
         },
         "type": "array"
       },

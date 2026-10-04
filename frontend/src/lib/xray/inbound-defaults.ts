@@ -1,4 +1,5 @@
 import { RandomUtil, Wireguard } from '@/utils';
+import { generateSnellPsk, type SnellInboundSettings } from '@/schemas/protocols/inbound/snell';
 import { generateAwgObfuscation } from '@/lib/xray/amneziawg-obfuscation';
 
 import type { AmneziawgInboundSettings } from '@/schemas/protocols/inbound/amneziawg';
@@ -375,10 +376,13 @@ export type AnyInboundSettings =
   | WireguardInboundSettings
   | MtprotoInboundSettings
   | AmneziawgInboundSettings
-  | TuicInboundSettings;
+  | TuicInboundSettings
+  | SnellInboundSettings;
 
 export function createDefaultInboundSettings(protocol: string): AnyInboundSettings | null {
   switch (protocol) {
+    case 'snell':
+      return { psk: generateSnellPsk(), version: 5, ipv6: false, reuse: true, clients: [] };
     case 'vless':
       return createDefaultVlessInboundSettings();
     case 'vmess':

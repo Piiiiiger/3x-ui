@@ -68,6 +68,7 @@ import {
   MtprotoFields,
   ShadowsocksFields,
   TuicFields,
+  SnellFields,
   TunFields,
   TunnelFields,
   VlessFields,
@@ -255,8 +256,10 @@ export default function InboundFormModal({
     addAllFallbacks,
   } = useInboundFallbacks(dbInbound, dbInbounds);
 
-  const selectableNodes = (availableNodes || []).filter((n) => n.enable);
   const protocol = (useWatch({ control, name: 'protocol' }) ?? '') as string;
+  const selectableNodes = (availableNodes || []).filter(
+    (n) => n.enable && (protocol !== Protocols.SNELL || n.kind === 'agent'),
+  );
   const isNodeEligible = !!NODE_ELIGIBLE_PROTOCOLS[protocol];
   /*
    * The `node` share-address strategy only means something when the inbound can
@@ -286,7 +289,8 @@ export default function InboundFormModal({
     protocol !== Protocols.HYSTERIA &&
     protocol !== Protocols.WIREGUARD &&
     protocol !== Protocols.TUNNEL &&
-    protocol !== Protocols.TUIC;
+    protocol !== Protocols.TUIC &&
+    protocol !== Protocols.SNELL;
 
   const wPort = useWatch({ control, name: 'port' });
   const wListen = (useWatch({ control, name: 'listen' }) ?? '') as string;
@@ -527,6 +531,12 @@ export default function InboundFormModal({
       const next = getV('protocol') as string;
       const settings = createDefaultInboundSettings(next) ?? undefined;
       setV('settings', settings);
+      if (next === Protocols.SNELL) {
+        setV('total', 0);
+        setV('trafficReset', 'never');
+        setV('streamSettings', undefined);
+        setV('sniffing', SniffingSchema.parse({ enabled: false }));
+      }
       if (!NODE_ELIGIBLE_PROTOCOLS[next]) {
         setV('nodeId', null);
       }
@@ -551,7 +561,7 @@ export default function InboundFormModal({
         });
       } else if (next === Protocols.WIREGUARD || next === Protocols.TUNNEL) {
         setV('streamSettings', { security: 'none' });
-      } else {
+      } else if (next !== Protocols.SNELL) {
         const current = getV('streamSettings') as { network?: string } | undefined;
         if (current?.network === 'hysteria' || !current?.network) {
           setV('streamSettings', { network: 'tcp', security: 'none', tcpSettings: {} });
@@ -575,6 +585,14 @@ export default function InboundFormModal({
         '[InboundFormModal] schema validation failed:',
         issues.map((issue) => formatInboundIssue(issue, values, t)),
       );
+      return;
+    }
+    if (
+      parsed.data.protocol === Protocols.SNELL &&
+      !(availableNodes || []).some((n) => n.id === parsed.data.nodeId && n.kind === 'agent')
+    ) {
+      setActiveTab('basic');
+      messageApi.error(t('pages.inbounds.snell.managed') + ': ' + t('pages.inbounds.deployTo'));
       return;
     }
     setSaving(true);
@@ -633,7 +651,7 @@ export default function InboundFormModal({
             showSearch
             disabled={mode === 'edit' || presetHost !== undefined}
             placeholder={t('pages.inbounds.localPanel')}
-            allowClear
+            allowClear={protocol !== Protocols.SNELL}
             options={selectableNodes.map((n) => ({
               value: n.id,
               // Same rule as the clone target picker: only online is
@@ -646,7 +664,18 @@ export default function InboundFormModal({
       )}
 
       <FormField name="protocol" label={t('pages.inbounds.protocol')}>
-        <Select id="protocol" disabled={mode === 'edit'} options={PROTOCOL_OPTIONS} />
+        <Select
+          id="protocol"
+          disabled={mode === 'edit'}
+          options={PROTOCOL_OPTIONS.map((option) => ({
+            ...option,
+            disabled:
+              option.value === Protocols.SNELL &&
+              (presetHost !== undefined
+                ? !(availableNodes || []).some((n) => n.id === presetHost && n.kind === 'agent')
+                : !(availableNodes || []).some((n) => n.enable && n.kind === 'agent')),
+          }))}
+        />
       </FormField>
 
       <FormField
@@ -753,6 +782,7 @@ export default function InboundFormModal({
         }
       >
         <InputNumber
+          disabled={protocol === Protocols.SNELL}
           value={wTotal ? Math.round((wTotal / SizeFormatter.ONE_GB) * 100) / 100 : 0}
           min={0}
           step={1}
@@ -765,6 +795,7 @@ export default function InboundFormModal({
 
       <FormField name="trafficReset" label={t('pages.inbounds.periodicTrafficResetTitle')}>
         <Select
+          disabled={protocol === Protocols.SNELL}
           options={TRAFFIC_RESETS.map((r) => ({
             value: r,
             label: t(`pages.inbounds.periodicTrafficReset.${r}`),
@@ -824,6 +855,7 @@ export default function InboundFormModal({
       )}
 
       {protocol === Protocols.TUIC && <TuicFields />}
+      {protocol === Protocols.SNELL && <SnellFields />}
 
       {protocol === Protocols.TUN && <TunFields />}
 
@@ -1164,6 +1196,7 @@ export default function InboundFormModal({
                     Protocols.MTPROTO,
                     Protocols.AMNEZIAWG,
                     Protocols.TUIC,
+                    Protocols.SNELL,
                   ] as string[]
                 ).includes(protocol) || isFallbackHost
                   ? [

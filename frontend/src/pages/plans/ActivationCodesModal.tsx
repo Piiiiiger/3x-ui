@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -21,6 +22,15 @@ import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { ActivationCodeFormSchema, type ActivationCodeFormValues } from '@/schemas/activationCode';
 import { ClipboardManager, SizeFormatter } from '@/utils';
 
+export function activationCodeExpiry(code: { days: number; createdAt: number }, now: number) {
+  const expiresAt = code.days > 0 ? code.createdAt + code.days * 86_400_000 : 0;
+  return {
+    expiresAt,
+    remainingDays: expiresAt ? Math.max(0, Math.ceil((expiresAt - now) / 86_400_000)) : 0,
+    expired: expiresAt > 0 && now >= expiresAt,
+  };
+}
+
 export default function ActivationCodesModal({
   plan,
   onClose,
@@ -30,6 +40,16 @@ export default function ActivationCodesModal({
 }) {
   const { t, i18n } = useTranslation();
   const codes = useActivationCodes(plan.id);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const update = () => setNow(Date.now());
+    const timer = window.setInterval(update, 60_000);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', update);
+    };
+  }, []);
   const [messageApi, contextHolder] = message.useMessage();
   const methods = useForm<ActivationCodeFormValues>({
     defaultValues: { count: 1, quotaGB: 0, days: 30, resetDay: 0, note: '' },
@@ -49,7 +69,7 @@ export default function ActivationCodesModal({
 
   async function copyUnused() {
     const unused = (codes.data ?? [])
-      .filter((code) => code.usedAt === 0)
+      .filter((code) => code.usedAt === 0 && !activationCodeExpiry(code, Date.now()).expired)
       .map((code) => code.code)
       .join('\n');
     if (unused && (await ClipboardManager.copyText(unused))) messageApi.success(t('copied'));
@@ -107,7 +127,14 @@ export default function ActivationCodesModal({
             <Button htmlType="submit" type="primary" loading={codes.create.isPending}>
               {t('pages.plans.codes.create')}
             </Button>
-            <Button onClick={copyUnused} disabled={!codes.data?.some((code) => !code.usedAt)}>
+            <Button
+              onClick={copyUnused}
+              disabled={
+                !codes.data?.some(
+                  (code) => !code.usedAt && !activationCodeExpiry(code, now).expired,
+                )
+              }
+            >
               {t('pages.plans.codes.copyAll')}
             </Button>
           </Space>
@@ -144,7 +171,25 @@ export default function ActivationCodesModal({
             render: (_, row) => (
               <div>
                 {row.totalGB ? SizeFormatter.sizeFormat(row.totalGB) : t('unlimited')} ·{' '}
-                {row.days ? `${row.days} ${t('pages.plans.daysUnit')}` : t('pages.plans.permanent')}
+                {row.days
+                  ? row.usedAt
+                    ? `${row.days} ${t('pages.plans.daysUnit')}`
+                    : t('pages.plans.codes.remainingDays', {
+                        days: activationCodeExpiry(row, now).remainingDays,
+                      })
+                  : t('pages.plans.permanent')}
+                {!row.usedAt && row.days > 0 && (
+                  <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
+                    {t('pages.plans.codes.expiresAt')}{' '}
+                    <time
+                      dateTime={new Date(activationCodeExpiry(row, now).expiresAt).toISOString()}
+                    >
+                      {new Date(activationCodeExpiry(row, now).expiresAt).toLocaleString(
+                        i18n.language,
+                      )}
+                    </time>
+                  </Typography.Text>
+                )}
               </div>
             ),
           },
@@ -153,10 +198,20 @@ export default function ActivationCodesModal({
             key: 'status',
             render: (_, row) => (
               <div>
-                <Tag color={row.usedAt ? undefined : 'green'}>
+                <Tag
+                  color={
+                    row.usedAt
+                      ? undefined
+                      : activationCodeExpiry(row, now).expired
+                        ? 'red'
+                        : 'green'
+                  }
+                >
                   {row.usedAt
                     ? t('pages.plans.codes.used', { user: row.usedBy })
-                    : t('pages.plans.codes.unused')}
+                    : activationCodeExpiry(row, now).expired
+                      ? t('pages.plans.codes.expired')
+                      : t('pages.plans.codes.unused')}
                 </Tag>
                 {row.usedAt > 0 && (
                   <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>

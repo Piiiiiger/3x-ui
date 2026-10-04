@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import ActivationCodesModal from '@/pages/plans/ActivationCodesModal';
+import ActivationCodesModal, { activationCodeExpiry } from '@/pages/plans/ActivationCodesModal';
 import { HttpUtil, Msg } from '@/utils';
 import { renderWithProviders } from './test-utils';
 
@@ -39,6 +39,40 @@ afterEach(() => {
 });
 
 describe('activation codes', () => {
+  it('counts down unused validity and expires exactly at its deadline', () => {
+    const day = 86_400_000;
+    const createdAt = Date.UTC(2026, 9, 4, 8);
+    const grant = { days: 12, createdAt };
+    expect(activationCodeExpiry(grant, createdAt).remainingDays).toBe(12);
+    expect(activationCodeExpiry(grant, createdAt + day).remainingDays).toBe(11);
+    expect(activationCodeExpiry(grant, createdAt + 12 * day - 1).remainingDays).toBe(1);
+    expect(activationCodeExpiry(grant, createdAt + 12 * day)).toMatchObject({
+      remainingDays: 0,
+      expired: true,
+    });
+    expect(activationCodeExpiry({ days: 0, createdAt }, createdAt + 365 * day).expired).toBe(false);
+  });
+
+  it('shows remaining days for an unused code', async () => {
+    get.mockResolvedValue(
+      new Msg(true, '', [{ ...code, days: 12, createdAt: Date.now() - 86_400_000 - 1000 }]),
+    );
+    renderWithProviders(<ActivationCodesModal plan={plan} onClose={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/11 days remaining/)).toBeTruthy());
+    expect(screen.getByText(/Expires:/)).toBeTruthy();
+  });
+
+  it('marks an expired code and disables copying it as unused', async () => {
+    get.mockResolvedValue(
+      new Msg(true, '', [{ ...code, days: 1, createdAt: Date.now() - 2 * 86_400_000 }]),
+    );
+    renderWithProviders(<ActivationCodesModal plan={plan} onClose={() => {}} />);
+    await waitFor(() => expect(screen.getByText('Expired')).toBeTruthy());
+    expect(screen.getByRole('button', { name: 'Copy unused codes' }).hasAttribute('disabled')).toBe(
+      true,
+    );
+  });
+
   it('creates codes with a per-user quota and refreshes the list', async () => {
     get.mockResolvedValue(new Msg(true, '', []));
     post.mockImplementation(async () => {

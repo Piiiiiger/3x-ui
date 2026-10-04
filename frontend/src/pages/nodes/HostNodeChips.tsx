@@ -5,6 +5,12 @@ import { Card, Space, Tag } from 'antd';
 export interface HostNode {
   id: number;
   remark?: string;
+  /** How this inbound participates in a configured proxy chain. */
+  chain?: {
+    role: 'target' | 'relay';
+    peerNames: string[];
+    enabled: boolean;
+  };
 }
 
 /** Groups nodes by the host they run on; one without a host runs on the local panel (0). */
@@ -28,7 +34,25 @@ export function HostNodeChips({ nodes }: { nodes: HostNode[] }) {
   return (
     <span className="host-nodes">
       {nodes.slice(0, NAMED_NODES).map((node) => (
-        <Tag key={node.id}>{node.remark || `#${node.id}`}</Tag>
+        <Tag
+          key={node.id}
+          color={node.chain ? (node.chain.enabled ? 'purple' : 'default') : undefined}
+          title={
+            node.chain
+              ? node.chain.role === 'target'
+                ? `已中转：经 ${node.chain.peerNames.join('、') || '未命名中转节点'}`
+                : `中转入口：服务 ${node.chain.peerNames.join('、') || '未命名目标节点'}`
+              : '直连节点，未配置中转'
+          }
+        >
+          {node.remark || `#${node.id}`}
+          {node.chain && (
+            <small style={{ marginInlineStart: 4, opacity: 0.82 }}>
+              {node.chain.enabled ? (node.chain.role === 'target' ? '中转' : '入口') : '已停用'}
+            </small>
+          )}
+          {!node.chain && <small style={{ marginInlineStart: 4, opacity: 0.62 }}>直连</small>}
+        </Tag>
       ))}
       {nodes.length > NAMED_NODES && <Tag>+{nodes.length - NAMED_NODES}</Tag>}
     </span>

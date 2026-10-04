@@ -35,6 +35,8 @@ export type DBInboundInit = Partial<{
   listen: string;
   port: number;
   protocol: string;
+  runtimeState?: string;
+  runtimeError?: string;
   settings: RawJsonField;
   streamSettings: RawJsonField;
   tag: string;
@@ -86,6 +88,8 @@ export class DBInbound {
   listen: string;
   port: number;
   protocol: string;
+  runtimeState?: string;
+  runtimeError?: string;
   settings: RawJsonField;
   streamSettings: RawJsonField;
   tag: string;
@@ -119,6 +123,8 @@ export class DBInbound {
     this.listen = '';
     this.port = 0;
     this.protocol = '';
+    this.runtimeState = '';
+    this.runtimeError = '';
     this.settings = '';
     this.streamSettings = '';
     this.tag = '';

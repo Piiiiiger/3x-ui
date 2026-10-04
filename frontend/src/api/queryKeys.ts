@@ -61,6 +61,7 @@ export const keys = {
   },
   portal: {
     data: (base: string) => ['portal', 'data', base] as const,
+    customization: (base: string) => ['portal', 'customization', base] as const,
     probes: () => ['portal', 'probe'] as const,
     // Keyed by client: one browser can sign in a second person, who must never
     // be handed what the cache holds of the first.

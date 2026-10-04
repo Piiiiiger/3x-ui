@@ -14,6 +14,7 @@ function inboundTransports(
   streamSettings: Record<string, unknown> | undefined,
   settings: Record<string, unknown> | undefined,
 ): TransportBits {
+  if (protocol === 'snell') return TCP | UDP;
   if (
     protocol === 'hysteria' ||
     protocol === 'wireguard' ||

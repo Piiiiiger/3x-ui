@@ -659,8 +659,10 @@ export const GenerateNodeRequestSchema = z.object({
   originNodeGuid: z.string().optional(),
   planIds: z.array(z.number().int()),
   port: z.number().int().min(0).max(65535),
-  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic']),
+  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic', 'snell']),
   remark: z.string(),
+  runtimeError: z.string().optional(),
+  runtimeState: z.string().optional(),
   settings: z.unknown(),
   shareAddr: z.string(),
   shareAddrStrategy: z.enum(['node', 'listen', 'custom']),
@@ -761,8 +763,10 @@ export const InboundSchema = z.object({
   nodeId: z.number().int().nullable().optional(),
   originNodeGuid: z.string().optional(),
   port: z.number().int().min(0).max(65535),
-  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic']),
+  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic', 'snell']),
   remark: z.string(),
+  runtimeError: z.string().optional(),
+  runtimeState: z.string().optional(),
   settings: z.unknown(),
   shareAddr: z.string(),
   shareAddrStrategy: z.enum(['node', 'listen', 'custom']),
@@ -1025,10 +1029,19 @@ export const PlanInputSchema = z.object({
   inboundIds: z.array(z.number().int()),
   limitIp: z.number().int(),
   name: z.string(),
+  nodeKeys: z.array(z.string()).optional(),
+  proxyGroups: z.array(z.lazy(() => PlanProxyGroupSchema)).optional(),
   remark: z.string(),
   templateId: z.number().int(),
 });
 export type PlanInput = z.infer<typeof PlanInputSchema>;
+
+export const PlanProxyGroupSchema = z.object({
+  inboundIds: z.array(z.number().int()),
+  name: z.string(),
+  nodeKeys: z.array(z.string()).optional(),
+});
+export type PlanProxyGroup = z.infer<typeof PlanProxyGroupSchema>;
 
 export const PlanSummarySchema = z.object({
   createdAt: z.number().int(),
@@ -1037,6 +1050,9 @@ export const PlanSummarySchema = z.object({
   limitIp: z.number().int(),
   memberCount: z.number().int(),
   name: z.string(),
+  nodeKeys: z.array(z.string()).optional(),
+  proxyGroupNames: z.array(z.string()).optional(),
+  proxyGroups: z.array(z.lazy(() => PlanProxyGroupSchema)).optional(),
   remark: z.string(),
   sortIndex: z.number().int(),
   templateId: z.number().int(),
@@ -1244,6 +1260,7 @@ export type RuleTemplatePreview = z.infer<typeof RuleTemplatePreviewSchema>;
 export const RuleTemplateSummarySchema = z.object({
   baseId: z.number().int(),
   changes: z.array(z.lazy(() => RuleTemplateChangeSchema)),
+  groups: z.array(z.string()).optional(),
   id: z.number().int(),
   isDefault: z.boolean(),
   kind: z.enum(['rules', 'yaml', 'remote']),

@@ -1,10 +1,15 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import PlanFormModal from '@/pages/plans/PlanFormModal';
 import type { PlanSummary } from '@/generated/zod';
 import { HttpUtil, Msg } from '@/utils';
-import { chooseSelectOption, fieldLabels, renderWithProviders } from './test-utils';
+import {
+  chooseSelectOption,
+  fieldLabels,
+  listSelectOptions,
+  renderWithProviders,
+} from './test-utils';
 
 const plan: PlanSummary = {
   id: 7,
@@ -21,6 +26,17 @@ const plan: PlanSummary = {
 
 const getStub = vi.mocked(HttpUtil.get);
 const setupGet = getStub.getMockImplementation();
+const NODES = [
+  { key: '1:direct', label: '香港-Neburst', inboundId: 1, relayInboundId: 0 },
+  { key: '2:direct', label: '新加坡-家宽（直连）', inboundId: 2, relayInboundId: 0 },
+  { key: '2:relay:7', label: '新加坡-家宽（中转·香港-Neburst）', inboundId: 2, relayInboundId: 1 },
+];
+
+beforeEach(() => {
+  getStub.mockImplementation(
+    async (url: string) => new Msg(true, '', url === '/panel/api/plans/nodeOptions' ? NODES : []),
+  );
+});
 
 afterEach(() => {
   if (setupGet) getStub.mockImplementation(setupGet);
@@ -51,7 +67,12 @@ const TEMPLATES = [
   },
 ];
 
-function save() {
+async function save() {
+  await waitFor(() =>
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    ),
+  );
   fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 }
 
@@ -78,12 +99,12 @@ describe('PlanFormModal', () => {
       ),
     ).toBeTruthy();
 
-    save();
+    await save();
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
     expect(onConfirm.mock.calls[0][1]).toBe(false);
 
     fireEvent.click(reapply);
-    save();
+    await save();
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(2));
     expect(onConfirm.mock.calls[1][1]).toBe(true);
   });
@@ -93,7 +114,7 @@ describe('PlanFormModal', () => {
     getStub.mockImplementation(async (url: string) =>
       url === '/panel/api/ruleTemplates/list'
         ? new Msg(true, '', TEMPLATES)
-        : new Msg(true, '', []),
+        : new Msg(true, '', url === '/panel/api/plans/nodeOptions' ? NODES : []),
     );
     const onConfirm = vi.fn();
     renderWithProviders(
@@ -102,9 +123,110 @@ describe('PlanFormModal', () => {
 
     await screen.findByText('Default (alpha_v3)');
     chooseSelectOption(screen.getByLabelText('Rule template').id, 'beta_v3');
-    save();
+    await save();
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
     expect(onConfirm.mock.calls[0][0]).toMatchObject({ templateId: 5 });
+  });
+
+  it('shows direct and relay variants together and saves them independently', async () => {
+    const onConfirm = vi.fn();
+    const view = renderWithProviders(
+      <PlanFormModal open plan={plan} onClose={() => {}} onConfirm={onConfirm} />,
+    );
+    await screen.findByText('新加坡-家宽（中转·香港-Neburst）');
+    expect(screen.getByText('新加坡-家宽（直连）')).toBeTruthy();
+    expect(screen.getByText('新加坡-家宽（中转·香港-Neburst）')).toBeTruthy();
+    expect(listSelectOptions('plan-node-options')).toEqual(NODES.map((node) => node.label));
+    fireEvent.click(screen.getByRole('button', { name: /Clear all/i }));
+    chooseSelectOption('plan-node-options', NODES[1].label);
+    chooseSelectOption('plan-node-options', NODES[2].label);
+    await save();
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
+    const saved = onConfirm.mock.calls[0][0];
+    expect(saved.nodeKeys).toEqual(['2:direct', '2:relay:7']);
+    expect(saved.inboundIds).toEqual([2, 1]);
+    view.unmount();
+    renderWithProviders(
+      <PlanFormModal open plan={{ ...plan, ...saved }} onClose={() => {}} onConfirm={vi.fn()} />,
+    );
+    await screen.findByText(NODES[2].label);
+    const select = screen.getByLabelText('Nodes').closest('.ant-select')!;
+    const chips = Array.from(select.querySelectorAll('.ant-select-selection-item')).map((item) =>
+      item.getAttribute('title'),
+    );
+    expect(chips).toContain(NODES[2].label);
+    expect(chips).not.toContain(NODES[0].label);
+    expect(chips).toContain(NODES[1].label);
+  });
+
+  it('allows deleting a direct variant while retaining the relay variant', async () => {
+    renderWithProviders(<PlanFormModal open plan={plan} onClose={() => {}} onConfirm={vi.fn()} />);
+    await screen.findByText(NODES[2].label);
+    fireEvent.click(screen.getByRole('button', { name: /Clear all/i }));
+    chooseSelectOption('plan-node-options', NODES[2].label);
+
+    const select = screen.getByLabelText('Nodes').closest('.ant-select')!;
+    const chips = Array.from(select.querySelectorAll('.ant-select-selection-item')).map((item) =>
+      item.getAttribute('title'),
+    );
+    expect(chips).toContain(NODES[2].label);
+    expect(chips).not.toContain(NODES[0].label);
+  });
+
+  it('keeps an explicitly selected relay alongside its chain after saving and reopening', async () => {
+    const onConfirm = vi.fn();
+    const view = renderWithProviders(
+      <PlanFormModal open plan={plan} onClose={() => {}} onConfirm={onConfirm} />,
+    );
+    await screen.findByText(NODES[2].label);
+    fireEvent.click(screen.getByRole('button', { name: /Clear all/i }));
+    chooseSelectOption('plan-node-options', NODES[2].label);
+    chooseSelectOption('plan-node-options', NODES[0].label);
+    await save();
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
+    const saved = onConfirm.mock.calls[0][0];
+    expect(saved.nodeKeys).toEqual(['2:relay:7', '1:direct']);
+    view.unmount();
+    renderWithProviders(
+      <PlanFormModal open plan={{ ...plan, ...saved }} onClose={() => {}} onConfirm={vi.fn()} />,
+    );
+    await screen.findByText(NODES[2].label);
+    const select = screen.getByLabelText('Nodes').closest('.ant-select')!;
+    const chips = Array.from(select.querySelectorAll('.ant-select-selection-item')).map((item) =>
+      item.getAttribute('title'),
+    );
+    expect(chips).toContain(NODES[0].label);
+    expect(chips).toContain(NODES[2].label);
+  });
+
+  it('keeps independent variants in proxy-group assignments', async () => {
+    const onConfirm = vi.fn();
+    const groupPlan = {
+      ...plan,
+      proxyGroupNames: ['🤖 AI 服务'],
+      proxyGroups: [{ name: '🤖 AI 服务', inboundIds: [2], nodeKeys: ['2:relay:7'] }],
+    };
+    renderWithProviders(
+      <PlanFormModal open plan={groupPlan} onClose={() => {}} onConfirm={onConfirm} />,
+    );
+    await save();
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
+    expect(onConfirm.mock.calls[0][0].proxyGroups).toEqual([
+      { name: '🤖 AI 服务', inboundIds: [2], nodeKeys: ['2:relay:7'] },
+    ]);
+  });
+
+  it('blocks saving when node options are malformed instead of clearing assignments', async () => {
+    getStub.mockImplementation(
+      async (url: string) => new Msg(true, '', url === '/panel/api/plans/nodeOptions' ? {} : []),
+    );
+    const onConfirm = vi.fn();
+    renderWithProviders(
+      <PlanFormModal open plan={plan} onClose={() => {}} onConfirm={onConfirm} />,
+    );
+    await screen.findByText('节点加载失败，请刷新后重试');
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(onConfirm).not.toHaveBeenCalled();
   });
 });

@@ -28,6 +28,8 @@ export interface DBInboundRecord extends ProtocolFlags {
   subSortIndex: number;
   port: number;
   protocol: string;
+  runtimeState?: string;
+  runtimeError?: string;
   up: number;
   down: number;
   total: number;

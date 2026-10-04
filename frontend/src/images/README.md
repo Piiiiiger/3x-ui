@@ -1,3 +1,9 @@
+# Current brand icon
+
+`taffy-avatar.png` is the Taffy portrait used in the portal header and panel login, requested on 2026-10-04.
+
+Source: [永雏塔菲的魔法卷轴](https://tf520.top/), [original PNG](https://tf520.top/imgs/taffy-rmbg.png). Downloaded unchanged; bundled locally so the UI does not depend on external image requests.
+
 # Pigger mascot
 
 `pigger-mascot.png` is the transparent anime pig icon used by the account portal and panel login. Generated with the built-in image generation tool on 2026-10-03.

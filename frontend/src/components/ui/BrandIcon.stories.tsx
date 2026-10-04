@@ -9,7 +9,7 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Transparent anime pig mascot, displayed beside the accessible Pigger wordmark.',
+        component: 'Taffy avatar, displayed beside the accessible Pigger wordmark.',
       },
     },
   },

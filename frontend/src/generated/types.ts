@@ -620,6 +620,8 @@ export interface GenerateNodeRequest {
   port: number;
   protocol: Protocol;
   remark: string;
+  runtimeError?: string;
+  runtimeState?: string;
   settings: unknown;
   shareAddr: string;
   shareAddrStrategy: string;
@@ -711,6 +713,8 @@ export interface Inbound {
   port: number;
   protocol: Protocol;
   remark: string;
+  runtimeError?: string;
+  runtimeState?: string;
   settings: unknown;
   shareAddr: string;
   shareAddrStrategy: string;
@@ -956,8 +960,16 @@ export interface PlanInput {
   inboundIds: number[];
   limitIp: number;
   name: string;
+  nodeKeys?: string[];
+  proxyGroups?: PlanProxyGroup[];
   remark: string;
   templateId: number;
+}
+
+export interface PlanProxyGroup {
+  inboundIds: number[];
+  name: string;
+  nodeKeys?: string[];
 }
 
 export interface PlanSummary {
@@ -967,6 +979,9 @@ export interface PlanSummary {
   limitIp: number;
   memberCount: number;
   name: string;
+  nodeKeys?: string[];
+  proxyGroupNames?: string[];
+  proxyGroups?: PlanProxyGroup[];
   remark: string;
   sortIndex: number;
   templateId: number;
@@ -1156,6 +1171,7 @@ export interface RuleTemplatePreview {
 export interface RuleTemplateSummary {
   baseId: number;
   changes: RuleTemplateChange[];
+  groups?: string[];
   id: number;
   isDefault: boolean;
   kind: string;

@@ -187,3 +187,33 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.inbounds-page .inbound-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.inbounds-page .inbound-name-cell__name {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 20px;
+}
+
+.inbounds-page .inbound-name-cell__routes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.inbounds-page .inbound-name-cell__routes .ant-tag {
+  flex-shrink: 0;
+  margin-inline-end: 0;
+  line-height: 18px;
+}

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SnellInboundSettingsSchema } from './snell';
 
 import { AmneziawgInboundSettingsSchema } from './amneziawg';
 import { HttpInboundSettingsSchema } from './http';
@@ -22,6 +23,7 @@ export * from './mtproto';
 export * from './shadowsocks';
 export * from './trojan';
 export * from './tuic';
+export * from './snell';
 export * from './tun';
 export * from './tunnel';
 export * from './vless';
@@ -47,5 +49,6 @@ export const InboundSettingsSchema = z.discriminatedUnion('protocol', [
   z.object({ protocol: z.literal('mtproto'), settings: MtprotoInboundSettingsSchema }),
   z.object({ protocol: z.literal('amneziawg'), settings: AmneziawgInboundSettingsSchema }),
   z.object({ protocol: z.literal('tuic'), settings: TuicInboundSettingsSchema }),
+  z.object({ protocol: z.literal('snell'), settings: SnellInboundSettingsSchema }),
 ]);
 export type InboundSettings = z.infer<typeof InboundSettingsSchema>;

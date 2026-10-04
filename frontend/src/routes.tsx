@@ -3,6 +3,7 @@ import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { Spin } from 'antd';
 
 import PanelLayout from '@/layouts/PanelLayout';
+import RouteLoadError from '@/components/feedback/RouteLoadError';
 
 const IndexPage = lazy(() => import('@/pages/index/IndexPage'));
 const InboundsPage = lazy(() => import('@/pages/inbounds/InboundsPage'));
@@ -13,6 +14,7 @@ const NodesPage = lazy(() => import('@/pages/nodes/NodesPage'));
 const HostPage = lazy(() => import('@/pages/nodes/HostPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
+const ChainsPage = lazy(() => import('@/pages/chains/ChainsPage'));
 
 function withSuspense(node: React.ReactNode) {
   return (
@@ -39,6 +41,7 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <PanelLayout />,
+    errorElement: <RouteLoadError />,
     children: [
       { index: true, element: withSuspense(<IndexPage />) },
       // The probe's servers moved onto the hosts page; old links and bookmarks follow them.
@@ -51,6 +54,7 @@ const routes: RouteObject[] = [
       { path: 'nodes/:hostId', element: withSuspense(<HostPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'xray', element: withSuspense(<XrayPage />) },
+      { path: 'chains', element: withSuspense(<ChainsPage />) },
     ],
   },
 ];

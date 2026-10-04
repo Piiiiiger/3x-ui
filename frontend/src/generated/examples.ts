@@ -677,6 +677,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "port": 443,
     "protocol": "vless",
     "remark": "VLESS-443",
+    "runtimeError": "",
+    "runtimeState": "",
     "settings": null,
     "shareAddr": "",
     "shareAddrStrategy": "node",
@@ -794,6 +796,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "port": 443,
     "protocol": "vless",
     "remark": "VLESS-443",
+    "runtimeError": "",
+    "runtimeState": "",
     "settings": null,
     "shareAddr": "",
     "shareAddrStrategy": "node",
@@ -1031,8 +1035,33 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limitIp": 0,
     "name": "Monthly 100G",
+    "nodeKeys": [
+      ""
+    ],
+    "proxyGroups": [
+      {
+        "inboundIds": [
+          1,
+          2
+        ],
+        "name": "🔰 节点选择",
+        "nodeKeys": [
+          ""
+        ]
+      }
+    ],
     "remark": "Hong Kong and Singapore",
     "templateId": 1
+  },
+  "PlanProxyGroup": {
+    "inboundIds": [
+      1,
+      2
+    ],
+    "name": "🔰 节点选择",
+    "nodeKeys": [
+      ""
+    ]
   },
   "PlanSummary": {
     "createdAt": 1735689600000,
@@ -1044,6 +1073,24 @@ export const EXAMPLES: Record<string, unknown> = {
     "limitIp": 0,
     "memberCount": 4,
     "name": "Monthly 100G",
+    "nodeKeys": [
+      ""
+    ],
+    "proxyGroupNames": [
+      ""
+    ],
+    "proxyGroups": [
+      {
+        "inboundIds": [
+          1,
+          2
+        ],
+        "name": "🔰 节点选择",
+        "nodeKeys": [
+          ""
+        ]
+      }
+    ],
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
     "templateId": 1,
@@ -1355,6 +1402,9 @@ export const EXAMPLES: Record<string, unknown> = {
         "key": "rules",
         "replaced": false
       }
+    ],
+    "groups": [
+      ""
     ],
     "id": 1,
     "isDefault": false,

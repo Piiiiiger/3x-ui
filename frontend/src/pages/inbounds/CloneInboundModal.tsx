@@ -39,9 +39,11 @@ export default function CloneInboundModal({
 
   const targetOptions = useMemo(
     () => [
-      { value: LOCAL_PANEL, label: t('pages.inbounds.localPanel'), disabled: false },
+      ...(dbInbound?.protocol === 'snell'
+        ? []
+        : [{ value: LOCAL_PANEL, label: t('pages.inbounds.localPanel'), disabled: false }]),
       ...(nodes || [])
-        .filter((n) => n.enable)
+        .filter((n) => n.enable && (dbInbound?.protocol !== 'snell' || n.kind === 'agent'))
         .map((n) => ({
           value: n.id,
           // Only online nodes are deployable targets: nodes report `unknown`
@@ -51,7 +53,7 @@ export default function CloneInboundModal({
           disabled: n.status !== 'online',
         })),
     ],
-    [nodes, t],
+    [nodes, t, dbInbound?.protocol],
   );
 
   // "Select all" must not pick targets the user can't pick manually —
@@ -72,7 +74,7 @@ export default function CloneInboundModal({
     const src = dbInbound.nodeId ?? LOCAL_PANEL;
     const srcNode = (nodes || []).find((n) => n.id === src);
     const selectable = !!srcNode && !!srcNode.enable && srcNode.status === 'online';
-    setTargets([selectable ? src : LOCAL_PANEL]);
+    setTargets(selectable ? [src] : dbInbound.protocol === 'snell' ? [] : [LOCAL_PANEL]);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [open]);
 

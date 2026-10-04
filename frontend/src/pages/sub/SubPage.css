@@ -674,3 +674,17 @@ a.sub-row-title:hover {
   width: 100%;
   max-width: none;
 }
+
+/* Match the panel wordmark while showing only the current account name. */
+.sub-account-wordmark {
+  margin: 0;
+  font-size: 24px;
+  color: #f18c6e;
+}
+.sub-account-wordmark .brand-mark {
+  max-width: 100%;
+}
+.sub-account-wordmark .brand-mark-rest {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -106,6 +106,24 @@
   gap: 0 16px;
 }
 
+.plan-proxy-groups {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 4px;
+}
+
+.plan-proxy-groups-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.plan-proxy-groups-hint {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
 @media (max-width: 576px) {
   .plan-form-row {
     grid-template-columns: 1fr;

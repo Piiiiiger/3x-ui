@@ -7,6 +7,7 @@ import { Protocols } from '@/schemas/primitives';
  * target picker so the two surfaces can never drift apart.
  */
 export const NODE_ELIGIBLE_PROTOCOLS: Readonly<Record<string, true>> = {
+  [Protocols.SNELL]: true,
   [Protocols.VLESS]: true,
   [Protocols.VMESS]: true,
   [Protocols.TROJAN]: true,

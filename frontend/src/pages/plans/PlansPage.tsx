@@ -46,6 +46,7 @@ import AssignPlanModal from './AssignPlanModal';
 import PlanFormModal from './PlanFormModal';
 import ActivationCodesModal from './ActivationCodesModal';
 import { useInboundChoices } from './planText';
+import { usePlanNodeOptions } from '@/api/queries/usePlanNodeOptions';
 import './PlansPage.css';
 
 type PlansView = 'grid' | 'list';
@@ -98,6 +99,7 @@ export default function PlansPage() {
   const { create, update, remove } = usePlanMutations();
   const { templates } = useRuleTemplatesQuery();
   const { labelOf } = useInboundChoices();
+  const { data: planNodeOptions = [] } = usePlanNodeOptions();
 
   const [view, setView] = useState<PlansView>(readView);
   const [formOpen, setFormOpen] = useState(false);
@@ -131,10 +133,13 @@ export default function PlansPage() {
   }
 
   function nodesOf(plan: PlanSummary): ReactNode {
-    const count = plan.inboundIds.length;
+    const labels =
+      plan.nodeKeys?.map((key) => planNodeOptions.find((node) => node.key === key)?.label ?? key) ??
+      plan.inboundIds.map((id) => labelOf(id));
+    const count = labels.length;
     if (count === 0) return <Typography.Text type="secondary">0</Typography.Text>;
     return (
-      <Tooltip title={plan.inboundIds.map((id) => labelOf(id)).join(' · ')}>
+      <Tooltip title={labels.join(' · ')}>
         <span className="plan-count">{count}</span>
       </Tooltip>
     );

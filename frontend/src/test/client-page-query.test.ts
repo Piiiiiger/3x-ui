@@ -21,6 +21,7 @@ const params = {
   hasTgId: 'yes',
   hasComment: 'no',
   plan: '3',
+  customGroup: '2',
 } satisfies Required<ClientQueryParams>;
 
 test('every filter the clients page can set reaches the list request', () => {

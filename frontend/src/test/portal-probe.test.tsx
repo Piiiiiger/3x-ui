@@ -133,7 +133,8 @@ describe('the portal probe view', () => {
     renderWithProviders(<PortalApp base={BASE} />);
 
     expect(await screen.findByText('My plan')).toBeTruthy();
-    expect(screen.queryByRole('radio')).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Probe' })).toBeNull();
+    expect(screen.getByRole('radio', { name: '自定义订阅' })).toBeTruthy();
     expect(server.countOf('probe')).toBe(0);
   });
 
@@ -143,7 +144,8 @@ describe('the portal probe view', () => {
     renderWithProviders(<PortalApp base={BASE} />);
 
     expect(await screen.findByText('My plan')).toBeTruthy();
-    expect(screen.queryByRole('radio')).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Probe' })).toBeNull();
+    expect(screen.getByRole('radio', { name: '自定义订阅' })).toBeTruthy();
     expect(screen.queryByText('Your details could not be loaded. Try again later.')).toBeNull();
   });
 

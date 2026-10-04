@@ -1,4 +1,4 @@
-import mascot from '@/images/pigger-mascot.png';
+import mascot from '@/images/taffy-avatar.png';
 
 export default function BrandIcon({ className }: { className?: string }) {
   return (

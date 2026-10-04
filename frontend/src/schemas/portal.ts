@@ -52,3 +52,43 @@ export const PortalDataSchema = z.object({
   probe: z.boolean().default(false),
 });
 export type PortalData = z.infer<typeof PortalDataSchema>;
+
+export const PortalCustomizationGroupSchema = z
+  .object({
+    name: z.string(),
+    type: z.string(),
+    proxies: z.array(z.string()).optional(),
+    filter: z.string().optional(),
+  })
+  .passthrough();
+export type PortalCustomizationGroup = z.infer<typeof PortalCustomizationGroupSchema>;
+
+export const PortalCustomizationLinkSchema = z.object({
+  kind: z.enum(['link', 'subscription']),
+  value: z.string(),
+  remark: z.string(),
+});
+export type PortalCustomizationLink = z.infer<typeof PortalCustomizationLinkSchema>;
+
+export const PortalCustomizationNodeSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  source: z.enum(['yaml', 'link', 'subscription']),
+  linkIndex: z.number().int().nonnegative().optional(),
+});
+export type PortalCustomizationNode = z.infer<typeof PortalCustomizationNodeSchema>;
+
+export const PortalCustomizationSchema = z.object({
+  nodesYaml: z.string(),
+  links: z.array(PortalCustomizationLinkSchema),
+  rulesYaml: z.string(),
+  effectiveYaml: z.string(),
+  groups: z.array(PortalCustomizationGroupSchema),
+  rules: z.array(z.string()),
+  nodeCount: z.number().int().nonnegative(),
+  nodes: z.array(PortalCustomizationNodeSchema),
+  proxyNames: z.array(z.string()),
+  updatedAt: z.number(),
+  versions: z.array(z.object({ id: z.number().int(), savedAt: z.number() })),
+});
+export type PortalCustomization = z.infer<typeof PortalCustomizationSchema>;

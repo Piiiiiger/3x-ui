@@ -28,6 +28,7 @@ const PROTOCOL_LABELS: Record<string, string> = {
   tg: 'MTProto',
   vpn: 'AmneziaWG',
   tuic: 'TUIC',
+  snell: 'Snell',
 };
 
 const PROTOCOL_COLORS: Record<string, string> = {
@@ -41,6 +42,7 @@ const PROTOCOL_COLORS: Record<string, string> = {
   MTProto: 'blue',
   AmneziaWG: 'yellow',
   TUIC: 'orange',
+  Snell: 'cyan',
 };
 
 const SECURITY_COLORS: Record<string, string> = {
@@ -135,6 +137,7 @@ export function parseLinkParts(link: string): LinkParts | null {
       network = 'quic';
       security = 'TLS';
     }
+    if (scheme === 'snell') network = 'TCP/UDP';
   }
   if (security === 'none') security = '';
   return {

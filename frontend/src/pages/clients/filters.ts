@@ -7,6 +7,7 @@ export interface ClientFilters {
   nodeIds: number[];
   // Plan ids; 0 matches clients on no plan.
   plans: number[];
+  customGroup?: string;
   expiryFrom?: number;
   expiryTo?: number;
   usageFromGB?: number;
@@ -31,6 +32,7 @@ export function emptyFilters(): ClientFilters {
 
 export function activeFilterCount(f: ClientFilters): number {
   let n = 0;
+  if (f.customGroup) n++;
   if (f.buckets.length) n++;
   if (f.protocols.length) n++;
   if (f.inboundIds.length) n++;

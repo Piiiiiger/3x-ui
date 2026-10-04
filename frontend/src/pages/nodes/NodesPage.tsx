@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
@@ -57,6 +58,19 @@ type HostsView = 'grid' | 'list';
 const VIEW_KEY = 'hosts-view';
 const ADDRESS_KEY = 'hosts-show-address';
 
+type ProxyChainRecord = {
+  id: number;
+  targetInboundId: number;
+  relayInboundId: number;
+  enabled: boolean;
+};
+
+type ChainBadge = {
+  role: 'target' | 'relay';
+  peerNames: string[];
+  enabled: boolean;
+};
+
 function readStored(key: string): string | null {
   try {
     return localStorage.getItem(key);
@@ -106,6 +120,7 @@ function UpdateChannelChoice({ onChange }: { onChange: (dev: boolean) => void })
 /** 主机: the panel's hosts as 妙妙屋X's 服务管理 cards, with the probe's figures on them. */
 export default function NodesPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { isMobile } = useMediaQuery();
   const [modal, modalContextHolder] = Modal.useModal();
@@ -116,7 +131,50 @@ export default function NodesPage() {
 
   const { nodes, loading, fetched, fetchError, refetch, totals } = useNodesQuery();
   const { data: inboundOptions } = useInboundOptions();
-  const nodesByHost = useMemo(() => nodesByHostOf(inboundOptions ?? []), [inboundOptions]);
+  const [proxyChains, setProxyChains] = useState<ProxyChainRecord[]>([]);
+  useEffect(() => {
+    let active = true;
+    void HttpUtil.get<ProxyChainRecord[]>('/panel/api/proxyChains/list', undefined, {
+      silent: true,
+    })
+      .then((msg) => {
+        if (active && msg?.success && Array.isArray(msg.obj)) setProxyChains(msg.obj);
+      })
+      .catch(() => {
+        // The node list remains useful when chain metadata is unavailable.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const nodesByHost = useMemo(() => {
+    const options = inboundOptions ?? [];
+    const names = new Map(options.map((item) => [item.id, item.remark || `入站 #${item.id}`]));
+    const byInbound = new Map<number, ChainBadge>();
+    for (const chain of proxyChains) {
+      const target = byInbound.get(chain.targetInboundId);
+      if (!target || target.role !== 'target') {
+        byInbound.set(chain.targetInboundId, {
+          role: 'target',
+          peerNames: [names.get(chain.relayInboundId) || `入站 #${chain.relayInboundId}`],
+          enabled: chain.enabled,
+        });
+      } else {
+        target.peerNames.push(names.get(chain.relayInboundId) || `入站 #${chain.relayInboundId}`);
+      }
+      const relay = byInbound.get(chain.relayInboundId);
+      if (!relay || relay.role !== 'relay') {
+        byInbound.set(chain.relayInboundId, {
+          role: 'relay',
+          peerNames: [names.get(chain.targetInboundId) || `入站 #${chain.targetInboundId}`],
+          enabled: chain.enabled,
+        });
+      } else {
+        relay.peerNames.push(names.get(chain.targetInboundId) || `入站 #${chain.targetInboundId}`);
+      }
+    }
+    return nodesByHostOf(options.map((item) => ({ ...item, chain: byInbound.get(item.id) })));
+  }, [inboundOptions, proxyChains]);
   const {
     overview,
     loading: probeLoading,
@@ -489,6 +547,9 @@ export default function NodesPage() {
       </Button>
       <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
         {t('pages.nodes.addNode')}
+      </Button>
+      <Button icon={<LinkOutlined />} onClick={() => navigate('/chains')}>
+        管理中转链
       </Button>
       {/* Without a Lite address there is no server to link a host to. */}
       <Button

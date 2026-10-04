@@ -39,6 +39,7 @@ interface UseInboundColumnsParams {
   onRowAction: (action: { key: RowAction; dbInbound: DBInboundRecord }) => void;
   onSwitchEnable: (dbInbound: DBInboundRecord, next: boolean) => void;
   publicEndpointsOf?: (dbInbound: DBInboundRecord) => string[];
+  chainByInbound?: Map<number, { role: 'target' | 'relay'; peerName: string; enabled: boolean }>;
 }
 
 export function useInboundColumns({
@@ -54,6 +55,7 @@ export function useInboundColumns({
   onRowAction,
   onSwitchEnable,
   publicEndpointsOf,
+  chainByInbound,
 }: UseInboundColumnsParams): TableColumnType<DBInboundRecord>[] {
   const { t } = useTranslation();
   const { datepicker } = useDatepicker();
@@ -139,10 +141,45 @@ export function useInboundColumns({
         title: t('pages.inbounds.remark'),
         dataIndex: 'remark',
         key: 'remark',
-        align: 'center',
-        width: 140,
+        align: 'left',
+        width: 200,
         sorter: (a, b) => compareText(a.remark, b.remark),
-        render: (_, record) => record.remark || null,
+        render: (_, record) => {
+          const chain = chainByInbound?.get(record.id);
+          const name = (
+            <span className="inbound-name-cell__name" title={record.remark || undefined}>
+              {record.remark || null}
+            </span>
+          );
+          if (!chain) return <div className="inbound-name-cell">{name}</div>;
+          const chainTitle =
+            chain.role === 'target'
+              ? chain.enabled
+                ? `目标节点；中转版通过 ${chain.peerName}`
+                : `目标节点；中转关系已停用（${chain.peerName}）`
+              : `中转入口；为 ${chain.peerName} 提供入口`;
+          return (
+            <div className="inbound-name-cell">
+              {name}
+              <Tooltip title={chainTitle}>
+                <span className="inbound-name-cell__routes">
+                  {chain.role === 'target' ? (
+                    <>
+                      <Tag>直连版</Tag>
+                      <Tag color={chain.enabled ? 'purple' : 'default'}>
+                        {chain.enabled ? '中转版' : '中转已停用'}
+                      </Tag>
+                    </>
+                  ) : (
+                    <Tag color={chain.enabled ? 'cyan' : 'default'}>
+                      {chain.enabled ? '中转入口' : '中转入口已停用'}
+                    </Tag>
+                  )}
+                </span>
+              </Tooltip>
+            </div>
+          );
+        },
       });
     }
 
@@ -214,6 +251,22 @@ export function useInboundColumns({
               {record.protocol}
             </Tag>,
           ];
+          if (record.protocol === 'snell') {
+            const state = record.runtimeState || 'pending';
+            tags.push(
+              <Tag key="v" color="blue">
+                v5
+              </Tag>,
+              <Tag key="transport" color="green">
+                TCP / UDP
+              </Tag>,
+              <Tooltip key="status" title={record.runtimeError || t('pages.inbounds.snell.help')}>
+                <Tag color={state === 'running' ? 'green' : state === 'error' ? 'red' : 'default'}>
+                  {t('pages.inbounds.snell.states.' + state, { defaultValue: state })}
+                </Tag>
+              </Tooltip>,
+            );
+          }
           if (record.isWireguard || record.isAmneziawg || record.isHysteria || record.isTuic) {
             tags.push(
               <Tag key="n" color="green">
@@ -389,31 +442,38 @@ export function useInboundColumns({
         align: 'center',
         width: 140,
         sorter: (a, b) => a.up + a.down - (b.up + b.down),
-        render: (_, record) => (
-          <Popover
-            content={
-              <table cellPadding={2}>
-                <tbody>
-                  <tr>
-                    <td>↑ {SizeFormatter.sizeFormat(record.up)}</td>
-                    <td>↓ {SizeFormatter.sizeFormat(record.down)}</td>
-                  </tr>
-                  {record.total > 0 && record.up + record.down < record.total && (
+        render: (_, record) =>
+          record.protocol === 'snell' ? (
+            <Tooltip title={t('pages.inbounds.snell.help')}>
+              <Tag>{t('pages.inbounds.snell.noStats')}</Tag>
+            </Tooltip>
+          ) : (
+            <Popover
+              content={
+                <table cellPadding={2}>
+                  <tbody>
                     <tr>
-                      <td>{t('remained')}</td>
-                      <td>{SizeFormatter.sizeFormat(record.total - record.up - record.down)}</td>
+                      <td>↑ {SizeFormatter.sizeFormat(record.up)}</td>
+                      <td>↓ {SizeFormatter.sizeFormat(record.down)}</td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            }
-          >
-            <Tag color={ColorUtils.usageColor(record.up + record.down, trafficDiff, record.total)}>
-              {SizeFormatter.sizeFormat(record.up + record.down)} /{' '}
-              {record.total > 0 ? SizeFormatter.sizeFormat(record.total) : <InfinityIcon />}
-            </Tag>
-          </Popover>
-        ),
+                    {record.total > 0 && record.up + record.down < record.total && (
+                      <tr>
+                        <td>{t('remained')}</td>
+                        <td>{SizeFormatter.sizeFormat(record.total - record.up - record.down)}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              }
+            >
+              <Tag
+                color={ColorUtils.usageColor(record.up + record.down, trafficDiff, record.total)}
+              >
+                {SizeFormatter.sizeFormat(record.up + record.down)} /{' '}
+                {record.total > 0 ? SizeFormatter.sizeFormat(record.total) : <InfinityIcon />}
+              </Tag>
+            </Popover>
+          ),
       },
       {
         title: t('pages.inbounds.speed'),
@@ -468,6 +528,7 @@ export function useInboundColumns({
     hasAnySubSortIndex,
     hasActiveNode,
     nodesById,
+    chainByInbound,
     clientCount,
     inboundSpeed,
     subEnable,

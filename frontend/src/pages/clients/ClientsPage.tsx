@@ -87,6 +87,7 @@ const BulkDetachInboundsModal = lazy(() => import('./BulkDetachInboundsModal'));
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
 const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
 import ClientChips from './ClientChips';
+import CustomUserGroups, { CustomGroupCell } from './CustomUserGroups';
 import ClientCommentCell from './ClientCommentCell';
 import ClientRowMenu from './ClientRowMenu';
 import PlanUsageCell from './PlanUsageCell';
@@ -428,6 +429,7 @@ export default function ClientsPage() {
       hasTgId: filters.hasTgId || undefined,
       hasComment: filters.hasComment || undefined,
       plan: filters.plans.join(',') || undefined,
+      customGroup: filters.customGroup,
       sort: sortColumn || undefined,
       order: sortOrder || undefined,
     });
@@ -942,6 +944,11 @@ export default function ClientsPage() {
         return [
           emailColumn,
           {
+            title: t('pages.clients.groups.title'),
+            key: 'customGroup',
+            render: (_v, record) => <CustomGroupCell email={record.email} />,
+          },
+          {
             title: t('menu.plans'),
             key: 'plan',
             render: (_v, record) =>
@@ -993,6 +1000,11 @@ export default function ClientsPage() {
       }
       return [
         emailColumn,
+        {
+          title: t('pages.clients.groups.title'),
+          key: 'customGroup',
+          render: (_v, record) => <CustomGroupCell email={record.email} />,
+        },
         {
           title: t('pages.clients.comment'),
           key: 'comment',
@@ -1394,12 +1406,23 @@ export default function ClientsPage() {
                     )}
                   </div>
 
+                  <CustomUserGroups
+                    selected={selectedRowKeys}
+                    value={filters.customGroup}
+                    onChange={(customGroup) => setFilters({ ...filters, customGroup })}
+                    onSaved={() => {
+                      setSelectedRowKeys([]);
+                      refresh();
+                    }}
+                  />
                   <ClientChips
                     plans={plans}
                     summary={summary}
                     planFilter={filters.plans}
                     bucketFilter={filters.buckets}
-                    onShowAll={() => setFilters({ ...filters, plans: [], buckets: [] })}
+                    onShowAll={() =>
+                      setFilters({ ...filters, plans: [], buckets: [], customGroup: undefined })
+                    }
                     onPlan={onPlanChip}
                     onBucket={onBucketChip}
                   />
@@ -1610,6 +1633,7 @@ export default function ClientsPage() {
                               />
                               <span className="tag-name">{row.email}</span>
                               <ClientStateTag state={stateOf(row)} />
+                              <CustomGroupCell email={row.email} />
                               <div className="card-actions">
                                 <ClientRowMenu
                                   email={row.email}
