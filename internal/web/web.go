@@ -24,6 +24,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/frontendassets"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/controller"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/job"
@@ -242,7 +243,11 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if config.IsDebug() {
 		engine.StaticFS(basePath+"assets", http.FS(os.DirFS("internal/web/dist/assets")))
 	} else {
-		engine.StaticFS(basePath+"assets", http.FS(&wrapDistFS{FS: distFS}))
+		current, err := fs.Sub(distFS, "dist/assets")
+		if err != nil {
+			return nil, err
+		}
+		engine.StaticFS(basePath+"assets", http.FS(frontendassets.Mount(current)))
 	}
 
 	// Hand the embedded `dist/` filesystem to the controller package

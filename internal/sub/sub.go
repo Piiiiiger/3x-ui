@@ -16,6 +16,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/frontendassets"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
@@ -294,7 +295,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if _, err := os.Stat("internal/web/dist/assets"); err == nil {
 		assetsFS = http.FS(os.DirFS("internal/web/dist/assets"))
 	} else if subFS, err := fs.Sub(distFS, "dist/assets"); err == nil {
-		assetsFS = http.FS(subFS)
+		assetsFS = http.FS(frontendassets.Mount(subFS))
 	} else {
 		logger.Error("sub: failed to mount embedded dist assets:", err)
 	}
