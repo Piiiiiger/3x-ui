@@ -364,6 +364,9 @@ func (t *Tgbot) Start(i18nFS embed.FS) error {
 		return err
 	}
 
+	if err := t.settingService.SetAccountBotUsername(bot.Username()); err != nil {
+		logger.Warning("Unable to save bot username:", err)
+	}
 	t.trySetBotCommands(bot)
 
 	// Start receiving Telegram bot messages
@@ -387,15 +390,10 @@ func (t *Tgbot) trySetBotCommands(bot *telego.Bot) {
 
 	err := bot.SetMyCommands(context.Background(), &telego.SetMyCommandsParams{
 		Commands: []telego.BotCommand{
-			{Command: "start", Description: t.I18nBot("tgbot.commands.startDesc")},
-			{Command: "help", Description: t.I18nBot("tgbot.commands.helpDesc")},
-			{Command: "status", Description: t.I18nBot("tgbot.commands.statusDesc")},
-			{Command: "id", Description: t.I18nBot("tgbot.commands.idDesc")},
-			{Command: "usage", Description: t.I18nBot("tgbot.commands.usageDesc")},
-			{Command: "inbound", Description: t.I18nBot("tgbot.commands.inboundDesc")},
-			{Command: "restart", Description: t.I18nBot("tgbot.commands.restartDesc")},
-			{Command: "clearall", Description: t.I18nBot("tgbot.commands.clearallDesc")},
-			{Command: "broadcast", Description: t.I18nBot("tgbot.commands.broadcastDesc")},
+			{Command: "start", Description: "绑定账号与使用说明"},
+			{Command: "bind", Description: "使用专属激活码绑定账号"},
+			{Command: "report", Description: "查询剩余流量和使用情况"},
+			{Command: "daily", Description: "日报开关和发送时间（北京时间）"},
 		},
 	})
 	if err != nil {

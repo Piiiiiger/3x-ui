@@ -68,8 +68,10 @@ func (t *Tgbot) OnReceive() {
 	isRunning = true
 	// Add to WaitGroup before releasing the lock so StopBot() can't return
 	// before this receiver goroutine is accounted for.
-	botWG.Add(1)
+	botWG.Add(2)
 	tgBotMutex.Unlock()
+
+	go t.runAccountNotifications(ctx)
 
 	// Get updates channel using the context with shorter timeout for better error recovery
 	updates, _ := bot.UpdatesViaLongPolling(ctx, &params)
@@ -96,6 +98,9 @@ func (t *Tgbot) OnReceive() {
 			// Use goroutine with worker pool for concurrent command processing
 			go runBotHandler(func() {
 				userStateMgr.clear(messageActor(message))
+				if t.handleAccountMessage(&message) {
+					return
+				}
 				if isAdmin, ok := t.gateCommand(&message); ok {
 					t.answerCommand(&message, message.Chat.ID, isAdmin)
 				}
@@ -116,6 +121,9 @@ func (t *Tgbot) OnReceive() {
 
 		h.HandleMessage(func(ctx *th.Context, message telego.Message) error {
 			defer recoverBotPanic()
+			if t.handleAccountMessage(&message) {
+				return nil
+			}
 			userStateMgr.maybePrune(time.Hour)
 			actor := messageActor(message)
 			if userState, exists := userStateMgr.get(actor); exists {

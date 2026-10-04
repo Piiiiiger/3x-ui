@@ -56,10 +56,13 @@ type portalPlan struct {
 }
 
 type portalData struct {
-	Email string               `json:"email"`
-	Page  map[string]any       `json:"page"`
-	Plan  *portalPlan          `json:"plan"`
-	Daily []service.TrafficDay `json:"daily"`
+	TelegramBot   string                   `json:"telegramBot"`
+	Account       *model.AccountActivation `json:"account"`
+	TelegramBound bool                     `json:"telegramBound"`
+	Email         string                   `json:"email"`
+	Page          map[string]any           `json:"page"`
+	Plan          *portalPlan              `json:"plan"`
+	Daily         []service.TrafficDay     `json:"daily"`
 	// Probe offers the probe view: set when one of the client's hosts is linked.
 	Probe bool `json:"probe"`
 }
@@ -271,32 +274,13 @@ type portalRedeemForm struct {
 	Code string `json:"code"`
 }
 
-// portalRedeem applies the signed-in person's next code: a renewal or another plan.
+// portalRedeem is retained for old browsers, but account credentials are no
+// longer consumable renewal vouchers. Administration owns renewals.
 func (a *SUBController) portalRedeem(c *gin.Context) {
-	client, ok := a.portalSessionClient(c)
-	if !ok {
+	if _, ok := a.portalSessionClient(c); !ok {
 		return
 	}
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, portalBodyLimit)
-	var form portalRedeemForm
-	if err := c.ShouldBindJSON(&form); err != nil || form.Code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid"})
-		return
-	}
-	ip := a.portalClientIP(c)
-	if _, ok := a.portalLimiter.Allow(ip, portalCodeGuesses); !ok {
-		c.JSON(http.StatusTooManyRequests, gin.H{"success": false, "error": "blocked"})
-		return
-	}
-	needRestart, err := a.codeService.Redeem(&service.InboundService{}, client.Email, form.Code)
-	if needRestart {
-		(&service.XrayService{}).SetToNeedRestart()
-	}
-	if !a.answerCodeError(c, ip, err) {
-		return
-	}
-	logger.Infof("portal: %q used an activation code from %s", client.Email, ip)
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusConflict, gin.H{"success": false, "error": "account_code", "message": "激活码固定对应账号，续费请联系管理员。"})
 }
 
 // answerCodeError answers a failed register or redeem and reports whether it went
@@ -356,7 +340,13 @@ func (a *SUBController) portalData(c *gin.Context) {
 		return
 	}
 
-	data := portalData{Email: client.Email}
+	data := portalData{Email: client.Email, TelegramBound: client.TgID != 0, TelegramBot: a.settingService.AccountBotUsername()}
+	var accountErr error
+	data.Account, accountErr = service.EnsureAccountActivation(client)
+	if accountErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "account"})
+		return
+	}
 	page, found, err := a.pageDataFor(c, client.SubID)
 	if err != nil {
 		logger.Warning("portal: could not build the subscription page:", err)

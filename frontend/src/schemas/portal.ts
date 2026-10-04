@@ -44,6 +44,12 @@ export type PortalPlan = z.infer<typeof PortalPlanSchema>;
 // What {subPath}portal/data returns for the signed-in client; page is the same
 // payload the subscription page is rendered from, or null without a subscription.
 export const PortalDataSchema = z.object({
+  account: z
+    .object({ code: z.string(), dailyEnabled: z.boolean(), dailyTime: z.string() })
+    .nullable()
+    .default(null),
+  telegramBound: z.boolean().default(false),
+  telegramBot: z.string().default(''),
   email: z.string(),
   page: z.custom<SubPageData>((value) => typeof value === 'object').nullable(),
   plan: PortalPlanSchema.nullable(),

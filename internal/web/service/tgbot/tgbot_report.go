@@ -3,6 +3,7 @@ package tgbot
 import (
 	"context"
 	"fmt"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"net"
 	"os"
 	"strconv"
@@ -320,6 +321,12 @@ func (t *Tgbot) notifyExhausted() {
 				if err == nil {
 					for _, client := range clients {
 						if client.TgID != 0 {
+							// Account-code users have their own durable 7/3/1 reminder schedule.
+							var accountCount int64
+							database.GetDB().Table("account_activations").Joins("JOIN clients ON clients.id = account_activations.client_id").Where("clients.email = ?", client.Email).Count(&accountCount)
+							if accountCount > 0 {
+								continue
+							}
 							chatID := client.TgID
 							if !int64Contains(chatIDsDone, chatID) && !checkAdmin(chatID) {
 								var disabledClients []xray.ClientTraffic

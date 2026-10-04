@@ -71,6 +71,8 @@ func migrationModels() []any {
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 		&model.ActivationCode{},
+		&model.AccountActivation{},
+		&model.AccountNotification{},
 	}
 }
 

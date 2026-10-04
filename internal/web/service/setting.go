@@ -1987,3 +1987,16 @@ func (s *SettingService) GetFactoryDefaults() map[string]string {
 	}
 	return result
 }
+
+// AccountBotUsername is public bot metadata, never its authentication token.
+func (s *SettingService) AccountBotUsername() string {
+	enabled, _ := s.GetTgbotEnabled()
+	if !enabled {
+		return ""
+	}
+	name, _ := s.getString("accountBotUsername")
+	return name
+}
+func (s *SettingService) SetAccountBotUsername(name string) error {
+	return s.setString("accountBotUsername", name)
+}

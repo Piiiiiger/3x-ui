@@ -60,7 +60,7 @@ func liteTestServers() []ProbeServer {
 			Virtualization: "lxc", CpuCores: 1, Status: "offline", UpdatedAt: 1790883600000, Pings: []ProbePing{},
 		},
 		{
-			Id: "srv-online", Name: "0 first by name", Region: "🇭🇰", OS: "Debian GNU/Linux 13 (trixie)", Arch: "amd64",
+			ExpiryTime: 1793116800000, Id: "srv-online", Name: "0 first by name", Region: "🇭🇰", OS: "Debian GNU/Linux 13 (trixie)", Arch: "amd64",
 			Virtualization: "kvm", CpuCores: 2, Status: "online", UpdatedAt: 1790884235101,
 			Cpu: 12.5, MemUsed: 858993459, MemTotal: 2147483648, DiskUsed: 8589934592, DiskTotal: 42949672960,
 			Load1: 0.31, Load5: 0.22, Load15: 0.18, NetIn: 5678, NetOut: 1234,

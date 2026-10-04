@@ -74,6 +74,7 @@ type liteReply struct {
 }
 
 type liteNode struct {
+	ExpiredAt        string `json:"expired_at"`
 	Name             string `json:"name"`
 	Region           string `json:"region"`
 	OS               string `json:"os"`
@@ -284,6 +285,9 @@ func mapLiteServers(nodes map[string]liteNode, statuses map[string]liteStatus, b
 			TrafficLimit:    node.TrafficLimit,
 			TrafficResetDay: node.TrafficResetDay,
 			Pings:           []ProbePing{},
+		}
+		if expiry, err := time.Parse(time.RFC3339, node.ExpiredAt); err == nil && !expiry.IsZero() {
+			server.ExpiryTime = expiry.UnixMilli()
 		}
 		if status, reported := statuses[id]; reported {
 			server.Status = probeStatusOffline

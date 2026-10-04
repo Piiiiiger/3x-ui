@@ -7,7 +7,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { keys } from '@/api/queryKeys';
 import { PANEL_NAME } from '@/lib/brand';
-import { getMessage } from '@/utils/messageBus';
 import { PortalDataSchema, type PortalData } from '@/schemas/portal';
 import SubHeader from '../SubHeader';
 import SubPage from '../SubPage';
@@ -15,7 +14,7 @@ import SubShell, { useSubLanguage } from '../SubShell';
 import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
-import PortalRedeemModal from './PortalRedeemModal';
+import PortalAccountCode from './PortalAccountCode';
 import PortalCustomize from './PortalCustomize';
 import './Portal.css';
 
@@ -73,7 +72,6 @@ export default function PortalApp({ base }: { base: string }) {
   const queryClient = useQueryClient();
   const [customizationDirty, setCustomizationDirty] = useState(false);
   const [view, showView] = usePortalView();
-  const [redeeming, setRedeeming] = useState(false);
   const portal = useQuery({
     queryKey: keys.portal.data(base),
     queryFn: () => fetchPortal(base),
@@ -131,7 +129,7 @@ export default function PortalApp({ base }: { base: string }) {
       data={data.page ?? { emails: [data.email], enabled: true }}
       headerExtra={
         <>
-          <Button onClick={() => setRedeeming(true)}>{t('subscription.portal.redeem')}</Button>
+          <PortalAccountCode data={data} />
           <Button
             size="large"
             className="toolbar-btn"
@@ -182,18 +180,6 @@ export default function PortalApp({ base }: { base: string }) {
         <Alert type="warning" showIcon title={t('subscription.portal.noSubscription')} />
       )}
       {data.plan && <PortalPlanCard plan={data.plan} />}
-      {redeeming && (
-        <PortalRedeemModal
-          base={base}
-          onClose={() => setRedeeming(false)}
-          onSessionEnded={onSessionEnded}
-          onActivated={() => {
-            void getMessage().success(t('subscription.portal.activated'));
-            queryClient.removeQueries({ queryKey: keys.portal.probes() });
-            onSignedIn();
-          }}
-        />
-      )}
       <PortalUsageCard daily={data.daily} />
     </SubPage>
   );

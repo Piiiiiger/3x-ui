@@ -112,23 +112,20 @@ func TestPortalRegisterLimitsCodeGuessesPerAddress(t *testing.T) {
 	}
 }
 
-// A signed-in person renews or changes plan with their next code.
-func TestPortalRedeemAppliesACodeToTheSignedInUser(t *testing.T) {
+// Old browser sessions cannot consume another user's registration grant.
+func TestPortalRedeemCannotConsumeAnotherAccountCode(t *testing.T) {
 	router, _ := seedPortal(t)
 	code := portalCode(t, "Yearly")
 	body, _ := json.Marshal(map[string]string{"code": code})
 	if res := portalRequest(router, http.MethodPost, "/sub/portal/redeem", string(body), "198.51.100.7", nil); res.Code != http.StatusUnauthorized {
-		t.Fatalf("redeem without a session = %d, want 401", res.Code)
+		t.Fatalf("unauthenticated: %d", res.Code)
 	}
 	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.7"))
-	if res := portalRequest(router, http.MethodPost, "/sub/portal/redeem", `{"code":"`+wrongCode+`"}`, "198.51.100.7", cookie); res.Code != http.StatusBadRequest || portalErrorOf(t, res) != "code" {
-		t.Fatalf("redeem a wrong code = %d %s, want 400 code", res.Code, res.Body)
+	if res := portalRequest(router, http.MethodPost, "/sub/portal/redeem", string(body), "198.51.100.7", cookie); res.Code != http.StatusConflict {
+		t.Fatalf("redeem: %d", res.Code)
 	}
-	if res := portalRequest(router, http.MethodPost, "/sub/portal/redeem", string(body), "198.51.100.7", cookie); res.Code != http.StatusOK {
-		t.Fatalf("redeem = %d %s", res.Code, res.Body)
-	}
-	if _, plan := portalDataOf(t, router, cookie); plan != "Yearly" {
-		t.Fatalf("plan after redeeming = %q, want Yearly", plan)
+	if res := portalRegister(router, "newaccount", "secret-pass", code, "198.51.100.8"); res.Code != http.StatusOK {
+		t.Fatalf("grant was consumed: %d %s", res.Code, res.Body)
 	}
 }
 

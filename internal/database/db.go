@@ -97,6 +97,8 @@ func allModels() []any {
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 		&model.ActivationCode{},
+		&model.AccountActivation{},
+		&model.AccountNotification{},
 		&model.ProxyChain{},
 	}
 }

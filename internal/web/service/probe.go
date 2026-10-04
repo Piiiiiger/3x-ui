@@ -64,6 +64,7 @@ type ProbePing struct {
 // ProbeServer is one server of the Lite monitor. Its metrics are zero unless
 // status is online; linked with nodeId 0 means the panel's own host.
 type ProbeServer struct {
+	ExpiryTime     int64   `json:"-"`
 	Id             string  `json:"id" example:"00000000-0000-4000-8000-000000000001"`
 	Name           string  `json:"name" example:"hk-1"`
 	Region         string  `json:"region" example:"🇭🇰"`

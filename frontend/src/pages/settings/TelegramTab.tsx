@@ -68,6 +68,13 @@ export default function TelegramTab({ allSetting, updateSetting }: TelegramTabPr
           label: catTabLabel(<SettingOutlined />, t('pages.settings.panelSettings'), isMobile),
           children: (
             <>
+              <Alert
+                type="info"
+                showIcon
+                title="账户绑定与续费提醒"
+                description="在 @BotFather 创建新机器人，将 Token 填入下方并启用、保存。用户私聊机器人发送自己的激活码即可绑定；默认北京时间 20:00 日报，可用 /daily 修改。账号和服务器在到期前 7、3、1 天提醒；服务器提醒发给已绑定的 pigger 账号，无需填写管理员聊天 ID。"
+                style={{ marginBottom: 16 }}
+              />
               <SettingListItem
                 paddings="small"
                 title={t('pages.settings.telegramBotEnable')}

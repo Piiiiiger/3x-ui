@@ -162,6 +162,9 @@ func (s *ActivationCodeService) Register(inboundSvc *InboundService, username, p
 		return nil, needRestart, err
 	}
 	rec, err := s.clientService.GetRecordByEmail(nil, username)
+	if err == nil {
+		_, err = EnsureAccountActivation(rec)
+	}
 	return rec, needRestart, err
 }
 
