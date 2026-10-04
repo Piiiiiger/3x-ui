@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Segmented } from 'antd';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 import SubPage from './SubPage';
 import PortalProbe from './portal/PortalProbe';
@@ -8,6 +9,14 @@ import PortalProbe from './portal/PortalProbe';
 export default function SubscriptionApp({ data }: { data: SubPageData }) {
   const { t } = useTranslation();
   const [view, setView] = useState<'overview' | 'probe'>('overview');
+  useDocumentTitle(
+    t(
+      view === 'probe' && data.probeBase
+        ? 'subscription.portal.viewProbe'
+        : 'subscription.tabLinks',
+    ),
+    [...new Set(data.emails?.filter(Boolean))].join(', ') || undefined,
+  );
   return (
     <SubPage
       data={data}

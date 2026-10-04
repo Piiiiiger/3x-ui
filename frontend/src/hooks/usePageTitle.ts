@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { PANEL_NAME } from '@/lib/brand';
+import { useDocumentTitle } from './useDocumentTitle';
 
 const TITLE_KEYS: Record<string, string> = {
   '/': 'menu.dashboard',
@@ -19,10 +19,6 @@ export function usePageTitle() {
   const { pathname } = useLocation();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const key = TITLE_KEYS[pathname] ?? TITLE_KEYS[`/${pathname.split('/')[1]}`];
-    const title = key ? t(key) : PANEL_NAME;
-    const host = window.location.hostname;
-    document.title = host ? `${host} - ${title}` : title;
-  }, [pathname, t]);
+  const key = TITLE_KEYS[pathname] ?? TITLE_KEYS[`/${pathname.split('/')[1]}`];
+  useDocumentTitle(key ? t(key) : PANEL_NAME);
 }

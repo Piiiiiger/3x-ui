@@ -19,6 +19,5 @@ test.each(['/nodes/3', '/nodes/local'])('titles %s after the hosts tab', (path) 
       <Titled />
     </MemoryRouter>,
   );
-  expect(document.title.endsWith('Hosts')).toBe(true);
-  expect(document.title.endsWith(PANEL_NAME)).toBe(false);
+  expect(document.title).toBe(`Hosts · ${PANEL_NAME}`);
 });

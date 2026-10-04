@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { keys } from '@/api/queryKeys';
 import { PANEL_NAME } from '@/lib/brand';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { PortalDataSchema, type PortalData } from '@/schemas/portal';
 import SubHeader from '../SubHeader';
 import SubPage from '../SubPage';
@@ -78,6 +79,21 @@ export default function PortalApp({ base }: { base: string }) {
     queryFn: () => fetchPortal(base),
     retry: false,
   });
+  const data = portal.data;
+  const probeOpen = !!data?.probe && view === 'probe';
+  const customizeOpen = !!data && view === 'customize';
+  useDocumentTitle(
+    portal.isPending || portal.isError
+      ? t('subscription.tabLinks')
+      : !data
+        ? t('subscription.portal.title')
+        : customizeOpen
+          ? '自定义订阅'
+          : probeOpen
+            ? t('subscription.portal.viewProbe')
+            : t('subscription.tabLinks'),
+    portal.isSuccess ? data?.email : undefined,
+  );
 
   const onSignedIn = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: keys.portal.data(base) });
@@ -119,12 +135,8 @@ export default function PortalApp({ base }: { base: string }) {
       </PortalStatus>
     );
   }
-  const data = portal.data;
   if (!data) return <PortalLogin base={base} onSignedIn={onSignedIn} />;
 
-  // The address may still name the probe view of whoever signed in before.
-  const probeOpen = data.probe && view === 'probe';
-  const customizeOpen = view === 'customize';
   return (
     <SubPage
       data={data.page ?? { emails: [data.email], enabled: true }}
