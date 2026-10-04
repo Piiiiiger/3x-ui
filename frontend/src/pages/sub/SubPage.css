@@ -688,3 +688,133 @@ a.sub-row-title:hover {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+/* Portal controls use the same framed hover and pressed feedback as AppNav. */
+.subscription-page {
+  --portal-control-shadow: rgba(0, 0, 0, 0.18);
+  --portal-control-shadow-hover: rgba(0, 0, 0, 0.22);
+  --portal-control-outline: #b5482d;
+}
+.subscription-page.is-dark {
+  --portal-control-shadow: rgba(0, 0, 0, 0.45);
+  --portal-control-shadow-hover: rgba(0, 0, 0, 0.55);
+  --portal-control-outline: #fbbf24;
+}
+.subscription-page
+  :is(
+    .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+    .portal-views .ant-segmented-item,
+    .portal-customize .ant-tabs-tab
+  ) {
+  position: relative;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 var(--portal-control-shadow);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+.subscription-page
+  :is(
+    .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+    .portal-views .ant-segmented-item,
+    .portal-customize .ant-tabs-tab
+  )::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 2px solid var(--portal-control-outline);
+  pointer-events: none;
+  clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+  transition: clip-path 350ms ease-out;
+}
+.subscription-page .portal-views.ant-segmented {
+  padding: 3px;
+  background: transparent;
+}
+.subscription-page .portal-views .ant-segmented-group {
+  gap: 8px;
+}
+.subscription-page .portal-views .ant-segmented-item {
+  border: 2px solid var(--sub-card-border);
+  min-height: 34px;
+}
+.subscription-page .portal-views .ant-segmented-item-selected {
+  color: var(--ant-color-primary);
+  border-color: var(--ant-color-primary);
+  background: var(--sub-row-bg-hover);
+  font-weight: 700;
+}
+.subscription-page .portal-customize .ant-tabs-tab {
+  padding: 8px 12px;
+  border: 2px solid var(--sub-card-border);
+  margin-block: 3px 5px;
+}
+.subscription-page .portal-customize .ant-tabs-tab-active {
+  border-color: var(--ant-color-primary);
+  background: var(--sub-row-bg-hover);
+}
+.subscription-page .portal-customize .ant-tabs-ink-bar {
+  display: none;
+}
+.subscription-page
+  :is(
+    .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+    .portal-views .ant-segmented-item,
+    .portal-customize .ant-tabs-tab
+  ):not(:disabled):not(.ant-btn-loading):not(.ant-segmented-item-disabled):not(
+    .ant-tabs-tab-disabled
+  ):is(:focus-visible, :has(:focus-visible)) {
+  outline: 2px solid var(--portal-control-outline);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .subscription-page
+    :is(
+      .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+      .portal-views .ant-segmented-item,
+      .portal-customize .ant-tabs-tab
+    ):not(:disabled):not(.ant-btn-loading):not(.ant-segmented-item-disabled):not(
+      .ant-tabs-tab-disabled
+    ):hover {
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 0 var(--portal-control-shadow-hover);
+  }
+  .subscription-page
+    :is(
+      .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+      .portal-views .ant-segmented-item,
+      .portal-customize .ant-tabs-tab
+    ):not(:disabled):not(.ant-btn-loading):not(.ant-segmented-item-disabled):not(
+      .ant-tabs-tab-disabled
+    ):hover::before {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+.subscription-page
+  :is(
+    .ant-btn:not(.ant-btn-text):not(.ant-btn-link),
+    .portal-views .ant-segmented-item,
+    .portal-customize .ant-tabs-tab
+  ):not(:disabled):not(.ant-btn-loading):not(.ant-segmented-item-disabled):not(
+    .ant-tabs-tab-disabled
+  ):active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 var(--portal-control-shadow);
+}
+.subscription-page .ant-btn:is(:disabled, .ant-btn-loading) {
+  transform: none;
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .subscription-page
+    :is(.ant-btn, .portal-views .ant-segmented-item, .portal-customize .ant-tabs-tab),
+  .subscription-page
+    :is(.ant-btn, .portal-views .ant-segmented-item, .portal-customize .ant-tabs-tab)::before {
+    transition: none !important;
+    transform: none !important;
+  }
+}
