@@ -22,11 +22,13 @@ import (
 )
 
 const (
-	portalCustomizationBodyLimit  = 1 << 20
-	portalCustomizationMaxNodes   = 256
-	portalCustomizationMaxLinks   = 32
-	portalCustomizationMaxRules   = 256 << 10
-	portalCustomizationMaxHistory = 10
+	// Account for JSON escaping plus the node/link payload.
+	portalCustomizationBodyLimit   = 32 << 20
+	portalCustomizationMaxNodeYAML = 1 << 20
+	portalCustomizationMaxNodes    = 256
+	portalCustomizationMaxLinks    = 32
+	portalCustomizationMaxRules    = 4 << 20
+	portalCustomizationMaxHistory  = 10
 )
 
 type portalCustomizationEntry struct {
@@ -64,6 +66,7 @@ type portalCustomizationVersion struct {
 }
 
 type portalCustomizationResponse struct {
+	MaxRulesBytes int                          `json:"maxRulesBytes"`
 	NodesYAML     string                       `json:"nodesYaml"`
 	Links         []portalCustomizationLink    `json:"links"`
 	RulesYAML     string                       `json:"rulesYaml"`
@@ -177,6 +180,9 @@ func portalExternalLinks(entry *portalCustomizationEntry) []externalLinkEntry {
 // bare list of proxy maps. Only the proxy entries are kept; groups, rules and
 // providers from an imported document cannot replace the panel's route graph.
 func portalNodeMaps(raw string) ([]map[string]any, error) {
+	if len(raw) > portalCustomizationMaxNodeYAML {
+		return nil, errors.New("节点 YAML 文件过大，最大支持 1 MB")
+	}
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
 		return nil, nil
@@ -231,7 +237,7 @@ func portalNodeMaps(raw string) ([]map[string]any, error) {
 // that can alter more than proxy groups and rules.
 func portalRulesDocument(raw string) (map[string]any, error) {
 	if len(raw) > portalCustomizationMaxRules {
-		return nil, fmt.Errorf("rules file is too large (maximum %d bytes)", portalCustomizationMaxRules)
+		return nil, fmt.Errorf("规则文件过大，最大支持 %d MB；请精简规则或使用 rule-providers 引用规则集", portalCustomizationMaxRules>>20)
 	}
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -323,6 +329,11 @@ func (a *SUBController) portalCustomizationSave(c *gin.Context) {
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, portalCustomizationBodyLimit)
 	var payload portalCustomizationPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "保存内容过大，请精简节点或规则文件后重试"})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid"})
 		return
 	}
@@ -534,12 +545,13 @@ func portalEditorFromRendered(raw string) (groups []map[string]any, rules []stri
 
 func (a *SUBController) portalCustomizationResponse(client *model.ClientRecord, row *model.ClientSubscriptionCustomization, found bool) (*portalCustomizationResponse, error) {
 	response := &portalCustomizationResponse{
-		Links:      []portalCustomizationLink{},
-		Nodes:      []portalCustomizationNode{},
-		ProxyNames: []string{},
-		Groups:     []map[string]any{},
-		Rules:      []string{},
-		Versions:   []portalCustomizationVersion{},
+		MaxRulesBytes: portalCustomizationMaxRules,
+		Links:         []portalCustomizationLink{},
+		Nodes:         []portalCustomizationNode{},
+		ProxyNames:    []string{},
+		Groups:        []map[string]any{},
+		Rules:         []string{},
+		Versions:      []portalCustomizationVersion{},
 	}
 	if found {
 		response.NodesYAML = row.Nodes

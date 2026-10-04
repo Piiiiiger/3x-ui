@@ -85,6 +85,11 @@ export const PortalCustomizationNodeSchema = z.object({
 export type PortalCustomizationNode = z.infer<typeof PortalCustomizationNodeSchema>;
 
 export const PortalCustomizationSchema = z.object({
+  maxRulesBytes: z
+    .number()
+    .int()
+    .positive()
+    .default(256 * 1024),
   nodesYaml: z.string(),
   links: z.array(PortalCustomizationLinkSchema),
   rulesYaml: z.string(),

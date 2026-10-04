@@ -156,6 +156,10 @@ export default function PortalCustomize({
     staleTime: Infinity,
   });
 
+  const rulesBytes = useMemo(() => new TextEncoder().encode(rulesYaml).length, [rulesYaml]);
+  const maxRulesBytes = customization.data?.maxRulesBytes ?? 256 * 1024;
+  const rulesLimitLabel = `${maxRulesBytes / (1024 * 1024)} MB`;
+
   const dirty =
     !!customization.data &&
     (nodesYaml !== customization.data.nodesYaml ||
@@ -222,6 +226,11 @@ export default function PortalCustomize({
       messageApi.warning('输入框中还有未添加的链接，请先点击“添加”。');
       return;
     }
+    const savedRules = rulesDirty ? rulesYaml : (customization.data?.rulesYaml ?? '');
+    if (new TextEncoder().encode(savedRules).length > maxRulesBytes)
+      throw new Error(
+        `规则文件超过 ${rulesLimitLabel}，请精简规则或使用 rule-providers 引用规则集。`,
+      );
     const parsed = readRouteYaml(rulesYaml, customization.data?.effectiveYaml);
     const names = parsed.groups.map((g: EditableGroup) => g.name.trim());
     if (names.some((name: string) => !name) || new Set(names).size !== names.length)
@@ -233,7 +242,7 @@ export default function PortalCustomize({
       body: JSON.stringify({
         nodesYaml,
         links,
-        rulesYaml: rulesDirty ? rulesYaml : (customization.data?.rulesYaml ?? ''),
+        rulesYaml: savedRules,
       }),
     });
     if (response.status === 401) {
@@ -773,6 +782,18 @@ export default function PortalCustomize({
                     可直接编辑 proxy-groups、rules 和
                     rule-providers。保存时服务器会拒绝代理节点、脚本等其他顶层配置。
                   </p>
+                  <p className="portal-customize-help" role="status">
+                    规则文件：{(rulesBytes / 1024).toFixed(1)} KB · 最大 {rulesLimitLabel}。
+                    较大的规则集可使用 rule-providers 引用。
+                  </p>
+                  {rulesDirty && rulesBytes > maxRulesBytes && (
+                    <Alert
+                      type="error"
+                      showIcon
+                      title={`规则文件超过 ${rulesLimitLabel}，请精简后保存。`}
+                      style={{ marginBottom: 12 }}
+                    />
+                  )}
                   <YamlEditor
                     value={rulesYaml}
                     onChange={(value) => {

@@ -75,3 +75,21 @@ it('loads saved links, hides advanced YAML and saves only explicitly added sourc
     ).toBe(true),
   );
 });
+
+it('shows the server rule limit and refuses oversized UTF-8 rules before sending', async () => {
+  const fetcher = vi.fn(
+    async (_url: unknown, _init?: RequestInit) =>
+      new Response(JSON.stringify({ ...snapshot, maxRulesBytes: 1024 }), { status: 200 }),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  renderWithProviders(<PortalCustomize base="/x/portal" onSessionEnded={() => {}} />);
+  await screen.findByDisplayValue('Existing');
+  fireEvent.click(screen.getByRole('tab', { name: '高级 · YAML' }));
+  fireEvent.change(screen.getByLabelText('YAML'), {
+    target: { value: `# ${'规则'.repeat(200)}\nrules:\n - MATCH,DIRECT\n` },
+  });
+  expect(screen.getByText(/规则文件：/).textContent).toContain('KB');
+  fireEvent.click(screen.getAllByRole('button', { name: /保存并应用$/ })[0]);
+  await screen.findByText(/规则文件超过 .*请精简规则或使用 rule-providers/);
+  expect(fetcher.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
+});

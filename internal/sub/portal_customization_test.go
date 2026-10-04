@@ -99,3 +99,48 @@ func TestPortalCustomizationRollbackRestoresPreviousOverlay(t *testing.T) {
 		t.Fatalf("rollback = %d %s", res.Code, res.Body)
 	}
 }
+
+// A rule file can exceed both legacy limits (256 KiB rules, 1 MiB JSON body).
+// Saving and subscription rendering must agree on the supported size.
+func TestPortalCustomizationSavesLargeRulesAndRendersSubscription(t *testing.T) {
+	router, controller := seedPortal(t)
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	rules := strings.Repeat("# "+strings.Repeat("large rule comment ", 8)+"\n", 8500) + "rules:\n  - DOMAIN-SUFFIX,large.example,DIRECT\n  - MATCH,DIRECT\n"
+	if len(rules) <= 1<<20 {
+		t.Fatal("fixture must exceed the old request limit")
+	}
+	body, _ := json.Marshal(map[string]any{"nodesYaml": "", "links": []any{}, "rulesYaml": rules})
+	res := portalRequest(router, http.MethodPut, "/sub/portal/customization", string(body), "198.51.100.1", cookie)
+	if res.Code != http.StatusOK {
+		t.Fatalf("large save = %d: %.300s", res.Code, res.Body.String())
+	}
+	var out struct {
+		MaxRulesBytes int `json:"maxRulesBytes"`
+	}
+	if err := json.Unmarshal(res.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if out.MaxRulesBytes != portalCustomizationMaxRules {
+		t.Fatal("editor limit differs from validator")
+	}
+	var row model.ClientSubscriptionCustomization
+	if err := database.GetDB().First(&row, "client_id = ?", clientIdOf(t, "pa@e")).Error; err != nil {
+		t.Fatal(err)
+	}
+	if row.Rules != strings.TrimSpace(rules) {
+		t.Fatal("saved rules truncated")
+	}
+	clash, _, err := controller.subClashService.GetClash("s1", "example.com")
+	if err != nil || !strings.Contains(clash, "DOMAIN-SUFFIX,large.example,DIRECT") {
+		t.Fatalf("large overlay missing from subscription: %v", err)
+	}
+}
+
+func TestPortalCustomizationKeepsBoundedRuleAndNodeInputs(t *testing.T) {
+	if _, err := portalRulesDocument(strings.Repeat("x", portalCustomizationMaxRules+1)); err == nil || !strings.Contains(err.Error(), "4 MB") {
+		t.Fatalf("oversized rules: %v", err)
+	}
+	if _, err := portalNodeMaps(strings.Repeat("x", portalCustomizationMaxNodeYAML+1)); err == nil {
+		t.Fatal("oversized nodes accepted after increasing request limit")
+	}
+}
