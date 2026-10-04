@@ -1,230 +1,82 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](README.md) | **简体中文**
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
-  </picture>
-</p>
+# ProxyPigger
 
-<p align="center">
-  <a href="https://github.com/MHSanaei/3x-ui/releases"><img src="https://img.shields.io/github/v/release/mhsanaei/3x-ui" alt="Release"></a>
-  <a href="https://github.com/MHSanaei/3x-ui/actions"><img src="https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg" alt="Build"></a>
-  <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg" alt="GO Version"></a>
-  <a href="https://github.com/MHSanaei/3x-ui/releases/latest"><img src="https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg" alt="Downloads"></a>
-  <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true" alt="License"></a>
-  <a href="https://pkg.go.dev/github.com/mhsanaei/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/mhsanaei/3x-ui/v3.svg" alt="Go Reference"></a>
-  <a href="https://docs.sanaei.dev"><img src="https://img.shields.io/badge/docs-docs.sanaei.dev-22d3ee" alt="Documentation"></a>
-</p>
+ProxyPigger（简称 Pigger）是一个自托管的面板，用来运营一个小型代理服务：几台服务器，加上使用它们的人。
+所有用户、套餐、流量额度和规则都在一个面板里管理；每台服务器只运行一个内置 Xray 的小型 agent。
 
-**3X-UI** 是一个先进的开源 Web 控制面板，用于管理 [Xray-core](https://github.com/XTLS/Xray-core) 服务器。它提供简洁、多语言的界面，用于部署、配置和监控各种代理与 VPN 协议——从单台 VPS 到多节点部署。
+它最初是 [3X-UI](https://github.com/MHSanaei/3x-ui) 的分支，之后围绕主机、用户、套餐和规则模板重新构建，
+有了自己的 agent、用户门户和界面风格。
 
-3X-UI 作为原始 X-UI 项目的增强分支（fork），增加了更广泛的协议支持、更好的稳定性、按客户端的流量统计以及许多提升使用体验的功能。
+## 功能
 
-> [!IMPORTANT]
-> 本项目仅供个人使用。请勿将其用于非法目的，也请勿在生产环境中使用。
+- **主机与节点。** 每台服务器是一个*主机*，上面运行若干*节点*（入站）。一键在主机上生成下一个节点，
+  自动生成新的 REALITY 密钥并挑选空闲端口；前面有中转或 NAT 时，可以单独设置对外端口。
+- **pigger-agent。** 不必在每台服务器上装完整面板，只需一个内置 Xray 的静态二进制。
+  它通过 WebSocket 连接面板，运行面板下发的配置，并回报流量、在线用户和负载。
+  面板暂时连不上时，它会继续用最后一份配置提供服务。支持 systemd 和 OpenRC（Alpine），也可以托管 Snell v5。
+- **用户。** 流量额度、到期时间和重置日属于每个用户。支持激活码、绑定 Telegram 接收用量报告和到期提醒，
+  并按原因列出已用尽的用户。
+- **套餐。** 一个套餐由一组服务器、一套规则和一个 IP 限制组成。一个节点可以属于多个套餐，
+  套餐的改动会同步到所有成员。
+- **规则。** Clash / Mihomo 规则模板：一套基础规则，变体只保存与基础规则的差异。可以预览结果，并查看谁在使用。
+- **订阅与门户。** 由模板生成 Clash YAML，也提供分享链接。用户登录门户即可查看用量、复制订阅、
+  上传自定义规则，并查看自己服务器的状态。
+- **流量信息。** 按用户和按主机统计的总量与每日历史，以及需要关注的用户。
+- **探针。** 服务器卡片（CPU、内存、磁盘、三网延迟）读取自同一台机器上的
+  [Lite](https://github.com/nuomiiiii/Lite) 监控。在门户中，每个用户只能看到自己订阅里的服务器。
+  也可以直接在监控已知的服务器上安装 agent。
+- **代理链。** 管理"中转 → 落地"链路。
+- **界面。** 珊瑚色扁平主题，支持浅色和深色，顶部导航栏。支持简体中文和英文。
 
-## 功能特性
+相比 3X-UI 移除了：客户端分组、出站和路由页面，以及 API 文档和赞助页面。
 
-- **多协议入站** — VLESS、VMess、Trojan、Shadowsocks、WireGuard、AmneziaWG、TUIC v5、Hysteria2、MTProto、HTTP、SOCKS (Mixed)、Dokodemo-door / Tunnel 和 TUN。
-- **现代传输与安全** — TCP (Raw)、mKCP、WebSocket、gRPC、HTTPUpgrade 和 XHTTP，并通过 TLS、XTLS 和 REALITY 加密。
-- **内置 AmneziaWG** — 抗 DPI 的 WireGuard 直接在面板内的用户态网络栈上运行，无需内核模块、DKMS 或额外软件包。
-- **内置 TUIC v5** — 基于 QUIC 的高性能代理，支持原生 UDP 中继流量统计、0-RTT 握手和 BBR 拥塞控制。
-- **MTProto 代理** — 按客户端配置 FakeTLS 密钥、广告标签和配额，实时生效且不会断开已有连接。
-- **回落 (Fallback)** — 通过 Xray 的 fallback 功能在单个端口上提供多种协议（例如在 443 端口上同时使用 VLESS 和 Trojan）。
-- **按客户端管理** — 流量配额、到期日期、可豁免受信任地址的 IP 限制、HWID 设备数限制、定时续期周期、实时在线状态，以及一键分享链接、二维码和订阅。
-- **流量统计** — 按入站、按客户端统计，并支持重置控制。
-- **多节点支持** — 从单一面板管理并扩展到多台服务器，并可将入站克隆到其他节点。
-- **内置订阅服务器** — 提供 raw、JSON 和 Clash 输出，可依据客户端 User-Agent 自动选择，并支持[自定义页面模板](docs/custom-subscription-templates.md)。
-- **Telegram 和 Discord 机器人**，用于远程监控和管理。
-- **RESTful API**，支持带作用域、可设置有效期的令牌，并提供面板内置的 API 参考文档。
-- **可安装面板 (PWA)** — 将 3X-UI 固定到桌面或手机主屏幕。
-- **灵活的存储** — SQLite（默认）或 PostgreSQL。
-- **13 种界面语言**，支持深色和浅色主题。
-- **Fail2ban 集成**，用于强制执行按客户端的 IP 限制。
+## 安装
 
-## 截图
+ProxyPigger 目前还没有发布安装包。面板二进制可以直接替换 3X-UI 的 `x-ui`，经过验证的方式是：
 
-<details>
-<summary>点击展开</summary>
+1. 用 3X-UI 自己的安装脚本在服务器上安装 3X-UI v3.8.5。
+2. 构建 ProxyPigger（见下文），用新的二进制替换 `/usr/local/x-ui/x-ui`。
+3. 重启服务：`systemctl restart x-ui`。
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
-</picture>
+> [!WARNING]
+> 不要在 ProxyPigger 服务器上使用 3X-UI 的**更新**按钮、`x-ui update` 或 3X-UI 的 `install.sh`：
+> 它们会用上游 3X-UI 覆盖掉 ProxyPigger。
+>
+> 首次启动前和每次升级前都要备份数据库。ProxyPigger 的迁移会删除已移除功能对应的数据表，
+> 回退时需要用到备份。SQLite 数据库运行在 WAL 模式下，请用
+> `sqlite3 /etc/x-ui/x-ui.db ".backup /root/x-ui-backup.db"` 备份，不要用 `cp`。
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
-</picture>
+把服务器作为 agent 节点加入面板，请看 [deploy/pigger-agent](deploy/pigger-agent/README.md)。
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
-</picture>
+## 构建
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
-</picture>
-
-</details>
-
-## 快速开始
+需要 Go 1.27.1 或更新版本、Node.js 26（见 `.nvmrc`），以及 C 编译器（SQLite 需要 cgo）。
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+git clone https://github.com/Piiiiiger/Proxypigger.git
+cd Proxypigger
+make build-fe build-agent-package   # 前端资源，以及面板提供下载的 agent 安装包
+go build -o x-ui .                  # 面板
+make build-agent                    # 单独构建 pigger-agent
 ```
 
-若要安装特定版本，请在命令后附加对应的标签（例如 `v3.7.0`）：
+## 开发
 
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.7.0
-```
+- `make help` 列出所有任务。`make verify` 运行完整检查：代码生成检查、lint、格式化、类型检查、
+  Go 和前端测试、构建以及 Storybook。
+- [docs/architecture.md](docs/architecture.md) 是代码地图。
+- [CLAUDE.md](CLAUDE.md) 和 [CONTRIBUTING.md](CONTRIBUTING.md) 记录了开发约定。
 
-若要安装滚动更新的 **dev** 版本（来自 `main` 的最新逐次提交预发布版本，而非稳定版本），请传入 `dev-latest`：
-
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
-```
-
-安装过程中会生成随机的用户名、密码和访问路径。安装完成后，运行 `x-ui` 打开管理菜单，您可以在其中启动/停止服务、查看或重置登录凭据、管理 SSL 证书等。
-
-每个发布资源都会在其旁边附带一个 `.sha256` 校验和。`install.sh` 和更新程序都会据此校验压缩包，不匹配时中止。
-
-完整文档（安装、配置、运维以及完整的 API 参考）请访问 **[docs.sanaei.dev](https://docs.sanaei.dev/zh)**。
-
-### 无人值守安装
-
-安装程序也可以**非交互式**运行，适用于 cloud-init。
-设置 `XUI_NONINTERACTIVE=1`（或在无 TTY 的情况下通过管道传入），它就会全程
-零提示地完成端到端安装，生成随机凭据并写入
-`/etc/x-ui/install-result.env`。请参阅 [`deploy/`](deploy/)：
-
-- [Cloud-init user-data](deploy/cloud-init/) — 在任意云平台上无人值守安装（Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle）
-- [Hetzner Cloud 说明](deploy/marketplace/hetzner/) — 在 Hetzner 上基于 cloud-init 的部署
-
-## 支持的平台
-
-**操作系统：** Ubuntu、Debian、Armbian、Fedora、CentOS、RHEL、AlmaLinux、Rocky Linux、Oracle Linux、Amazon Linux、Virtuozzo、Arch、Manjaro、Parch、openSUSE (Tumbleweed / Leap)、Alpine 和 Windows。
-
-**架构：** `amd64` · `386` · `arm64` (aarch64) · `armv7` · `armv6` · `armv5` · `s390x`。
-
-## 数据库选项
-
-3X-UI 支持两种后端，可在安装时选择：
-
-- **SQLite**（默认）— 位于 `/etc/x-ui/x-ui.db` 的单个文件。无需配置，适合中小型部署。
-- **PostgreSQL** — 推荐用于大量客户端或多节点设置。安装程序可以为您在本地安装 PostgreSQL，或接受指向现有服务器的 DSN。
-
-运行时通过环境变量选择后端（安装程序会为您写入 `/etc/default/x-ui`）：
-
-```
-XUI_DB_TYPE=postgres
-XUI_DB_DSN=postgres://xui:password@127.0.0.1:5432/xui?sslmode=disable
-```
-
-### 将现有的 SQLite 安装迁移到 PostgreSQL
-
-```bash
-x-ui migrate-db --dsn "postgres://xui:password@127.0.0.1:5432/xui?sslmode=disable"
-# 然后在 /etc/default/x-ui 中设置 XUI_DB_TYPE 和 XUI_DB_DSN 并重启：
-systemctl restart x-ui
-```
-
-源 SQLite 文件保持不变；在确认新后端正常工作后，请手动删除它。
-
-### Docker
-
-默认的 `docker compose up -d` 仍使用 SQLite。若要使用捆绑的 PostgreSQL 服务运行，请取消注释 `docker-compose.yml` 中的两行 `XUI_DB_*` 环境变量，并使用该 profile 启动：
-
-```bash
-docker compose --profile postgres up -d
-```
-
-该镜像捆绑了 Fail2ban（默认启用），用于强制执行按客户端的 **IP 限制**。Fail2ban 使用 `iptables` 封禁违规者，这需要 `NET_ADMIN` 权限。`docker-compose.yml` 已通过 `cap_add` 授予该权限；如果您改用 `docker run` 启动容器，请自行添加这些权限，否则封禁只会被记录而永远不会生效：
-
-```bash
-docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/mhsanaei/3x-ui
-```
-
-## 环境变量
-
-| 变量 | 说明 | 默认值 |
-| --- | --- | --- |
-| `XUI_DB_TYPE` | 数据库后端：`sqlite` 或 `postgres` | `sqlite` |
-| `XUI_DB_DSN` | PostgreSQL 连接字符串（当 `XUI_DB_TYPE=postgres` 时） | — |
-| `XUI_DB_FOLDER` | SQLite 数据库文件所在目录 | `/etc/x-ui` |
-| `XUI_DB_MAX_OPEN_CONNS` | 最大打开连接数（PostgreSQL 连接池） | — |
-| `XUI_DB_MAX_IDLE_CONNS` | 最大空闲连接数（PostgreSQL 连接池） | — |
-| `XUI_INIT_WEB_BASE_PATH` | Web 面板的初始 URI 路径 | `/` |
-| `XUI_ENABLE_FAIL2BAN` | 启用基于 Fail2ban 的 IP 限制 | `true` |
-| `XUI_LOG_LEVEL` | 日志级别（`debug`、`info`、`warning`、`error`） | `info` |
-| `XUI_DEBUG` | 启用调试模式 | `false` |
-| `XUI_TUNNEL_HEALTH_MONITOR` | 启用隧道健康监控（探测某个 URL，在连续多次失败后重启 xray；重启会断开所有客户端） | `false` |
-| `XUI_TUNNEL_HEALTH_PROXY` | 探测请求所经过的代理；将其指向本地 xray 入站，使探测能够测试隧道（例如 `socks5://127.0.0.1:1080`）。留空表示探测仅检查主机连通性 | — |
-| `XUI_TUNNEL_HEALTH_URL` | 用于检测隧道健康状况的探测 URL | `https://www.cloudflare.com/cdn-cgi/trace` |
-| `XUI_TUNNEL_HEALTH_INTERVAL` | 两次探测之间的间隔 | `30s` |
-| `XUI_TUNNEL_HEALTH_TIMEOUT` | 单次探测的超时时间 | `10s` |
-| `XUI_TUNNEL_HEALTH_FAILURES` | 触发重启前的连续失败次数 | `3` |
-| `XUI_TUNNEL_HEALTH_COOLDOWN` | 两次连续重启之间的最小间隔 | `5m` |
-| `NODE_TOKEN_ENCRYPTION` | 节点 API 令牌的静态加密：`off`、`migration` 或 `required`（注意：无 `XUI_` 前缀） | `off` |
-| `XUI_NODE_TOKEN_KEY_FILE` | JSON 密钥环（权限 `0600`），包含活动密钥 ID 及其 base64 编码的 32 字节密钥 | `/etc/x-ui/node_token_key.json` |
-| `XUI_NODE_TOKEN_KEY` | 单个 base64 编码的 32 字节密钥，仅在无法加载密钥文件时使用 | — |
-
-完整列表请参阅[环境变量参考](https://docs.sanaei.dev/zh/docs/reference/env-vars)。
-
-## 支持的语言
-
-面板界面提供 13 种语言：
-
-English · فارسی · العربية · 中文（简体） · 中文（繁體） · Español · Русский · Українська · Türkçe · Tiếng Việt · 日本語 · Bahasa Indonesia · Português (Brasil)
-
-## 贡献
-
-欢迎贡献。在提交 issue 或 pull request 之前，请阅读[贡献指南](/CONTRIBUTING.md)。
-
-## 特别感谢
-
-- [alireza0](https://github.com/alireza0/)
+为了让现有安装继续工作，一些上游名称被有意保留：二进制和服务名是 `x-ui`，数据在 `/etc/x-ui`，
+环境变量以 `XUI_` 开头，Go 模块路径仍是 `github.com/mhsanaei/3x-ui/v3`。
 
 ## 致谢
 
-- [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (许可证: **GPL-3.0**): _增强的 v2ray/xray 和 v2ray/xray-clients 路由规则，内置伊朗域名，专注于安全性和广告拦截。_
-- [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (许可证: **GPL-3.0**): _此仓库包含基于俄罗斯被阻止域名和地址数据自动更新的 V2Ray 路由规则。_
+ProxyPigger 基于 MHSanaei 及其贡献者的 [3X-UI](https://github.com/MHSanaei/3x-ui)
+（它源自 [X-UI](https://github.com/vaxilu/x-ui)），以及 [Xray-core](https://github.com/XTLS/Xray-core)。
+服务器状态来自 [Lite](https://github.com/nuomiiiii/Lite)。
 
-## 社区工具
+## 许可证
 
-社区围绕 3x-ui 构建的工具和集成。
-
-- [terraform-provider-3x-ui](https://github.com/batonogov/terraform-provider-threexui) (许可证: **MIT**): _使用 Terraform / OpenTofu 通过代码管理入站、客户端、面板设置和 Xray 配置。_
-- [3X-UI Manager](https://github.com/yukh975/3X-UI-Manager) (许可证: **MIT**): _3x-ui 的原生 Android 客户端 — 仪表板、入站、带二维码分享的客户端、节点以及多面板管理。可在 F-Droid 获取。_
-
-## 支持项目
-
-**如果这个项目对您有帮助，您可以给它一个**:star2:
-
-<a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
-</a>
-
-</br>
-<a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
-</a>
-
-## 星标历史
-
-<a href="https://www.star-history.com/?repos=mhsanaei%2F3x-ui&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&legend=top-left" />
- </picture>
-</a>
-
-<p align="center">
- <a href="https://www.star-history.com/mhsanaei/3x-ui">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /><img alt="GitHub Trending Repository of the Day" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /></picture>
- </a>
-</p>
+[GPL-3.0](LICENSE)，与 3X-UI 相同。
