@@ -6,7 +6,8 @@ type ActivationCode struct {
 	Id     int    `json:"id" gorm:"primaryKey;autoIncrement" example:"1"`
 	Code   string `json:"code" gorm:"uniqueIndex;not null" example:"7KQ3-X9MZ-2F4H-RT8W"`
 	PlanId int    `json:"planId" gorm:"column:plan_id;not null;index" example:"2"`
-	// TotalGB is the quota in bytes, 0 for none; Days 0 never expires; ResetDay 0 never resets.
+	// TotalGB is the quota in bytes, 0 for none. Days counts from CreatedAt,
+	// including time spent unused; 0 never expires. ResetDay 0 never resets.
 	TotalGB  int64  `json:"totalGB" gorm:"column:total_gb;not null;default:0" example:"107374182400"`
 	Days     int    `json:"days" gorm:"not null;default:0" example:"30"`
 	ResetDay int    `json:"resetDay" gorm:"column:reset_day;not null;default:0" example:"1"`

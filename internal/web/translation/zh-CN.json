@@ -349,6 +349,25 @@
       }
     },
     "inbounds": {
+      "snell": {
+        "managed": "由 Agent 管理的独立 Snell 服务",
+        "help": "仅支持已安装 Snell v5 的 Agent 主机。通过套餐分配节点，分配仅控制订阅可见性；所有用户共享密钥，不支持按用户限速、限流量、IP 限制或独立撤销访问。撤销已发出的密钥需更换 PSK。",
+        "psk": "共享密钥（PSK）",
+        "pskHelp": "请输入 16–256 位字母、数字或 _ + / = -，不能包含空格或换行。",
+        "regenerate": "生成新密钥（保存后旧密钥失效）",
+        "reuse": "订阅启用连接复用",
+        "noStats": "不支持统计",
+        "states": {
+          "running": "运行中",
+          "starting": "启动中",
+          "stopped": "已停止",
+          "stopping": "停止中",
+          "pending": "等待下发",
+          "unknown": "状态未知",
+          "error": "启动失败",
+          "expired": "已过期"
+        }
+      },
       "totalDownUp": "总上传 / 下载",
       "totalUsage": "总用量",
       "inboundCount": "入站数量",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "续期 {email}",
       "renewManyTitle": "续期 {count} 个用户",
       "renewAddDays": "延长天数",
-      "renewHint": "从今天和当前到期日中较晚的一天起延长。没有到期日的用户保持不限期。"
+      "renewHint": "从今天和当前到期日中较晚的一天起延长。没有到期日的用户保持不限期。",
+      "groups": {
+        "title": "用户分组",
+        "all": "全部分组",
+        "ungrouped": "未分组",
+        "manage": "管理分组",
+        "assign": "移入分组",
+        "apply": "应用",
+        "retry": "加载失败，重试",
+        "hint": "分组仅用于整理用户，不影响套餐、流量或节点。删除分组后，成员将回到未分组。",
+        "name": "分组名称",
+        "rename": "重命名",
+        "create": "新建分组",
+        "deleteConfirm": "删除此分组？成员将回到未分组。"
+      }
     },
     "plans": {
       "intro": "一组用户共用的节点、订阅模板和 IP 限制。流量、有效期和重置由每个用户自己设置。",
@@ -1114,7 +1147,10 @@
         "created": "已生成激活码",
         "copyAll": "复制未使用的激活码",
         "deleteConfirm": "删除该激活码？",
-        "zeroHint": "0 表示永久有效或不定期重置。"
+        "zeroHint": "有效期从激活码生成时起算，未使用也会倒计时。0 表示永久有效或不定期重置。",
+        "remainingDays": "剩余 {days} 天",
+        "expiresAt": "到期时间：",
+        "expired": "已过期"
       }
     },
     "nodes": {

@@ -1,6 +1,7 @@
 package sub
 
 import (
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -143,4 +144,18 @@ func (s *SubService) buildEndpointVmessLinks(eps []ShareEndpoint, baseObj map[st
 		links.WriteString(buildVmessLink(newObj))
 	}
 	return links.String()
+}
+
+// ChainEndpoints shares subscription address/NAT selection with chain checks.
+func ChainEndpoints(inbound *model.Inbound) ([]ShareEndpoint, error) {
+	s := NewSubService("")
+	var nodes []*model.Node
+	if err := database.GetDB().Find(&nodes).Error; err != nil {
+		return nil, err
+	}
+	s.nodesByID = map[int]*model.Node{}
+	for _, n := range nodes {
+		s.nodesByID[n.Id] = n
+	}
+	return s.advertisedEndpoints(s.withPublicPort(inbound)), nil
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/random"
@@ -470,9 +471,17 @@ func (s *SubService) getSubs(subId string) ([]string, []string, int64, xray.Clie
 	if err != nil {
 		return nil, nil, 0, traffic, err
 	}
+	inbounds = s.visibleSubscriptionInbounds(subId, inbounds)
 	externalLinks, err := s.getClientExternalLinksBySubId(subId)
 	if err != nil {
 		return nil, nil, 0, traffic, err
+	}
+	customization, err := s.getClientSubscriptionCustomization(subId)
+	if err != nil {
+		return nil, nil, 0, traffic, err
+	}
+	if customization != nil {
+		externalLinks = append(externalLinks, portalExternalLinks(customization)...)
 	}
 
 	if len(inbounds) == 0 && len(externalLinks) == 0 {
@@ -540,6 +549,31 @@ func (s *SubService) getSubs(subId string) ([]string, []string, int64, xray.Clie
 	}
 
 	return result, emails, lastOnline, traffic, nil
+}
+
+func (s *SubService) visibleSubscriptionInbounds(subId string, inbounds []*model.Inbound) []*model.Inbound {
+	plan, err := subscriptionPlanNodes(subId)
+	if err != nil || strings.TrimSpace(plan.NodeKeys) == "" {
+		return inbounds
+	}
+	var keys []string
+	if json.Unmarshal([]byte(plan.NodeKeys), &keys) != nil {
+		return inbounds
+	}
+	visible := make(map[int]bool, len(keys))
+	for _, key := range keys {
+		id, _, err := model.ParsePlanNodeKey(key)
+		if err == nil {
+			visible[id] = true
+		}
+	}
+	out := make([]*model.Inbound, 0, len(inbounds))
+	for _, inbound := range inbounds {
+		if visible[inbound.Id] {
+			out = append(out, inbound)
+		}
+	}
+	return out
 }
 
 // inboundLinks builds the share links of every distinct client of one inbound the way
@@ -822,8 +856,29 @@ func (s *SubService) GetLink(inbound *model.Inbound, email string) string {
 		return s.genAmneziaWGLink(inbound, email)
 	case "tuic":
 		return s.genTuicLink(inbound, email)
+	case model.Snell:
+		return s.genSnellLink(inbound, email)
 	}
 	return ""
+}
+
+func (s *SubService) genSnellLink(inbound *model.Inbound, email string) string {
+	if inbound.Protocol != model.Snell {
+		return ""
+	}
+	settings, err := snell.ParseSettings(inbound.Settings)
+	if err != nil {
+		return ""
+	}
+	link := fmt.Sprintf("snell://%s", joinHostPort(s.resolveInboundAddress(inbound), inbound.Port))
+	params := map[string]string{
+		"psk":     settings.PSK,
+		"version": strconv.Itoa(settings.Version),
+	}
+	if settings.Reuse {
+		params["reuse"] = "true"
+	}
+	return buildLinkWithParams(link, params, s.genRemark(inbound, email, "", ""))
 }
 
 func (s *SubService) genTuicLink(inbound *model.Inbound, email string) string {
@@ -1237,7 +1292,11 @@ func (s *SubService) genVlessLink(inbound *model.Inbound, email string) string {
 			params,
 			security,
 			func(ep map[string]any, dest string, port int) string {
-				return fmt.Sprintf("vless://%s@%s", uuid, joinHostPort(dest, port))
+				endpointUUID := uuid
+				if externalUUID, ok := ep["uuid"].(string); ok && strings.TrimSpace(externalUUID) != "" {
+					endpointUUID = strings.TrimSpace(externalUUID)
+				}
+				return fmt.Sprintf("vless://%s@%s", endpointUUID, joinHostPort(dest, port))
 			},
 			func(ep map[string]any) string {
 				return s.endpointRemark(inbound, email, ep, streamNetwork)

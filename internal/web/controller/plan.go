@@ -24,6 +24,10 @@ func NewPlanController(g *gin.RouterGroup) *PlanController {
 
 func (a *PlanController) initRouter(g *gin.RouterGroup) {
 	g.GET("/list", a.list)
+	g.GET("/nodeOptions", func(c *gin.Context) {
+		options, err := a.planService.NodeOptions()
+		jsonObj(c, options, err)
+	})
 	g.POST("/add", a.create)
 	g.POST("/update/:id", a.update)
 	g.POST("/del/:id", a.delete)

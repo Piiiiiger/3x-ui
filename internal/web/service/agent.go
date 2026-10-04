@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
+	"slices"
 	"sync"
 	"time"
 
@@ -52,6 +54,10 @@ func (s *AgentService) AgentConfig(nodeID int) ([]byte, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+	raw, err = s.withSnellConfig(nodeID, raw)
+	if err != nil {
+		return nil, "", err
+	}
 	sum := sha256.Sum256(raw)
 	return raw, hex.EncodeToString(sum[:]), nil
 }
@@ -74,6 +80,11 @@ func (s *AgentService) SyncAgent(ctx context.Context, n *model.Node) error {
 	raw, hash, err := s.AgentConfig(n.Id)
 	if err != nil {
 		return err
+	}
+	if _, instances, splitErr := snell.Split(raw); splitErr != nil {
+		return splitErr
+	} else if len(instances) > 0 && !slices.Contains(state.Hello.Capabilities, snell.Capability) {
+		return fmt.Errorf("agent on %s needs Snell support and a Snell v5 binary before this config can be applied", n.Name)
 	}
 	if hash != state.AppliedHash {
 		dropUsers, err := s.settingService.GetRestartXrayOnClientDisable()

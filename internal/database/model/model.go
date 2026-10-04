@@ -34,12 +34,13 @@ const (
 	MTProto     Protocol = "mtproto"
 	AmneziaWG   Protocol = "amneziawg"
 	TUIC        Protocol = "tuic"
+	Snell       Protocol = "snell"
 )
 
 // SubscriptionProtocols are the inbound protocols a subscription emits links
 // for; plain strings so the list binds as a SQL IN argument on every driver.
 func SubscriptionProtocols() []string {
-	listed := []Protocol{VMESS, VLESS, Trojan, Shadowsocks, Hysteria, WireGuard, AmneziaWG, MTProto, TUIC}
+	listed := []Protocol{VMESS, VLESS, Trojan, Shadowsocks, Hysteria, WireGuard, AmneziaWG, MTProto, TUIC, Snell}
 	names := make([]string, len(listed))
 	for i, protocol := range listed {
 		names[i] = string(protocol)
@@ -57,6 +58,8 @@ type User struct {
 
 // Inbound represents an Xray inbound configuration with traffic statistics and settings.
 type Inbound struct {
+	RuntimeState         string               `json:"runtimeState,omitempty" gorm:"-"`
+	RuntimeError         string               `json:"runtimeError,omitempty" gorm:"-"`
 	Id                   int                  `json:"id" form:"id" gorm:"primaryKey;autoIncrement" example:"1"`                                                                                                     // Unique identifier
 	UserId               int                  `json:"-"`                                                                                                                                                            // Associated user ID
 	Up                   int64                `json:"up" form:"up"`                                                                                                                                                 // Upload traffic in bytes
@@ -75,7 +78,7 @@ type Inbound struct {
 	// Xray configuration fields
 	Listen            string   `json:"listen" form:"listen"`
 	Port              int      `json:"port" form:"port" validate:"gte=0,lte=65535" example:"443"`
-	Protocol          Protocol `json:"protocol" form:"protocol" validate:"required,oneof=vmess vless trojan shadowsocks wireguard hysteria http mixed tunnel tun mtproto amneziawg tuic" example:"vless"`
+	Protocol          Protocol `json:"protocol" form:"protocol" validate:"required,oneof=vmess vless trojan shadowsocks wireguard hysteria http mixed tunnel tun mtproto amneziawg tuic snell" example:"vless"`
 	Settings          string   `json:"settings" form:"settings"`
 	StreamSettings    string   `json:"streamSettings" form:"streamSettings"`
 	Tag               string   `json:"tag" form:"tag" gorm:"unique" example:"in-443-tcp"`
@@ -777,6 +780,21 @@ type Setting struct {
 	Value string `json:"value" form:"value"`
 }
 
+// ProxyChain declares that a generated subscription proxy reaches its target
+// inbound through another generated proxy first. The relation is rendered as
+// Clash/Mihomo dialer-proxy metadata.
+type ProxyChain struct {
+	Id              int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name            string `json:"name"`
+	DirectName      string `json:"directName" gorm:"default:''"`
+	RelayName       string `json:"relayName" gorm:"default:''"`
+	TargetInboundId int    `json:"targetInboundId" gorm:"column:target_inbound_id;uniqueIndex:idx_proxy_chains_route,priority:1"`
+	RelayInboundId  int    `json:"relayInboundId" gorm:"column:relay_inbound_id;uniqueIndex:idx_proxy_chains_route,priority:2"`
+	Enabled         bool   `json:"enabled" gorm:"default:true"`
+	CreatedAt       int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt       int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+}
+
 // Node represents a remote 3x-ui panel registered with the central panel.
 // The central panel polls each node's existing /panel/api/server/status
 // endpoint over HTTP using the per-node ApiToken to populate the runtime
@@ -1055,6 +1073,37 @@ type ClientExternalLink struct {
 }
 
 func (ClientExternalLink) TableName() string { return "client_external_links" }
+
+// ClientSubscriptionCustomization is the private subscription overlay a portal
+// user owns. Nodes contains a Clash/Mihomo YAML document with a proxies list,
+// Links contains JSON-encoded share links/subscription URLs, and Rules contains
+// only the routing keys accepted by the portal editor.
+type ClientSubscriptionCustomization struct {
+	ClientId  int    `json:"clientId" gorm:"primaryKey;column:client_id"`
+	Nodes     string `json:"nodes" gorm:"type:text;not null;default:''"`
+	Links     string `json:"links" gorm:"type:text;not null;default:''"`
+	Rules     string `json:"rules" gorm:"type:text;not null;default:''"`
+	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+}
+
+func (ClientSubscriptionCustomization) TableName() string {
+	return "client_subscription_customizations"
+}
+
+// ClientSubscriptionCustomizationVersion keeps a small rollback history for a
+// user's private overlay. It is never shared with plans or other clients.
+type ClientSubscriptionCustomizationVersion struct {
+	Id       int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	ClientId int    `json:"clientId" gorm:"column:client_id;index;not null"`
+	Nodes    string `json:"nodes" gorm:"type:text;not null;default:''"`
+	Links    string `json:"links" gorm:"type:text;not null;default:''"`
+	Rules    string `json:"rules" gorm:"type:text;not null;default:''"`
+	SavedAt  int64  `json:"savedAt" gorm:"autoCreateTime:milli;index"`
+}
+
+func (ClientSubscriptionCustomizationVersion) TableName() string {
+	return "client_subscription_customization_versions"
+}
 
 // External link kinds.
 const (

@@ -241,3 +241,31 @@ func TestAgentHub_StatusDisconnectAndGone(t *testing.T) {
 		t.Fatal("a closed session must not be reported")
 	}
 }
+
+func TestAgentHubProbeUsesRelayAndPropagatesFailure(t *testing.T) {
+	hub := NewAgentHub()
+	agent := dialFakeAgent(t, serveHub(t, hub, 7), agentproto.Hello{AgentVersion: "probe", Capabilities: []string{agentproto.ProbeCapability}})
+	waitFor(t, "hello", helloReceived(hub, 7, "probe"))
+	done := make(chan error, 1)
+	go func() { done <- hub.Probe(context.Background(), 7, agentproto.Probe{Host: "2001:db8::1", Port: 19336}) }()
+	msg, err := agent.Recv(time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if msg.Type != agentproto.TypeProbe || msg.Probe == nil || msg.Probe.Host != "2001:db8::1" || msg.Probe.Port != 19336 {
+		t.Fatalf("bad probe: %+v", msg)
+	}
+	agent.Send(agentproto.Message{Type: agentproto.TypeResult, ID: msg.ID, Result: &agentproto.Result{Error: "network is unreachable"}})
+	if err := <-done; err == nil || err.Error() != "network is unreachable" {
+		t.Fatalf("lost agent failure: %v", err)
+	}
+}
+
+func TestAgentHubProbeRejectsLegacyAgent(t *testing.T) {
+	hub := NewAgentHub()
+	dialFakeAgent(t, serveHub(t, hub, 8), agentproto.Hello{AgentVersion: "old"})
+	waitFor(t, "hello", helloReceived(hub, 8, "old"))
+	if err := hub.Probe(context.Background(), 8, agentproto.Probe{Host: "example.com", Port: 443}); err == nil {
+		t.Fatal("legacy agent was treated as checked")
+	}
+}

@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "بازنویسی مقصد",
       "advancedTitle": "تنظیمات پیشرفته",
-      "intro": "پورت‌ها، پروتکل‌ها و ترنسپورت‌های در حال شنود، همراه با کاربران هر کدام."
+      "intro": "پورت‌ها، پروتکل‌ها و ترنسپورت‌های در حال شنود، همراه با کاربران هر کدام.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "پایه",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "تمدید {email}",
       "renewManyTitle": "تمدید {count} کاربر",
       "renewAddDays": "روزهای افزوده",
-      "renewHint": "به دیرترینِ امروز و تاریخ انقضای فعلی افزوده می‌شود. کاربری که تاریخ انقضا ندارد همچنان بدون آن می‌ماند."
+      "renewHint": "به دیرترینِ امروز و تاریخ انقضای فعلی افزوده می‌شود. کاربری که تاریخ انقضا ندارد همچنان بدون آن می‌ماند.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "سرورها، قالب قوانین و محدودیت IP که گروهی از کاربران با هم دارند. سهمیهٔ ترافیک، انقضا و بازنشانی برای هر کاربر جداست.",
@@ -1114,7 +1147,10 @@
         "created": "کدهای فعال‌سازی ساخته شدند",
         "copyAll": "کپی کدهای استفاده‌نشده",
         "deleteConfirm": "این کد فعال‌سازی حذف شود؟",
-        "zeroHint": "0 یعنی بدون انقضا یا بدون بازنشانی دوره‌ای."
+        "zeroHint": "0 یعنی بدون انقضا یا بدون بازنشانی دوره‌ای.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

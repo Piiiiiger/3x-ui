@@ -18,9 +18,9 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 )
 
-// ErrActivationCode is the one answer to an unknown or used code, so a guess learns
+// ErrActivationCode is the one answer to an unknown, expired or used code, so a guess learns
 // nothing about which codes exist.
-var ErrActivationCode = errors.New("the activation code is not valid or has already been used")
+var ErrActivationCode = errors.New("the activation code is not valid, has expired or has already been used")
 
 // ErrUsernameTaken refuses a registration under a name another user already has.
 var ErrUsernameTaken = errors.New("that username is taken")
@@ -115,7 +115,7 @@ func (s *ActivationCodeService) Delete(id int) error {
 }
 
 // Register makes a new user from a code: on its plan, with its quota, a period
-// from today and its reset day, signed in to the portal with password.
+// ending at the code's creation-based deadline and its reset day.
 func (s *ActivationCodeService) Register(inboundSvc *InboundService, username, password, code string) (*model.ClientRecord, bool, error) {
 	activationUseMu.Lock()
 	defer activationUseMu.Unlock()
@@ -138,7 +138,7 @@ func (s *ActivationCodeService) Register(inboundSvc *InboundService, username, p
 		return nil, false, err
 	}
 	client := model.Client{Email: username, Enable: true, LimitIP: plan.LimitIP}
-	if err := applyCodeGrant(&client, grant, time.Now().UnixMilli()); err != nil {
+	if err := applyCodeGrant(&client, grant, grant.UsedAt); err != nil {
 		s.release(grant.Id, username)
 		return nil, false, err
 	}
@@ -264,6 +264,15 @@ func (s *ActivationCodeService) claim(code, who string, renewal *model.ClientRec
 		return &grant, plan, inboundIds, nil
 	}
 	now := time.Now().UnixMilli()
+	expiresAt, err := activationCodeDeadline(&grant)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if expiresAt != 0 && now >= expiresAt {
+		return nil, nil, nil, ErrActivationCode
+	}
+	// Freeze the remaining duration at the same instant we claim the code.
+	grant.UsedAt = now
 	updates := map[string]any{"used_at": now, "used_by": who}
 	if renewal != nil {
 		expiry, err := codeExpiry(&grant, max(now, renewal.ExpiryTime))
@@ -294,7 +303,7 @@ func (s *ActivationCodeService) release(id int, who string) {
 	}
 }
 
-// applyCodeGrant sets the code's quota, its days from start (none for 0) and its
+// applyCodeGrant sets the quota, remaining duration from start (none for 0) and its
 // monthly reset day (none for 0).
 func applyCodeGrant(client *model.Client, grant *model.ActivationCode, start int64) error {
 	expiry := int64(0)
@@ -317,13 +326,28 @@ func applyCodeGrant(client *model.Client, grant *model.ActivationCode, start int
 }
 
 func codeExpiry(grant *model.ActivationCode, start int64) (int64, error) {
+	deadline, err := activationCodeDeadline(grant)
+	if err != nil || deadline == 0 {
+		return deadline, err
+	}
+	remaining := deadline - grant.UsedAt
+	if grant.UsedAt <= 0 || remaining <= 0 {
+		return 0, ErrActivationCode
+	}
+	if start > math.MaxInt64-remaining {
+		return 0, common.NewError("the activation exceeds the supported expiry range")
+	}
+	return start + remaining, nil
+}
+
+func activationCodeDeadline(grant *model.ActivationCode) (int64, error) {
 	if grant.Days == 0 {
 		return 0, nil
 	}
-	if grant.Days < 0 || grant.Days > activationCodeMaxDays || start > math.MaxInt64-int64(grant.Days)*planDayMillis {
+	if grant.Days < 0 || grant.Days > activationCodeMaxDays || grant.CreatedAt <= 0 || grant.CreatedAt > math.MaxInt64-int64(grant.Days)*planDayMillis {
 		return 0, common.NewError("the activation exceeds the supported expiry range")
 	}
-	return start + int64(grant.Days)*planDayMillis, nil
+	return grant.CreatedAt + int64(grant.Days)*planDayMillis, nil
 }
 
 func anyInboundTakesVision(inboundIds []int) (bool, error) {

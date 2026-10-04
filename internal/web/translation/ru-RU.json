@@ -770,7 +770,26 @@
         "peerNumberConfig": "Конфиг Peer {n}"
       },
       "sniffingDestOverride": "Переопределение назначения",
-      "intro": "Порты, протоколы и транспорты для входящих подключений и пользователи каждого из них."
+      "intro": "Порты, протоколы и транспорты для входящих подключений и пользователи каждого из них.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Основные",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Продлить {email}",
       "renewManyTitle": "Продлить пользователей: {count}",
       "renewAddDays": "Добавить дней",
-      "renewHint": "Добавляются к более поздней из дат: сегодня или текущий срок. У пользователя без срока его по-прежнему нет."
+      "renewHint": "Добавляются к более поздней из дат: сегодня или текущий срок. У пользователя без срока его по-прежнему нет.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Серверы, шаблон правил и лимит IP, общие для группы пользователей. Квота трафика, срок и сброс у каждого пользователя свои.",
@@ -1114,7 +1147,10 @@
         "created": "Коды активации созданы",
         "copyAll": "Копировать неиспользованные коды",
         "deleteConfirm": "Удалить этот код активации?",
-        "zeroHint": "0 означает бессрочно или без периодического сброса."
+        "zeroHint": "0 означает бессрочно или без периодического сброса.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

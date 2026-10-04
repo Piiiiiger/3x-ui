@@ -349,6 +349,25 @@
       }
     },
     "inbounds": {
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      },
       "totalDownUp": "Total Sent/Received",
       "totalUsage": "Total Usage",
       "inboundCount": "Total Inbounds",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Renew {email}",
       "renewManyTitle": "Renew {count} user(s)",
       "renewAddDays": "Days to add",
-      "renewHint": "Added to the later of today and the current expiry. A user without an expiry keeps none."
+      "renewHint": "Added to the later of today and the current expiry. A user without an expiry keeps none.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "The nodes, rule template and IP limit a group of users share. Each user keeps their own traffic quota, expiry and reset.",
@@ -1114,7 +1147,10 @@
         "created": "Codes created",
         "copyAll": "Copy unused codes",
         "deleteConfirm": "Delete this activation code?",
-        "zeroHint": "0 means no expiry or no scheduled reset."
+        "zeroHint": "Validity starts when the code is created, including while unused. 0 means no expiry or no scheduled reset.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

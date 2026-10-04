@@ -104,7 +104,7 @@ func TestCreateCodesRefusesWhatCouldNotBeUsed(t *testing.T) {
 }
 
 // What the code grants becomes the new user: its plan's nodes and IP limit, its
-// quota, a period from today and its reset day, behind the password chosen.
+// quota, the creation-based deadline and its reset day, behind the password chosen.
 func TestRegisterCreatesTheUserOnThePlanWithTheCodesLimits(t *testing.T) {
 	a, b, _ := setupPlanDB(t)
 	plan := codePlan(t, "Monthly", 2, a, b)
@@ -116,7 +116,6 @@ func TestRegisterCreatesTheUserOnThePlanWithTheCodesLimits(t *testing.T) {
 	if _, _, err := (&ActivationCodeService{}).Register(&InboundService{}, "newbie", "secret-pass", typed); err != nil {
 		t.Fatalf("register: %v", err)
 	}
-	end := time.Now().UnixMilli()
 
 	rec := planRecord(t, "newbie")
 	if rec.PlanId != plan.Id || rec.TotalGB != 50*planGiB || rec.LimitIP != 2 || !rec.Enable ||
@@ -124,8 +123,8 @@ func TestRegisterCreatesTheUserOnThePlanWithTheCodesLimits(t *testing.T) {
 		t.Fatalf("user = plan %d quota %d limitIp %d enable %v reset %s/%d, want the code's grants",
 			rec.PlanId, rec.TotalGB, rec.LimitIP, rec.Enable, rec.TrafficReset, rec.TrafficResetDay)
 	}
-	if rec.ExpiryTime < start+30*planDayMs || rec.ExpiryTime > end+30*planDayMs {
-		t.Fatalf("expiry %d is not 30 days from the registration", rec.ExpiryTime)
+	if rec.ExpiryTime != code.CreatedAt+30*planDayMs {
+		t.Fatalf("expiry %d is not 30 days from code creation", rec.ExpiryTime)
 	}
 	if got := planInboundIdsOf(t, "newbie"); !slices.Equal(got, []int{a, b}) {
 		t.Fatalf("inbounds = %v, want the plan's %v", got, []int{a, b})
@@ -213,7 +212,7 @@ func TestRegisterGivesTheCodeBackWhenTheUserCannotBeMade(t *testing.T) {
 }
 
 // A signed-in person's next code renews them, or moves them to its plan: its nodes
-// and IP limit, its quota and reset, days on top of what is left, usage cleared.
+// and IP limit, its quota and reset, remaining code time added, usage cleared.
 func TestRedeemMovesTheUserToTheCodesPlanAndRenewsIt(t *testing.T) {
 	a, b, _ := setupPlanDB(t)
 	planA, planB := codePlan(t, "A", 1, a), codePlan(t, "B", 3, b)
@@ -230,7 +229,7 @@ func TestRedeemMovesTheUserToTheCodesPlanAndRenewsIt(t *testing.T) {
 	}
 
 	rec := planRecord(t, "member@code")
-	if rec.PlanId != planB.Id || rec.LimitIP != 3 || rec.TotalGB != 80*planGiB || rec.ExpiryTime != future+30*planDayMs ||
+	if rec.PlanId != planB.Id || rec.LimitIP != 3 || rec.TotalGB != 80*planGiB || rec.ExpiryTime != future+code.CreatedAt+30*planDayMs-codeRow(t, code.Id).UsedAt ||
 		rec.TrafficReset != "monthly" || rec.TrafficResetDay != 5 {
 		t.Fatalf("user = plan %d limitIp %d quota %d expiry %d reset %s/%d, want plan B's and the code's",
 			rec.PlanId, rec.LimitIP, rec.TotalGB, rec.ExpiryTime, rec.TrafficReset, rec.TrafficResetDay)
@@ -310,7 +309,7 @@ func TestRedeemRetriesAFailedResetWithoutAddingDaysTwice(t *testing.T) {
 	if _, err := (&ActivationCodeService{}).Redeem(&InboundService{}, "retry@code", code.Code); err != nil {
 		t.Fatalf("retry: %v", err)
 	}
-	if got := planRecord(t, "retry@code").ExpiryTime; got != future+30*planDayMs {
+	if got := planRecord(t, "retry@code").ExpiryTime; got != future+code.CreatedAt+30*planDayMs-codeRow(t, code.Id).UsedAt {
 		t.Fatalf("expiry = %d, want one 30-day grant", got)
 	}
 	if _, err := s.Redeem(&InboundService{}, "retry@code", code.Code); !errors.Is(err, ErrActivationCode) {
@@ -341,7 +340,11 @@ func TestConcurrentCodesAddBothPeriodsToTheSameUser(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if got := planRecord(t, "concurrent@code").ExpiryTime; got != future+60*planDayMs {
+	want := future
+	for _, code := range codes {
+		want += code.CreatedAt + 30*planDayMs - codeRow(t, code.Id).UsedAt
+	}
+	if got := planRecord(t, "concurrent@code").ExpiryTime; got != want {
 		t.Fatalf("expiry = %d, want both periods", got)
 	}
 }
@@ -402,5 +405,73 @@ func TestRedeemRejectsExpiryOverflowBeforeUsingTheCode(t *testing.T) {
 	after := planRecord(t, before.Email)
 	if after.ExpiryTime != before.ExpiryTime || after.PlanId != before.PlanId || codeRow(t, code.Id).UsedAt != 0 {
 		t.Fatal("rejected overflow changed the user or consumed the code")
+	}
+}
+
+func TestActivationCodeAgesBeforeRegistrationAndRenewal(t *testing.T) {
+	a, _, _ := setupPlanDB(t)
+	plan := codePlan(t, "Countdown", 0, a)
+	codes := mustCreateCodes(t, ActivationCodeInput{PlanId: plan.Id, Count: 3, Days: 12})
+	created := time.Now().Add(-24 * time.Hour).UnixMilli()
+	for i := range codes {
+		if err := database.GetDB().Model(&model.ActivationCode{}).Where("id = ?", codes[i].Id).UpdateColumn("created_at", created).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	s := &ActivationCodeService{}
+	if _, _, err := s.Register(&InboundService{}, "countdown-new", "secret-pass", codes[0].Code); err != nil {
+		t.Fatal(err)
+	}
+	deadline := created + 12*planDayMillis
+	if got := planRecord(t, "countdown-new").ExpiryTime; got != deadline {
+		t.Fatalf("new expiry = %d, want fixed deadline %d", got, deadline)
+	}
+	future := time.Now().Add(5 * 24 * time.Hour).UnixMilli()
+	createPlanClient(t, "countdown-renew", []int{a}, future)
+	if _, err := s.Redeem(&InboundService{}, "countdown-renew", codes[1].Code); err != nil {
+		t.Fatal(err)
+	}
+	want := future + deadline - codeRow(t, codes[1].Id).UsedAt
+	if got := planRecord(t, "countdown-renew").ExpiryTime; got != want {
+		t.Fatalf("renewal expiry = %d, want only remaining time added: %d", got, want)
+	}
+	createPlanClient(t, "countdown-expired-account", []int{a}, time.Now().Add(-24*time.Hour).UnixMilli())
+	if _, err := s.Redeem(&InboundService{}, "countdown-expired-account", codes[2].Code); err != nil {
+		t.Fatal(err)
+	}
+	if got := planRecord(t, "countdown-expired-account").ExpiryTime; got != deadline {
+		t.Fatalf("expired account expiry = %d, want code deadline %d", got, deadline)
+	}
+}
+
+func TestExpiredActivationCodeCannotCreateOrChangeAUser(t *testing.T) {
+	a, _, _ := setupPlanDB(t)
+	code := mustCreateCodes(t, ActivationCodeInput{PlanId: codePlan(t, "Expired", 0, a).Id, Count: 1, Days: 1})[0]
+	if err := database.GetDB().Model(&model.ActivationCode{}).Where("id = ?", code.Id).UpdateColumn("created_at", time.Now().Add(-48*time.Hour).UnixMilli()).Error; err != nil {
+		t.Fatal(err)
+	}
+	s := &ActivationCodeService{}
+	if _, _, err := s.Register(&InboundService{}, "too-late", "secret-pass", code.Code); !errors.Is(err, ErrActivationCode) {
+		t.Fatalf("expired registration: %v", err)
+	}
+	if clientExists(t, "too-late") {
+		t.Fatal("expired code created a user")
+	}
+	future := time.Now().Add(24 * time.Hour).UnixMilli()
+	createPlanClient(t, "expired-code-renew", []int{a}, future)
+	if _, err := s.Redeem(&InboundService{}, "expired-code-renew", code.Code); !errors.Is(err, ErrActivationCode) {
+		t.Fatalf("expired renewal: %v", err)
+	}
+	if planRecord(t, "expired-code-renew").ExpiryTime != future || codeRow(t, code.Id).UsedAt != 0 {
+		t.Fatal("expired code changed state")
+	}
+	if err := database.GetDB().Model(&model.ActivationCode{}).Where("id = ?", code.Id).UpdateColumn("days", 0).Error; err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.Register(&InboundService{}, "permanent-code", "secret-pass", code.Code); err != nil {
+		t.Fatal(err)
+	}
+	if planRecord(t, "permanent-code").ExpiryTime != 0 {
+		t.Fatal("permanent code gained an expiry")
 	}
 }

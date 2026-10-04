@@ -127,6 +127,44 @@ const hwidStatusErrorResponses = {
 
 export const sections: readonly Section[] = [
   {
+    id: 'proxy-chains',
+    title: 'Proxy chains',
+    description: 'Manage target nodes and their relays for Clash/Mihomo subscriptions.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/proxyChains/list',
+        summary: 'List configured proxy chains.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/proxyChains/add',
+        summary: 'Create a chain with distinct target and relay inbounds.',
+        body: '{"name":"Relay route","targetInboundId":2,"relayInboundId":1,"enabled":true}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/proxyChains/update/:id',
+        summary: 'Update a chain and its optional direct and relay display names.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Chain id.' }],
+        body: '{"name":"Relay route","targetInboundId":2,"relayInboundId":1,"enabled":true}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/proxyChains/del/:id',
+        summary: 'Delete a proxy chain.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Chain id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/proxyChains/check/:id',
+        summary: 'Probe a chain using the configured node runtimes.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Chain id.' }],
+      },
+    ],
+  },
+
+  {
     id: 'authentication',
     title: 'Authentication',
     description:
@@ -932,6 +970,33 @@ export const sections: readonly Section[] = [
     description:
       'Manage clients as first-class entities that can be attached to one or more inbounds. A single client row drives the settings.clients entry in every inbound it belongs to. Endpoints live under /panel/api/clients.',
     endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/clients/customGroups',
+        summary:
+          'List custom user groups with member emails. Groups are independent of subscription plans.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/customGroups/save',
+        summary:
+          'Create a group with id 0, or rename an existing group. Names must be unique and 1–64 characters.',
+        body: '{"id":0,"name":"Friends"}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/customGroups/assign',
+        summary:
+          'Atomically move users into one group. Use id 0 to leave them ungrouped. Plans and quotas are unchanged.',
+        body: '{"id":1,"emails":["alice"]}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/customGroups/delete',
+        summary: 'Delete a group and leave its members ungrouped; users are retained.',
+        body: '{"id":1}',
+      },
+
       {
         method: 'GET',
         path: '/panel/api/clients/list',
@@ -1880,6 +1945,13 @@ export const sections: readonly Section[] = [
     endpoints: [
       {
         method: 'GET',
+        path: '/panel/api/plans/nodeOptions',
+        summary:
+          'List selectable direct and relayed node variants for plans and proxy-group assignments.',
+      },
+
+      {
+        method: 'GET',
         path: '/panel/api/plans/codes/:id',
         summary: 'List activation codes for a plan, newest first. Plan id 0 lists every code.',
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Plan id, or 0 for all plans.' }],
@@ -1890,7 +1962,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/plans/codes/add',
         summary:
-          'Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days and monthly reset day. Zero means unlimited quota, no expiry or no reset respectively.',
+          'Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days counted from creation (including unused time), and monthly reset day. Expired codes cannot be redeemed; renewal adds only their remaining validity. Zero means unlimited quota, no expiry or no reset respectively.',
         body: '{\n  "planId": 1,\n  "count": 5,\n  "totalGB": 107374182400,\n  "days": 30,\n  "resetDay": 22,\n  "note": "March group"\n}',
         responseSchema: 'ActivationCode',
         responseSchemaArray: true,

@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "Hedef geçersiz kılma",
       "advancedTitle": "Gelişmiş Ayarlar",
-      "intro": "Dinlenen portlar, protokoller ve taşıma türleri ile her birinin hizmet verdiği kullanıcılar."
+      "intro": "Dinlenen portlar, protokoller ve taşıma türleri ile her birinin hizmet verdiği kullanıcılar.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Temel",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "{email} yenile",
       "renewManyTitle": "{count} kullanıcıyı yenile",
       "renewAddDays": "Eklenecek gün",
-      "renewHint": "Bugün ile mevcut bitiş tarihinden hangisi daha geçse ona eklenir. Bitiş tarihi olmayan kullanıcı öyle kalır."
+      "renewHint": "Bugün ile mevcut bitiş tarihinden hangisi daha geçse ona eklenir. Bitiş tarihi olmayan kullanıcı öyle kalır.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Bir kullanıcı grubunun paylaştığı sunucular, kural şablonu ve IP sınırı. Trafik kotası, bitiş tarihi ve sıfırlama her kullanıcının kendisine aittir.",
@@ -1114,7 +1147,10 @@
         "created": "Etkinleştirme kodları oluşturuldu",
         "copyAll": "Kullanılmamış kodları kopyala",
         "deleteConfirm": "Bu etkinleştirme kodu silinsin mi?",
-        "zeroHint": "0, süresiz veya dönemsel sıfırlama yok anlamına gelir."
+        "zeroHint": "0, süresiz veya dönemsel sıfırlama yok anlamına gelir.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

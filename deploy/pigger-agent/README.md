@@ -4,7 +4,7 @@ A Pigger panel can run a server as an **agent node** instead of installing a ful
 panel there. The agent is one small program with Xray built in: it dials the
 panel over a WebSocket, runs the Xray config the panel sends, and reports
 traffic, online clients and the server's load back. The panel keeps every
-user, quota and setting; nothing listens on the server except Xray itself.
+user, quota and setting; only the configured Xray and optional Snell listeners are exposed on the server.
 
 ## Install on a server
 
@@ -30,3 +30,30 @@ to `/var/log/pigger-agent`.
 - Minting a new secret in the panel disconnects the agent that used the old
   one; update `/etc/pigger-agent/config.json` and restart the service.
 - MTProto, TUIC and AmneziaWG inbounds need a full panel node.
+
+## Managed Snell v5 (systemd)
+
+Install an official Snell v5 binary, verified for the server architecture, at
+/usr/local/libexec/pigger-agent/snell-server with root ownership and mode 0755,
+then restart the updated agent. It advertises snell-v5-systemd only when the
+binary reports version 5 and systemd is present. Inbounds cannot supply executable paths.
+
+Select Snell when adding an inbound on an Agent host. The panel manages its
+listen address, TCP/UDP port, shared PSK, enable state and absolute expiry.
+Assign through a plan and use a Clash/Mihomo subscription supporting Snell.
+Adding an inbound never creates personal customizations or assigns subscribers.
+Xray JSON and ordinary share-link exports do not support this protocol.
+
+Each inbound gets a pigger-snell-<inbound id>.service systemd unit. Credentials
+and state live under <agent stateDir>/snell/ with root-only permissions;
+systemd supplies a private credential to a DynamicUser process. The panel
+shows service state reported by the agent. Failed updates restore the previous
+managed configuration. Disconnecting the agent does not stop listeners;
+absolute expiry is enforced while the agent runs. Standalone services are never
+adopted automatically: stop the specific old listener before enabling its
+replacement, and keep the original configuration for rollback.
+
+Snell uses a shared PSK, not individual panel user credentials. Plan assignment
+controls subscription visibility only. Per-user byte accounting, traffic/IP
+limits and independent revocation cannot be enforced. Rotate the PSK to revoke
+previously issued access; existing clients must refresh their configurations.

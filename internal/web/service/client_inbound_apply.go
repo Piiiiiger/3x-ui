@@ -443,6 +443,8 @@ func (s *ClientService) AddInboundClient(inboundSvc *InboundService, data *model
 			return false, common.NewError("client email is required")
 		}
 		switch oldInbound.Protocol {
+		case model.Snell:
+			// The email identifies subscription membership; authentication uses the inbound PSK.
 		case "trojan":
 			if client.Password == "" {
 				return false, common.NewError("empty client ID")
@@ -688,6 +690,8 @@ func (s *ClientService) UpdateInboundClient(inboundSvc *InboundService, data *mo
 
 	newClientId := ""
 	switch oldInbound.Protocol {
+	case model.Snell:
+		newClientId = clients[0].Email
 	case "trojan":
 		newClientId = clients[0].Password
 	case "shadowsocks":

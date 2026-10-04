@@ -89,6 +89,7 @@ func run(root, outDir string) error {
 			StructAllow: setOf(
 				"InboundOption",
 				"PlanInput",
+				"PlanProxyGroup",
 				"ActivationCodeInput",
 				"PlanSummary",
 				"RuleTemplateChange",

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"slices"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/clashmerge"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 )
 
@@ -19,26 +21,42 @@ type PlanService struct {
 	clientService ClientService
 }
 
+// PlanProxyGroup assigns a plan's inbounds to one proxy group from its rule template.
+type PlanProxyGroup struct {
+	Name       string   `json:"name" example:"🔰 节点选择"`
+	InboundIds []int    `json:"inboundIds" example:"[1,2]"`
+	NodeKeys   []string `json:"nodeKeys,omitempty"`
+}
+
 // PlanInput is the editable part of a plan plus the inbounds it grants.
 type PlanInput struct {
-	Name       string `json:"name" example:"Monthly 100G"`
-	LimitIP    int    `json:"limitIp" example:"0"`
-	Remark     string `json:"remark" example:"Hong Kong and Singapore"`
-	TemplateId int    `json:"templateId" example:"1"`
-	InboundIds []int  `json:"inboundIds" example:"[1,2]"`
+	Name        string           `json:"name" example:"Monthly 100G"`
+	LimitIP     int              `json:"limitIp" example:"0"`
+	Remark      string           `json:"remark" example:"Hong Kong and Singapore"`
+	TemplateId  int              `json:"templateId" example:"1"`
+	InboundIds  []int            `json:"inboundIds" example:"[1,2]"`
+	ProxyGroups []PlanProxyGroup `json:"proxyGroups,omitempty"`
+	NodeKeys    []string         `json:"nodeKeys,omitempty"`
 }
 
 // PlanSummary is a plan with the inbounds it grants and how many clients use it.
 type PlanSummary struct {
 	model.Plan
-	InboundIds  []int `json:"inboundIds" example:"[1,2]"`
-	MemberCount int   `json:"memberCount" example:"4"`
+	InboundIds      []int            `json:"inboundIds" example:"[1,2]"`
+	ProxyGroups     []PlanProxyGroup `json:"proxyGroups,omitempty"`
+	ProxyGroupNames []string         `json:"proxyGroupNames,omitempty"`
+	MemberCount     int              `json:"memberCount" example:"4"`
+	NodeKeys        []string         `json:"nodeKeys,omitempty"`
 }
 
 const planDayMillis = int64(24 * time.Hour / time.Millisecond)
 
 func (s *PlanService) List() ([]PlanSummary, error) {
 	db := database.GetDB()
+	options, err := s.NodeOptions()
+	if err != nil {
+		return nil, err
+	}
 	var plans []model.Plan
 	if err := db.Order("sort_index ASC, id ASC").Find(&plans).Error; err != nil {
 		return nil, err
@@ -53,7 +71,21 @@ func (s *PlanService) List() ([]PlanSummary, error) {
 		if err := db.Model(&model.ClientRecord{}).Where("plan_id = ?", p.Id).Count(&members).Error; err != nil {
 			return nil, err
 		}
-		out = append(out, PlanSummary{Plan: p, InboundIds: ids, MemberCount: int(members)})
+		nodeKeys := effectivePlanNodeKeys(p.NodeKeys, ids, options)
+		groups := decodePlanProxyGroups(p.ProxyGroups)
+		for i := range groups {
+			if groups[i].NodeKeys == nil {
+				groups[i].NodeKeys = nodeKeysForInbounds(nodeKeys, groups[i].InboundIds)
+			}
+		}
+		out = append(out, PlanSummary{
+			Plan:            p,
+			InboundIds:      ids,
+			ProxyGroups:     groups,
+			NodeKeys:        nodeKeys,
+			ProxyGroupNames: planTemplateGroupNames(db, p.TemplateId),
+			MemberCount:     int(members),
+		})
 	}
 	return out, nil
 }
@@ -284,6 +316,97 @@ func (s *PlanService) Unassign(emails []string) error {
 		Where("email IN ?", emails).UpdateColumn("plan_id", 0).Error
 }
 
+func decodePlanProxyGroups(raw string) []PlanProxyGroup {
+	if strings.TrimSpace(raw) == "" {
+		return []PlanProxyGroup{}
+	}
+	var groups []PlanProxyGroup
+	if err := json.Unmarshal([]byte(raw), &groups); err != nil || groups == nil {
+		return []PlanProxyGroup{}
+	}
+	return groups
+}
+
+func encodePlanProxyGroups(groups []PlanProxyGroup) string {
+	if len(groups) == 0 {
+		return ""
+	}
+	encoded, err := json.Marshal(groups)
+	if err != nil {
+		return ""
+	}
+	return string(encoded)
+}
+
+func normalizePlanProxyGroups(groups []PlanProxyGroup, inboundIds []int) error {
+	allowed := make(map[int]struct{}, len(inboundIds))
+	for _, id := range inboundIds {
+		allowed[id] = struct{}{}
+	}
+	seenNames := make(map[string]struct{}, len(groups))
+	for i := range groups {
+		groups[i].Name = strings.TrimSpace(groups[i].Name)
+		if groups[i].Name == "" {
+			return common.NewError("plan proxy group name is required")
+		}
+		if _, duplicate := seenNames[groups[i].Name]; duplicate {
+			return common.NewError("duplicate plan proxy group:", groups[i].Name)
+		}
+		seenNames[groups[i].Name] = struct{}{}
+		groups[i].InboundIds = uniqueSortedIds(groups[i].InboundIds)
+		for _, id := range groups[i].InboundIds {
+			if _, ok := allowed[id]; !ok {
+				return common.NewError("plan proxy group refers to an inbound outside this plan:", id)
+			}
+		}
+	}
+	return nil
+}
+
+func planTemplateGroupNames(db *gorm.DB, templateId int) []string {
+	var tpl model.RuleTemplate
+	query := db
+	if templateId > 0 {
+		query = query.Where("id = ?", templateId)
+	} else {
+		query = query.Where("is_default = ?", true).Order("id ASC")
+	}
+	if err := query.First(&tpl).Error; err != nil {
+		return []string{}
+	}
+	doc, err := templateMap(tpl.Content)
+	if err != nil {
+		return []string{}
+	}
+	if tpl.BaseId != 0 {
+		base, baseDoc, err := loadBase(db, tpl.BaseId)
+		if err != nil || base.Id == 0 {
+			return []string{}
+		}
+		doc = clashmerge.Apply(baseDoc, doc)
+	}
+	values, _ := doc["proxy-groups"].([]any)
+	names := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		group, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		name, _ := group["name"].(string)
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if _, duplicate := seen[name]; duplicate {
+			continue
+		}
+		seen[name] = struct{}{}
+		names = append(names, name)
+	}
+	return names
+}
+
 func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 	in.Name = strings.TrimSpace(in.Name)
 	if in.Name == "" {
@@ -312,6 +435,12 @@ func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 		}
 	}
 	in.InboundIds = uniqueSortedIds(in.InboundIds)
+	if err := normalizePlanNodeKeys(tx, in); err != nil {
+		return err
+	}
+	if err := normalizePlanProxyGroups(in.ProxyGroups, in.InboundIds); err != nil {
+		return err
+	}
 	if len(in.InboundIds) > 0 {
 		var found int64
 		if err := tx.Model(&model.Inbound{}).Where("id IN ?", in.InboundIds).Count(&found).Error; err != nil {
@@ -329,6 +458,11 @@ func applyPlanInput(plan *model.Plan, in PlanInput) {
 	plan.LimitIP = in.LimitIP
 	plan.Remark = in.Remark
 	plan.TemplateId = in.TemplateId
+	plan.ProxyGroups = encodePlanProxyGroups(in.ProxyGroups)
+	if in.NodeKeys != nil {
+		encoded, _ := json.Marshal(in.NodeKeys)
+		plan.NodeKeys = string(encoded)
+	}
 }
 
 func replacePlanInbounds(tx *gorm.DB, planId int, inboundIds []int) error {

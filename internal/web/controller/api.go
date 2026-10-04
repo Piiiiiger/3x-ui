@@ -200,6 +200,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	plans := api.Group("/plans")
 	NewPlanController(plans)
 
+	// Proxy chains — generated Clash dialer-proxy relations
+	proxyChains := api.Group("/proxyChains")
+	NewProxyChainController(proxyChains)
+
 	// Rule templates API — the Clash rules plans share
 	ruleTemplates := api.Group("/ruleTemplates")
 	NewRuleTemplateController(ruleTemplates)

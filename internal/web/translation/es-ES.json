@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "Anulación de destino",
       "advancedTitle": "Configuración avanzada",
-      "intro": "Puertos, protocolos y transportes de escucha, con los usuarios que atiende cada uno."
+      "intro": "Puertos, protocolos y transportes de escucha, con los usuarios que atiende cada uno.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Básico",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Renovar {email}",
       "renewManyTitle": "Renovar {count} usuario(s)",
       "renewAddDays": "Días a añadir",
-      "renewHint": "Se suman a la fecha más tardía entre hoy y la caducidad actual. Un usuario sin caducidad sigue sin ella."
+      "renewHint": "Se suman a la fecha más tardía entre hoy y la caducidad actual. Un usuario sin caducidad sigue sin ella.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Los servidores, la plantilla de reglas y el límite de IP que comparte un grupo de usuarios. Cada usuario conserva su propia cuota, caducidad y reinicio.",
@@ -1114,7 +1147,10 @@
         "created": "Códigos de activación generados",
         "copyAll": "Copiar códigos sin usar",
         "deleteConfirm": "¿Eliminar este código de activación?",
-        "zeroHint": "0 significa sin caducidad o sin reinicio periódico."
+        "zeroHint": "0 significa sin caducidad o sin reinicio periódico.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

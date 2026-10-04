@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "Ghi đè đích",
       "advancedTitle": "Cài đặt nâng cao",
-      "intro": "Cổng, giao thức và phương thức truyền tải đang lắng nghe, cùng người dùng của từng inbound."
+      "intro": "Cổng, giao thức và phương thức truyền tải đang lắng nghe, cùng người dùng của từng inbound.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Cơ bản",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Gia hạn {email}",
       "renewManyTitle": "Gia hạn {count} người dùng",
       "renewAddDays": "Số ngày thêm",
-      "renewHint": "Cộng vào ngày muộn hơn giữa hôm nay và ngày hết hạn hiện tại. Người dùng không có hạn vẫn không có hạn."
+      "renewHint": "Cộng vào ngày muộn hơn giữa hôm nay và ngày hết hạn hiện tại. Người dùng không có hạn vẫn không có hạn.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Máy chủ, mẫu quy tắc và giới hạn IP mà một nhóm người dùng dùng chung. Mỗi người dùng có hạn mức lưu lượng, ngày hết hạn và đặt lại riêng.",
@@ -1114,7 +1147,10 @@
         "created": "Đã tạo mã kích hoạt",
         "copyAll": "Sao chép mã chưa dùng",
         "deleteConfirm": "Xóa mã kích hoạt này?",
-        "zeroHint": "0 nghĩa là không hết hạn hoặc không đặt lại định kỳ."
+        "zeroHint": "0 nghĩa là không hết hạn hoặc không đặt lại định kỳ.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

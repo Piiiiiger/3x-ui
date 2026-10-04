@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "目標覆寫",
       "advancedTitle": "進階設定",
-      "intro": "監聽連接埠、協定與傳輸方式，以及每個節點下的使用者。"
+      "intro": "監聽連接埠、協定與傳輸方式，以及每個節點下的使用者。",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "基本",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "續期 {email}",
       "renewManyTitle": "續期 {count} 個使用者",
       "renewAddDays": "延長天數",
-      "renewHint": "從今天和目前到期日中較晚的一天起延長。沒有到期日的使用者維持不限期。"
+      "renewHint": "從今天和目前到期日中較晚的一天起延長。沒有到期日的使用者維持不限期。",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "一組使用者共用的節點、訂閱範本與 IP 限制。流量、有效期與重置由每個使用者自行設定。",
@@ -1114,7 +1147,10 @@
         "created": "已產生啟用碼",
         "copyAll": "複製未使用的啟用碼",
         "deleteConfirm": "刪除此啟用碼？",
-        "zeroHint": "0表示永久有效或不定期重設。"
+        "zeroHint": "0表示永久有效或不定期重設。",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

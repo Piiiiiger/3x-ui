@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "宛先のオーバーライド",
       "advancedTitle": "詳細設定",
-      "intro": "待ち受けポート、プロトコル、トランスポートと、それぞれが受け持つユーザー。"
+      "intro": "待ち受けポート、プロトコル、トランスポートと、それぞれが受け持つユーザー。",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "基本",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "{email} を更新",
       "renewManyTitle": "{count} 人のユーザーを更新",
       "renewAddDays": "追加する日数",
-      "renewHint": "今日と現在の有効期限のうち遅いほうから延長します。有効期限のないユーザーは無期限のままです。"
+      "renewHint": "今日と現在の有効期限のうち遅いほうから延長します。有効期限のないユーザーは無期限のままです。",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "ユーザーのグループが共有するサーバー・ルールテンプレート・IP 制限。通信量・有効期限・リセットはユーザーごとに設定します。",
@@ -1114,7 +1147,10 @@
         "created": "有効化コードを生成しました",
         "copyAll": "未使用のコードをコピー",
         "deleteConfirm": "この有効化コードを削除しますか？",
-        "zeroHint": "0は無期限または定期リセットなしを意味します。"
+        "zeroHint": "0は無期限または定期リセットなしを意味します。",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

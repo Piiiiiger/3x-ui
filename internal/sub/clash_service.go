@@ -16,6 +16,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/clashmerge"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
@@ -36,6 +37,85 @@ type RuleTemplateSource struct {
 }
 
 var errNoLegacyClashProxies = errors.New("no Clash for Windows-compatible proxies found; use the Mihomo subscription for modern proxy types")
+
+const (
+	clashPlanInboundIDKey  = "__xui_plan_inbound_id"
+	clashPlanGroupsKey     = "__xui_plan_proxy_groups"
+	clashPlanNodeKey       = "__xui_plan_node_key"
+	clashPlanGroupNodesKey = "__xui_plan_group_nodes"
+	clashRelayInboundKey   = "__xui_relay_inbound_id"
+	clashAIRankKey         = "__xui_ai_rank"
+)
+
+func planProxyGroupAssignments(subID string) (map[string]map[int]struct{}, error) {
+	var raw string
+	err := database.GetDB().Table("clients AS c").
+		Joins("JOIN plans AS p ON p.id = c.plan_id").
+		Where("c.sub_id = ?", subID).
+		Select("p.proxy_groups").
+		Limit(1).Scan(&raw).Error
+	if err != nil || strings.TrimSpace(raw) == "" {
+		return map[string]map[int]struct{}{}, err
+	}
+	var groups []map[string]any
+	if err := json.Unmarshal([]byte(raw), &groups); err != nil {
+		return map[string]map[int]struct{}{}, err
+	}
+	out := make(map[string]map[int]struct{}, len(groups))
+	for _, group := range groups {
+		name, _ := group["name"].(string)
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		ids := make(map[int]struct{})
+		if values, ok := group["inboundIds"].([]any); ok {
+			for _, value := range values {
+				switch id := value.(type) {
+				case float64:
+					ids[int(id)] = struct{}{}
+				case int:
+					ids[id] = struct{}{}
+				}
+			}
+		}
+		out[name] = ids
+	}
+	return out, nil
+}
+
+func markPlanInbound(proxies []map[string]any, inboundID int) {
+	for _, proxy := range proxies {
+		proxy[clashPlanInboundIDKey] = inboundID
+	}
+}
+
+func clearPlanMetadata(config map[string]any) {
+	delete(config, clashPlanGroupsKey)
+	delete(config, clashPlanGroupNodesKey)
+	switch proxies := config["proxies"].(type) {
+	case []map[string]any:
+		for _, proxy := range proxies {
+			delete(proxy, clashPlanInboundIDKey)
+			delete(proxy, clashPlanNodeKey)
+			delete(proxy, clashRelayInboundKey)
+			delete(proxy, clashAIRankKey)
+			delete(proxy, "__xui_chain_id")
+			delete(proxy, "__xui_transit")
+		}
+	case []any:
+		for _, value := range proxies {
+			if proxy, ok := value.(map[string]any); ok {
+				delete(proxy, clashPlanInboundIDKey)
+				delete(proxy, clashPlanNodeKey)
+				delete(proxy, clashRelayInboundKey)
+				delete(proxy, clashAIRankKey)
+				delete(proxy, "__xui_chain_id")
+				delete(proxy, "__xui_transit")
+			}
+		}
+	}
+}
 
 func NewSubClashService(subService *SubService) *SubClashService {
 	return &SubClashService{SubService: subService}
@@ -68,7 +148,19 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	if err != nil {
 		return "", "", err
 	}
-	if len(inbounds) == 0 && len(externalLinks) == 0 {
+	customization, err := subReq.getClientSubscriptionCustomization(subId)
+	if err != nil {
+		return "", "", err
+	}
+	var customProxies []map[string]any
+	if customization != nil {
+		customProxies, err = portalNodeMaps(customization.Nodes)
+		if err != nil {
+			return "", "", fmt.Errorf("invalid private subscription nodes: %w", err)
+		}
+		externalLinks = append(externalLinks, portalExternalLinks(customization)...)
+	}
+	if len(inbounds) == 0 && len(externalLinks) == 0 && len(customProxies) == 0 {
 		return "", "", nil
 	}
 
@@ -95,8 +187,26 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 				hasEnabledClient = true
 			}
 			seenEmails[client.Email] = struct{}{}
-			proxies = append(proxies, s.getProxies(subReq, inbound, client, host)...)
+			generated := s.getProxies(subReq, inbound, client, host)
+			markPlanInbound(generated, inbound.Id)
+			for _, proxy := range generated {
+				_, chained := proxy["dialer-proxy"]
+				if _, exists := proxy[clashPlanNodeKey]; !exists {
+					proxy[clashPlanNodeKey] = model.PlanNodeKey(inbound.Id, false)
+				}
+				if strings.Contains(inbound.Remark, "新加坡-家宽") || strings.Contains(inbound.Remark, "新加坡家宽") {
+					proxy[clashAIRankKey] = 1
+					if chained {
+						proxy[clashAIRankKey] = 2
+					}
+				}
+			}
+			proxies = append(proxies, generated...)
 		}
+	}
+	proxies, err = filterPlanNodeVariants(subId, proxies)
+	if err != nil {
+		return "", "", err
 	}
 	for _, ext := range externalLinks {
 		if ext.Enable {
@@ -117,6 +227,27 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 			if proxy := s.clashProxyFromExternal(el.Link, name); proxy != nil {
 				proxies = append(proxies, proxy)
 			}
+		}
+	}
+	if customization != nil {
+		existingNames := make(map[string]struct{}, len(proxies))
+		for _, proxy := range proxies {
+			if name, ok := proxy["name"].(string); ok && strings.TrimSpace(name) != "" {
+				existingNames[strings.TrimSpace(name)] = struct{}{}
+			}
+		}
+		for _, proxy := range customProxies {
+			if name, ok := proxy["name"].(string); ok {
+				name = strings.TrimSpace(name)
+				if _, duplicate := existingNames[name]; duplicate {
+					return "", "", fmt.Errorf("private subscription node name %q conflicts with an existing node", name)
+				}
+				existingNames[name] = struct{}{}
+			}
+			proxies = append(proxies, cloneMap(proxy))
+		}
+		if customization.Email != "" {
+			seenEmails[customization.Email] = struct{}{}
 		}
 	}
 
@@ -158,9 +289,19 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	}
 
 	ensureUniqueProxyNames(proxies)
+	if err := resolveChainProxyNames(proxies); err != nil {
+		return "", "", err
+	}
 
+	proxies, err = attachChainTransitProxies(proxies)
+	if err != nil {
+		return "", "", err
+	}
 	proxyNames := make([]string, 0, len(proxies)+1)
 	for _, proxy := range proxies {
+		if proxy["__xui_transit"] == true {
+			continue
+		}
 		if isDummyProxy(proxy) && len(proxies) > 1 {
 			continue
 		}
@@ -178,6 +319,16 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 			"proxies": proxyNames,
 		}},
 		"rules": []string{"MATCH,PROXY"},
+	}
+	if assignments, err := planProxyGroupAssignments(subId); err != nil {
+		return "", "", err
+	} else if len(assignments) > 0 {
+		config[clashPlanGroupsKey] = assignments
+	}
+	if assignments, err := planGroupNodeKeys(subId); err != nil {
+		return "", "", err
+	} else {
+		config[clashPlanGroupNodesKey] = assignments
 	}
 
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
@@ -200,14 +351,83 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 				return "", "", err
 			}
 		}
+		preferSingaporeResidentialForAI(config)
+		if customization != nil && strings.TrimSpace(customization.Rules) != "" {
+			if err := mergePortalClashRules(config, customization.Rules); err != nil {
+				return "", "", fmt.Errorf("invalid private subscription rules: %w", err)
+			}
+		}
 	}
 
+	clearPlanMetadata(config)
 	finalYAML, err := marshalClashYAML(config)
 	if err != nil {
 		return "", "", err
 	}
 
 	return string(finalYAML), header, nil
+}
+
+// Select groups default to their first member. Only reorder existing, available
+// members so plan assignments remain authoritative. Private rules are applied later.
+func preferSingaporeResidentialForAI(config map[string]any) {
+	available := make(map[string]bool)
+	for _, name := range clashProxyNamesForGroups(config["proxies"]) {
+		available[name] = true
+	}
+	ranks := make(map[string]int)
+	for name := range available {
+		if strings.Contains(name, "新加坡-家宽") || strings.Contains(name, "新加坡家宽") {
+			ranks[name] = 1
+			if strings.Contains(name, "中转") {
+				ranks[name] = 2
+			}
+		}
+	}
+	items, _ := asAnySlice(config["proxies"])
+	for _, item := range items {
+		if proxy, ok := item.(map[string]any); ok {
+			if rank, ok := proxy[clashAIRankKey].(int); ok {
+				name, _ := proxy["name"].(string)
+				ranks[name] = rank
+			}
+		}
+	}
+	groups, _ := asAnySlice(config["proxy-groups"])
+	for _, item := range groups {
+		group, ok := item.(map[string]any)
+		if !ok || group["type"] != "select" {
+			continue
+		}
+		name, _ := group["name"].(string)
+		// A saved group order overrides the legacy residential-node preference.
+		assignments, _ := config[clashPlanGroupNodesKey].(map[string][]string)
+		if _, explicit := assignments[name]; explicit {
+			continue
+		}
+		name = strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(name), "🤖"))
+		if name != "AI 服务" && name != "AI服务" {
+			continue
+		}
+		members, _ := asAnySlice(group["proxies"])
+		best, bestRank := -1, 0
+		for i, member := range members {
+			name, _ := member.(string)
+			if !available[name] || ranks[name] == 0 {
+				continue
+			}
+			rank := ranks[name]
+			if rank > bestRank {
+				best, bestRank = i, rank
+			}
+		}
+		if best > 0 {
+			preferred := members[best]
+			copy(members[1:best+1], members[:best])
+			members[0] = preferred
+			group["proxies"] = members
+		}
+	}
 }
 
 // routingRules picks the rule template of the subscription's plan, else the default
@@ -385,6 +605,23 @@ func fallbackProxyName(proxy map[string]any, idx int) string {
 	return fmt.Sprintf("proxy-%d", idx+1)
 }
 
+type clashProxyChain struct {
+	model.ProxyChain
+	RelayRemark string
+}
+
+func (s *SubClashService) proxyChainConfigs(targetInboundID int) []clashProxyChain {
+	var rows []clashProxyChain
+	if targetInboundID <= 0 {
+		return rows
+	}
+	database.GetDB().Table("proxy_chains AS c").
+		Joins("JOIN inbounds AS i ON i.id = c.relay_inbound_id").
+		Where("c.target_inbound_id = ? AND c.enabled = ?", targetInboundID, true).
+		Select("c.*, COALESCE(NULLIF(i.remark, ''), i.tag) AS relay_remark").Order("c.id").Scan(&rows)
+	return rows
+}
+
 func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound, client model.Client, host string) []map[string]any {
 	stream := s.streamData(inbound.StreamSettings)
 	// For node-managed inbounds the Clash proxy "server" must be the
@@ -406,6 +643,7 @@ func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound,
 	}
 	delete(stream, "externalProxy")
 
+	chains := s.proxyChainConfigs(inbound.Id)
 	proxies := make([]map[string]any, 0, len(externalProxies))
 	for _, ep := range externalProxies {
 		extPrxy, ok := ep.(map[string]any)
@@ -444,12 +682,30 @@ func (s *SubClashService) getProxies(subReq *SubService, inbound *model.Inbound,
 		proxy := s.buildProxy(subReq, &workingInbound, client, workingStream, extPrxy)
 		if len(proxy) > 0 {
 			proxies = append(proxies, proxy)
+			baseName, _ := proxy["name"].(string)
+			for _, chain := range chains {
+				chained := maps.Clone(proxy)
+				relayName := strings.TrimSpace(chain.RelayRemark)
+				chained["name"] = chain.RelayProxyName(baseName, relayName)
+				chained["dialer-proxy"] = relayName
+				chained[clashRelayInboundKey] = chain.RelayInboundId
+				chained["__xui_chain_id"] = chain.Id
+				chained[clashPlanNodeKey] = model.PlanChainKey(inbound.Id, chain.Id)
+				proxies = append(proxies, chained)
+			}
 		}
 	}
 	return proxies
 }
 
 func (s *SubClashService) buildProxy(subReq *SubService, inbound *model.Inbound, client model.Client, stream map[string]any, ep map[string]any) map[string]any {
+	if inbound.Protocol == model.Snell {
+		settings, err := snell.ParseSettings(inbound.Settings)
+		if err != nil {
+			return nil
+		}
+		return map[string]any{"name": subReq.endpointRemark(inbound, client.Email, ep, ""), "type": "snell", "server": inbound.Listen, "port": inbound.Port, "psk": settings.PSK, "version": settings.Version, "udp": true, "reuse": settings.Reuse}
+	}
 	// Hysteria has its own transport + TLS model, applyTransport /
 	// applySecurity don't fit.
 	if inbound.Protocol == model.Hysteria {
@@ -486,6 +742,12 @@ func (s *SubClashService) buildProxy(subReq *SubService, inbound *model.Inbound,
 	case model.VLESS:
 		proxy["type"] = "vless"
 		proxy["uuid"] = client.ID
+		// External endpoints may keep a shared credential that differs from
+		// the panel-side client row. This is used by migrated/imported nodes
+		// whose public listener is managed outside this panel.
+		if externalUUID, ok := ep["uuid"].(string); ok && strings.TrimSpace(externalUUID) != "" {
+			proxy["uuid"] = strings.TrimSpace(externalUUID)
+		}
 		inboundSettings := subReq.linkSettings(inbound)
 		streamSecurity, _ := stream["security"].(string)
 		if client.Flow != "" && !inbound.DisableFlow && vlessFlowAllowed(network, streamSecurity, inboundSettings) {
@@ -1388,16 +1650,30 @@ func expandClashTemplateGroups(config map[string]any) {
 	if !ok {
 		return
 	}
-	names := clashProxyNamesForGroups(config["proxies"])
+	assignments, _ := config[clashPlanGroupsKey].(map[string]map[int]struct{})
+	variantAssignments, _ := config[clashPlanGroupNodesKey].(map[string][]string)
 	for _, item := range groups {
 		group, ok := item.(map[string]any)
 		if !ok {
 			continue
 		}
+		groupName, _ := group["name"].(string)
+		var selected map[int]struct{}
+		if assignments != nil {
+			selected, _ = assignments[groupName]
+		}
+		hasAssignment := assignments != nil && selected != nil
+		names := clashProxyNamesForGroupsFiltered(config["proxies"], selected, hasAssignment)
+		if keys, assigned := variantAssignments[groupName]; assigned {
+			names = clashProxyNamesForNodeKeys(config["proxies"], keys)
+			hasAssignment = true
+		}
 		if members, ok := asAnySlice(group["proxies"]); ok && len(members) > 0 {
 			expanded := make([]any, 0, len(members)+len(names))
+			hadPlaceholder := false
 			for _, member := range members {
 				if text, _ := member.(string); text == clashProxyNodesPlaceholder {
+					hadPlaceholder = true
 					for _, name := range names {
 						expanded = append(expanded, name)
 					}
@@ -1405,10 +1681,23 @@ func expandClashTemplateGroups(config map[string]any) {
 				}
 				expanded = append(expanded, member)
 			}
+			if hasAssignment && !hadPlaceholder {
+				for _, name := range names {
+					expanded = append(expanded, name)
+				}
+			}
 			group["proxies"] = expanded
+			if hasAssignment {
+				clearClashGroupSources(group)
+			}
 			continue
 		}
 		filter, _ := group["filter"].(string)
+		if hasAssignment {
+			group["proxies"] = stringsToAny(names)
+			clearClashGroupSources(group)
+			continue
+		}
 		if filter == "" || clashGroupHasSource(group) {
 			continue
 		}
@@ -1429,6 +1718,22 @@ func expandClashTemplateGroups(config map[string]any) {
 	}
 }
 
+func clearClashGroupSources(group map[string]any) {
+	delete(group, "use")
+	delete(group, "include-all")
+	delete(group, "include-all-proxies")
+	delete(group, "include-all-providers")
+	delete(group, "filter")
+}
+
+func stringsToAny(values []string) []any {
+	out := make([]any, len(values))
+	for i, value := range values {
+		out[i] = value
+	}
+	return out
+}
+
 // clashGroupHasSource reports whether Mihomo itself fills the group from providers
 // or from include-all.
 func clashGroupHasSource(group map[string]any) bool {
@@ -1443,12 +1748,28 @@ func clashGroupHasSource(group map[string]any) bool {
 // clashProxyNamesForGroups lists the generated proxy names the way the default PROXY
 // group does, leaving out the info node unless it is the only proxy.
 func clashProxyNamesForGroups(value any) []string {
+	return clashProxyNamesForGroupsFiltered(value, nil, false)
+}
+
+func clashProxyNamesForGroupsFiltered(value any, selected map[int]struct{}, restrict bool) []string {
 	proxies, ok := value.([]map[string]any)
 	if !ok {
 		return nil
 	}
 	names := make([]string, 0, len(proxies))
 	for _, proxy := range proxies {
+		if restrict {
+			id, ok := proxy[clashPlanInboundIDKey].(int)
+			if !ok {
+				continue
+			}
+			if _, ok := selected[id]; !ok {
+				continue
+			}
+		}
+		if proxy["__xui_transit"] == true {
+			continue
+		}
 		if isDummyProxy(proxy) && len(proxies) > 1 {
 			continue
 		}

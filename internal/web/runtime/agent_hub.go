@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -348,4 +349,28 @@ func GetAgentHub() *AgentHub {
 	agentHubMu.RLock()
 	defer agentHubMu.RUnlock()
 	return agentHub
+}
+
+// Probe checks the destination from the connected relay host. Older agents are
+// explicitly unverified; a panel-side TCP dial is not an equivalent test.
+func (h *AgentHub) Probe(ctx context.Context, nodeID int, p agentproto.Probe) error {
+	state, ok := h.Session(nodeID)
+	if !ok {
+		return ErrAgentNotConnected
+	}
+	if !slices.Contains(state.Hello.Capabilities, agentproto.ProbeCapability) {
+		return errors.New("中转 Agent 需要升级才能检查目标连通性")
+	}
+	s := h.session(nodeID)
+	if s == nil {
+		return ErrAgentNotConnected
+	}
+	res, err := s.request(ctx, agentproto.Message{Type: agentproto.TypeProbe, Probe: &p})
+	if err != nil {
+		return err
+	}
+	if !res.OK {
+		return errors.New(res.Error)
+	}
+	return nil
 }

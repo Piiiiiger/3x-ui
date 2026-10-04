@@ -64,7 +64,8 @@ type ClientPageParams struct {
 	HasTgID    string `form:"hasTgId"`
 	HasComment string `form:"hasComment"`
 	// Plan takes plan ids; 0 matches clients on no plan.
-	Plan string `form:"plan"`
+	Plan        string `form:"plan"`
+	CustomGroup string `form:"customGroup"`
 }
 
 // ClientPageResponse is the shape returned by ListPaged. `Total` is the
@@ -286,6 +287,11 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 	}
 	if planIds := parsePlanFilter(params.Plan); len(planIds) > 0 {
 		where("COALESCE(c.plan_id, 0) IN ?", planIds)
+	}
+	if params.CustomGroup == "0" {
+		where("NOT EXISTS (SELECT 1 FROM custom_user_group_members gm JOIN custom_user_groups gg ON gg.id = gm.group_id WHERE gm.client_id = c.id)")
+	} else if params.CustomGroup != "" {
+		where("c.id IN (SELECT client_id FROM custom_user_group_members WHERE group_id = ?)", params.CustomGroup)
 	}
 	return tx, narrowed
 }

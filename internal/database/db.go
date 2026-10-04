@@ -73,9 +73,13 @@ func allModels() []any {
 		&model.Node{},
 		&model.ApiToken{},
 		&model.ClientRecord{},
+		&model.CustomUserGroup{},
+		&model.CustomUserGroupMember{},
 		&model.ClientInbound{},
 		&model.ClientHwid{},
 		&model.ClientExternalLink{},
+		&model.ClientSubscriptionCustomization{},
+		&model.ClientSubscriptionCustomizationVersion{},
 		&model.InboundFallback{},
 		&model.NodeClientTraffic{},
 		&model.NodeClientIp{},
@@ -93,6 +97,7 @@ func allModels() []any {
 		&model.ClientPortalLogin{},
 		&model.ProbeLink{},
 		&model.ActivationCode{},
+		&model.ProxyChain{},
 	}
 }
 
@@ -203,6 +208,9 @@ func initModels() error {
 		return err
 	}
 	if err := movePlanRulesIntoTemplates(); err != nil {
+		return err
+	}
+	if err := migrateProxyChainRoutes(); err != nil {
 		return err
 	}
 	if err := dropPlanLimitColumns(); err != nil {

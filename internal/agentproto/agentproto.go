@@ -2,7 +2,10 @@
 // Both sides exchange JSON Messages over one WebSocket the agent opens.
 package agentproto
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
+)
 
 // ConnectPath is where an agent dials, relative to the panel's web base path.
 const ConnectPath = "agent/connect"
@@ -10,17 +13,20 @@ const ConnectPath = "agent/connect"
 // Message types. The agent sends hello first, then status and traffic on its
 // own schedule; the panel sends apply and restart and acks every traffic report.
 const (
-	TypeHello   = "hello"
-	TypeStatus  = "status"
-	TypeTraffic = "traffic"
-	TypeResult  = "result"
-	TypeApply   = "apply"
-	TypeRestart = "restart"
-	TypeAck     = "ack"
+	TypeHello       = "hello"
+	TypeStatus      = "status"
+	TypeTraffic     = "traffic"
+	TypeResult      = "result"
+	TypeApply       = "apply"
+	TypeRestart     = "restart"
+	TypeAck         = "ack"
+	TypeProbe       = "probe"
+	ProbeCapability = "tcp-probe-v1"
 )
 
 // Message is one frame; ID pairs an apply or restart with its result.
 type Message struct {
+	Probe   *Probe   `json:"probe,omitempty"`
 	Type    string   `json:"type"`
 	ID      uint64   `json:"id,omitempty"`
 	Hello   *Hello   `json:"hello,omitempty"`
@@ -32,23 +38,25 @@ type Message struct {
 }
 
 type Hello struct {
-	AgentVersion string `json:"agentVersion"`
-	XrayVersion  string `json:"xrayVersion"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	AgentVersion string   `json:"agentVersion"`
+	XrayVersion  string   `json:"xrayVersion"`
 	// ConfigHash is the hash of the config the agent is running, "" for none.
 	ConfigHash string `json:"configHash"`
 }
 
 // Status is the agent's latest state; a newer one replaces it entirely.
 type Status struct {
-	CpuPct      float64 `json:"cpuPct"`
-	MemPct      float64 `json:"memPct"`
-	UptimeSecs  uint64  `json:"uptimeSecs"`
-	NetUp       uint64  `json:"netUp"`
-	NetDown     uint64  `json:"netDown"`
-	XrayVersion string  `json:"xrayVersion"`
-	XrayState   string  `json:"xrayState"`
-	XrayError   string  `json:"xrayError,omitempty"`
-	ConfigHash  string  `json:"configHash"`
+	Snell       map[string]snell.Status `json:"snell,omitempty"`
+	CpuPct      float64                 `json:"cpuPct"`
+	MemPct      float64                 `json:"memPct"`
+	UptimeSecs  uint64                  `json:"uptimeSecs"`
+	NetUp       uint64                  `json:"netUp"`
+	NetDown     uint64                  `json:"netDown"`
+	XrayVersion string                  `json:"xrayVersion"`
+	XrayState   string                  `json:"xrayState"`
+	XrayError   string                  `json:"xrayError,omitempty"`
+	ConfigHash  string                  `json:"configHash"`
 	// Online and ActiveInbounds are the emails and inbound tags active within
 	// the agent's online grace window.
 	Online         []string             `json:"online"`
@@ -97,4 +105,10 @@ type Result struct {
 type Ack struct {
 	Instance string `json:"instance"`
 	Seq      int64  `json:"seq"`
+}
+
+// Probe tests TCP reachability from the relay, not from the panel.
+type Probe struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }

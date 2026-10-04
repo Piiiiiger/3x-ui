@@ -125,6 +125,13 @@ func (s *SubJsonService) GetJson(subId string, host string, alwaysReturnArray bo
 	if err != nil {
 		return "", "", err
 	}
+	customization, err := subReq.getClientSubscriptionCustomization(subId)
+	if err != nil {
+		return "", "", err
+	}
+	if customization != nil {
+		externalLinks = append(externalLinks, portalExternalLinks(customization)...)
+	}
 	if len(inbounds) == 0 && len(externalLinks) == 0 {
 		return "", "", nil
 	}
@@ -656,7 +663,7 @@ func (s *SubJsonService) getConfig(subReq *SubService, inbound *model.Inbound, c
 				continue
 			}
 			newOutbounds = append(newOutbounds, wgOutbound)
-		case "amneziawg", "tuic":
+		case "amneziawg", "tuic", "snell":
 			continue
 		}
 

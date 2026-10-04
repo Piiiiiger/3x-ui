@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "Penggantian tujuan",
       "advancedTitle": "Pengaturan Lanjutan",
-      "intro": "Port, protokol, dan transport yang didengarkan, beserta pengguna yang dilayani masing-masing."
+      "intro": "Port, protokol, dan transport yang didengarkan, beserta pengguna yang dilayani masing-masing.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Dasar",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Perpanjang {email}",
       "renewManyTitle": "Perpanjang {count} pengguna",
       "renewAddDays": "Hari yang ditambahkan",
-      "renewHint": "Ditambahkan ke yang lebih akhir antara hari ini dan kedaluwarsa saat ini. Pengguna tanpa kedaluwarsa tetap tanpa kedaluwarsa."
+      "renewHint": "Ditambahkan ke yang lebih akhir antara hari ini dan kedaluwarsa saat ini. Pengguna tanpa kedaluwarsa tetap tanpa kedaluwarsa.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Server, templat aturan, dan batas IP yang dipakai bersama sekelompok pengguna. Setiap pengguna punya kuota, masa berlaku, dan reset sendiri.",
@@ -1114,7 +1147,10 @@
         "created": "Kode aktivasi dibuat",
         "copyAll": "Salin kode yang belum digunakan",
         "deleteConfirm": "Hapus kode aktivasi ini?",
-        "zeroHint": "0 berarti tanpa kedaluwarsa atau tanpa reset berkala."
+        "zeroHint": "0 berarti tanpa kedaluwarsa atau tanpa reset berkala.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

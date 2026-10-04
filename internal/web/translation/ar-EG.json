@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "تجاوز الوجهة",
       "advancedTitle": "الإعدادات المتقدمة",
-      "intro": "المنافذ والبروتوكولات وطرق النقل المستمعة، مع المستخدمين الذين يخدمهم كل منها."
+      "intro": "المنافذ والبروتوكولات وطرق النقل المستمعة، مع المستخدمين الذين يخدمهم كل منها.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "أساسي",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "تجديد {email}",
       "renewManyTitle": "تجديد {count} مستخدم",
       "renewAddDays": "الأيام المضافة",
-      "renewHint": "تُضاف إلى الأبعد بين اليوم وتاريخ الانتهاء الحالي. المستخدم بلا تاريخ انتهاء يبقى بلا تاريخ."
+      "renewHint": "تُضاف إلى الأبعد بين اليوم وتاريخ الانتهاء الحالي. المستخدم بلا تاريخ انتهاء يبقى بلا تاريخ.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "الخوادم وقالب القواعد وحد IP التي تتشاركها مجموعة من المستخدمين. يحتفظ كل مستخدم بحصة بياناته وتاريخ انتهائه وإعادة ضبطه.",
@@ -1114,7 +1147,10 @@
         "created": "تم إنشاء رموز التفعيل",
         "copyAll": "نسخ الرموز غير المستخدمة",
         "deleteConfirm": "حذف رمز التفعيل هذا؟",
-        "zeroHint": "0 يعني بلا انتهاء أو بلا إعادة تعيين دورية."
+        "zeroHint": "0 يعني بلا انتهاء أو بلا إعادة تعيين دورية.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {

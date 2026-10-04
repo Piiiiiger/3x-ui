@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 
 	"github.com/gorilla/websocket"
@@ -38,6 +40,8 @@ type Agent struct {
 	version  string
 	interval time.Duration
 
+	snell    *snellManager
+	applied  savedConfig
 	core     *xrayCore
 	outbox   *outbox
 	activity *activity
@@ -80,6 +84,7 @@ func New(cfg Config, version string) (*Agent, error) {
 		version:  version,
 		interval: defaultInterval,
 		core:     newXrayCore(),
+		snell:    newSnellManager(cfg.StateDir),
 		outbox:   box,
 		activity: newActivity(onlineGrace),
 	}, nil
@@ -118,34 +123,60 @@ func (a *Agent) restoreConfig() {
 		logger.Warning("agent: the saved config is unreadable, waiting for the panel:", err)
 		return
 	}
-	a.statsMu.Lock()
-	defer a.statsMu.Unlock()
-	if _, err := a.core.apply(saved.Config, saved.Hash, false); err != nil {
-		logger.Warning("agent: the saved config does not start, waiting for the panel:", err)
-		return
+	if result := a.applyConfig(agentproto.Apply{Config: saved.Config, Hash: saved.Hash}); !result.OK {
+		logger.Warning("agent: saved config failed:", result.Error)
 	}
-	a.resetStatsLocked()
 }
 
 func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 	a.statsMu.Lock()
+	defer a.statsMu.Unlock()
+	coreRaw, instances, err := snell.Split(apply.Config)
+	if err != nil {
+		return agentproto.Result{Error: err.Error(), ConfigHash: a.applied.Hash}
+	}
+	if err := a.snell.validate(instances); err != nil {
+		return agentproto.Result{Error: err.Error(), ConfigHash: a.applied.Hash}
+	}
 	a.pollLocked(time.Now())
-	restarted, err := a.core.apply(apply.Config, apply.Hash, apply.RestartToDropUsers)
+	previous := a.applied
+	restarted, err := a.core.apply(coreRaw, apply.Hash, apply.RestartToDropUsers)
 	if restarted {
 		a.resetStatsLocked()
 	}
-	a.statsMu.Unlock()
 	if err != nil {
-		logger.Warning("agent: the panel's config does not start:", err)
-		return agentproto.Result{Error: err.Error(), ConfigHash: a.core.state().Hash, Restarted: restarted}
+		return agentproto.Result{Error: err.Error(), ConfigHash: previous.Hash, Restarted: restarted}
 	}
-	saved, err := json.Marshal(savedConfig{Hash: apply.Hash, Config: apply.Config})
+	rollback := func(cause error, restoreSnell bool) agentproto.Result {
+		oldCore, oldInstances, splitErr := snell.Split(previous.Config)
+		if len(previous.Config) > 0 && splitErr == nil {
+			if _, restoreErr := a.core.apply(oldCore, previous.Hash, false); restoreErr != nil {
+				cause = fmt.Errorf("%w; Xray rollback failed: %v", cause, restoreErr)
+			}
+			a.resetStatsLocked()
+		} else if len(previous.Config) == 0 {
+			a.closeStatsLocked()
+			a.core.stop()
+		}
+		if restoreSnell {
+			if restoreErr := a.snell.apply(oldInstances); restoreErr != nil {
+				cause = fmt.Errorf("%w; Snell rollback failed: %v", cause, restoreErr)
+			}
+		}
+		return agentproto.Result{Error: cause.Error(), ConfigHash: previous.Hash, Restarted: restarted}
+	}
+	if err := a.snell.apply(instances); err != nil {
+		return rollback(err, false)
+	}
+	saved := savedConfig{Hash: apply.Hash, Config: apply.Config}
+	encoded, err := json.Marshal(saved)
 	if err == nil {
-		err = writeFileAtomic(a.savedConfigPath(), saved, 0o600)
+		err = writeFileAtomic(a.savedConfigPath(), encoded, 0600)
 	}
 	if err != nil {
-		logger.Warning("agent: saving the applied config failed:", err)
+		return rollback(fmt.Errorf("cannot persist applied configuration"), true)
 	}
+	a.applied = saved
 	return agentproto.Result{OK: true, ConfigHash: apply.Hash, Restarted: restarted}
 }
 
@@ -157,6 +188,11 @@ func (a *Agent) restartCore() agentproto.Result {
 	a.resetStatsLocked()
 	if err != nil {
 		return agentproto.Result{Error: err.Error()}
+	}
+	for _, id := range snellIDs(a.snell.known) {
+		if err := a.snell.start(a.snell.known[id]); err != nil {
+			return agentproto.Result{Error: err.Error()}
+		}
 	}
 	return agentproto.Result{OK: true, ConfigHash: a.core.state().Hash, Restarted: true}
 }
@@ -250,7 +286,7 @@ func (a *Agent) statusLocked(now time.Time) agentproto.Status {
 	st := agentproto.Status{XrayVersion: xrayVersion()}
 	a.sampler.sample(&st)
 	cs := a.core.state()
-	st.ConfigHash = cs.Hash
+	st.ConfigHash = a.applied.Hash
 	st.XrayError = cs.Err
 	switch {
 	case cs.Running:
@@ -262,6 +298,7 @@ func (a *Agent) statusLocked(now time.Time) agentproto.Status {
 	}
 	st.Online, st.ActiveInbounds = a.activity.current(now)
 	st.IPs = a.ips
+	st.Snell = a.snell.statuses(now)
 	return st
 }
 
@@ -355,7 +392,13 @@ func (a *Agent) session(ctx context.Context) error {
 	a.setConn(conn)
 	defer a.setConn(nil)
 
-	hello := agentproto.Hello{AgentVersion: a.version, XrayVersion: xrayVersion(), ConfigHash: a.core.state().Hash}
+	a.statsMu.Lock()
+	hello := agentproto.Hello{AgentVersion: a.version, XrayVersion: xrayVersion(), ConfigHash: a.applied.Hash}
+	a.statsMu.Unlock()
+	hello.Capabilities = []string{agentproto.ProbeCapability}
+	if a.snell.ready {
+		hello.Capabilities = append(hello.Capabilities, snell.Capability)
+	}
 	if err := a.send(agentproto.Message{Type: agentproto.TypeHello, Hello: &hello}); err != nil {
 		return err
 	}
@@ -373,6 +416,9 @@ func (a *Agent) session(ctx context.Context) error {
 
 func (a *Agent) handle(msg agentproto.Message) {
 	switch msg.Type {
+	case agentproto.TypeProbe:
+		res := probeTCP(msg.Probe)
+		_ = a.send(agentproto.Message{Type: agentproto.TypeResult, ID: msg.ID, Result: &res})
 	case agentproto.TypeApply:
 		if msg.Apply == nil {
 			return

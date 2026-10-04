@@ -47,6 +47,7 @@ type RuleTemplateSummary struct {
 	// BaseId and Changes describe a variant: its base and what it changes there.
 	BaseId  int                  `json:"baseId" example:"0"`
 	Changes []RuleTemplateChange `json:"changes"`
+	Groups  []string             `json:"groups,omitempty"`
 }
 
 // RuleTemplateChange is a key of its base a variant replaces, adds entries to, or both.
@@ -104,7 +105,7 @@ func (s *RuleTemplateService) List() ([]RuleTemplateSummary, error) {
 		summary := RuleTemplateSummary{
 			Id: tpl.Id, Name: tpl.Name, IsDefault: tpl.IsDefault, Kind: ruleTemplateKind(tpl.Content),
 			Size: len(tpl.Content), PlanCount: plans, UpdatedAt: tpl.UpdatedAt,
-			BaseId: tpl.BaseId, Changes: []RuleTemplateChange{}, Users: usersOf[tpl.Id],
+			BaseId: tpl.BaseId, Changes: []RuleTemplateChange{}, Groups: templateGroupNames(db, tpl.Id), Users: usersOf[tpl.Id],
 		}
 		if tpl.BaseId != 0 {
 			if doc, err := templateMap(tpl.Content); err == nil {
@@ -535,6 +536,44 @@ func checkVariantsStillMerge(tx *gorm.DB, baseId int, content string) error {
 }
 
 // templateMap reads content as a YAML map; anything else is an error.
+func templateGroupNames(db *gorm.DB, templateId int) []string {
+	var tpl model.RuleTemplate
+	if err := db.First(&tpl, templateId).Error; err != nil {
+		return []string{}
+	}
+	doc, err := templateMap(tpl.Content)
+	if err != nil {
+		return []string{}
+	}
+	if tpl.BaseId != 0 {
+		_, baseDoc, err := loadBase(db, tpl.BaseId)
+		if err != nil {
+			return []string{}
+		}
+		doc = clashmerge.Apply(baseDoc, doc)
+	}
+	values, _ := doc["proxy-groups"].([]any)
+	names := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		group, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		name, _ := group["name"].(string)
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if _, duplicate := seen[name]; duplicate {
+			continue
+		}
+		seen[name] = struct{}{}
+		names = append(names, name)
+	}
+	return names
+}
+
 func templateMap(content string) (map[string]any, error) {
 	if _, remote, _ := common.ParseRemoteRoutingURL(content); remote {
 		return nil, errors.New("a URL, not a YAML document")

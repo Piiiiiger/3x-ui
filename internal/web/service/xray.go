@@ -14,6 +14,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
 	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
@@ -182,7 +183,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		if inbound.NodeID != nil {
 			continue
 		}
-		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC {
+		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC || inbound.Protocol == model.Snell {
 			continue
 		}
 		inboundConfig, err := s.buildInboundConfig(inbound)
@@ -239,6 +240,9 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		injectNodeEgresses(xrayConfig, nodes)
 	}
 
+	if err := injectChainTransit(xrayConfig); err != nil {
+		return nil, err
+	}
 	return xrayConfig, nil
 }
 
@@ -257,7 +261,7 @@ func (s *XrayService) GetAgentXrayConfig(nodeID int) (*xray.Config, error) {
 		if !inbound.Enable {
 			continue
 		}
-		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC {
+		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC || inbound.Protocol == model.Snell {
 			continue
 		}
 		inboundConfig, err := s.buildInboundConfig(inbound)
@@ -265,6 +269,12 @@ func (s *XrayService) GetAgentXrayConfig(nodeID int) (*xray.Config, error) {
 			return nil, err
 		}
 		xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *inboundConfig)
+	}
+	if err := injectChainTransit(xrayConfig); err != nil {
+		return nil, err
+	}
+	if err := inlineAgentPrivateGeoIP(xrayConfig); err != nil {
+		return nil, err
 	}
 	return xrayConfig, nil
 }
@@ -301,6 +311,11 @@ func (s *XrayService) templateXrayConfig() (*xray.Config, error) {
 // buildInboundConfig turns a stored inbound into the core's inbound entry, keeping
 // only the clients that may connect and healing legacy settings on the way.
 func (s *XrayService) buildInboundConfig(inbound *model.Inbound) (*xray.InboundConfig, error) {
+	copyInbound := *inbound
+	inbound = &copyInbound
+	if err := protectChainRelay(database.GetDB(), inbound); err != nil {
+		return nil, err
+	}
 	settings := map[string]any{}
 	_ = json.Unmarshal([]byte(inbound.Settings), &settings)
 	var wireguardClientsByEmail map[string]model.Client

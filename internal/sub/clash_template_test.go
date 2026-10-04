@@ -103,6 +103,63 @@ func TestTemplateGroupsSkipTheInfoNodeUnlessItIsAlone(t *testing.T) {
 	assertStrings(t, "alone", clashProxyNamesForGroups([]map[string]any{info}), []string{"⏳ Expired"})
 }
 
+func TestTemplateGroupsUsePlanNodeAssignments(t *testing.T) {
+	config := map[string]any{
+		"proxies": []map[string]any{
+			{"name": "香港", clashPlanInboundIDKey: 1},
+			{"name": "新加坡", clashPlanInboundIDKey: 2},
+		},
+		clashPlanGroupsKey: map[string]map[int]struct{}{
+			"节点选择": {2: {}},
+		},
+		"proxy-groups": []map[string]any{{
+			"name":    "节点选择",
+			"type":    "select",
+			"proxies": []any{clashProxyNodesPlaceholder},
+		}},
+	}
+	expandClashTemplateGroups(config)
+	groups, ok := config["proxy-groups"].([]map[string]any)
+	if !ok || len(groups) != 1 {
+		t.Fatalf("groups = %#v", config["proxy-groups"])
+	}
+	members, _ := groups[0]["proxies"].([]any)
+	got := make([]string, 0, len(members))
+	for _, member := range members {
+		got = append(got, member.(string))
+	}
+	assertStrings(t, "assigned group", got, []string{"新加坡"})
+}
+
+func TestPlanNodeAssignmentsOverrideIncludeAllGroups(t *testing.T) {
+	config := map[string]any{
+		"proxies": []map[string]any{
+			{"name": "香港", clashPlanInboundIDKey: 1},
+			{"name": "新加坡", clashPlanInboundIDKey: 2},
+		},
+		clashPlanGroupsKey: map[string]map[int]struct{}{
+			"海外自动": {},
+		},
+		"proxy-groups": []map[string]any{{
+			"name":                "海外自动",
+			"type":                "url-test",
+			"include-all-proxies": true,
+			"filter":              "新加坡",
+		}},
+	}
+	expandClashTemplateGroups(config)
+	group := config["proxy-groups"].([]map[string]any)[0]
+	if _, ok := group["include-all-proxies"]; ok {
+		t.Fatal("include-all-proxies should not bypass a plan assignment")
+	}
+	members, _ := group["proxies"].([]any)
+	got := make([]string, 0, len(members))
+	for _, member := range members {
+		got = append(got, member.(string))
+	}
+	assertStrings(t, "assigned include-all group", got, []string{})
+}
+
 func assertStrings(t *testing.T, what string, got, want []string) {
 	t.Helper()
 	if len(got) != len(want) {

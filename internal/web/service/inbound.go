@@ -178,6 +178,7 @@ func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	s.enrichClientStats(db, inbounds)
 	s.annotateFallbackParents(db, inbounds)
 	s.annotateLocalOriginGuid(inbounds)
+	s.annotateSnellStatus(inbounds)
 	return inbounds, nil
 }
 
@@ -220,6 +221,7 @@ func (s *InboundService) GetInboundsSlim(userId int) ([]*model.Inbound, error) {
 	}
 	s.annotateFallbackParents(db, inbounds)
 	s.annotateLocalOriginGuid(inbounds)
+	s.annotateSnellStatus(inbounds)
 	// Top up stats rows owned by sibling inbounds (multi-attached clients)
 	// so the list's depleted/expiring badges see every client; the UUID/SubId
 	// enrichment stays skipped. Must run before slimming strips the settings.
@@ -1090,6 +1092,9 @@ func (s *InboundService) normalizeMtprotoXrayPort(inbound *model.Inbound, oldSet
 // Returns the created inbound, whether Xray needs restart, and any error.
 func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, bool, error) {
 	inbound.Id = 0
+	if err := s.validateSnellInbound(inbound); err != nil {
+		return inbound, false, err
+	}
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
@@ -1210,6 +1215,10 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 			}
 			if client.AdTag != "" && !model.ValidMtprotoAdTag(client.AdTag) {
 				return inbound, false, common.NewError("mtproto client ad tag must be 32 hex characters")
+			}
+		case "snell":
+			if client.Email == "" {
+				return inbound, false, common.NewError("empty client email")
 			}
 		case "tuic":
 			if client.ID == "" {
@@ -1547,6 +1556,7 @@ func (s *InboundService) GetInboundDetail(id int) (*model.Inbound, error) {
 	}
 	s.enrichClientStats(db, []*model.Inbound{inbound})
 	s.overlayInboundsClientStats(db, []*model.Inbound{inbound})
+	s.annotateSnellStatus([]*model.Inbound{inbound})
 	return inbound, nil
 }
 
@@ -1602,6 +1612,11 @@ func (s *InboundService) SetInboundEnable(id int, enable bool) (bool, error) {
 	inbound, err := s.GetInbound(id)
 	if err != nil {
 		return false, err
+	}
+	if enable {
+		if err := s.validateSnellInbound(inbound); err != nil {
+			return false, err
+		}
 	}
 	if inbound.Enable == enable {
 		return false, nil
@@ -1750,6 +1765,9 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 	// Restore the stored NodeID before the port-conflict check so a node inbound
 	// stays scoped to its own node (the payload's nodeId is unreliable, often absent).
 	inbound.NodeID = oldInbound.NodeID
+	if err := s.validateSnellInbound(inbound); err != nil {
+		return inbound, false, err
+	}
 	// The node assignment is the stored one, so only a protocol change can
 	// introduce one; a row adopted from a node keeps the protocol it arrived with.
 	if inbound.NodeID != nil && inbound.Protocol != oldInbound.Protocol && !isNodeEligibleProtocol(inbound.Protocol) {
@@ -2047,6 +2065,9 @@ func (s *InboundService) buildInboundForNodePush(tx *gorm.DB, inbound *model.Inb
 	}
 
 	built := *inbound
+	if err := protectChainRelay(tx, &built); err != nil {
+		return nil, err
+	}
 	settings := map[string]any{}
 	if err := json.Unmarshal([]byte(inbound.Settings), &settings); err != nil {
 		return nil, err

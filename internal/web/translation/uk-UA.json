@@ -770,7 +770,26 @@
       },
       "sniffingDestOverride": "Перевизначення призначення",
       "advancedTitle": "Додаткові налаштування",
-      "intro": "Порти, протоколи й транспорти для вхідних підключень і користувачі кожного з них."
+      "intro": "Порти, протоколи й транспорти для вхідних підключень і користувачі кожного з них.",
+      "snell": {
+        "managed": "Independent Snell service managed by the agent",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "psk": "Shared key (PSK)",
+        "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
+        "regenerate": "Generate a new key (invalidates the old key after saving)",
+        "reuse": "Enable connection reuse in subscriptions",
+        "noStats": "Stats unavailable",
+        "states": {
+          "running": "Running",
+          "starting": "Starting",
+          "stopped": "Stopped",
+          "stopping": "Stopping",
+          "pending": "Pending",
+          "unknown": "Unknown",
+          "error": "Failed",
+          "expired": "Expired"
+        }
+      }
     },
     "clients": {
       "tabBasics": "Основні",
@@ -1056,7 +1075,21 @@
       "renewOneTitle": "Продовжити {email}",
       "renewManyTitle": "Продовжити користувачів: {count}",
       "renewAddDays": "Додати днів",
-      "renewHint": "Додаються до пізнішої з дат: сьогодні чи поточний термін. Користувач без терміну так і лишається без нього."
+      "renewHint": "Додаються до пізнішої з дат: сьогодні чи поточний термін. Користувач без терміну так і лишається без нього.",
+      "groups": {
+        "title": "User group",
+        "all": "All groups",
+        "ungrouped": "Ungrouped",
+        "manage": "Manage groups",
+        "assign": "Move to group",
+        "apply": "Apply",
+        "retry": "Load failed; retry",
+        "hint": "Groups organize users without changing plans, traffic or nodes. Deleting a group leaves its members ungrouped.",
+        "name": "Group name",
+        "rename": "Rename",
+        "create": "Create group",
+        "deleteConfirm": "Delete this group? Members will become ungrouped."
+      }
     },
     "plans": {
       "intro": "Сервери, шаблон правил і ліміт IP, спільні для групи користувачів. Квота трафіку, термін і скидання в кожного користувача свої.",
@@ -1114,7 +1147,10 @@
         "created": "Коди активації створено",
         "copyAll": "Копіювати невикористані коди",
         "deleteConfirm": "Видалити цей код активації?",
-        "zeroHint": "0 означає безстроково або без періодичного скидання."
+        "zeroHint": "0 означає безстроково або без періодичного скидання.",
+        "remainingDays": "{days} days remaining",
+        "expiresAt": "Expires:",
+        "expired": "Expired"
       }
     },
     "nodes": {
