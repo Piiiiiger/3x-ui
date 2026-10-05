@@ -132,7 +132,6 @@
       "taken": "该用户名已被使用。",
       "passwordLength": "密码长度为 6 至 72 字节。",
       "redeem": "使用激活码",
-      "activated": "套餐已激活。",
       "adminSignIn": "管理员登录",
       "twoFactorCode": "验证器验证码",
       "adminRequires2FA": "管理员登录需要开启两步验证。",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ 操作成功!",
       "restartFailed": "❗ 操作错误。\r\n\r\n<code>错误: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core 未运行。",
-      "startDesc": "显示主菜单",
-      "helpDesc": "机器人帮助",
-      "statusDesc": "检查机器人状态",
-      "idDesc": "显示您的 Telegram ID",
-      "usageDesc": "查看用户用量：/usage 邮箱",
-      "inboundDesc": "搜索入站：/inbound 备注（管理员）",
-      "restartDesc": "重启 Xray 内核（管理员）",
-      "broadcastDesc": "向所有用户群发消息（管理员）",
-      "clearallDesc": "重置所有用户流量（管理员）"
+      "xrayNotRunning": "❗ Xray Core 未运行。"
     },
     "messages": {
       "cpuThreshold": "CPU 使用率为 {{ .Percent }}%，超过阈值 {{ .Threshold }}%",

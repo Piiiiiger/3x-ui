@@ -132,7 +132,6 @@
       "taken": "Bu kullanıcı adı zaten kullanılıyor.",
       "passwordLength": "Parola 6 ile 72 bayt arasında olmalıdır.",
       "redeem": "Etkinleştirme kodu kullan",
-      "activated": "Paket etkinleştirildi.",
       "adminSignIn": "Yönetici girişi",
       "twoFactorCode": "Kimlik doğrulayıcı kodu",
       "adminRequires2FA": "Yönetici girişi iki faktörlü kimlik doğrulama gerektirir.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "<code>/restart</code>",
       "restartSuccess": "✅ İşlem başarılı!",
       "restartFailed": "❗ İşlem hatası.\r\n\r\n<code>Hata: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core çalışmıyor.",
-      "startDesc": "Ana menüyü göster",
-      "helpDesc": "Bot yardımı",
-      "statusDesc": "Bot durumunu kontrol et",
-      "idDesc": "Telegram Kimliğinizi gösterir",
-      "usageDesc": "Kullanıcı kullanımını göster: /usage e-posta",
-      "inboundDesc": "Gelenleri ara: /inbound ad (yönetici)",
-      "restartDesc": "Xray çekirdeğini yeniden başlat (yönetici)",
-      "broadcastDesc": "Tüm kullanıcılara mesaj gönder (yönetici)",
-      "clearallDesc": "Tüm kullanıcıların trafiğini sıfırla (yönetici)"
+      "xrayNotRunning": "❗ Xray Core çalışmıyor."
     },
     "messages": {
       "cpuThreshold": "CPU Yükü ({{ .Percent }}%), {{ .Threshold }}% eşiğini aşıyor",

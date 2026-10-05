@@ -10,11 +10,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 	"github.com/xtls/xray-core/common/geodata"
 	"google.golang.org/protobuf/encoding/protowire"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 var agentPrivateGeoIPCache struct {

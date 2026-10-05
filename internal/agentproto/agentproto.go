@@ -4,6 +4,7 @@ package agentproto
 
 import (
 	"encoding/json"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 

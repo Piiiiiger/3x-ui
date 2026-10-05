@@ -1,9 +1,10 @@
 package agent
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"net"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 )
 
 func TestProbeTCP(t *testing.T) {

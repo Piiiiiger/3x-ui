@@ -2,11 +2,12 @@ package agent
 
 import (
 	"context"
-	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 )
 
 func probeTCP(p *agentproto.Probe) agentproto.Result {

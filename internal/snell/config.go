@@ -9,8 +9,10 @@ import (
 	"strconv"
 )
 
-const ConfigKey = "_piggerSnell"
-const Capability = "snell-v5-systemd"
+const (
+	ConfigKey  = "_piggerSnell"
+	Capability = "snell-v5-systemd"
+)
 
 // Settings holds one shared server credential. Assignments control subscription
 // visibility; the Snell server does not authenticate individual panel users.
@@ -32,6 +34,7 @@ func (s Settings) Validate() error {
 	}
 	return nil
 }
+
 func ParseSettings(raw string) (Settings, error) {
 	s := Settings{Version: 5, Reuse: true}
 	if err := json.Unmarshal([]byte(raw), &s); err != nil {
@@ -64,6 +67,7 @@ func (i Instance) Validate() error {
 	}
 	return i.Settings.Validate()
 }
+
 func (i Instance) ServerConfig() string {
 	host := i.Listen
 	if host == "" {

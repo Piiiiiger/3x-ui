@@ -2,8 +2,9 @@ package sub
 
 import (
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"maps"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 // Each dialer has a separate relay credential. It stays in proxies solely as a

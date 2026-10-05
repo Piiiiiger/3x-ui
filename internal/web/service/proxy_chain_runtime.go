@@ -2,9 +2,11 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 // Enforce at render time, including subsequent inbound edits and restored rows.

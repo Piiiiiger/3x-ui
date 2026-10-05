@@ -132,7 +132,6 @@
       "taken": "このユーザー名はすでに使用されています。",
       "passwordLength": "パスワードは6〜72バイトで入力してください。",
       "redeem": "有効化コードを使用",
-      "activated": "プランを有効化しました。",
       "adminSignIn": "管理者ログイン",
       "twoFactorCode": "認証アプリのコード",
       "adminRequires2FA": "管理者ログインには二要素認証が必要です。",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ 操作成功！",
       "restartFailed": "❗ 操作エラー。\r\n\r\n<code>エラー: {{ .Error }}</code>",
-      "xrayNotRunning": "❗ Xray Core は動作していません。",
-      "startDesc": "メインメニューを表示",
-      "helpDesc": "ボットのヘルプ",
-      "statusDesc": "ボットの状態を確認",
-      "idDesc": "Telegram IDを表示",
-      "usageDesc": "ユーザー使用量を表示: /usage メール",
-      "inboundDesc": "インバウンド検索: /inbound 備考（管理者）",
-      "restartDesc": "Xray コアを再起動（管理者）",
-      "broadcastDesc": "全ユーザーへ一括送信（管理者）",
-      "clearallDesc": "全ユーザーのトラフィックをリセット（管理者）"
+      "xrayNotRunning": "❗ Xray Core は動作していません。"
     },
     "messages": {
       "cpuThreshold": "CPU使用率は{{ .Percent }}%、しきい値{{ .Threshold }}%を超えました",

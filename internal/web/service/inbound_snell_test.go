@@ -2,12 +2,13 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 
 const snellTestSettings = `{"psk":"0123456789abcdef0123456789abcdef","version":5,"reuse":true,"clients":[]}`
@@ -56,6 +57,7 @@ func TestSnellAgentIsolationHashAndDisable(t *testing.T) {
 		t.Fatal("disabled Snell still served")
 	}
 }
+
 func TestSnellValidationAndPlanAssignment(t *testing.T) {
 	a, _, _ := setupPlanDB(t)
 	n := seedAgentNodeRow(t, "snell-plan")

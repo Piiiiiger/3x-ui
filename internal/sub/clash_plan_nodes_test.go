@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	yaml "github.com/goccy/go-yaml"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )

@@ -191,7 +191,7 @@ func portalNodeMaps(raw string) ([]map[string]any, error) {
 	if err := yaml.Unmarshal([]byte(raw), &document); err != nil {
 		return nil, fmt.Errorf("invalid Clash YAML: %w", err)
 	}
-	var value any = document
+	value := document
 	if object, ok := document.(map[string]any); ok {
 		var found bool
 		value, found = object["proxies"]

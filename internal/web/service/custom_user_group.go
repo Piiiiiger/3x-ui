@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"strings"
 	"unicode/utf8"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 type CustomUserGroupSummary struct {
@@ -31,6 +33,7 @@ func ListCustomUserGroups() ([]CustomUserGroupSummary, error) {
 	}
 	return result, nil
 }
+
 func SaveCustomUserGroup(id int, name string) error {
 	name = strings.TrimSpace(name)
 	if id < 0 || name == "" || utf8.RuneCountInString(name) > 64 {
@@ -54,6 +57,7 @@ func SaveCustomUserGroup(id int, name string) error {
 	}
 	return nil
 }
+
 func DeleteCustomUserGroup(id int) error {
 	if id <= 0 {
 		return errors.New("invalid group")
@@ -65,6 +69,7 @@ func DeleteCustomUserGroup(id int) error {
 		return tx.Delete(&model.CustomUserGroup{}, id).Error
 	})
 }
+
 func AssignCustomUserGroup(id int, emails []string) error {
 	if id < 0 || len(emails) == 0 || len(emails) > 10000 {
 		return errors.New("invalid group assignment")

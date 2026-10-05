@@ -132,7 +132,6 @@
       "taken": "Este nombre de usuario ya está en uso.",
       "passwordLength": "La contraseña debe tener entre 6 y 72 bytes.",
       "redeem": "Usar código de activación",
-      "activated": "Plan activado.",
       "adminSignIn": "Acceso de administrador",
       "twoFactorCode": "Código del autenticador",
       "adminRequires2FA": "El acceso de administrador requiere autenticación de dos factores.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ ¡Operación exitosa!",
       "restartFailed": "❗ Error en la operación.\r\n\r\n<code>Error: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core no está en ejecución.",
-      "startDesc": "Mostrar el menú principal",
-      "helpDesc": "Ayuda del bot",
-      "statusDesc": "Comprobar el estado del bot",
-      "idDesc": "Mostrar tu ID de Telegram",
-      "usageDesc": "Ver el uso del usuario: /usage correo",
-      "inboundDesc": "Buscar entradas: /inbound nombre (admin)",
-      "restartDesc": "Reiniciar el núcleo de Xray (admin)",
-      "broadcastDesc": "Enviar un mensaje a todos los usuarios (admin)",
-      "clearallDesc": "Restablecer el tráfico de todos los usuarios (admin)"
+      "xrayNotRunning": "❗ Xray Core no está en ejecución."
     },
     "messages": {
       "cpuThreshold": "El uso de CPU {{ .Percent }}% es mayor que el umbral {{ .Threshold }}%",

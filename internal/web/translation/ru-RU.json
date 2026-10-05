@@ -132,7 +132,6 @@
       "taken": "Это имя пользователя уже занято.",
       "passwordLength": "Пароль должен содержать от 6 до 72 байт.",
       "redeem": "Использовать код активации",
-      "activated": "Тариф активирован.",
       "adminSignIn": "Вход администратора",
       "twoFactorCode": "Код приложения аутентификации",
       "adminRequires2FA": "Для входа администратора нужна двухфакторная аутентификация.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ Ядро Xray успешно перезапущено.",
       "restartFailed": "❗ Ошибка при перезапуске Xray-core.\r\n\r\n<code>Ошибка: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core не запущен.",
-      "startDesc": "Показать главное меню",
-      "helpDesc": "Справка по боту",
-      "statusDesc": "Проверить статус бота",
-      "idDesc": "Показать ваш Telegram ID",
-      "usageDesc": "Показать трафик пользователя: /usage email",
-      "inboundDesc": "Поиск входящих: /inbound имя (админ)",
-      "restartDesc": "Перезапустить ядро Xray (админ)",
-      "broadcastDesc": "Массовая рассылка всем пользователям (админ)",
-      "clearallDesc": "Сбросить трафик всех пользователей (админ)"
+      "xrayNotRunning": "❗ Xray Core не запущен."
     },
     "messages": {
       "cpuThreshold": "Загрузка процессора составляет {{ .Percent }}%, что превышает пороговое значение {{ .Threshold }}%",

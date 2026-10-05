@@ -6,8 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"gorm.io/gorm"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 func migrateProxyChainRoutes() error {

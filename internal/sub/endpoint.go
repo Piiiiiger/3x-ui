@@ -1,8 +1,9 @@
 package sub
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"strings"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )

@@ -3,11 +3,12 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net"
+	"time"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"net"
-	"time"
 )
 
 func (s *InboundService) validateSnellInbound(ib *model.Inbound) error {
@@ -43,6 +44,7 @@ func (s *InboundService) validateSnellInbound(ib *model.Inbound) error {
 	ib.Sniffing = `{"enabled":false}`
 	return nil
 }
+
 func (s *AgentService) withSnellConfig(nodeID int, raw []byte) ([]byte, error) {
 	rows, err := s.inboundService.GetNodeInbounds(nodeID)
 	if err != nil {
@@ -73,6 +75,7 @@ func (s *AgentService) withSnellConfig(nodeID int, raw []byte) ([]byte, error) {
 	top[snell.ConfigKey] = instances
 	return json.Marshal(top)
 }
+
 func (s *InboundService) annotateSnellStatus(inbounds []*model.Inbound) {
 	hub := runtime.GetAgentHub()
 	for _, ib := range inbounds {

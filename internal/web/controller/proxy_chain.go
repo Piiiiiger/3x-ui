@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/sub"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"net/http"
 	"slices"
 	"strconv"
@@ -17,10 +13,16 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
+	"github.com/mhsanaei/3x-ui/v3/internal/sub"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 )
 
 // ProxyChainController manages the admin-facing target -> relay relations used
@@ -227,6 +229,7 @@ func checkChainRoute(ctx context.Context, target, relay *model.Inbound) error {
 	}
 	return nil
 }
+
 func (a *ProxyChainController) check(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {

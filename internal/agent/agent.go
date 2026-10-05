@@ -151,7 +151,7 @@ func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 		oldCore, oldInstances, splitErr := snell.Split(previous.Config)
 		if len(previous.Config) > 0 && splitErr == nil {
 			if _, restoreErr := a.core.apply(oldCore, previous.Hash, false); restoreErr != nil {
-				cause = fmt.Errorf("%w; Xray rollback failed: %v", cause, restoreErr)
+				cause = fmt.Errorf("%w; Xray rollback failed: %w", cause, restoreErr)
 			}
 			a.resetStatsLocked()
 		} else if len(previous.Config) == 0 {
@@ -160,7 +160,7 @@ func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 		}
 		if restoreSnell {
 			if restoreErr := a.snell.apply(oldInstances); restoreErr != nil {
-				cause = fmt.Errorf("%w; Snell rollback failed: %v", cause, restoreErr)
+				cause = fmt.Errorf("%w; Snell rollback failed: %w", cause, restoreErr)
 			}
 		}
 		return agentproto.Result{Error: cause.Error(), ConfigHash: previous.Hash, Restarted: restarted}
@@ -171,7 +171,7 @@ func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 	saved := savedConfig{Hash: apply.Hash, Config: apply.Config}
 	encoded, err := json.Marshal(saved)
 	if err == nil {
-		err = writeFileAtomic(a.savedConfigPath(), encoded, 0600)
+		err = writeFileAtomic(a.savedConfigPath(), encoded, 0o600)
 	}
 	if err != nil {
 		return rollback(fmt.Errorf("cannot persist applied configuration"), true)

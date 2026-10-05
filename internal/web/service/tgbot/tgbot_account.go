@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mymmrac/telego"
+	tu "github.com/mymmrac/telego/telegoutil"
+	"gorm.io/gorm/clause"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mymmrac/telego"
-	tu "github.com/mymmrac/telego/telegoutil"
-	"gorm.io/gorm/clause"
 )
 
 var accountLocation = time.FixedZone("Asia/Shanghai", 8*60*60)
@@ -119,6 +120,7 @@ func validDailyTime(value string) bool {
 	parsed, err := time.Parse("15:04", value)
 	return err == nil && parsed.Format("15:04") == value
 }
+
 func accountPreferences(p *model.AccountActivation) string {
 	state := "已关闭"
 	if p.DailyEnabled {

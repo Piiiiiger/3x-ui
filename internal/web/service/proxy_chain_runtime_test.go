@@ -2,9 +2,10 @@ package service
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"testing"
 )
 
 func TestChainRelaySniffingSurvivesEditsAndBothRuntimePaths(t *testing.T) {

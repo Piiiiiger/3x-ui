@@ -9,6 +9,7 @@ import (
 func testInstance() Instance {
 	return Instance{ID: 7, Tag: "n3-in-26163-tcpudp", Listen: "::", Port: 26163, Settings: Settings{PSK: "0123456789abcdef0123456789abcdef", Version: 5, Reuse: true}}
 }
+
 func TestSplitKeepsXrayAndRemovesSecrets(t *testing.T) {
 	i := testInstance()
 	raw, _ := json.Marshal(map[string]any{"inbounds": []any{}, ConfigKey: []Instance{i}})
@@ -27,6 +28,7 @@ func TestSplitKeepsXrayAndRemovesSecrets(t *testing.T) {
 		t.Fatal("removal must produce empty desired set")
 	}
 }
+
 func TestRejectUnsafeSnellConfigs(t *testing.T) {
 	for _, change := range []func(*Instance){func(i *Instance) { i.Settings.PSK = "secret\nlisten = 0.0.0.0:22" }, func(i *Instance) { i.Settings.PSK = "short" }, func(i *Instance) { i.Settings.Version = 4 }, func(i *Instance) { i.Listen = "/tmp/socket" }, func(i *Instance) { i.Port = 65536 }, func(i *Instance) { i.ID = -1 }} {
 		i := testInstance()

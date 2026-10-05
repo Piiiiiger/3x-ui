@@ -1,9 +1,10 @@
 package sub
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"strings"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 func TestSnellClashUsesSharedKeyAndPublicEndpoint(t *testing.T) {

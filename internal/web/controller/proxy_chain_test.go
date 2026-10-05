@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
@@ -184,5 +185,4 @@ func TestProxyChainRefusesUnverifiedRemoteRouteButAllowsDisabledDraft(t *testing
 	if draft.Enabled {
 		t.Fatal("disabled draft was silently enabled by the database default")
 	}
-
 }

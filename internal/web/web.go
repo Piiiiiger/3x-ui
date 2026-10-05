@@ -57,53 +57,11 @@ var i18nFS embed.FS
 //go:embed all:dist
 var distFS embed.FS
 
-var startTime = time.Now()
-
 // cronPanicLogger adapts the package logger to cron's Printf-style logger so a
 // panicking scheduled job is recovered and logged instead of crashing the panel.
 type cronPanicLogger struct{}
 
 func (cronPanicLogger) Printf(format string, args ...any) { logger.Errorf(format, args...) }
-
-// wrapDistFS adapts the embedded `dist/` directory so it can be mounted
-// as the panel's `/assets/` static route. Vite emits its bundled JS/CSS
-// under `dist/assets/`; serving the FS rooted at `dist/assets` makes
-// `/assets/<hash>.js` URLs resolve directly.
-type wrapDistFS struct {
-	embed.FS
-}
-
-func (f *wrapDistFS) Open(name string) (fs.File, error) {
-	file, err := f.FS.Open("dist/assets/" + name)
-	if err != nil {
-		return nil, err
-	}
-	return &wrapAssetsFile{
-		File: file,
-	}, nil
-}
-
-type wrapAssetsFile struct {
-	fs.File
-}
-
-func (f *wrapAssetsFile) Stat() (fs.FileInfo, error) {
-	info, err := f.File.Stat()
-	if err != nil {
-		return nil, err
-	}
-	return &wrapAssetsFileInfo{
-		FileInfo: info,
-	}, nil
-}
-
-type wrapAssetsFileInfo struct {
-	fs.FileInfo
-}
-
-func (f *wrapAssetsFileInfo) ModTime() time.Time {
-	return startTime
-}
 
 // EmbeddedDist returns the embedded Vite-built frontend filesystem.
 // Controllers serve their HTML out of this FS via the dist-page handler

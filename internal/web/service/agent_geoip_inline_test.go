@@ -10,9 +10,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 	"github.com/xtls/xray-core/common/geodata"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 func TestGetAgentXrayConfig_InlinesPrivateNetworkPolicy(t *testing.T) {
@@ -29,7 +30,7 @@ func TestGetAgentXrayConfig_InlinesPrivateNetworkPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(bin, "geoip.dat"), data, 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(bin, "geoip.dat"), data, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	node := seedAgentNodeRow(t, "without-geodata")
@@ -96,7 +97,7 @@ func TestAgentPrivateGeoIPCacheRefreshesAndSupportsConcurrentNodes(t *testing.T)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(bin, "next.dat"), data, 0600); err != nil {
+		if err := os.WriteFile(filepath.Join(bin, "next.dat"), data, 0o600); err != nil {
 			t.Fatal(err)
 		}
 		if err := os.Rename(filepath.Join(bin, "next.dat"), filepath.Join(bin, "geoip.dat")); err != nil {
@@ -182,7 +183,7 @@ func TestInlineAgentPrivateGeoIP_UnavailableDataKeepsPolicy(t *testing.T) {
 	if string(before) != string(after) {
 		t.Fatal("missing panel geodata changed the policy")
 	}
-	if err := os.WriteFile(filepath.Join(bin, "geoip.dat"), []byte("invalid protobuf"), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(bin, "geoip.dat"), []byte("invalid protobuf"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := inlineAgentPrivateGeoIP(cfg); err == nil {

@@ -1,10 +1,11 @@
 package service
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"strconv"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 func TestCustomGroupsLifecycleAndPaging(t *testing.T) {

@@ -132,7 +132,6 @@
       "taken": "該使用者名稱已被使用。",
       "passwordLength": "密碼長度須為6至72位元組。",
       "redeem": "使用啟用碼",
-      "activated": "方案已啟用。",
       "adminSignIn": "管理員登入",
       "twoFactorCode": "驗證器驗證碼",
       "adminRequires2FA": "管理員登入需要啟用雙重驗證。",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ 操作成功!",
       "restartFailed": "❗ 操作錯誤。\r\n\r\n<code>錯誤: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core 未運行。",
-      "startDesc": "顯示主選單",
-      "helpDesc": "機器人幫助",
-      "statusDesc": "檢查機器人狀態",
-      "idDesc": "顯示您的 Telegram ID",
-      "usageDesc": "查看使用者用量：/usage 郵箱",
-      "inboundDesc": "搜尋入站：/inbound 備註（管理員）",
-      "restartDesc": "重啟 Xray 核心（管理員）",
-      "broadcastDesc": "向所有使用者群發訊息（管理員）",
-      "clearallDesc": "重置所有使用者流量（管理員）"
+      "xrayNotRunning": "❗ Xray Core 未運行。"
     },
     "messages": {
       "cpuThreshold": "CPU 使用率為 {{ .Percent }}%，超過閾值 {{ .Threshold }}%",

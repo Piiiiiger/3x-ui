@@ -132,7 +132,6 @@
       "taken": "این نام کاربری قبلاً استفاده شده است.",
       "passwordLength": "رمز عبور باید بین 6 تا 72 بایت باشد.",
       "redeem": "استفاده از کد فعال‌سازی",
-      "activated": "طرح فعال شد.",
       "adminSignIn": "ورود مدیر",
       "twoFactorCode": "کد برنامه احراز هویت",
       "adminRequires2FA": "ورود مدیر به احراز هویت دومرحله‌ای نیاز دارد.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ عملیات با موفقیت انجام شد!",
       "restartFailed": "❗ خطا در عملیات.\r\n\r\n<code>خطا: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core در حال اجرا نیست.",
-      "startDesc": "نمایش منوی اصلی",
-      "helpDesc": "راهنمای ربات",
-      "statusDesc": "بررسی وضعیت ربات",
-      "idDesc": "نمایش شناسه تلگرام شما",
-      "usageDesc": "مشاهده مصرف کاربر: /usage ایمیل",
-      "inboundDesc": "جستجوی ورودی‌ها: /inbound نام (مدیر)",
-      "restartDesc": "راه‌اندازی مجدد هسته Xray (مدیر)",
-      "broadcastDesc": "ارسال پیام به همه کاربران (مدیر)",
-      "clearallDesc": "صفر کردن ترافیک همه کاربران (مدیر)"
+      "xrayNotRunning": "❗ Xray Core در حال اجرا نیست."
     },
     "messages": {
       "cpuThreshold": "بار ‌پردازنده {{ .Percent }}% بیشتر از آستانه است {{ .Threshold }}%",

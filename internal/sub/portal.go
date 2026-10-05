@@ -270,10 +270,6 @@ func (a *SUBController) portalRegister(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
-type portalRedeemForm struct {
-	Code string `json:"code"`
-}
-
 // portalRedeem is retained for old browsers, but account credentials are no
 // longer consumable renewal vouchers. Administration owns renewals.
 func (a *SUBController) portalRedeem(c *gin.Context) {

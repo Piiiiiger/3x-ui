@@ -132,7 +132,6 @@
       "taken": "اسم المستخدم مستخدم بالفعل.",
       "passwordLength": "يجب أن تكون كلمة المرور من 6 إلى 72 بايتًا.",
       "redeem": "استخدام رمز تفعيل",
-      "activated": "تم تفعيل الباقة.",
       "adminSignIn": "تسجيل دخول المسؤول",
       "twoFactorCode": "رمز تطبيق المصادقة",
       "adminRequires2FA": "يتطلب دخول المسؤول تفعيل المصادقة الثنائية.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ العملية نجحت!",
       "restartFailed": "❗ حصل خطأ في العملية.\r\n\r\n<code>Error: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core مش شغال.",
-      "startDesc": "عرض القائمة الرئيسية",
-      "helpDesc": "مساعدة البوت",
-      "statusDesc": "التحقق من حالة البوت",
-      "idDesc": "عرض معرف Telegram الخاص بك",
-      "usageDesc": "عرض استهلاك المستخدم: /usage البريد",
-      "inboundDesc": "البحث في الواردات: /inbound الاسم (مشرف)",
-      "restartDesc": "إعادة تشغيل نواة Xray (مشرف)",
-      "broadcastDesc": "إرسال رسالة لجميع المستخدمين (مسؤول)",
-      "clearallDesc": "تصفير استهلاك جميع المستخدمين (مشرف)"
+      "xrayNotRunning": "❗ Xray Core مش شغال."
     },
     "messages": {
       "cpuThreshold": "حمل المعالج {{ .Percent }}% عدى الحد المسموح ({{ .Threshold }}%)",

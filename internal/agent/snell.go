@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 
 const snellBinary = "/usr/local/libexec/pigger-agent/snell-server"
@@ -39,6 +40,7 @@ func systemctl(args ...string) (string, error) {
 	}
 	return strings.TrimSpace(string(out)), nil
 }
+
 func newSnellManager(stateDir string) *snellManager {
 	m := &snellManager{dir: filepath.Join(stateDir, "snell"), units: "/etc/systemd/system", binary: snellBinary, run: systemctl, known: map[int]snell.Instance{}}
 	data, err := os.ReadFile(filepath.Join(m.dir, "manifest.json"))
@@ -58,7 +60,7 @@ func newSnellManager(stateDir string) *snellManager {
 			}
 		}
 	}
-	if st, err := os.Stat(m.binary); err == nil && st.Mode().IsRegular() && st.Mode().Perm()&0111 != 0 {
+	if st, err := os.Stat(m.binary); err == nil && st.Mode().IsRegular() && st.Mode().Perm()&0o111 != 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		out, err := exec.CommandContext(ctx, m.binary, "--version").CombinedOutput()
@@ -106,6 +108,7 @@ LimitNOFILE=16384
 WantedBy=multi-user.target
 `, i.ID, m.configPath(i.ID), m.binary))
 }
+
 func (m *snellManager) validate(want []snell.Instance) error {
 	if m.initErr != nil {
 		return fmt.Errorf("cannot load managed Snell state: %w", m.initErr)
@@ -127,6 +130,7 @@ func (m *snellManager) validate(want []snell.Instance) error {
 	}
 	return nil
 }
+
 func snellIDs(m map[int]snell.Instance) []int {
 	ids := make([]int, 0, len(m))
 	for id := range m {
@@ -135,6 +139,7 @@ func snellIDs(m map[int]snell.Instance) []int {
 	sort.Ints(ids)
 	return ids
 }
+
 func (m *snellManager) start(i snell.Instance) error {
 	if i.ExpiryTime > 0 && i.ExpiryTime <= time.Now().UnixMilli() {
 		_, err := m.run("disable", "--now", snellUnit(i.ID))
@@ -157,11 +162,12 @@ func (m *snellManager) start(i snell.Instance) error {
 	}
 	return nil
 }
+
 func (m *snellManager) write(i snell.Instance) error {
-	if err := writeFileAtomic(m.configPath(i.ID), []byte(i.ServerConfig()), 0600); err != nil {
+	if err := writeFileAtomic(m.configPath(i.ID), []byte(i.ServerConfig()), 0o600); err != nil {
 		return err
 	}
-	return writeFileAtomic(m.unitPath(i.ID), m.unit(i), 0644)
+	return writeFileAtomic(m.unitPath(i.ID), m.unit(i), 0o644)
 }
 
 // apply reconciles a complete desired set. If any changed process fails, restore
@@ -177,7 +183,7 @@ func (m *snellManager) apply(want []snell.Instance) error {
 	if reflect.DeepEqual(next, m.known) && (m.reconciled || len(next) == 0) {
 		return nil
 	}
-	if err := os.MkdirAll(m.dir, 0700); err != nil {
+	if err := os.MkdirAll(m.dir, 0o700); err != nil {
 		return err
 	}
 	touched := map[int]bool{}
@@ -247,7 +253,7 @@ func (m *snellManager) apply(want []snell.Instance) error {
 	if err != nil {
 		return rollback(err)
 	}
-	if err := writeFileAtomic(filepath.Join(m.dir, "manifest.json"), data, 0600); err != nil {
+	if err := writeFileAtomic(filepath.Join(m.dir, "manifest.json"), data, 0o600); err != nil {
 		return rollback(err)
 	}
 	for id := range m.known {
@@ -260,6 +266,7 @@ func (m *snellManager) apply(want []snell.Instance) error {
 	m.reconciled = true
 	return nil
 }
+
 func (m *snellManager) statuses(now time.Time) map[string]snell.Status {
 	out := map[string]snell.Status{}
 	for _, id := range snellIDs(m.known) {

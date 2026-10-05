@@ -132,7 +132,6 @@
       "taken": "Nama pengguna ini sudah digunakan.",
       "passwordLength": "Kata sandi harus berukuran 6 hingga 72 byte.",
       "redeem": "Gunakan kode aktivasi",
-      "activated": "Paket diaktifkan.",
       "adminSignIn": "Masuk sebagai administrator",
       "twoFactorCode": "Kode autentikator",
       "adminRequires2FA": "Akses administrator memerlukan autentikasi dua faktor.",
@@ -2329,16 +2328,7 @@
       "restartUsage": "\r\n\r\n<code>/restart</code>",
       "restartSuccess": "✅ Operasi berhasil!",
       "restartFailed": "❗ Kesalahan dalam operasi.\r\n\r\n<code>Error: {{ .Error }}</code>.",
-      "xrayNotRunning": "❗ Xray Core tidak berjalan.",
-      "startDesc": "Tampilkan menu utama",
-      "helpDesc": "Bantuan bot",
-      "statusDesc": "Periksa status bot",
-      "idDesc": "Tampilkan ID Telegram Anda",
-      "usageDesc": "Lihat pemakaian pengguna: /usage email",
-      "inboundDesc": "Cari inbound: /inbound nama (admin)",
-      "restartDesc": "Mulai ulang inti Xray (admin)",
-      "broadcastDesc": "Kirim pesan ke semua pengguna (admin)",
-      "clearallDesc": "Reset trafik semua pengguna (admin)"
+      "xrayNotRunning": "❗ Xray Core tidak berjalan."
     },
     "messages": {
       "cpuThreshold": "Beban CPU {{ .Percent }}% melebihi batas {{ .Threshold }}%",

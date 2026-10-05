@@ -2,12 +2,13 @@ package agent
 
 import (
 	"errors"
-	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 
 func TestSnellReconcileRollbackRemovalAndExpiry(t *testing.T) {
@@ -34,12 +35,12 @@ func TestSnellReconcileRollbackRemovalAndExpiry(t *testing.T) {
 	}
 	i := snell.Instance{ID: 11, Tag: "snell-11", Port: 26163, Settings: snell.Settings{PSK: "0123456789abcdef0123456789abcdef", Version: 5}}
 	unrelated := filepath.Join(dir, "snell-neburst.service")
-	os.WriteFile(unrelated, []byte("original"), 0600)
+	os.WriteFile(unrelated, []byte("original"), 0o600)
 	if err := m.apply([]snell.Instance{i}); err != nil {
 		t.Fatal(err)
 	}
 	st, _ := os.Stat(m.configPath(i.ID))
-	if st.Mode().Perm() != 0600 {
+	if st.Mode().Perm() != 0o600 {
 		t.Fatal("config exposed")
 	}
 	unit, _ := os.ReadFile(m.unitPath(i.ID))
@@ -82,6 +83,7 @@ func TestSnellReconcileRollbackRemovalAndExpiry(t *testing.T) {
 		t.Fatal("unmanaged service modified")
 	}
 }
+
 func TestSnellMissingBinaryRejectedBeforeMutation(t *testing.T) {
 	calls := 0
 	m := &snellManager{known: map[int]snell.Instance{}, run: func(...string) (string, error) { calls++; return "", nil }}
