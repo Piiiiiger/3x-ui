@@ -1271,49 +1271,19 @@ func (s *ClientService) SetClientTelegramUserID(inboundSvc *InboundService, traf
 	if inbound == nil {
 		return false, common.NewError("Inbound Not Found For Traffic ID:", trafficId)
 	}
-
-	clientEmail := traffic.Email
-
-	oldClients, err := inboundSvc.GetClients(inbound)
+	rec, err := s.GetRecordByEmail(nil, traffic.Email)
 	if err != nil {
-		return false, err
+		return false, common.NewError("Client Not Found For Email:", traffic.Email)
 	}
+	return s.setTelegramID(inboundSvc, rec, tgId)
+}
 
-	found := false
-	for _, oldClient := range oldClients {
-		if oldClient.Email == clientEmail {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return false, common.NewError("Client Not Found For Email:", clientEmail)
-	}
-
-	var settings map[string]any
-	err = json.Unmarshal([]byte(inbound.Settings), &settings)
-	if err != nil {
-		return false, err
-	}
-	clients := settings["clients"].([]any)
-	var newClients []any
-	for client_index := range clients {
-		c := clients[client_index].(map[string]any)
-		if c["email"] == clientEmail {
-			c["tgId"] = tgId
-			c["updated_at"] = time.Now().Unix() * 1000
-			newClients = append(newClients, any(c))
-		}
-	}
-	settings["clients"] = newClients
-	modifiedSettings, err := json.MarshalIndent(settings, "", "  ")
-	if err != nil {
-		return false, err
-	}
-	inbound.Settings = string(modifiedSettings)
-	needRestart, err := s.UpdateInboundClient(inboundSvc, inbound, clientEmail)
-	return needRestart, err
+// setTelegramID writes the binding into every inbound the client is on: an
+// inbound save copies its own settings' tgId back over the record.
+func (s *ClientService) setTelegramID(inboundSvc *InboundService, rec *model.ClientRecord, tgId int64) (bool, error) {
+	client := rec.ToClient()
+	client.TgID = tgId
+	return s.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
 }
 
 func (s *ClientService) CheckIsEnabledByEmail(inboundSvc *InboundService, clientEmail string) (bool, error) {

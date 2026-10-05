@@ -1435,6 +1435,11 @@ func runSeeders(isUsersEmpty bool) error {
 		return err
 	}
 
+	// Self-gated on the "ClientTgIdToInbounds" row.
+	if err := copyClientTgIdsToInbounds(); err != nil {
+		return err
+	}
+
 	// Idempotent, not seeder-gated: bad values can re-enter via a restored
 	// backup, so re-check on every start.
 	return normalizeSettingPaths()
@@ -2870,4 +2875,79 @@ func ValidateSQLiteDB(dbPath string) error {
 		return errors.New("sqlite integrity check failed: " + res)
 	}
 	return nil
+}
+
+// copyClientTgIdsToInbounds writes each bound client's Telegram id into every
+// inbound it is on. The account bot once bound the clients row alone, and an
+// inbound save copies its settings' tgId back over the row. One-time.
+func copyClientTgIdsToInbounds() error {
+	var history []string
+	if err := db.Model(&model.HistoryOfSeeders{}).Pluck("seeder_name", &history).Error; err != nil {
+		return err
+	}
+	if slices.Contains(history, "ClientTgIdToInbounds") {
+		return nil
+	}
+	var links []struct {
+		InboundId int
+		Email     string
+		TgId      int64
+	}
+	if err := db.Table("client_inbounds").
+		Select("client_inbounds.inbound_id AS inbound_id, clients.email AS email, clients.tg_id AS tg_id").
+		Joins("JOIN clients ON clients.id = client_inbounds.client_id").
+		Where("clients.tg_id <> 0").Scan(&links).Error; err != nil {
+		return err
+	}
+	wanted := map[int]map[string]int64{}
+	for _, l := range links {
+		if wanted[l.InboundId] == nil {
+			wanted[l.InboundId] = map[string]int64{}
+		}
+		wanted[l.InboundId][l.Email] = l.TgId
+	}
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		for inboundId, tgIds := range wanted {
+			var inbound model.Inbound
+			if err := tx.First(&inbound, inboundId).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					continue
+				}
+				return err
+			}
+			var settings map[string]any
+			if err := json.Unmarshal([]byte(inbound.Settings), &settings); err != nil {
+				log.Printf("ClientTgIdToInbounds: skip inbound %d (invalid settings json): %v", inboundId, err)
+				continue
+			}
+			clients, _ := settings["clients"].([]any)
+			mutated := false
+			for _, raw := range clients {
+				obj, ok := raw.(map[string]any)
+				if !ok {
+					continue
+				}
+				email, _ := obj["email"].(string)
+				tgId, bound := tgIds[email]
+				if current, _ := obj["tgId"].(float64); !bound || current == float64(tgId) {
+					continue
+				}
+				obj["tgId"] = tgId
+				mutated = true
+			}
+			if !mutated {
+				continue
+			}
+			newSettings, err := json.MarshalIndent(settings, "", "  ")
+			if err != nil {
+				return err
+			}
+			if err := tx.Model(&model.Inbound{}).Where("id = ?", inboundId).
+				Update("settings", string(newSettings)).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Create(&model.HistoryOfSeeders{SeederName: "ClientTgIdToInbounds"}).Error
+	})
 }

@@ -48,39 +48,41 @@ func EnsureAccountActivation(client *model.ClientRecord) (*model.AccountActivati
 	return &row, err
 }
 
-// BindAccountActivation changes only the canonical account's notification
-// identity; no Xray configuration or restart is needed for a Telegram binding.
-func BindAccountActivation(code string, tgID int64) (*model.ClientRecord, error) {
+// accountBindMu makes a bind's check and write one step: of two Telegram
+// accounts claiming one code at once, exactly one must win.
+var accountBindMu sync.Mutex
+
+// BindAccountActivation binds the account a code names to one Telegram account,
+// reporting whether the cores need a restart as any client edit does.
+func BindAccountActivation(code string, tgID int64) (*model.ClientRecord, bool, error) {
 	if tgID <= 0 {
-		return nil, ErrActivationCode
+		return nil, false, ErrActivationCode
 	}
-	accountActivationMu.Lock()
-	defer accountActivationMu.Unlock()
+	accountBindMu.Lock()
+	defer accountBindMu.Unlock()
+	db := database.GetDB()
+	var row model.AccountActivation
+	if err := db.Where("code = ?", strings.ToUpper(strings.TrimSpace(code))).First(&row).Error; err != nil {
+		return nil, false, ErrActivationCode
+	}
 	var client model.ClientRecord
-	err := database.GetDB().Transaction(func(tx *gorm.DB) error {
-		var row model.AccountActivation
-		if err := tx.Where("code = ?", strings.ToUpper(strings.TrimSpace(code))).First(&row).Error; err != nil {
-			return ErrActivationCode
-		}
-		if err := tx.First(&client, row.ClientId).Error; err != nil {
-			return ErrActivationCode
-		}
-		var others int64
-		if err := tx.Model(&model.ClientRecord{}).Where("tg_id = ? AND id != ?", tgID, client.Id).Count(&others).Error; err != nil {
-			return err
-		}
-		if others != 0 || (client.TgID != 0 && client.TgID != tgID) {
-			return ErrActivationCode
-		}
-		result := tx.Model(&model.ClientRecord{}).Where("id = ? AND (tg_id = 0 OR tg_id = ?)", client.Id, tgID).Updates(map[string]any{"tg_id": tgID})
-		if result.Error != nil {
-			return result.Error
-		}
-		if result.RowsAffected != 1 {
-			return ErrActivationCode
-		}
-		client.TgID = tgID
-		return nil
-	})
-	return &client, err
+	if err := db.First(&client, row.ClientId).Error; err != nil {
+		return nil, false, ErrActivationCode
+	}
+	var others int64
+	if err := db.Model(&model.ClientRecord{}).Where("tg_id = ? AND id != ?", tgID, client.Id).Count(&others).Error; err != nil {
+		return nil, false, err
+	}
+	if others != 0 || (client.TgID != 0 && client.TgID != tgID) {
+		return nil, false, ErrActivationCode
+	}
+	if client.TgID == tgID {
+		return &client, false, nil
+	}
+	needRestart, err := (&ClientService{}).setTelegramID(&InboundService{}, &client, tgID)
+	if err != nil {
+		return nil, needRestart, err
+	}
+	client.TgID = tgID
+	return &client, needRestart, nil
 }

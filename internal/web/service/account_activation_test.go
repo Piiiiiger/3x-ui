@@ -35,7 +35,11 @@ func TestAccountActivationStableAndExclusive(t *testing.T) {
 	outcomes := make(chan bool, 2)
 	for _, id := range []int64{222, 333} {
 		wg.Add(1)
-		go func(id int64) { defer wg.Done(); _, err := BindAccountActivation(a.Code, id); outcomes <- err == nil }(id)
+		go func(id int64) {
+			defer wg.Done()
+			_, _, err := BindAccountActivation(a.Code, id)
+			outcomes <- err == nil
+		}(id)
 	}
 	wg.Wait()
 	close(outcomes)
@@ -49,7 +53,7 @@ func TestAccountActivationStableAndExclusive(t *testing.T) {
 		t.Fatalf("claim winners=%d", wins)
 	}
 	db.First(&c, c.Id)
-	if _, err := BindAccountActivation(a.Code, c.TgID); err != nil {
+	if _, _, err := BindAccountActivation(a.Code, c.TgID); err != nil {
 		t.Fatal("idempotent bind", err)
 	}
 	other := model.ClientRecord{Email: "two", Enable: true}
@@ -58,10 +62,10 @@ func TestAccountActivationStableAndExclusive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := BindAccountActivation(otherCode.Code, c.TgID); err == nil {
+	if _, _, err := BindAccountActivation(otherCode.Code, c.TgID); err == nil {
 		t.Fatal("one Telegram claimed two accounts")
 	}
-	if _, err := BindAccountActivation(a.Code, 0); err == nil {
+	if _, _, err := BindAccountActivation(a.Code, 0); err == nil {
 		t.Fatal("invalid sender accepted")
 	}
 }

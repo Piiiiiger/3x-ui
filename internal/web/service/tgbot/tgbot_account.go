@@ -59,7 +59,10 @@ func (t *Tgbot) handleAccountMessage(m *telego.Message) bool {
 			t.SendMsgToTgbot(m.Chat.ID, "尝试过于频繁，请稍后再试。")
 			return true
 		}
-		client, err := service.BindAccountActivation(code, m.From.ID)
+		client, needRestart, err := service.BindAccountActivation(code, m.From.ID)
+		if needRestart {
+			t.xrayService.SetToNeedRestart()
+		}
 		if err != nil {
 			t.SendMsgToTgbot(m.Chat.ID, "无法绑定：请确认激活码正确，且账号与 Telegram 均未绑定其他用户。")
 			return true
