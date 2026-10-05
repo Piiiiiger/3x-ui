@@ -74,6 +74,10 @@ func migrationModels() []any {
 		&model.AccountActivation{},
 		&model.AccountNotification{},
 		&model.ClientIpBan{},
+		&model.AiUsageDevice{},
+		&model.AiUsageDaily{},
+		&model.AiUsageSession{},
+		&model.AiUsageQuota{},
 	}
 }
 

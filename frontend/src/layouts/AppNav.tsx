@@ -24,6 +24,7 @@ import {
   MoonFilled,
   MoonOutlined,
   ProfileOutlined,
+  RobotOutlined,
   SafetyOutlined,
   SearchOutlined,
   SettingOutlined,
@@ -54,6 +55,7 @@ type IconName =
   | 'team'
   | 'plans'
   | 'rules'
+  | 'ai'
   | 'setting'
   | 'tool'
   | 'cluster'
@@ -65,6 +67,7 @@ const iconByName: Record<IconName, ComponentType> = {
   team: TeamOutlined,
   plans: ProfileOutlined,
   rules: FileTextOutlined,
+  ai: RobotOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
@@ -107,6 +110,7 @@ export default function AppNav() {
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/rules', icon: 'rules', title: t('menu.rules') },
+      { key: '/ai-usage', icon: 'ai', title: t('menu.aiUsage') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
       { key: '/chains', icon: 'tool', title: '链式管理' },

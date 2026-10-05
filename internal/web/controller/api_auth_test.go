@@ -76,6 +76,9 @@ func newAPIAuthTestEngine(t *testing.T) (*gin.Engine, *APIController) {
 	api.POST("/clients/clientIpsByGuid", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"reached": true})
 	})
+	api.POST("/aiUsage/ingest", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"reached": true})
+	})
 	for _, path := range []string{"/clients/bulkResetTraffic", "/clients/activeInbounds", "/inbounds/:id/subSortIndex"} {
 		api.POST(path, func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"reached": true})
@@ -305,5 +308,40 @@ func TestCheckAPIAuth_SessionLoginPasses(t *testing.T) {
 	pingResp.Body.Close()
 	if pingResp.StatusCode != http.StatusOK {
 		t.Fatalf("session ping status = %d, want 200", pingResp.StatusCode)
+	}
+}
+
+// A desktop's usage token must upload its report and reach nothing else, not
+// even the status routes a monitor token may read.
+func TestAiUsageScopeReachesOnlyTheIngest(t *testing.T) {
+	engine, _ := newAPIAuthTestEngine(t)
+	const plaintext = "ai-usage-token-value"
+	if err := database.GetDB().Create(&model.ApiToken{
+		Name:    "laptop",
+		Token:   crypto.HashTokenSHA256(plaintext),
+		Enabled: true,
+		Scope:   model.ApiScopeAiUsage,
+	}).Error; err != nil {
+		t.Fatalf("seed token: %v", err)
+	}
+	cases := []struct {
+		method, path string
+		want         int
+	}{
+		{http.MethodPost, "/panel/api/aiUsage/ingest", http.StatusOK},
+		{http.MethodGet, "/panel/api/server/status", http.StatusForbidden},
+		{http.MethodPost, "/panel/api/server/updatePanel", http.StatusForbidden},
+		{http.MethodPost, "/panel/api/clients/bulkResetTraffic", http.StatusForbidden},
+	}
+	for _, tc := range cases {
+		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			req.Header.Set("Authorization", "Bearer "+plaintext)
+			w := httptest.NewRecorder()
+			engine.ServeHTTP(w, req)
+			if w.Code != tc.want {
+				t.Fatalf("status = %d, want %d; body=%s", w.Code, tc.want, w.Body.String())
+			}
+		})
 	}
 }

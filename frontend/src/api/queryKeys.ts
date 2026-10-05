@@ -31,6 +31,11 @@ export const keys = {
     root: () => ['traffic'] as const,
     overview: (period: string) => ['traffic', 'overview', period] as const,
   },
+  aiUsage: {
+    root: () => ['aiUsage'] as const,
+    overview: (period: string, deviceId: number, app: string) =>
+      ['aiUsage', 'overview', period, deviceId, app] as const,
+  },
   probe: {
     root: () => ['probe'] as const,
     servers: () => ['probe', 'servers'] as const,

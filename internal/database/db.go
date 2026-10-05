@@ -99,6 +99,10 @@ func allModels() []any {
 		&model.AccountNotification{},
 		&model.ProxyChain{},
 		&model.ClientIpBan{},
+		&model.AiUsageDevice{},
+		&model.AiUsageDaily{},
+		&model.AiUsageSession{},
+		&model.AiUsageQuota{},
 	}
 }
 
