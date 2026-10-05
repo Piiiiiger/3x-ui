@@ -815,6 +815,9 @@ type Node struct {
 	InboundSyncMode     string   `json:"inboundSyncMode" form:"inboundSyncMode" gorm:"column:inbound_sync_mode;default:all" validate:"omitempty,oneof=all selected"`
 	InboundTags         []string `json:"inboundTags" form:"inboundTags" gorm:"serializer:json;column:inbound_tags"`
 	OutboundTag         string   `json:"outboundTag" form:"outboundTag" gorm:"column:outbound_tag"`
+	// AbuseMode is off, observe or enforce: whether this host watches for abuse
+	// and whether what it sees bans anyone.
+	AbuseMode string `json:"abuseMode" form:"abuseMode" gorm:"column:abuse_mode;default:off" example:"off"`
 
 	// Kind is NodeKindPanel (a 3x-ui this panel calls) or NodeKindAgent (a
 	// pigger-agent that dials in and runs only Xray; this panel owns its state).

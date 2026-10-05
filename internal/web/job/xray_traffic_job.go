@@ -81,6 +81,7 @@ func (j *XrayTrafficJob) Run() {
 	if err != nil {
 		logger.Warning("add inbound traffic failed:", err)
 	}
+	service.LocalAbuseTraffic(clientTraffics, time.Now())
 	if clientsDisabled {
 		restartOnDisable, settingErr := j.settingService.GetRestartXrayOnClientDisable()
 		if settingErr != nil {

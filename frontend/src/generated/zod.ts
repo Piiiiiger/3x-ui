@@ -30,6 +30,89 @@ export type trafficLocalApplyAction = z.infer<typeof trafficLocalApplyActionSche
 export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
+export const AbuseActionsSchema = z.object({
+  bt: z.string(),
+  crawler: z.string(),
+  flood: z.string(),
+  fullspeed: z.string(),
+  relay: z.string(),
+  scan: z.string(),
+  spam: z.string(),
+  speedtest: z.string(),
+});
+export type AbuseActions = z.infer<typeof AbuseActionsSchema>;
+
+export const AbuseEventSchema = z.object({
+  action: z.string(),
+  at: z.number().int(),
+  count: z.number().int(),
+  email: z.string(),
+  id: z.number().int(),
+  level: z.string(),
+  limit: z.number().int(),
+  measure: z.string(),
+  nodeId: z.number().int(),
+  rule: z.string(),
+  samples: z.string(),
+  window: z.number().int(),
+});
+export type AbuseEvent = z.infer<typeof AbuseEventSchema>;
+
+export const AbuseEventViewSchema = z.object({
+  action: z.string(),
+  at: z.number().int(),
+  count: z.number().int(),
+  email: z.string(),
+  evidence: z.string(),
+  id: z.number().int(),
+  label: z.string(),
+  level: z.string(),
+  limit: z.number().int(),
+  measure: z.string(),
+  nodeId: z.number().int(),
+  rule: z.string(),
+  samples: z.string(),
+  server: z.string(),
+  window: z.number().int(),
+});
+export type AbuseEventView = z.infer<typeof AbuseEventViewSchema>;
+
+export const AbuseHistorySchema = z.object({
+  records: z.array(z.lazy(() => BanRecordSchema)),
+  status: z.lazy(() => AbuseStatusSchema),
+});
+export type AbuseHistory = z.infer<typeof AbuseHistorySchema>;
+
+export const AbuseOverviewSchema = z.object({
+  bans: z.array(z.lazy(() => BanRecordSchema)),
+  events: z.array(z.lazy(() => AbuseEventViewSchema)),
+  servers: z.array(z.lazy(() => AbuseServerSchema)),
+  settings: z.lazy(() => AbuseSettingsSchema),
+});
+export type AbuseOverview = z.infer<typeof AbuseOverviewSchema>;
+
+export const AbuseServerSchema = z.object({
+  capable: z.boolean(),
+  mode: z.string(),
+  name: z.string(),
+  nodeId: z.number().int(),
+});
+export type AbuseServer = z.infer<typeof AbuseServerSchema>;
+
+export const AbuseSettingsSchema = z.object({
+  actions: z.lazy(() => AbuseActionsSchema),
+  rules: z.lazy(() => RulesSchema),
+  signup: z.lazy(() => SignupGuardSchema),
+});
+export type AbuseSettings = z.infer<typeof AbuseSettingsSchema>;
+
+export const AbuseStatusSchema = z.object({
+  ban: z.lazy(() => BanRecordSchema).nullable().optional(),
+  limit: z.number().int(),
+  strikes: z.number().int(),
+});
+export type AbuseStatus = z.infer<typeof AbuseStatusSchema>;
+
 export const ActivationCodeSchema = z.object({
   code: z.string(),
   createdAt: z.number().int(),
@@ -451,6 +534,22 @@ export const ApiTokenViewSchema = z.object({
   token: z.string().optional(),
 });
 export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
+
+export const BanRecordSchema = z.object({
+  bannedAt: z.number().int(),
+  email: z.string(),
+  eventId: z.number().int(),
+  expiresAt: z.number().int(),
+  forgiven: z.boolean(),
+  id: z.number().int(),
+  kind: z.string(),
+  liftedAt: z.number().int(),
+  network: z.string(),
+  reason: z.string(),
+  rule: z.string(),
+  strike: z.number().int(),
+});
+export type BanRecord = z.infer<typeof BanRecordSchema>;
 
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
@@ -907,6 +1006,7 @@ export const NewUUIDResponseSchema = z.object({
 export type NewUUIDResponse = z.infer<typeof NewUUIDResponseSchema>;
 
 export const NodeSchema = z.object({
+  abuseMode: z.string(),
   activeCount: z.number().int(),
   address: z.string(),
   allowPrivateAddress: z.boolean(),
@@ -1322,6 +1422,33 @@ export const RuleTemplateVersionViewSchema = z.object({
 });
 export type RuleTemplateVersionView = z.infer<typeof RuleTemplateVersionViewSchema>;
 
+export const RulesSchema = z.object({
+  btAttempts: z.number().int(),
+  btWindowMin: z.number().int(),
+  crawlerConns: z.number().int(),
+  crawlerHosts: z.number().int(),
+  crawlerWindowMin: z.number().int(),
+  crawlerWindows: z.number().int(),
+  floodPerDest: z.number().int(),
+  floodTotal: z.number().int(),
+  fullSpeedMbps: z.number().int(),
+  fullSpeedStrikeMin: z.number().int(),
+  fullSpeedWarnMin: z.number().int(),
+  relayMinMb: z.number().int(),
+  relaySharePct: z.number().int(),
+  relayWindowMin: z.number().int(),
+  scanIps: z.number().int(),
+  scanPortsOnIp: z.number().int(),
+  scanSensitiveIps: z.number().int(),
+  scanWindowMin: z.number().int(),
+  spamAttempts: z.number().int(),
+  spamWindowMin: z.number().int(),
+  speedTestGapMin: z.number().int(),
+  speedTestsPerDay: z.number().int(),
+  speedTestsPerHour: z.number().int(),
+});
+export type Rules = z.infer<typeof RulesSchema>;
+
 export const ServerSettingsSchema = z.object({
   contentPaddingAddition: z.string().optional(),
   disableCookies: z.boolean(),
@@ -1369,6 +1496,12 @@ export const SettingSchema = z.object({
   value: z.string(),
 });
 export type Setting = z.infer<typeof SettingSchema>;
+
+export const SignupGuardSchema = z.object({
+  action: z.string(),
+  limit: z.number().int(),
+});
+export type SignupGuard = z.infer<typeof SignupGuardSchema>;
 
 export const SubBalancerSchema = z.object({
   createdAt: z.number().int(),

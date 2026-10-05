@@ -543,3 +543,33 @@ func TestClientListRowsCarryOnlineIpCounts(t *testing.T) {
 		t.Fatalf("xia row = online %d, bans %d; want nothing", r.OnlineIps, r.IpBans)
 	}
 }
+
+// An IP-limit ban outlives its row as history: the person sees when and why,
+// and a ban an admin ended early says so.
+func TestIpLimitBansAreKeptAsHistory(t *testing.T) {
+	setupIpLimitTest(t)
+	node := seedAgentNodeRow(t, "edge")
+	seedLimitedClient(t, &node.Id, "in-h", 443, "alice", 1)
+	now := time.Unix(1_800_000_000, 0)
+	observed := []IpObservation{
+		{Email: "alice", IP: "198.51.100.1", LastSeen: now.Unix() - 60},
+		{Email: "alice", IP: "198.51.100.2", LastSeen: now.Unix() - 5},
+	}
+	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+	history, err := (&AbuseService{}).History("alice", now.Add(-time.Hour))
+	if err != nil || len(history) != 1 {
+		t.Fatalf("history = %+v, %v; want the one ban", history, err)
+	}
+	if h := history[0]; h.Kind != BanKindIPLimit || h.Network != "198.51.100.1" || h.ExpiresAt != now.Unix()+30*60 || h.Reason == "" {
+		t.Errorf("history entry = %+v, want the banned network, its 30 minutes and a reason", h)
+	}
+
+	if err := (&IpLimitService{}).Unban("alice", "198.51.100.1"); err != nil {
+		t.Fatal(err)
+	}
+	if history, _ = (&AbuseService{}).History("alice", now.Add(-time.Hour)); history[0].LiftedAt == 0 {
+		t.Errorf("after the admin lifted it the entry is %+v, want it marked lifted", history[0])
+	}
+}

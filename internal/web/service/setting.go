@@ -258,6 +258,10 @@ var defaultValueMap = map[string]string{
 	// their own validated endpoint, so a generic settings save cannot set them.
 	"probeLiteURL":       "",
 	"probeLitePublicURL": "",
+	// Abuse detection: the mode of the panel's own core and the thresholds,
+	// hidden keys with their own endpoint like the probe's.
+	"abuseLocalMode": "off",
+	"abuseSettings":  "",
 }
 
 // SettingService provides business logic for application settings management.

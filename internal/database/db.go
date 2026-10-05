@@ -99,6 +99,9 @@ func allModels() []any {
 		&model.AccountNotification{},
 		&model.ProxyChain{},
 		&model.ClientIpBan{},
+		&model.AbuseEvent{},
+		&model.BanRecord{},
+		&model.PortalSignup{},
 	}
 }
 

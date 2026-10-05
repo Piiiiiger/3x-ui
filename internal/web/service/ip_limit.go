@@ -333,6 +333,18 @@ func (s *IpLimitService) Enforce(now time.Time, observed []IpObservation) (bool,
 	if err != nil {
 		return changed, err
 	}
+	history := make([]model.BanRecord, 0, len(fresh))
+	for _, b := range fresh {
+		history = append(history, model.BanRecord{
+			Email: b.Email, Kind: BanKindIPLimit, Rule: BanKindIPLimit, Network: b.Network,
+			Reason:   fmt.Sprintf("同时在线 IP 超过上限（%d 个），暂停 %s", limits[b.Email], b.Network),
+			BannedAt: b.BannedAt, ExpiresAt: b.ExpiresAt,
+		})
+	}
+	// The ban itself stands even if its history cannot be written.
+	if err := db.Create(&history).Error; err != nil {
+		logger.Warning("[LimitIP] writing ban history failed:", err)
+	}
 	stamp := now.Format("2006/01/02 15:04:05")
 	lines := make([]string, 0, len(fresh))
 	for _, b := range fresh {
@@ -726,7 +738,13 @@ func (s *IpLimitService) Unban(email, network string) error {
 	if err := db.Delete(&ban).Error; err != nil {
 		return err
 	}
-	logUnbans(time.Now(), []model.ClientIpBan{ban})
+	now := time.Now()
+	if err := db.Model(&model.BanRecord{}).
+		Where("email = ? AND kind = ? AND network = ? AND banned_at = ? AND lifted_at = 0", email, BanKindIPLimit, network, ban.BannedAt).
+		Update("lifted_at", now.Unix()).Error; err != nil {
+		logger.Warning("[LimitIP] marking the ban lifted in its history failed:", err)
+	}
+	logUnbans(now, []model.ClientIpBan{ban})
 	return nil
 }
 

@@ -2120,6 +2120,67 @@ export const sections: readonly Section[] = [
     ],
   },
   {
+    id: 'abuse',
+    title: 'Abuse',
+    description:
+      "Abuse detection: each server (node id 0 is the panel's own core) is off, observe or enforce. A detecting server watches its users' connections and traffic, never their content, for spam, BitTorrent, scanning, floods, crawling, repeated speed tests, hours at full speed and relaying. Observe only records and tells the admins; enforce does what each rule is set to. Each strike bans the account on every server for 30 minutes; the fourth within 30 days locks it until an admin lifts it, which also clears its strikes. IP-limit bans are kept in the same history but never count as strikes. The panel also guards sign-ups on the user page per network.",
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/abuse/overview',
+        summary:
+          'Every server with its mode (capable is false for an agent too old to detect, or not connected), the settings, the abuse bans and locks running now, and the latest 100 hits with what was done about each: observed, noticed (recorded for the admins), warned, banned, locked, held (a hit during a ban) or blocked (a network refused sign-ups for the day).',
+        responseSchema: 'AbuseOverview',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/abuse/mode',
+        summary:
+          "Set one server's mode: off, observe or enforce. The panel's own core changes at once, an agent on its next config sync. Returns the overview.",
+        body: '{\n  "nodeId": 3,\n  "mode": "observe"\n}',
+        responseSchema: 'AbuseOverview',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/abuse/settings',
+        summary:
+          "Replace the abuse settings. rules are the thresholds every detecting server checks; a zero turns a check off, and windows are minutes kept within the hour a server remembers. actions say what each rule's hits do on an enforcing server: record (tell the admins), warn (also tell the person, no strike) or ban (a strike); the full-speed rule's first stage only ever warns. signup limits sign-ups on the user page per network (IPv4 /24, IPv6 /48) and 24 hours: reaching limit is reported to the admins, and while action is ban the network is refused until the day is over; limit 0 turns it off, action is record or ban. Returns the overview.",
+        requestSchema: { $ref: '#/components/schemas/AbuseSettings' },
+        responseSchema: 'AbuseOverview',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/abuse/history/:email',
+        summary:
+          "One account's standing (its running ban or lock, and its strikes within 30 days) and its bans of either kind from the last 90 days, newest first.",
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email (unique identifier).' },
+        ],
+        responseSchema: 'AbuseHistory',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/abuse/lift/:email',
+        summary:
+          "End the account's running abuse ban now. Ending a lock also clears the account's strikes; ending a 30-minute ban keeps them. Returns the account's history.",
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email (unique identifier).' },
+        ],
+        responseSchema: 'AbuseHistory',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/abuse/forgive/:email',
+        summary:
+          "Clear the account's strikes; its history keeps the bans, marked forgiven. Returns the account's history.",
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email (unique identifier).' },
+        ],
+        responseSchema: 'AbuseHistory',
+      },
+    ],
+  },
+  {
     id: 'backup',
     title: 'Backup',
     description: 'Operations that interact with the configured Telegram bot.',

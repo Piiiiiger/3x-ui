@@ -215,6 +215,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	probe := api.Group("/probe")
 	NewProbeController(probe)
 
+	// Abuse API — which servers detect abuse, the bans and each account's history
+	abuseGroup := api.Group("/abuse")
+	NewAbuseController(abuseGroup)
+
 	// Settings + Xray config management live under the API surface too, so the
 	// same API token drives them. Paths are /panel/api/setting/* and
 	// /panel/api/xray/*.

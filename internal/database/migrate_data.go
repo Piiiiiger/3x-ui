@@ -74,6 +74,9 @@ func migrationModels() []any {
 		&model.AccountActivation{},
 		&model.AccountNotification{},
 		&model.ClientIpBan{},
+		&model.AbuseEvent{},
+		&model.BanRecord{},
+		&model.PortalSignup{},
 	}
 }
 

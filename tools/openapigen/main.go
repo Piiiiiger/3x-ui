@@ -43,6 +43,8 @@ func run(root, outDir string) error {
 				"RuleTemplate",
 				"PlanInbound",
 				"ClientIpBan",
+				"AbuseEvent",
+				"BanRecord",
 			),
 			AliasAllow: setOf("Protocol"),
 			Overrides: map[string][]walkOverride{
@@ -92,6 +94,14 @@ func run(root, outDir string) error {
 				"ClientIpInfo",
 				"ClientOnlineIps",
 				"OnlineNetwork",
+				"AbuseServer",
+				"AbuseEventView",
+				"AbuseOverview",
+				"AbuseStatus",
+				"AbuseHistory",
+				"AbuseSettings",
+				"AbuseActions",
+				"SignupGuard",
 				"IpLimitExemptHost",
 				"PlanInput",
 				"PlanProxyGroup",
@@ -155,6 +165,10 @@ func run(root, outDir string) error {
 		{
 			Path:        resolveRel(root, "internal/tuic"),
 			StructAllow: setOf("TuicServerSettings", "TuicClientSettings"),
+		},
+		{
+			Path:        resolveRel(root, "internal/abuse"),
+			StructAllow: setOf("Rules"),
 		},
 	}
 

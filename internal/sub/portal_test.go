@@ -308,3 +308,30 @@ func TestPortalOnlineIpsShowOnlyThePersonsOwnState(t *testing.T) {
 		t.Fatalf("bans = %+v; want pa@e's own ban only", got.Bans)
 	}
 }
+
+// The ban history is the signed-in person's own: when and why, never anyone else's.
+func TestPortalBansShowOnlyThePersonsOwnHistory(t *testing.T) {
+	router, _ := seedPortal(t)
+	now := time.Now()
+	for _, rec := range []model.BanRecord{
+		{Email: "pa@e", Kind: service.BanKindAbuse, Rule: "scan", Reason: "端口扫描：5 分钟内连接同一 IP 的 52 个端口", Strike: 1, BannedAt: now.Unix() - 60, ExpiresAt: now.Unix() + 1740},
+		{Email: "pb@e", Kind: service.BanKindIPLimit, Rule: "iplimit", Reason: "同时在线 IP 超过上限（3 个），暂停 198.51.100.8", BannedAt: now.Unix() - 60, ExpiresAt: now.Unix() + 600},
+	} {
+		if err := database.GetDB().Create(&rec).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if res := portalRequest(router, http.MethodGet, "/sub/portal/bans", "", "198.51.100.1", nil); res.Code != http.StatusUnauthorized {
+		t.Fatalf("signed out: %d %s, want 401", res.Code, res.Body)
+	}
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	res := portalRequest(router, http.MethodGet, "/sub/portal/bans", "", "198.51.100.1", cookie)
+	var got service.AbuseHistory
+	if err := json.Unmarshal(res.Body.Bytes(), &got); err != nil || res.Code != http.StatusOK {
+		t.Fatalf("bans = %d %s", res.Code, res.Body)
+	}
+	if len(got.Records) != 1 || got.Records[0].Email != "pa@e" || got.Status.Ban == nil || got.Status.Strikes != 1 {
+		t.Fatalf("history = %+v; want pa@e's own running ban and nothing of pb@e", got)
+	}
+}

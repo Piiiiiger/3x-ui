@@ -10,6 +10,81 @@ export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
+export interface AbuseActions {
+  bt: string;
+  crawler: string;
+  flood: string;
+  fullspeed: string;
+  relay: string;
+  scan: string;
+  spam: string;
+  speedtest: string;
+}
+
+export interface AbuseEvent {
+  action: string;
+  at: number;
+  count: number;
+  email: string;
+  id: number;
+  level: string;
+  limit: number;
+  measure: string;
+  nodeId: number;
+  rule: string;
+  samples: string;
+  window: number;
+}
+
+export interface AbuseEventView {
+  action: string;
+  at: number;
+  count: number;
+  email: string;
+  evidence: string;
+  id: number;
+  label: string;
+  level: string;
+  limit: number;
+  measure: string;
+  nodeId: number;
+  rule: string;
+  samples: string;
+  server: string;
+  window: number;
+}
+
+export interface AbuseHistory {
+  records: BanRecord[];
+  status: AbuseStatus;
+}
+
+export interface AbuseOverview {
+  bans: BanRecord[];
+  events: AbuseEventView[];
+  servers: AbuseServer[];
+  settings: AbuseSettings;
+}
+
+export interface AbuseServer {
+  capable: boolean;
+  mode: string;
+  name: string;
+  nodeId: number;
+}
+
+export interface AbuseSettings {
+  actions: AbuseActions;
+  rules: Rules;
+  signup: SignupGuard;
+}
+
+export interface AbuseStatus {
+  ban?: BanRecord | null;
+  limit: number;
+  strikes: number;
+}
+
 export interface ActivationCode {
   code: string;
   createdAt: number;
@@ -422,6 +497,21 @@ export interface ApiTokenView {
   name: string;
   scope: string;
   token?: string;
+}
+
+export interface BanRecord {
+  bannedAt: number;
+  email: string;
+  eventId: number;
+  expiresAt: number;
+  forgiven: boolean;
+  id: number;
+  kind: string;
+  liftedAt: number;
+  network: string;
+  reason: string;
+  rule: string;
+  strike: number;
 }
 
 export interface Client {
@@ -841,6 +931,7 @@ export interface NewUUIDResponse {
 }
 
 export interface Node {
+  abuseMode: string;
   activeCount: number;
   address: string;
   allowPrivateAddress: boolean;
@@ -1226,6 +1317,32 @@ export interface RuleTemplateVersionView {
   size: number;
 }
 
+export interface Rules {
+  btAttempts: number;
+  btWindowMin: number;
+  crawlerConns: number;
+  crawlerHosts: number;
+  crawlerWindowMin: number;
+  crawlerWindows: number;
+  floodPerDest: number;
+  floodTotal: number;
+  fullSpeedMbps: number;
+  fullSpeedStrikeMin: number;
+  fullSpeedWarnMin: number;
+  relayMinMb: number;
+  relaySharePct: number;
+  relayWindowMin: number;
+  scanIps: number;
+  scanPortsOnIp: number;
+  scanSensitiveIps: number;
+  scanWindowMin: number;
+  spamAttempts: number;
+  spamWindowMin: number;
+  speedTestGapMin: number;
+  speedTestsPerDay: number;
+  speedTestsPerHour: number;
+}
+
 export interface ServerSettings {
   contentPaddingAddition?: string;
   disableCookies: boolean;
@@ -1270,6 +1387,11 @@ export interface Setting {
   id: number;
   key: string;
   value: string;
+}
+
+export interface SignupGuard {
+  action: string;
+  limit: number;
 }
 
 export interface SubBalancer {

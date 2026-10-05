@@ -59,6 +59,10 @@ func (s *AgentService) AgentConfig(nodeID int) ([]byte, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+	raw, err = s.withAbuseSettings(nodeID, raw)
+	if err != nil {
+		return nil, "", err
+	}
 	sum := sha256.Sum256(raw)
 	return raw, hex.EncodeToString(sum[:]), nil
 }
@@ -116,8 +120,19 @@ func (s *AgentService) HandleTraffic(nodeID int, t *agentproto.Traffic) error {
 	for _, c := range t.Clients {
 		clients = append(clients, &xray.ClientTraffic{Email: c.Name, Up: c.Up, Down: c.Down})
 	}
-	_, err := s.inboundService.AddAgentTraffic(nodeID, t.Instance, t.Seq, inbounds, clients)
-	return err
+	applied, err := s.inboundService.AddAgentTraffic(nodeID, t.Instance, t.Seq, inbounds, clients)
+	if err != nil || !applied || len(t.Abuse) == 0 {
+		return err
+	}
+	// The usage is counted already, so a failure here must not refuse the report.
+	changed, err := (&AbuseService{}).HandleSignals(nodeID, t.Abuse, time.Now())
+	if err != nil {
+		logger.Warning("abuse: handling the report of node", nodeID, "failed:", err)
+	}
+	if changed {
+		s.xrayService.SetToNeedRestart()
+	}
+	return nil
 }
 
 // HandleStatus shows an agent's online clients, active inbounds and client IPs

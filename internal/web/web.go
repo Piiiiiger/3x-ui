@@ -276,6 +276,7 @@ const (
 	cadenceAmneziaWG     = "@every 10s"
 	cadenceTuic          = "@every 10s"
 	cadenceClientIPScan  = "@every 10s"
+	cadenceAbuseChecks   = "@every 5s"
 	cadenceNodeHeartbeat = "@every 5s"
 	cadenceNodeTraffic   = "@every 5s"
 	cadenceReapOrphans   = "@every 5m"
@@ -328,6 +329,7 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 
 	// check client ips from log file every 10 sec
 	_, _ = s.cron.AddJob(cadenceClientIPScan, job.NewCheckClientIpJob())
+	_, _ = s.cron.AddJob(cadenceAbuseChecks, job.NewAbuseJob())
 
 	_, _ = s.cron.AddJob(cadenceNodeHeartbeat, job.NewNodeHeartbeatJob())
 

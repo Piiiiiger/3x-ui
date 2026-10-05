@@ -250,9 +250,23 @@ func (a *SUBController) portalRegister(c *gin.Context) {
 		c.JSON(http.StatusTooManyRequests, gin.H{"success": false, "error": "blocked"})
 		return
 	}
-	client, needRestart, err := a.codeService.Register(&service.InboundService{}, form.Username, form.Password, form.Code)
+	var client *model.ClientRecord
+	var needRestart bool
+	err := a.abuseService.Signup(ip, time.Now(), func() (string, error) {
+		var err error
+		client, needRestart, err = a.codeService.Register(&service.InboundService{}, form.Username, form.Password, form.Code)
+		if err != nil {
+			return "", err
+		}
+		return client.Email, nil
+	})
 	if needRestart {
 		(&service.XrayService{}).SetToNeedRestart()
+	}
+	if errors.Is(err, service.ErrSignupLimit) {
+		logger.Warningf("portal: sign-up from %s refused, its network reached the day's limit", ip)
+		c.JSON(http.StatusTooManyRequests, gin.H{"success": false, "error": "signup_limit"})
+		return
 	}
 	if !a.answerCodeError(c, ip, err) {
 		return
@@ -391,6 +405,23 @@ func (a *SUBController) portalOnlineIps(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, ips)
+}
+
+// portalBans returns the signed-in client's standing and its bans of the last
+// 90 days, IP-limit ones included, so people can see when and why.
+func (a *SUBController) portalBans(c *gin.Context) {
+	setNoCacheHeaders(c)
+	client, ok := a.portalSessionClient(c)
+	if !ok {
+		return
+	}
+	history, err := a.abuseService.HistoryOf(client.Email, time.Now())
+	if err != nil {
+		logger.Warning("portal: could not load the client's bans:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "bans"})
+		return
+	}
+	c.JSON(http.StatusOK, history)
 }
 
 // portalProbe returns the status of the servers behind the signed-in client's

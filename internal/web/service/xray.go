@@ -245,7 +245,16 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	if (&AbuseService{}).Mode(0) != AbuseModeOff {
+		if err := injectAbuseChecks(xrayConfig); err != nil {
+			return nil, err
+		}
+		xrayConfig.LogConfig = withAbuseAccessLog(xrayConfig.LogConfig)
+	}
 	if err := injectIpLimitBans(xrayConfig, transitOwners, time.Now()); err != nil {
+		return nil, err
+	}
+	if err := injectAbuseBans(xrayConfig, transitOwners, time.Now()); err != nil {
 		return nil, err
 	}
 	return xrayConfig, nil
@@ -279,7 +288,15 @@ func (s *XrayService) GetAgentXrayConfig(nodeID int) (*xray.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	if (&AbuseService{}).Mode(nodeID) != AbuseModeOff {
+		if err := injectAbuseChecks(xrayConfig); err != nil {
+			return nil, err
+		}
+	}
 	if err := injectIpLimitBans(xrayConfig, transitOwners, time.Now()); err != nil {
+		return nil, err
+	}
+	if err := injectAbuseBans(xrayConfig, transitOwners, time.Now()); err != nil {
 		return nil, err
 	}
 	if err := inlineAgentPrivateGeoIP(xrayConfig); err != nil {

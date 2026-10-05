@@ -144,3 +144,26 @@ func TestPortalRegisterRejectsBrowserFormPostsBeforeUsingACode(t *testing.T) {
 		t.Fatalf("proper JSON retry = %d %s", res.Code, res.Body)
 	}
 }
+
+// A network at its daily sign-up limit is refused while the guard bans, and the
+// code it brought stays unused for someone elsewhere.
+func TestPortalRegisterRefusesANetworkAtItsSignupLimit(t *testing.T) {
+	router, _ := seedPortal(t)
+	abuse := &service.AbuseService{}
+	settings := abuse.Settings()
+	settings.Signup = service.SignupGuard{Limit: 1, Action: service.AbuseActBan}
+	if err := abuse.SetSettings(settings); err != nil {
+		t.Fatal(err)
+	}
+	if res := portalRegister(router, "first", "secret-pass", portalCode(t, "Monthly"), "203.0.113.5"); res.Code != http.StatusOK {
+		t.Fatalf("first sign-up = %d %s", res.Code, res.Body)
+	}
+	code := portalCode(t, "Yearly")
+	res := portalRegister(router, "second", "secret-pass", code, "203.0.113.77")
+	if res.Code != http.StatusTooManyRequests || portalErrorOf(t, res) != "signup_limit" {
+		t.Fatalf("second sign-up from the /24 = %d %s, want 429 signup_limit", res.Code, res.Body)
+	}
+	if res := portalRegister(router, "second", "secret-pass", code, "198.51.100.20"); res.Code != http.StatusOK {
+		t.Fatalf("the same code from another network = %d %s, want it unused and accepted", res.Code, res.Body)
+	}
+}
