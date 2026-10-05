@@ -9,6 +9,21 @@ _openapi:
     - ./public/openapi.json
   toc:
     - depth: 2
+      title: List custom user groups with member emails. Groups are independent of
+        subscription plans.
+      url: '#list-custom-user-groups-with-member-emails-groups-are-independent-of-subscription-plans'
+    - depth: 2
+      title: Create a group with id 0, or rename an existing group. Names must be
+        unique and 1–64 characters.
+      url: '#create-a-group-with-id-0-or-rename-an-existing-group-names-must-be-unique-and-164-characters'
+    - depth: 2
+      title: Atomically move users into one group. Use id 0 to leave them ungrouped.
+        Plans and quotas are unchanged.
+      url: '#atomically-move-users-into-one-group-use-id-0-to-leave-them-ungrouped-plans-and-quotas-are-unchanged'
+    - depth: 2
+      title: Delete a group and leave its members ungrouped; users are retained.
+      url: '#delete-a-group-and-leave-its-members-ungrouped-users-are-retained'
+    - depth: 2
       title: List every client with its attached inbound IDs and traffic record. The
         reverse field, if set, is returned as a nested JSON object (legacy
         JSON-encoded-string form is still accepted on write).
@@ -204,12 +219,23 @@ _openapi:
         migrations from external accounting systems.
       url: '#manually-adjust-a-clients-upload--download-counters-useful-for-migrations-from-external-accounting-systems'
     - depth: 2
-      title: List source IPs that have connected with the given client’s credentials.
-        Returns an array of "ip (timestamp)" strings.
-      url: '#list-source-ips-that-have-connected-with-the-given-clients-credentials-returns-an-array-of-ip-timestamp-strings'
+      title: 'List the source IPs seen live with the given client’s credentials in the
+        last 30 minutes, each with the server it connected through, why the IP
+        limit ignores it (`exempt`: host, allowlist or private) and when its ban
+        ends (`bannedUntil`, 0 = not banned).'
+      url: '#list-the-source-ips-seen-live-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-server-it-connected-through-why-the-ip-limit-ignores-it-exempt-host-allowlist-or-private-and-when-its-ban-ends-banneduntil-0--not-banned'
     - depth: 2
       title: Reset the recorded IP list for a client.
       url: '#reset-the-recorded-ip-list-for-a-client'
+    - depth: 2
+      title: List the running IP-limit bans of a client. Each keeps the client off one
+        network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server
+        that serves the client blocks it there.
+      url: '#list-the-running-ip-limit-bans-of-a-client-each-keeps-the-client-off-one-network-an-ipv4-address-or-an-ipv6-64-until-expiresat-every-server-that-serves-the-client-blocks-it-there'
+    - depth: 2
+      title: Lift one IP-limit ban before it expires. Agents drop the rule on their
+        next config sync; the panel’s own core gets a hot apply.
+      url: '#lift-one-ip-limit-ban-before-it-expires-agents-drop-the-rule-on-their-next-config-sync-the-panels-own-core-gets-a-hot-apply'
     - depth: 2
       title: List registered HWID devices for a client with a short fingerprint. Full
         hashes are not exposed.
@@ -277,6 +303,17 @@ _openapi:
       url: '#return-every-url-for-one-client-across-all-attached-inbounds-one-per-advertised-endpoint-the-managed-hosts-of-the-inbound-else-its-streamsettingsexternalproxy-entries-else-its-own-address-supported-protocols-vmess-vless-trojan-shadowsocks-hysteria-mtproto-protocols-without-a-url-form-socks-http-mixed-wireguard-dokodemo-tunnel-contribute-nothing'
   structuredData:
     headings:
+      - content: List custom user groups with member emails. Groups are independent of
+          subscription plans.
+        id: list-custom-user-groups-with-member-emails-groups-are-independent-of-subscription-plans
+      - content: Create a group with id 0, or rename an existing group. Names must be
+          unique and 1–64 characters.
+        id: create-a-group-with-id-0-or-rename-an-existing-group-names-must-be-unique-and-164-characters
+      - content: Atomically move users into one group. Use id 0 to leave them ungrouped.
+          Plans and quotas are unchanged.
+        id: atomically-move-users-into-one-group-use-id-0-to-leave-them-ungrouped-plans-and-quotas-are-unchanged
+      - content: Delete a group and leave its members ungrouped; users are retained.
+        id: delete-a-group-and-leave-its-members-ungrouped-users-are-retained
       - content: List every client with its attached inbound IDs and traffic record. The
           reverse field, if set, is returned as a nested JSON object (legacy
           JSON-encoded-string form is still accepted on write).
@@ -445,11 +482,20 @@ _openapi:
       - content: Manually adjust a client’s upload + download counters. Useful for
           migrations from external accounting systems.
         id: manually-adjust-a-clients-upload--download-counters-useful-for-migrations-from-external-accounting-systems
-      - content: List source IPs that have connected with the given client’s
-          credentials. Returns an array of "ip (timestamp)" strings.
-        id: list-source-ips-that-have-connected-with-the-given-clients-credentials-returns-an-array-of-ip-timestamp-strings
+      - content: 'List the source IPs seen live with the given client’s credentials in
+          the last 30 minutes, each with the server it connected through, why
+          the IP limit ignores it (`exempt`: host, allowlist or private) and
+          when its ban ends (`bannedUntil`, 0 = not banned).'
+        id: list-the-source-ips-seen-live-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-server-it-connected-through-why-the-ip-limit-ignores-it-exempt-host-allowlist-or-private-and-when-its-ban-ends-banneduntil-0--not-banned
       - content: Reset the recorded IP list for a client.
         id: reset-the-recorded-ip-list-for-a-client
+      - content: List the running IP-limit bans of a client. Each keeps the client off
+          one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every
+          server that serves the client blocks it there.
+        id: list-the-running-ip-limit-bans-of-a-client-each-keeps-the-client-off-one-network-an-ipv4-address-or-an-ipv6-64-until-expiresat-every-server-that-serves-the-client-blocks-it-there
+      - content: Lift one IP-limit ban before it expires. Agents drop the rule on their
+          next config sync; the panel’s own core gets a hot apply.
+        id: lift-one-ip-limit-ban-before-it-expires-agents-drop-the-rule-on-their-next-config-sync-the-panels-own-core-gets-a-hot-apply
       - content: List registered HWID devices for a client with a short fingerprint.
           Full hashes are not exposed.
         id: list-registered-hwid-devices-for-a-client-with-a-short-fingerprint-full-hashes-are-not-exposed
@@ -620,7 +666,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/list","method":"get"},{"path":"/panel/api/clients/list/paged","method":"get"},{"path":"/panel/api/clients/get/{email}","method":"get"},{"path":"/panel/api/clients/get/tgId/{tgId}","method":"get"},{"path":"/panel/api/clients/add","method":"post"},{"path":"/panel/api/clients/renewalPreview","method":"post"},{"path":"/panel/api/clients/update/{email}","method":"post"},{"path":"/panel/api/clients/del/{email}","method":"post"},{"path":"/panel/api/clients/{email}/attach","method":"post"},{"path":"/panel/api/clients/{email}/detach","method":"post"},{"path":"/panel/api/clients/{email}/externalLinks","method":"post"},{"path":"/panel/api/clients/{email}/comment","method":"post"},{"path":"/panel/api/clients/{email}/portal","method":"get"},{"path":"/panel/api/clients/{email}/portal","method":"post"},{"path":"/panel/api/clients/{email}/portal/clear","method":"post"},{"path":"/panel/api/clients/resetAllTraffics","method":"post"},{"path":"/panel/api/clients/delDepleted","method":"post"},{"path":"/panel/api/clients/delOrphans","method":"post"},{"path":"/panel/api/clients/export","method":"get"},{"path":"/panel/api/clients/import","method":"post"},{"path":"/panel/api/clients/renew","method":"post"},{"path":"/panel/api/clients/bulkAdjust","method":"post"},{"path":"/panel/api/clients/bulkEnable","method":"post"},{"path":"/panel/api/clients/bulkDisable","method":"post"},{"path":"/panel/api/clients/bulkDel","method":"post"},{"path":"/panel/api/clients/bulkCreate","method":"post"},{"path":"/panel/api/clients/bulkAttach","method":"post"},{"path":"/panel/api/clients/bulkDetach","method":"post"},{"path":"/panel/api/clients/bulkResetTraffic","method":"post"},{"path":"/panel/api/clients/resetTraffic/{email}","method":"post"},{"path":"/panel/api/clients/updateTraffic/{email}","method":"post"},{"path":"/panel/api/clients/ips/{email}","method":"post"},{"path":"/panel/api/clients/clearIps/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"delete"},{"path":"/panel/api/clients/hwids/{email}/{id}","method":"delete"},{"path":"/panel/api/clients/onlines","method":"post"},{"path":"/panel/api/clients/onlinesByGuid","method":"post"},{"path":"/panel/api/clients/clientIpsByGuid","method":"post"},{"path":"/panel/api/clients/activeInbounds","method":"post"},{"path":"/panel/api/clients/lastOnline","method":"post"},{"path":"/panel/api/clients/traffic/{email}","method":"get"},{"path":"/panel/api/clients/subLinks/{subId}","method":"get"},{"path":"/panel/api/clients/happLink/{id}","method":"post"},{"path":"/panel/api/clients/links/{email}","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/customGroups","method":"get"},{"path":"/panel/api/clients/customGroups/save","method":"post"},{"path":"/panel/api/clients/customGroups/assign","method":"post"},{"path":"/panel/api/clients/customGroups/delete","method":"post"},{"path":"/panel/api/clients/list","method":"get"},{"path":"/panel/api/clients/list/paged","method":"get"},{"path":"/panel/api/clients/get/{email}","method":"get"},{"path":"/panel/api/clients/get/tgId/{tgId}","method":"get"},{"path":"/panel/api/clients/add","method":"post"},{"path":"/panel/api/clients/renewalPreview","method":"post"},{"path":"/panel/api/clients/update/{email}","method":"post"},{"path":"/panel/api/clients/del/{email}","method":"post"},{"path":"/panel/api/clients/{email}/attach","method":"post"},{"path":"/panel/api/clients/{email}/detach","method":"post"},{"path":"/panel/api/clients/{email}/externalLinks","method":"post"},{"path":"/panel/api/clients/{email}/comment","method":"post"},{"path":"/panel/api/clients/{email}/portal","method":"get"},{"path":"/panel/api/clients/{email}/portal","method":"post"},{"path":"/panel/api/clients/{email}/portal/clear","method":"post"},{"path":"/panel/api/clients/resetAllTraffics","method":"post"},{"path":"/panel/api/clients/delDepleted","method":"post"},{"path":"/panel/api/clients/delOrphans","method":"post"},{"path":"/panel/api/clients/export","method":"get"},{"path":"/panel/api/clients/import","method":"post"},{"path":"/panel/api/clients/renew","method":"post"},{"path":"/panel/api/clients/bulkAdjust","method":"post"},{"path":"/panel/api/clients/bulkEnable","method":"post"},{"path":"/panel/api/clients/bulkDisable","method":"post"},{"path":"/panel/api/clients/bulkDel","method":"post"},{"path":"/panel/api/clients/bulkCreate","method":"post"},{"path":"/panel/api/clients/bulkAttach","method":"post"},{"path":"/panel/api/clients/bulkDetach","method":"post"},{"path":"/panel/api/clients/bulkResetTraffic","method":"post"},{"path":"/panel/api/clients/resetTraffic/{email}","method":"post"},{"path":"/panel/api/clients/updateTraffic/{email}","method":"post"},{"path":"/panel/api/clients/ips/{email}","method":"post"},{"path":"/panel/api/clients/clearIps/{email}","method":"post"},{"path":"/panel/api/clients/ipBans/{email}","method":"post"},{"path":"/panel/api/clients/unbanIp/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"delete"},{"path":"/panel/api/clients/hwids/{email}/{id}","method":"delete"},{"path":"/panel/api/clients/onlines","method":"post"},{"path":"/panel/api/clients/onlinesByGuid","method":"post"},{"path":"/panel/api/clients/clientIpsByGuid","method":"post"},{"path":"/panel/api/clients/activeInbounds","method":"post"},{"path":"/panel/api/clients/lastOnline","method":"post"},{"path":"/panel/api/clients/traffic/{email}","method":"get"},{"path":"/panel/api/clients/subLinks/{subId}","method":"get"},{"path":"/panel/api/clients/happLink/{id}","method":"post"},{"path":"/panel/api/clients/links/{email}","method":"get"}]} showTitle />
     </>
   );
 }

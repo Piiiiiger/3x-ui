@@ -59,7 +59,7 @@
             "type": "integer"
           },
           "totalGB": {
-            "description": "TotalGB is the quota in bytes, 0 for none; Days 0 never expires; ResetDay 0 never resets.",
+            "description": "TotalGB is the quota in bytes, 0 for none. Days counts from CreatedAt,\nincluding time spent unused; 0 never expires. ResetDay 0 never resets.",
             "example": 107374182400,
             "format": "int64",
             "type": "integer"
@@ -197,6 +197,11 @@
           },
           "ipLimitAllowlist": {
             "type": "string"
+          },
+          "ipLimitBanMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
           },
           "ldapAutoCreate": {
             "type": "boolean"
@@ -719,6 +724,7 @@
           "externalTrafficInformURI",
           "happLinkEnable",
           "ipLimitAllowlist",
+          "ipLimitBanMinutes",
           "ldapAutoCreate",
           "ldapAutoDelete",
           "ldapBaseDN",
@@ -954,6 +960,11 @@
           },
           "ipLimitAllowlist": {
             "type": "string"
+          },
+          "ipLimitBanMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
           },
           "ldapAutoCreate": {
             "type": "boolean"
@@ -1482,6 +1493,7 @@
           "hasTgBotToken",
           "hasTwoFactorToken",
           "ipLimitAllowlist",
+          "ipLimitBanMinutes",
           "ldapAutoCreate",
           "ldapAutoDelete",
           "ldapBaseDN",
@@ -1943,6 +1955,80 @@
           "createdAt",
           "flowOverride",
           "inboundId"
+        ],
+        "type": "object"
+      },
+      "ClientIpBan": {
+        "description": "ClientIpBan keeps one client off one network until ExpiresAt. Network is the\nunit the IP limit counts: an IPv4 address or an IPv6 /64.",
+        "properties": {
+          "bannedAt": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "expiresAt": {
+            "example": 1791174600,
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "network": {
+            "example": "198.51.100.7",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bannedAt",
+          "email",
+          "expiresAt",
+          "id",
+          "network"
+        ],
+        "type": "object"
+      },
+      "ClientIpInfo": {
+        "description": "ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with\nthe node it is connecting through (\"\" = this local panel).",
+        "properties": {
+          "bannedUntil": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "exempt": {
+            "description": "Exempt says why the IP limit ignores this address (IpExempt*, \"\" = it\ncounts); ExemptHost names the server for a host address, \"\" for this panel.",
+            "example": "host",
+            "type": "string"
+          },
+          "exemptHost": {
+            "example": "hk-relay",
+            "type": "string"
+          },
+          "ip": {
+            "example": "198.51.100.7",
+            "type": "string"
+          },
+          "node": {
+            "example": "hk-relay",
+            "type": "string"
+          },
+          "time": {
+            "example": "2026-10-05 12:00:00",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bannedUntil",
+          "exempt",
+          "exemptHost",
+          "ip",
+          "node",
+          "time"
         ],
         "type": "object"
       },
@@ -2670,7 +2756,8 @@
               "tun",
               "mtproto",
               "amneziawg",
-              "tuic"
+              "tuic",
+              "snell"
             ],
             "example": "vless",
             "type": "string"
@@ -2678,6 +2765,12 @@
           "remark": {
             "description": "Human-readable remark",
             "example": "VLESS-443",
+            "type": "string"
+          },
+          "runtimeError": {
+            "type": "string"
+          },
+          "runtimeState": {
             "type": "string"
           },
           "settings": {},
@@ -3095,7 +3188,8 @@
               "tun",
               "mtproto",
               "amneziawg",
-              "tuic"
+              "tuic",
+              "snell"
             ],
             "example": "vless",
             "type": "string"
@@ -3103,6 +3197,12 @@
           "remark": {
             "description": "Human-readable remark",
             "example": "VLESS-443",
+            "type": "string"
+          },
+          "runtimeError": {
+            "type": "string"
+          },
+          "runtimeState": {
             "type": "string"
           },
           "settings": {},
@@ -3388,6 +3488,30 @@
           "id",
           "total",
           "up"
+        ],
+        "type": "object"
+      },
+      "IpLimitExemptHost": {
+        "description": "IpLimitExemptHost is one Pigger server whose addresses the IP limit never\ncounts or bans; Name is \"\" for this panel's own host.",
+        "properties": {
+          "addresses": {
+            "example": [
+              "203.0.113.7",
+              "2001:db8:1:2::/64"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "example": "hk-relay",
+            "type": "string"
+          }
+        },
+        "required": [
+          "addresses",
+          "name"
         ],
         "type": "object"
       },
@@ -4230,6 +4354,18 @@
             "example": "Monthly 100G",
             "type": "string"
           },
+          "nodeKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "proxyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/PlanProxyGroup"
+            },
+            "type": "array"
+          },
           "remark": {
             "example": "Hong Kong and Singapore",
             "type": "string"
@@ -4245,6 +4381,36 @@
           "name",
           "remark",
           "templateId"
+        ],
+        "type": "object"
+      },
+      "PlanProxyGroup": {
+        "description": "PlanProxyGroup assigns a plan's inbounds to one proxy group from its rule template.",
+        "properties": {
+          "inboundIds": {
+            "example": [
+              1,
+              2
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "name": {
+            "example": "🔰 节点选择",
+            "type": "string"
+          },
+          "nodeKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "inboundIds",
+          "name"
         ],
         "type": "object"
       },
@@ -4281,6 +4447,24 @@
           "name": {
             "example": "Monthly 100G",
             "type": "string"
+          },
+          "nodeKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "proxyGroupNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "proxyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/PlanProxyGroup"
+            },
+            "type": "array"
           },
           "remark": {
             "example": "Hong Kong and Singapore",
@@ -5164,6 +5348,12 @@
             },
             "type": "array"
           },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "id": {
             "example": 1,
             "type": "integer"
@@ -5840,6 +6030,10 @@
   ],
   "tags": [
     {
+      "name": "Proxy chains",
+      "description": "Manage target nodes and their relays for Clash/Mihomo subscriptions."
+    },
+    {
       "name": "Authentication",
       "description": "Two authentication modes are supported. UI sessions use a cookie set by the login endpoint. Programmatic clients (bots, scripts, remote panels) authenticate with a Bearer token taken from Settings → Security → API Token. Both work for every endpoint under /panel/api/*."
     },
@@ -5905,6 +6099,221 @@
     }
   ],
   "paths": {
+    "/panel/api/proxyChains/list": {
+      "get": {
+        "tags": [
+          "Proxy chains"
+        ],
+        "summary": "List configured proxy chains.",
+        "operationId": "get_panel_api_proxyChains_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/proxyChains/add": {
+      "post": {
+        "tags": [
+          "Proxy chains"
+        ],
+        "summary": "Create a chain with distinct target and relay inbounds.",
+        "operationId": "post_panel_api_proxyChains_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Relay route",
+                "targetInboundId": 2,
+                "relayInboundId": 1,
+                "enabled": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/proxyChains/update/{id}": {
+      "post": {
+        "tags": [
+          "Proxy chains"
+        ],
+        "summary": "Update a chain and its optional direct and relay display names.",
+        "operationId": "post_panel_api_proxyChains_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Chain id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Relay route",
+                "targetInboundId": 2,
+                "relayInboundId": 1,
+                "enabled": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/proxyChains/del/{id}": {
+      "post": {
+        "tags": [
+          "Proxy chains"
+        ],
+        "summary": "Delete a proxy chain.",
+        "operationId": "post_panel_api_proxyChains_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Chain id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/proxyChains/check/{id}": {
+      "post": {
+        "tags": [
+          "Proxy chains"
+        ],
+        "summary": "Probe a chain using the configured node runtimes.",
+        "operationId": "post_panel_api_proxyChains_check_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Chain id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/portal-admin": {
       "post": {
         "tags": [
@@ -6210,6 +6619,8 @@
                       "port": 443,
                       "protocol": "vless",
                       "remark": "VLESS-443",
+                      "runtimeError": "",
+                      "runtimeState": "",
                       "settings": null,
                       "shareAddr": "",
                       "shareAddrStrategy": "node",
@@ -7408,45 +7819,6 @@
                       "load5": 0.3,
                       "load15": 0.2
                     }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/server/fail2banStatus": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Reports whether per-client IP limits can be enforced on this host. The panel uses it to gate the \"IP Limit\" field, since enforcement depends on Fail2ban being installed.",
-        "operationId": "get_panel_api_server_fail2banStatus",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "enabled": true,
-                    "installed": true,
-                    "usable": true,
-                    "windows": false
                   }
                 }
               }
@@ -9254,6 +9626,169 @@
                     "ips"
                   ]
                 }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/customGroups": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "List custom user groups with member emails. Groups are independent of subscription plans.",
+        "operationId": "get_panel_api_clients_customGroups",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/customGroups/save": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Create a group with id 0, or rename an existing group. Names must be unique and 1–64 characters.",
+        "operationId": "post_panel_api_clients_customGroups_save",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "id": 0,
+                "name": "Friends"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/customGroups/assign": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Atomically move users into one group. Use id 0 to leave them ungrouped. Plans and quotas are unchanged.",
+        "operationId": "post_panel_api_clients_customGroups_assign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "id": 1,
+                "emails": [
+                  "alice"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/customGroups/delete": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Delete a group and leave its members ungrouped; users are retained.",
+        "operationId": "post_panel_api_clients_customGroups_delete",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "id": 1
               }
             }
           }
@@ -11325,7 +11860,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "List source IPs that have connected with the given client’s credentials. Returns an array of \"ip (timestamp)\" strings.",
+        "summary": "List the source IPs seen live with the given client’s credentials in the last 30 minutes, each with the server it connected through, why the IP limit ignores it (`exempt`: host, allowlist or private) and when its ban ends (`bannedUntil`, 0 = not banned).",
         "operationId": "post_panel_api_clients_ips_email",
         "parameters": [
           {
@@ -11352,8 +11887,26 @@
                     "msg": {
                       "type": "string"
                     },
-                    "obj": {}
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClientIpInfo"
+                      }
+                    }
                   }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "bannedUntil": 0,
+                      "exempt": "host",
+                      "exemptHost": "hk-relay",
+                      "ip": "198.51.100.7",
+                      "node": "hk-relay",
+                      "time": "2026-10-05 12:00:00"
+                    }
+                  ]
                 }
               }
             }
@@ -11395,6 +11948,131 @@
                     },
                     "obj": {}
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/ipBans/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "List the running IP-limit bans of a client. Each keeps the client off one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server that serves the client blocks it there.",
+        "operationId": "post_panel_api_clients_ipBans_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClientIpBan"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "bannedAt": 1791172800,
+                      "email": "alice",
+                      "expiresAt": 1791174600,
+                      "id": 0,
+                      "network": "198.51.100.7"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/unbanIp/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Lift one IP-limit ban before it expires. Agents drop the rule on their next config sync; the panel’s own core gets a hot apply.",
+        "operationId": "post_panel_api_clients_unbanIp_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "network": {
+                    "type": "string",
+                    "description": "The banned network, exactly as the ban lists it."
+                  }
+                },
+                "required": [
+                  "network"
+                ]
+              },
+              "example": {
+                "network": "198.51.100.7"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Ban lifted"
                 }
               }
             }
@@ -13097,6 +13775,9 @@
                           "replaced": false
                         }
                       ],
+                      "groups": [
+                        ""
+                      ],
                       "id": 1,
                       "isDefault": false,
                       "kind": "yaml",
@@ -13620,6 +14301,36 @@
         }
       }
     },
+    "/panel/api/plans/nodeOptions": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "List selectable direct and relayed node variants for plans and proxy-group assignments.",
+        "operationId": "get_panel_api_plans_nodeOptions",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/plans/codes/{id}": {
       "get": {
         "tags": [
@@ -13688,7 +14399,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days and monthly reset day. Zero means unlimited quota, no expiry or no reset respectively.",
+        "summary": "Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days counted from creation (including unused time), and monthly reset day. Expired codes cannot be redeemed; renewal adds only their remaining validity. Zero means unlimited quota, no expiry or no reset respectively.",
         "operationId": "post_panel_api_plans_codes_add",
         "requestBody": {
           "required": true,
@@ -13842,6 +14553,24 @@
                       "limitIp": 0,
                       "memberCount": 4,
                       "name": "Monthly 100G",
+                      "nodeKeys": [
+                        ""
+                      ],
+                      "proxyGroupNames": [
+                        ""
+                      ],
+                      "proxyGroups": [
+                        {
+                          "inboundIds": [
+                            1,
+                            2
+                          ],
+                          "name": "🔰 节点选择",
+                          "nodeKeys": [
+                            ""
+                          ]
+                        }
+                      ],
                       "remark": "Hong Kong and Singapore",
                       "sortIndex": 0,
                       "templateId": 1,
@@ -14682,6 +15411,53 @@
                     },
                     "obj": {}
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/ipLimitExempt": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "List the server addresses the IP limit never counts or bans: this panel’s own (name \"\") and every node’s address plus the address its agent connects from. IPv6 is shown per /64.",
+        "operationId": "post_panel_api_setting_ipLimitExempt",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IpLimitExemptHost"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "addresses": [
+                        "203.0.113.7",
+                        "2001:db8:1:2::/64"
+                      ],
+                      "name": "hk-relay"
+                    }
+                  ]
                 }
               }
             }
@@ -17269,6 +18045,8 @@
                   "port": 443,
                   "protocol": "vless",
                   "remark": "VLESS-443",
+                  "runtimeError": "",
+                  "runtimeState": "",
                   "settings": null,
                   "shareAddr": "",
                   "shareAddrStrategy": "node",

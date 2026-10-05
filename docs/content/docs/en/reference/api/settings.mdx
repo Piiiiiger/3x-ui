@@ -27,6 +27,11 @@ _openapi:
         before write.
       url: '#persist-every-setting-at-once-the-body-mirrors-the-shape-returned-by-all-invalid-values-bad-ports-missing-cert-pairs-etc-are-rejected-before-write'
     - depth: 2
+      title: 'List the server addresses the IP limit never counts or bans: this
+        panel’s own (name "") and every node’s address plus the address its
+        agent connects from. IPv6 is shown per /64.'
+      url: '#list-the-server-addresses-the-ip-limit-never-counts-or-bans-this-panels-own-name--and-every-nodes-address-plus-the-address-its-agent-connects-from-ipv6-is-shown-per-64'
+    - depth: 2
       title: Validate any regular expression with the backend Go RE2 compiler without
         saving it.
       url: '#validate-any-regular-expression-with-the-backend-go-re2-compiler-without-saving-it'
@@ -73,6 +78,10 @@ _openapi:
           /all. Invalid values (bad ports, missing cert pairs, etc.) are
           rejected before write.
         id: persist-every-setting-at-once-the-body-mirrors-the-shape-returned-by-all-invalid-values-bad-ports-missing-cert-pairs-etc-are-rejected-before-write
+      - content: 'List the server addresses the IP limit never counts or bans: this
+          panel’s own (name "") and every node’s address plus the address its
+          agent connects from. IPv6 is shown per /64.'
+        id: list-the-server-addresses-the-ip-limit-never-counts-or-bans-this-panels-own-name--and-every-nodes-address-plus-the-address-its-agent-connects-from-ipv6-is-shown-per-64
       - content: Validate any regular expression with the backend Go RE2 compiler
           without saving it.
         id: validate-any-regular-expression-with-the-backend-go-re2-compiler-without-saving-it
@@ -108,7 +117,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/setting/all","method":"post"},{"path":"/panel/api/setting/defaultSettings","method":"post"},{"path":"/panel/api/setting/factoryDefaults","method":"post"},{"path":"/panel/api/setting/update","method":"post"},{"path":"/panel/api/setting/validateRegex","method":"post"},{"path":"/panel/api/setting/updateUser","method":"post"},{"path":"/panel/api/setting/restartPanel","method":"post"},{"path":"/panel/api/setting/testSmtp","method":"post"},{"path":"/panel/api/setting/testTgBot","method":"post"},{"path":"/panel/api/setting/testDiscord","method":"post"},{"path":"/panel/api/setting/getDefaultJsonConfig","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/setting/all","method":"post"},{"path":"/panel/api/setting/defaultSettings","method":"post"},{"path":"/panel/api/setting/factoryDefaults","method":"post"},{"path":"/panel/api/setting/update","method":"post"},{"path":"/panel/api/setting/ipLimitExempt","method":"post"},{"path":"/panel/api/setting/validateRegex","method":"post"},{"path":"/panel/api/setting/updateUser","method":"post"},{"path":"/panel/api/setting/restartPanel","method":"post"},{"path":"/panel/api/setting/testSmtp","method":"post"},{"path":"/panel/api/setting/testTgBot","method":"post"},{"path":"/panel/api/setting/testDiscord","method":"post"},{"path":"/panel/api/setting/getDefaultJsonConfig","method":"get"}]} showTitle />
     </>
   );
 }
