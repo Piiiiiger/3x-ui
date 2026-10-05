@@ -2318,6 +2318,7 @@
       "sessions": "Oturumlar",
       "sessionsDetail": "{projects} projede",
       "limitsSub": "Pigger Switch eşitler",
+      "planActiveUntil": "{date} tarihine kadar geçerli",
       "limitsRead": "{device} okudu · {time}",
       "limitsNone": "Henüz eşitlenmedi",
       "limitsFailed": "Sınırlar okunamadı: {error}",

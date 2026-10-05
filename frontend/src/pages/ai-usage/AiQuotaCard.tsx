@@ -4,7 +4,7 @@ import { ThunderboltOutlined } from '@ant-design/icons';
 
 import { RainbowBar } from '@/components/ui';
 import type { QuotaSlot } from './aiUsageFormat';
-import { resetCountdown } from './aiUsageFormat';
+import { planEndDate, resetCountdown } from './aiUsageFormat';
 
 const TOOL_NAME = { claude: 'Claude', codex: 'Codex' } as const;
 const KNOWN_TIERS = new Set([
@@ -29,12 +29,19 @@ export default function AiQuotaCard({ slot, nowMs, relativeTime }: AiQuotaCardPr
   const tierLabel = (name: string) =>
     KNOWN_TIERS.has(name) ? t(`pages.aiUsage.tier.${name}`) : name;
 
-  let status = '';
+  // The footer always says where the reading stands: missing, failed, or whose and how fresh.
+  let status: string;
   if (!quota) status = t('pages.aiUsage.limitsNone');
   else if (!quota.success)
     status = quota.error
       ? t('pages.aiUsage.limitsFailed', { error: quota.error })
       : t('pages.aiUsage.limitsSignedOut', { device: quota.deviceName });
+  else
+    status = t('pages.aiUsage.limitsRead', {
+      device: quota.deviceName,
+      time: relativeTime(Math.floor(quota.queriedAt / 1000)),
+    });
+  const endDate = quota ? planEndDate(quota.activeUntil) : null;
 
   return (
     <Card className="ai-quota-card" styles={{ body: { padding: 0 } }}>
@@ -46,11 +53,8 @@ export default function AiQuotaCard({ slot, nowMs, relativeTime }: AiQuotaCardPr
             {quota?.planLabel && <Tag className="ai-plan-tag">{quota.planLabel}</Tag>}
           </div>
           <div className="ov-sub">
-            {quota
-              ? t('pages.aiUsage.limitsRead', {
-                  device: quota.deviceName,
-                  time: relativeTime(Math.floor(quota.queriedAt / 1000)),
-                })
+            {endDate
+              ? t('pages.aiUsage.planActiveUntil', { date: endDate })
               : t('pages.aiUsage.limitsSub')}
           </div>
         </div>
@@ -85,7 +89,11 @@ export default function AiQuotaCard({ slot, nowMs, relativeTime }: AiQuotaCardPr
           ),
         )}
       </ul>
-      <div className="ai-quota-foot">{status || ' '}</div>
+      <div
+        className={quota && !quota.success ? 'ai-quota-foot ai-quota-foot-warn' : 'ai-quota-foot'}
+      >
+        {status}
+      </div>
     </Card>
   );
 }

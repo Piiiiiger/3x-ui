@@ -2318,6 +2318,7 @@
       "sessions": "Сеансы",
       "sessionsDetail": "В {projects} проектах",
       "limitsSub": "Присылает Pigger Switch",
+      "planActiveUntil": "Действует до {date}",
       "limitsRead": "Снято на {device} · {time}",
       "limitsNone": "Ещё не синхронизировано",
       "limitsFailed": "Не удалось прочитать лимиты: {error}",

@@ -46,6 +46,14 @@ export function resetCountdown(resetsAt: string, nowMs: number): string | null {
   return `${Math.max(1, minutes)}m`;
 }
 
+/** The plan's last day as a local YYYY-MM-DD, or null when the reading has none. */
+export function planEndDate(iso: string): string | null {
+  const at = iso ? new Date(iso) : null;
+  if (!at || Number.isNaN(at.getTime())) return null;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`;
+}
+
 export const AI_TOOLS = ['claude', 'codex'] as const;
 export type AiTool = (typeof AI_TOOLS)[number];
 

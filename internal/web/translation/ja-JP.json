@@ -2318,6 +2318,7 @@
       "sessions": "セッション",
       "sessionsDetail": "{projects} 件のプロジェクト",
       "limitsSub": "Pigger Switch から同期",
+      "planActiveUntil": "{date} まで有効",
       "limitsRead": "{device} で取得 · {time}",
       "limitsNone": "まだ同期されていません",
       "limitsFailed": "上限を読み取れません：{error}",

@@ -169,6 +169,28 @@ describe('AiUsageSection', () => {
     expect(rows[1][1].className).toContain('ai-quota-row-empty');
   });
 
+  it('says whose reading each plan card shows, how fresh, and when the plan ends', async () => {
+    const [claude, codex] = overview().quotas;
+    current = overview({
+      quotas: [
+        { ...claude, success: false, error: 'token expired', tiers: [] },
+        { ...codex, activeUntil: '2026-10-30T12:00:00+00:00', queriedAt: Date.now() - 30_000 },
+      ],
+    });
+    renderWithProviders(<AiUsageSection isMobile={false} />);
+    await screen.findByText('Team');
+
+    const [claudeCard, codexCard] = Array.from(
+      document.querySelectorAll<HTMLElement>('.ai-quota-card'),
+    );
+    expect(within(codexCard).getByText('Active until 2026-10-30')).toBeTruthy();
+    const codexFoot = codexCard.querySelector('.ai-quota-foot') as HTMLElement;
+    expect(codexFoot.textContent).toMatch(/^Read on laptop · /);
+    const claudeFoot = claudeCard.querySelector('.ai-quota-foot') as HTMLElement;
+    expect(claudeFoot.textContent).toContain('token expired');
+    expect(claudeFoot.className).toContain('ai-quota-foot-warn');
+  });
+
   it('asks for the chosen period and app and says where the period starts', async () => {
     const user = userEvent.setup();
     renderWithProviders(<AiUsageSection isMobile={false} />);

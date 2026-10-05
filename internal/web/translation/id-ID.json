@@ -2318,6 +2318,7 @@
       "sessions": "Sesi",
       "sessionsDetail": "Di {projects} proyek",
       "limitsSub": "Disinkronkan Pigger Switch",
+      "planActiveUntil": "Aktif hingga {date}",
       "limitsRead": "Dibaca di {device} · {time}",
       "limitsNone": "Belum disinkronkan",
       "limitsFailed": "Gagal membaca batas: {error}",

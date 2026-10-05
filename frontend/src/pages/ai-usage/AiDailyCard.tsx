@@ -48,7 +48,7 @@ export default function AiDailyCard({ daily, isMobile }: AiDailyCardProps) {
           </div>
           <div className="ov-sub">{t('pages.aiUsage.dailySub', { days: daily.length })}</div>
         </div>
-        <div className="ov-wide-legend">
+        <div className="ov-wide-legend ai-daily-legend">
           <div className="ov-legend-label">
             <span className="ai-legend-dot" style={{ background: claudeColor }} />
             Claude Code

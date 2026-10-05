@@ -2318,6 +2318,7 @@
       "sessions": "جلسه‌ها",
       "sessionsDetail": "در {projects} پروژه",
       "limitsSub": "همگام‌شده با Pigger Switch",
+      "planActiveUntil": "معتبر تا {date}",
       "limitsRead": "خوانده‌شده روی {device} · {time}",
       "limitsNone": "هنوز همگام نشده",
       "limitsFailed": "خواندن محدودیت‌ها ممکن نشد: {error}",

@@ -2318,6 +2318,7 @@
       "sessions": "Sessions",
       "sessionsDetail": "Across {projects} projects",
       "limitsSub": "Synced from Pigger Switch",
+      "planActiveUntil": "Active until {date}",
       "limitsRead": "Read on {device} · {time}",
       "limitsNone": "Not synced yet",
       "limitsFailed": "Could not read the limits: {error}",

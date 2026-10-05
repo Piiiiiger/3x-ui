@@ -89,6 +89,21 @@
   color: var(--ov-label);
 }
 
+.ai-quota-foot-warn {
+  color: var(--ant-color-warning);
+}
+
+/* Two app totals and the metric switch: on a phone they wrap as whole items, never inside a name. */
+.ai-daily-legend {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+
+.ai-daily-legend .ov-legend-label {
+  white-space: nowrap;
+}
+
 .ai-legend-dot {
   display: inline-block;
   width: 8px;

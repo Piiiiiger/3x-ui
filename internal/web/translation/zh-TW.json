@@ -2318,6 +2318,7 @@
       "sessions": "對話",
       "sessionsDetail": "涉及 {projects} 個專案",
       "limitsSub": "由 Pigger Switch 同步",
+      "planActiveUntil": "有效期至 {date}",
       "limitsRead": "{device} 讀取 · {time}",
       "limitsNone": "尚未同步",
       "limitsFailed": "讀取失敗：{error}",

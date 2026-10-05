@@ -4,6 +4,7 @@ import {
   cacheHitRate,
   formatTokens,
   formatUsd,
+  planEndDate,
   projectName,
   quotaSlots,
   resetCountdown,
@@ -80,5 +81,12 @@ describe('aiUsageFormat', () => {
       ['claude', null, 2],
       ['codex', null, 2],
     ]);
+  });
+
+  it("gives the plan's last day only when the reading has a real one", () => {
+    // Midday UTC is the same calendar day in every time zone the panel runs in.
+    expect(planEndDate('2026-10-30T12:00:00+00:00')).toBe('2026-10-30');
+    expect(planEndDate('')).toBeNull();
+    expect(planEndDate('soon')).toBeNull();
   });
 });

@@ -2318,6 +2318,7 @@
       "sessions": "الجلسات",
       "sessionsDetail": "عبر {projects} مشروعًا",
       "limitsSub": "يزامنه Pigger Switch",
+      "planActiveUntil": "ساري حتى {date}",
       "limitsRead": "قُرئ على {device} · {time}",
       "limitsNone": "لم تتم المزامنة بعد",
       "limitsFailed": "تعذّرت قراءة الحدود: {error}",

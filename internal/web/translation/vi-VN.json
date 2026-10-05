@@ -2318,6 +2318,7 @@
       "sessions": "Phiên",
       "sessionsDetail": "Trên {projects} dự án",
       "limitsSub": "Đồng bộ từ Pigger Switch",
+      "planActiveUntil": "Hiệu lực đến {date}",
       "limitsRead": "Đọc trên {device} · {time}",
       "limitsNone": "Chưa đồng bộ",
       "limitsFailed": "Không đọc được hạn mức: {error}",
