@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "У білому списку",
       "ipExemptPrivate": "Приватна адреса",
       "ipExemptHint": "Не враховується в ліміті IP і ніколи не блокується",
+      "ipNotCounted": "не враховується",
       "ipBannedFor": "Заблоковано · залишилось {minutes} хв",
       "ipBans": "Блокування за лімітом IP",
       "ipUnban": "Розблокувати",

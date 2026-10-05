@@ -101,7 +101,7 @@ export const ExemptAndBanned: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
     const body = within(canvasElement.ownerDocument.body);
     await userEvent.click(canvas.getByRole('button', { name: 'Show IP log' }));
-    const relay = await body.findByText('Server hk-relay');
+    const relay = await body.findByText('Server hk-relay · not counted');
     await waitFor(() => expect(relay).toBeVisible());
     await userEvent.click(body.getByRole('button', { name: 'Unban' }));
     await waitFor(() => expect(body.queryByRole('button', { name: 'Unban' })).toBeNull());

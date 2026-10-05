@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "في قائمة السماح",
       "ipExemptPrivate": "عنوان خاص",
       "ipExemptHint": "لا يُحتسب ضمن حد IP ولا يُحظر أبدًا",
+      "ipNotCounted": "لا يُحتسب",
       "ipBannedFor": "محظور · متبقٍ {minutes} دقيقة",
       "ipBans": "حظر بسبب حد IP",
       "ipUnban": "إلغاء الحظر",

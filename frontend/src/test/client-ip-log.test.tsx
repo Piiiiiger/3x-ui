@@ -44,7 +44,12 @@ describe('ClientIpLogModal', () => {
       />,
     );
 
-    for (const label of ['Server hk-relay', 'This panel', 'Allowlisted', 'Private address']) {
+    for (const label of [
+      'Server hk-relay · not counted',
+      'This panel · not counted',
+      'Allowlisted · not counted',
+      'Private address · not counted',
+    ]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
     expect(screen.getAllByText('Banned · 15 min left')).toHaveLength(2);

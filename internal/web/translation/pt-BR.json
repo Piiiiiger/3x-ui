@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "Na lista de permissões",
       "ipExemptPrivate": "Endereço privado",
       "ipExemptHint": "Não conta para o limite de IP e nunca é bloqueado",
+      "ipNotCounted": "não conta",
       "ipBannedFor": "Bloqueado · restam {minutes} min",
       "ipBans": "Bloqueios por limite de IP",
       "ipUnban": "Desbloquear",

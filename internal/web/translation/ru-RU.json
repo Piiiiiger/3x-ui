@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "В белом списке",
       "ipExemptPrivate": "Частный адрес",
       "ipExemptHint": "Не учитывается в лимите IP и никогда не блокируется",
+      "ipNotCounted": "не учитывается",
       "ipBannedFor": "Заблокирован · осталось {minutes} мин",
       "ipBans": "Блокировки по лимиту IP",
       "ipUnban": "Разблокировать",

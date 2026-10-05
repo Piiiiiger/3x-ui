@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "در فهرست مجاز",
       "ipExemptPrivate": "آدرس خصوصی",
       "ipExemptHint": "در محدودیت IP شمرده نمی‌شود و هرگز مسدود نمی‌شود",
+      "ipNotCounted": "شمرده نمی‌شود",
       "ipBannedFor": "مسدود · {minutes} دقیقه مانده",
       "ipBans": "مسدودسازی‌های محدودیت IP",
       "ipUnban": "رفع مسدودیت",

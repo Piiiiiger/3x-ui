@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "Dalam daftar izin",
       "ipExemptPrivate": "Alamat privat",
       "ipExemptHint": "Tidak dihitung dalam batas IP dan tidak pernah diblokir",
+      "ipNotCounted": "tidak dihitung",
       "ipBannedFor": "Diblokir · sisa {minutes} menit",
       "ipBans": "Blokir karena batas IP",
       "ipUnban": "Buka blokir",

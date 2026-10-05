@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "İzin listesinde",
       "ipExemptPrivate": "Özel adres",
       "ipExemptHint": "IP sınırına sayılmaz ve asla engellenmez",
+      "ipNotCounted": "sayılmaz",
       "ipBannedFor": "Engellendi · {minutes} dk kaldı",
       "ipBans": "IP sınırı engelleri",
       "ipUnban": "Engeli kaldır",

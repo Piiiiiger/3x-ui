@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "Allowlisted",
       "ipExemptPrivate": "Private address",
       "ipExemptHint": "Not counted toward the IP limit and never banned",
+      "ipNotCounted": "not counted",
       "ipBannedFor": "Banned · {minutes} min left",
       "ipBans": "IP limit bans",
       "ipUnban": "Unban",

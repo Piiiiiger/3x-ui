@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "許可リスト",
       "ipExemptPrivate": "プライベートアドレス",
       "ipExemptHint": "IP 制限に数えられず、ブロックもされません",
+      "ipNotCounted": "カウント対象外",
       "ipBannedFor": "ブロック中 · 残り {minutes} 分",
       "ipBans": "IP 制限によるブロック",
       "ipUnban": "解除",

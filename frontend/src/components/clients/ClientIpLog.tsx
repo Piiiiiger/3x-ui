@@ -88,7 +88,8 @@ export default function ClientIpLogModal({
                   flexWrap: 'wrap',
                   alignItems: 'center',
                   gap: 6,
-                  marginBottom: 6,
+                  padding: '6px 0',
+                  borderBottom: '1px solid var(--ant-color-border-secondary)',
                 }}
               >
                 <Tag color="blue" style={{ margin: 0, maxWidth: '100%', fontFamily: MONO }}>
@@ -100,7 +101,9 @@ export default function ClientIpLogModal({
                 </Tag>
                 {exempt ? (
                   <Tooltip title={t('pages.clients.ipExemptHint')}>
-                    <Tag style={{ margin: 0 }}>{exempt}</Tag>
+                    <Tag style={{ margin: 0 }}>
+                      {exempt} · {t('pages.clients.ipNotCounted')}
+                    </Tag>
                   </Tooltip>
                 ) : null}
                 {entry.bannedUntil * 1000 > nowMs ? (

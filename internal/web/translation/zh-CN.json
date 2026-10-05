@@ -852,6 +852,7 @@
       "ipExemptAllowlist": "白名单",
       "ipExemptPrivate": "内网地址",
       "ipExemptHint": "不计入 IP 限制，也不会被封禁",
+      "ipNotCounted": "不计入",
       "ipBannedFor": "已封禁 · 剩 {minutes} 分钟",
       "ipBans": "IP 限制封禁",
       "ipUnban": "解除",
