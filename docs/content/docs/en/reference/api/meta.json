@@ -16,6 +16,7 @@
     "rule-templates",
     "traffic",
     "probe",
+    "abuse",
     "nodes",
     "backup",
     "websocket"

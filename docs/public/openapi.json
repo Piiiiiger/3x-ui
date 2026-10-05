@@ -26,6 +26,337 @@
       }
     },
     "schemas": {
+      "AbuseActions": {
+        "description": "AbuseActions say what each rule's hits do on an enforcing server. Relay only\ntells the admin until it has proven itself on real traffic.",
+        "properties": {
+          "bt": {
+            "example": "ban",
+            "type": "string"
+          },
+          "crawler": {
+            "example": "ban",
+            "type": "string"
+          },
+          "flood": {
+            "example": "ban",
+            "type": "string"
+          },
+          "fullspeed": {
+            "example": "ban",
+            "type": "string"
+          },
+          "relay": {
+            "example": "record",
+            "type": "string"
+          },
+          "scan": {
+            "example": "ban",
+            "type": "string"
+          },
+          "spam": {
+            "example": "ban",
+            "type": "string"
+          },
+          "speedtest": {
+            "example": "ban",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bt",
+          "crawler",
+          "flood",
+          "fullspeed",
+          "relay",
+          "scan",
+          "spam",
+          "speedtest"
+        ],
+        "type": "object"
+      },
+      "AbuseEvent": {
+        "description": "AbuseEvent is one rule an account tripped on a server, with what tripped it\nand what was done; kept for review while the checks are tuned.",
+        "properties": {
+          "action": {
+            "example": "banned",
+            "type": "string"
+          },
+          "at": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "example": 52,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "id": {
+            "example": 7,
+            "type": "integer"
+          },
+          "level": {
+            "example": "strike",
+            "type": "string"
+          },
+          "limit": {
+            "example": 50,
+            "format": "int64",
+            "type": "integer"
+          },
+          "measure": {
+            "example": "ports",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 0,
+            "type": "integer"
+          },
+          "rule": {
+            "example": "scan",
+            "type": "string"
+          },
+          "samples": {
+            "example": "[\"198.51.100.7\"]",
+            "type": "string"
+          },
+          "window": {
+            "example": 300,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "at",
+          "count",
+          "email",
+          "id",
+          "level",
+          "limit",
+          "measure",
+          "nodeId",
+          "rule",
+          "samples",
+          "window"
+        ],
+        "type": "object"
+      },
+      "AbuseEventView": {
+        "description": "AbuseEventView is a hit as the admin page lists it, said in words.",
+        "properties": {
+          "action": {
+            "example": "banned",
+            "type": "string"
+          },
+          "at": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "example": 52,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "evidence": {
+            "example": "5 分钟内连接同一 IP 的 52 个端口",
+            "type": "string"
+          },
+          "id": {
+            "example": 7,
+            "type": "integer"
+          },
+          "label": {
+            "example": "端口扫描",
+            "type": "string"
+          },
+          "level": {
+            "example": "strike",
+            "type": "string"
+          },
+          "limit": {
+            "example": 50,
+            "format": "int64",
+            "type": "integer"
+          },
+          "measure": {
+            "example": "ports",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 0,
+            "type": "integer"
+          },
+          "rule": {
+            "example": "scan",
+            "type": "string"
+          },
+          "samples": {
+            "example": "[\"198.51.100.7\"]",
+            "type": "string"
+          },
+          "server": {
+            "example": "de-fra-1",
+            "type": "string"
+          },
+          "window": {
+            "example": 300,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "at",
+          "count",
+          "email",
+          "evidence",
+          "id",
+          "label",
+          "level",
+          "limit",
+          "measure",
+          "nodeId",
+          "rule",
+          "samples",
+          "server",
+          "window"
+        ],
+        "type": "object"
+      },
+      "AbuseHistory": {
+        "description": "AbuseHistory is one account's standing and its bans of the last 90 days.",
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/BanRecord"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbuseStatus"
+          }
+        },
+        "required": [
+          "records",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AbuseOverview": {
+        "description": "AbuseOverview is what the admin's abuse page shows at once.",
+        "properties": {
+          "bans": {
+            "items": {
+              "$ref": "#/components/schemas/BanRecord"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AbuseEventView"
+            },
+            "type": "array"
+          },
+          "servers": {
+            "items": {
+              "$ref": "#/components/schemas/AbuseServer"
+            },
+            "type": "array"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/AbuseSettings"
+          }
+        },
+        "required": [
+          "bans",
+          "events",
+          "servers",
+          "settings"
+        ],
+        "type": "object"
+      },
+      "AbuseServer": {
+        "description": "AbuseServer is one server's detection mode. Capable is false for an agent too\nold to detect, or not connected to say: its mode then has no effect yet.",
+        "properties": {
+          "capable": {
+            "example": true,
+            "type": "boolean"
+          },
+          "mode": {
+            "example": "observe",
+            "type": "string"
+          },
+          "name": {
+            "example": "de-fra-1",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "capable",
+          "mode",
+          "name",
+          "nodeId"
+        ],
+        "type": "object"
+      },
+      "AbuseSettings": {
+        "description": "AbuseSettings are what the admin tunes: the thresholds every detecting server\nchecks, what an enforcing server does about each rule, and the sign-up guard.",
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/AbuseActions"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/Rules"
+          },
+          "signup": {
+            "$ref": "#/components/schemas/SignupGuard"
+          }
+        },
+        "required": [
+          "actions",
+          "rules",
+          "signup"
+        ],
+        "type": "object"
+      },
+      "AbuseStatus": {
+        "description": "AbuseStatus is an account's standing: its ban running now, if any, and the\nstrikes it has within the window.",
+        "properties": {
+          "ban": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BanRecord"
+              }
+            ],
+            "nullable": true
+          },
+          "limit": {
+            "example": 3,
+            "type": "integer"
+          },
+          "strikes": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "strikes"
+        ],
+        "type": "object"
+      },
       "ActivationCode": {
         "description": "ActivationCode lets one person register, or a signed-in person renew or change\nplan: it grants a plan with their quota, validity and monthly reset day.",
         "properties": {
@@ -1762,6 +2093,77 @@
           "id",
           "name",
           "scope"
+        ],
+        "type": "object"
+      },
+      "BanRecord": {
+        "description": "BanRecord is a ban as people see it afterwards, from the IP limit or the abuse\nchecks. ExpiresAt 0 is a lock that only an admin lifts.",
+        "properties": {
+          "bannedAt": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "eventId": {
+            "example": 7,
+            "type": "integer"
+          },
+          "expiresAt": {
+            "example": 1791174600,
+            "format": "int64",
+            "type": "integer"
+          },
+          "forgiven": {
+            "example": false,
+            "type": "boolean"
+          },
+          "id": {
+            "example": 3,
+            "type": "integer"
+          },
+          "kind": {
+            "example": "abuse",
+            "type": "string"
+          },
+          "liftedAt": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "network": {
+            "example": "198.51.100.7",
+            "type": "string"
+          },
+          "reason": {
+            "example": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+            "type": "string"
+          },
+          "rule": {
+            "example": "scan",
+            "type": "string"
+          },
+          "strike": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bannedAt",
+          "email",
+          "eventId",
+          "expiresAt",
+          "forgiven",
+          "id",
+          "kind",
+          "liftedAt",
+          "network",
+          "reason",
+          "rule",
+          "strike"
         ],
         "type": "object"
       },
@@ -3650,6 +4052,11 @@
       "Node": {
         "description": "Node represents a remote 3x-ui panel registered with the central panel.\nThe central panel polls each node's existing /panel/api/server/status\nendpoint over HTTP using the per-node ApiToken to populate the runtime\nstatus fields below.",
         "properties": {
+          "abuseMode": {
+            "description": "AbuseMode is off, observe or enforce: whether this host watches for abuse\nand whether what it sees bans anyone.",
+            "example": "off",
+            "type": "string"
+          },
           "activeCount": {
             "example": 23,
             "type": "integer"
@@ -3833,6 +4240,7 @@
           }
         },
         "required": [
+          "abuseMode",
           "activeCount",
           "address",
           "allowPrivateAddress",
@@ -5504,6 +5912,129 @@
         ],
         "type": "object"
       },
+      "Rules": {
+        "description": "Rules are the thresholds, per account and per server; a zero turns a check\noff. Windows are minutes and stay within the hour the detector remembers.",
+        "properties": {
+          "btAttempts": {
+            "example": 30,
+            "type": "integer"
+          },
+          "btWindowMin": {
+            "example": 10,
+            "type": "integer"
+          },
+          "crawlerConns": {
+            "example": 4000,
+            "type": "integer"
+          },
+          "crawlerHosts": {
+            "example": 600,
+            "type": "integer"
+          },
+          "crawlerWindowMin": {
+            "example": 10,
+            "type": "integer"
+          },
+          "crawlerWindows": {
+            "example": 2,
+            "type": "integer"
+          },
+          "floodPerDest": {
+            "example": 1000,
+            "type": "integer"
+          },
+          "floodTotal": {
+            "example": 3000,
+            "type": "integer"
+          },
+          "fullSpeedMbps": {
+            "example": 100,
+            "type": "integer"
+          },
+          "fullSpeedStrikeMin": {
+            "example": 240,
+            "type": "integer"
+          },
+          "fullSpeedWarnMin": {
+            "example": 120,
+            "type": "integer"
+          },
+          "relayMinMb": {
+            "example": 2048,
+            "type": "integer"
+          },
+          "relaySharePct": {
+            "example": 80,
+            "type": "integer"
+          },
+          "relayWindowMin": {
+            "example": 30,
+            "type": "integer"
+          },
+          "scanIps": {
+            "example": 150,
+            "type": "integer"
+          },
+          "scanPortsOnIp": {
+            "example": 50,
+            "type": "integer"
+          },
+          "scanSensitiveIps": {
+            "example": 20,
+            "type": "integer"
+          },
+          "scanWindowMin": {
+            "example": 5,
+            "type": "integer"
+          },
+          "spamAttempts": {
+            "example": 10,
+            "type": "integer"
+          },
+          "spamWindowMin": {
+            "example": 10,
+            "type": "integer"
+          },
+          "speedTestGapMin": {
+            "example": 3,
+            "type": "integer"
+          },
+          "speedTestsPerDay": {
+            "example": 15,
+            "type": "integer"
+          },
+          "speedTestsPerHour": {
+            "example": 5,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "btAttempts",
+          "btWindowMin",
+          "crawlerConns",
+          "crawlerHosts",
+          "crawlerWindowMin",
+          "crawlerWindows",
+          "floodPerDest",
+          "floodTotal",
+          "fullSpeedMbps",
+          "fullSpeedStrikeMin",
+          "fullSpeedWarnMin",
+          "relayMinMb",
+          "relaySharePct",
+          "relayWindowMin",
+          "scanIps",
+          "scanPortsOnIp",
+          "scanSensitiveIps",
+          "scanWindowMin",
+          "spamAttempts",
+          "spamWindowMin",
+          "speedTestGapMin",
+          "speedTestsPerDay",
+          "speedTestsPerHour"
+        ],
+        "type": "object"
+      },
       "ServerSettings": {
         "description": "ServerSettings is the \"server\" block of an AmneziaWG inbound's Settings\nJSON: the interface-level configuration shared by every client/peer. The\nlisten port is deliberately not duplicated here — it lives on the inbound\nrow itself (Inbound.Port), like every other protocol.",
         "properties": {
@@ -5665,6 +6196,24 @@
           "id",
           "key",
           "value"
+        ],
+        "type": "object"
+      },
+      "SignupGuard": {
+        "description": "SignupGuard watches sign-ups on the user page: a network reaching Limit in a\nday is reported, and while Action is ban refused until the day is over.",
+        "properties": {
+          "action": {
+            "example": "record",
+            "type": "string"
+          },
+          "limit": {
+            "example": 3,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "limit"
         ],
         "type": "object"
       },
@@ -6139,6 +6688,10 @@
     {
       "name": "Probe",
       "description": "Server status read from a Lite monitor running on the panel's own host. The panel asks Lite over loopback without a credential, so it shows Lite's guest view: a server hidden in Lite is hidden here, and a private Lite site cannot be read. Answers are cached for 2 seconds; while Lite fails, the last good answer is served for up to 90 seconds, marked stale. Links say which Lite server is which panel host (node id 0 is the panel itself); the client portal uses them to show each client only the servers behind its own inbounds."
+    },
+    {
+      "name": "Abuse",
+      "description": "Abuse detection: each server (node id 0 is the panel's own core) is off, observe or enforce. A detecting server watches its users' connections and traffic, never their content, for spam, BitTorrent, scanning, floods, crawling, repeated speed tests, hours at full speed and relaying. Observe only records and tells the admins; enforce does what each rule is set to. Each strike bans the account on every server for 30 minutes; the fourth within 30 days locks it until an admin lifts it, which also clears its strikes. IP-limit bans are kept in the same history but never count as strikes. The panel also guards sign-ups on the user page per network."
     },
     {
       "name": "Backup",
@@ -15334,6 +15887,600 @@
                   "obj": {
                     "publicUrl": "https://probe.example.com",
                     "url": "http://127.0.0.1:27777"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/overview": {
+      "get": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "Every server with its mode (capable is false for an agent too old to detect, or not connected), the settings, the abuse bans and locks running now, and the latest 100 hits with what was done about each: observed, noticed (recorded for the admins), warned, banned, locked, held (a hit during a ban) or blocked (a network refused sign-ups for the day).",
+        "operationId": "get_panel_api_abuse_overview",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseOverview"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "bans": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "events": [
+                      {
+                        "action": "banned",
+                        "at": 1791172800,
+                        "count": 52,
+                        "email": "alice",
+                        "evidence": "5 分钟内连接同一 IP 的 52 个端口",
+                        "id": 7,
+                        "label": "端口扫描",
+                        "level": "strike",
+                        "limit": 50,
+                        "measure": "ports",
+                        "nodeId": 0,
+                        "rule": "scan",
+                        "samples": "[\"198.51.100.7\"]",
+                        "server": "de-fra-1",
+                        "window": 300
+                      }
+                    ],
+                    "servers": [
+                      {
+                        "capable": true,
+                        "mode": "observe",
+                        "name": "de-fra-1",
+                        "nodeId": 0
+                      }
+                    ],
+                    "settings": {
+                      "actions": {
+                        "bt": "ban",
+                        "crawler": "ban",
+                        "flood": "ban",
+                        "fullspeed": "ban",
+                        "relay": "record",
+                        "scan": "ban",
+                        "spam": "ban",
+                        "speedtest": "ban"
+                      },
+                      "rules": {
+                        "btAttempts": 30,
+                        "btWindowMin": 10,
+                        "crawlerConns": 4000,
+                        "crawlerHosts": 600,
+                        "crawlerWindowMin": 10,
+                        "crawlerWindows": 2,
+                        "floodPerDest": 1000,
+                        "floodTotal": 3000,
+                        "fullSpeedMbps": 100,
+                        "fullSpeedStrikeMin": 240,
+                        "fullSpeedWarnMin": 120,
+                        "relayMinMb": 2048,
+                        "relaySharePct": 80,
+                        "relayWindowMin": 30,
+                        "scanIps": 150,
+                        "scanPortsOnIp": 50,
+                        "scanSensitiveIps": 20,
+                        "scanWindowMin": 5,
+                        "spamAttempts": 10,
+                        "spamWindowMin": 10,
+                        "speedTestGapMin": 3,
+                        "speedTestsPerDay": 15,
+                        "speedTestsPerHour": 5
+                      },
+                      "signup": {
+                        "action": "record",
+                        "limit": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/mode": {
+      "post": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "Set one server's mode: off, observe or enforce. The panel's own core changes at once, an agent on its next config sync. Returns the overview.",
+        "operationId": "post_panel_api_abuse_mode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "nodeId": 3,
+                "mode": "observe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseOverview"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "bans": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "events": [
+                      {
+                        "action": "banned",
+                        "at": 1791172800,
+                        "count": 52,
+                        "email": "alice",
+                        "evidence": "5 分钟内连接同一 IP 的 52 个端口",
+                        "id": 7,
+                        "label": "端口扫描",
+                        "level": "strike",
+                        "limit": 50,
+                        "measure": "ports",
+                        "nodeId": 0,
+                        "rule": "scan",
+                        "samples": "[\"198.51.100.7\"]",
+                        "server": "de-fra-1",
+                        "window": 300
+                      }
+                    ],
+                    "servers": [
+                      {
+                        "capable": true,
+                        "mode": "observe",
+                        "name": "de-fra-1",
+                        "nodeId": 0
+                      }
+                    ],
+                    "settings": {
+                      "actions": {
+                        "bt": "ban",
+                        "crawler": "ban",
+                        "flood": "ban",
+                        "fullspeed": "ban",
+                        "relay": "record",
+                        "scan": "ban",
+                        "spam": "ban",
+                        "speedtest": "ban"
+                      },
+                      "rules": {
+                        "btAttempts": 30,
+                        "btWindowMin": 10,
+                        "crawlerConns": 4000,
+                        "crawlerHosts": 600,
+                        "crawlerWindowMin": 10,
+                        "crawlerWindows": 2,
+                        "floodPerDest": 1000,
+                        "floodTotal": 3000,
+                        "fullSpeedMbps": 100,
+                        "fullSpeedStrikeMin": 240,
+                        "fullSpeedWarnMin": 120,
+                        "relayMinMb": 2048,
+                        "relaySharePct": 80,
+                        "relayWindowMin": 30,
+                        "scanIps": 150,
+                        "scanPortsOnIp": 50,
+                        "scanSensitiveIps": 20,
+                        "scanWindowMin": 5,
+                        "spamAttempts": 10,
+                        "spamWindowMin": 10,
+                        "speedTestGapMin": 3,
+                        "speedTestsPerDay": 15,
+                        "speedTestsPerHour": 5
+                      },
+                      "signup": {
+                        "action": "record",
+                        "limit": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/settings": {
+      "post": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "Replace the abuse settings. rules are the thresholds every detecting server checks; a zero turns a check off, and windows are minutes kept within the hour a server remembers. actions say what each rule's hits do on an enforcing server: record (tell the admins), warn (also tell the person, no strike) or ban (a strike); the full-speed rule's first stage only ever warns. signup limits sign-ups on the user page per network (IPv4 /24, IPv6 /48) and 24 hours: reaching limit is reported to the admins, and while action is ban the network is refused until the day is over; limit 0 turns it off, action is record or ban. Returns the overview.",
+        "operationId": "post_panel_api_abuse_settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseOverview"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "bans": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "events": [
+                      {
+                        "action": "banned",
+                        "at": 1791172800,
+                        "count": 52,
+                        "email": "alice",
+                        "evidence": "5 分钟内连接同一 IP 的 52 个端口",
+                        "id": 7,
+                        "label": "端口扫描",
+                        "level": "strike",
+                        "limit": 50,
+                        "measure": "ports",
+                        "nodeId": 0,
+                        "rule": "scan",
+                        "samples": "[\"198.51.100.7\"]",
+                        "server": "de-fra-1",
+                        "window": 300
+                      }
+                    ],
+                    "servers": [
+                      {
+                        "capable": true,
+                        "mode": "observe",
+                        "name": "de-fra-1",
+                        "nodeId": 0
+                      }
+                    ],
+                    "settings": {
+                      "actions": {
+                        "bt": "ban",
+                        "crawler": "ban",
+                        "flood": "ban",
+                        "fullspeed": "ban",
+                        "relay": "record",
+                        "scan": "ban",
+                        "spam": "ban",
+                        "speedtest": "ban"
+                      },
+                      "rules": {
+                        "btAttempts": 30,
+                        "btWindowMin": 10,
+                        "crawlerConns": 4000,
+                        "crawlerHosts": 600,
+                        "crawlerWindowMin": 10,
+                        "crawlerWindows": 2,
+                        "floodPerDest": 1000,
+                        "floodTotal": 3000,
+                        "fullSpeedMbps": 100,
+                        "fullSpeedStrikeMin": 240,
+                        "fullSpeedWarnMin": 120,
+                        "relayMinMb": 2048,
+                        "relaySharePct": 80,
+                        "relayWindowMin": 30,
+                        "scanIps": 150,
+                        "scanPortsOnIp": 50,
+                        "scanSensitiveIps": 20,
+                        "scanWindowMin": 5,
+                        "spamAttempts": 10,
+                        "spamWindowMin": 10,
+                        "speedTestGapMin": 3,
+                        "speedTestsPerDay": 15,
+                        "speedTestsPerHour": 5
+                      },
+                      "signup": {
+                        "action": "record",
+                        "limit": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/history/{email}": {
+      "get": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "One account's standing (its running ban or lock, and its strikes within 30 days) and its bans of either kind from the last 90 days, newest first.",
+        "operationId": "get_panel_api_abuse_history_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email (unique identifier).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseHistory"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "records": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "status": {
+                      "ban": null,
+                      "limit": 3,
+                      "strikes": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/lift/{email}": {
+      "post": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "End the account's running abuse ban now. Ending a lock also clears the account's strikes; ending a 30-minute ban keeps them. Returns the account's history.",
+        "operationId": "post_panel_api_abuse_lift_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email (unique identifier).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseHistory"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "records": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "status": {
+                      "ban": null,
+                      "limit": 3,
+                      "strikes": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/abuse/forgive/{email}": {
+      "post": {
+        "tags": [
+          "Abuse"
+        ],
+        "summary": "Clear the account's strikes; its history keeps the bans, marked forgiven. Returns the account's history.",
+        "operationId": "post_panel_api_abuse_forgive_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email (unique identifier).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AbuseHistory"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "records": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "eventId": 7,
+                        "expiresAt": 1791174600,
+                        "forgiven": false,
+                        "id": 3,
+                        "kind": "abuse",
+                        "liftedAt": 0,
+                        "network": "198.51.100.7",
+                        "reason": "端口扫描：5 分钟内连接同一 IP 的 52 个端口",
+                        "rule": "scan",
+                        "strike": 1
+                      }
+                    ],
+                    "status": {
+                      "ban": null,
+                      "limit": 3,
+                      "strikes": 1
+                    }
                   }
                 }
               }

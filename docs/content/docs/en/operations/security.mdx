@@ -1,6 +1,6 @@
 ---
 title: Security
-description: Harden 3x-ui — panel auth and 2FA, IP limits, firewall rules, BBR, and staying current.
+description: Harden 3x-ui — panel auth and 2FA, IP limits, abuse prevention, firewall rules, BBR, and staying current.
 icon: ShieldCheck
 ---
 
@@ -40,6 +40,43 @@ The panel enforces the limit itself; it needs no Fail2ban and no firewall rules.
 
 Connections already open when a ban starts run until they close; new connections
 from the banned network are refused.
+
+## Abuse prevention
+
+The panel can watch for accounts that abuse the servers: spam, BitTorrent, port
+scans, attacks, crawling, repeated speed tests, hours at full speed, and relaying
+traffic to a server of their own. It looks at connections and traffic only, never
+at their content, so ordinary use such as downloading software never counts.
+
+- **Per server, off by default.** On the **Abuse** page (防滥用) each server, the
+  panel's own core and every agent node, is **off**, **observe** or **enforce**.
+  Observe records hits and tells the admins; enforce does what each rule is set
+  to do. Observe for about a week first and tune the thresholds on what it
+  records. An agent detects only from a build that reports the `abuse-v1`
+  capability; the page marks a server whose agent cannot.
+- **Rules.** On an enforcing server each rule is set to **record** (tell the
+  admins), **warn** (also tell the user, at no cost) or **ban**. Relaying starts
+  at record, since remote desktops, NAS and some games look the same. Full speed
+  warns after 2 hours and, while the rule bans, strikes after 4.
+- **Strikes and locks.** A strike bans the account on every server for 30
+  minutes. The fourth strike within 30 days locks it until an admin lifts the
+  lock, which also clears its strikes. IP-limit bans share the history but never
+  count as strikes.
+- **Sign-ups.** The user page counts sign-ups per network (an IPv4 /24 or an IPv6
+  /48) over 24 hours. A network reaching the limit (default 3) is reported to the
+  admins with the accounts it made; while the guard bans, it cannot sign up again
+  until the day is over.
+- **Notices.** Bans, locks and warnings reach the user's bound Telegram and the
+  admins. Hits that only record reach the admins at once for scans and attacks,
+  and otherwise in a digest at 09:00 (UTC+8).
+- **What users see.** The user page opens with the usage rules, the warning to
+  turn off location services on phones first; it can be closed or hidden for 7
+  days. The page and the bot list each account's bans of the last 90 days, with
+  when and why.
+
+Bans are routing rules, like the IP limit's: connections already open finish,
+new ones are refused. An admin lifts a ban or clears strikes on the Abuse page,
+in the user dialog or on the bot's user card.
 
 ## Firewall
 

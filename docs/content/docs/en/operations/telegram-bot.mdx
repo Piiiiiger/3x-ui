@@ -78,8 +78,10 @@ written into every inbound the client is on, so saving an inbound never drops it
 ### The account menu
 
 A linked user's `/start` shows their status, remaining traffic as a bar, the
-expiry with the days left and the IPs online, with buttons for the usage
-details, the devices online, the daily report and help. A button replaces the
+expiry with the days left, the IPs online and any running ban or strikes, with
+buttons for the usage details, the devices online, the daily report, the ban
+history (**封禁记录**, the last 90 days with when and why) and help, which also
+lists the usage rules. A button replaces the
 message it is on; one under a notification opens a new message instead, so the
 report or alert stays.
 
@@ -97,6 +99,9 @@ From the card an admin can:
 - **清零流量** — reset the usage on every server; a user the quota cut off comes back.
 - **停用 / 启用** — on every inbound the user is on.
 - **解封 IP** — lift an IP-limit ban.
+- **解除封禁** — end an abuse ban; ending a lock also clears the strikes.
+- **清除违规** — clear the strikes; the history keeps the bans, marked.
+- **封禁记录** — the user's bans of the last 90 days.
 
 **更多工具** opens the original admin buttons: server usage, the sorted traffic
 report, backups, ban logs, inbounds, online clients, the add-client wizard,
@@ -115,6 +120,13 @@ broadcast and the rest.
   limit bans one of a user's IPs, the user and the admins are told; the admins'
   message has a button that lifts the ban. Admins also get a reminder 7, 3 and 1
   days before a server's expiry in the probe.
+- **Abuse notices** — when [abuse prevention](/docs/operations/security#abuse-prevention)
+  bans or locks an account, the user and the admins are told why, with the strike
+  number and the time left; the admins' message has buttons that lift the ban and
+  open the user. A rule set to warn tells the user at most once an hour. Hits
+  that only record reach the admins at once for scans and attacks, at most once
+  an hour per user and rule, and otherwise in a digest at 09:00 Beijing time. A
+  network that signs up many accounts is reported with the accounts.
 - **Event alerts** — selected by `tgEnabledEvents` (default `login.attempt,cpu.high`):
 
   | Event           | When                                                    |
