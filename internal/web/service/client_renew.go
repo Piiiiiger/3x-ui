@@ -12,16 +12,12 @@ import (
 // Renew gives each user days more from the later of now and their expiry: a user
 // without an expiry keeps none, one not yet started gets a longer first period.
 func (s *ClientService) Renew(inboundSvc *InboundService, emails []string, days int, resetUsage bool) (bool, error) {
-	if days < 1 {
-		return false, common.NewError("a renewal adds at least one day")
+	if _, err := RenewedExpiry(0, days, time.Now()); err != nil {
+		return false, err
 	}
-	if int64(days) > math.MaxInt64/planDayMillis {
-		return false, common.NewError("the renewal exceeds the supported expiry range")
-	}
-	add := int64(days) * planDayMillis
 	needRestart := false
 	for _, email := range emails {
-		nr, err := s.renewOne(inboundSvc, email, add, resetUsage)
+		nr, err := s.renewOne(inboundSvc, email, days, resetUsage)
 		needRestart = needRestart || nr
 		if err != nil {
 			return needRestart, err
@@ -30,7 +26,33 @@ func (s *ClientService) Renew(inboundSvc *InboundService, emails []string, days 
 	return needRestart, nil
 }
 
-func (s *ClientService) renewOne(inboundSvc *InboundService, email string, add int64, resetUsage bool) (bool, error) {
+// RenewedExpiry is the expiry a renewal of days leaves, so a preview shows exactly
+// what Renew will write.
+func RenewedExpiry(expiry int64, days int, now time.Time) (int64, error) {
+	if days < 1 {
+		return 0, common.NewError("a renewal adds at least one day")
+	}
+	if int64(days) > math.MaxInt64/planDayMillis {
+		return 0, common.NewError("the renewal exceeds the supported expiry range")
+	}
+	add := int64(days) * planDayMillis
+	switch {
+	case expiry > 0:
+		base := max(expiry, now.UnixMilli())
+		if base > math.MaxInt64-add {
+			return 0, common.NewError("the renewal exceeds the supported expiry range")
+		}
+		return base + add, nil
+	case expiry < 0:
+		if expiry < math.MinInt64+add {
+			return 0, common.NewError("the renewal exceeds the supported expiry range")
+		}
+		return expiry - add, nil
+	}
+	return 0, nil
+}
+
+func (s *ClientService) renewOne(inboundSvc *InboundService, email string, days int, resetUsage bool) (bool, error) {
 	rec, err := s.GetRecordByEmail(nil, email)
 	if err != nil {
 		return false, err
@@ -42,18 +64,8 @@ func (s *ClientService) renewOne(inboundSvc *InboundService, email string, add i
 		}
 	}
 	client := rec.ToClient()
-	switch {
-	case rec.ExpiryTime > 0:
-		base := max(rec.ExpiryTime, time.Now().UnixMilli())
-		if base > math.MaxInt64-add {
-			return false, common.NewError("the renewal exceeds the supported expiry range")
-		}
-		client.ExpiryTime = base + add
-	case rec.ExpiryTime < 0:
-		if rec.ExpiryTime < math.MinInt64+add {
-			return false, common.NewError("the renewal exceeds the supported expiry range")
-		}
-		client.ExpiryTime = rec.ExpiryTime - add
+	if client.ExpiryTime, err = RenewedExpiry(rec.ExpiryTime, days, time.Now()); err != nil {
+		return false, err
 	}
 	needRestart, err := s.Update(inboundSvc, rec.Id, *client, rec.LimitHwid)
 	if err != nil {
