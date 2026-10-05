@@ -9,6 +9,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/abuse"
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 )
@@ -27,6 +28,7 @@ type outboxData struct {
 	InFlight *agentproto.Traffic `json:"inFlight,omitempty"`
 	Inbounds map[string][2]int64 `json:"inbounds"`
 	Clients  map[string][2]int64 `json:"clients"`
+	Abuse    []abuse.Signal      `json:"abuse,omitempty"`
 }
 
 func openOutbox(path string) (*outbox, error) {
@@ -77,6 +79,24 @@ func accumulate(into map[string][2]int64, counters []agentproto.Counter) int {
 	return moved
 }
 
+// maxQueuedSignals bounds abuse signals waiting for a panel that is away; the
+// oldest go first, as the newest say most about what is going on.
+const maxQueuedSignals = 256
+
+// addSignals queues abuse signals to go with the next report.
+func (o *outbox) addSignals(signals []abuse.Signal) {
+	if len(signals) == 0 {
+		return
+	}
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.data.Abuse = append(o.data.Abuse, signals...)
+	if extra := len(o.data.Abuse) - maxQueuedSignals; extra > 0 {
+		o.data.Abuse = append([]abuse.Signal(nil), o.data.Abuse[extra:]...)
+	}
+	o.persist()
+}
+
 // next is the report to send: the unacked one if there is one, otherwise a new
 // one holding everything queued; nil when there is nothing to report.
 func (o *outbox) next() *agentproto.Traffic {
@@ -85,7 +105,7 @@ func (o *outbox) next() *agentproto.Traffic {
 	if o.data.InFlight != nil {
 		return o.data.InFlight
 	}
-	if len(o.data.Inbounds) == 0 && len(o.data.Clients) == 0 {
+	if len(o.data.Inbounds) == 0 && len(o.data.Clients) == 0 && len(o.data.Abuse) == 0 {
 		return nil
 	}
 	o.data.InFlight = &agentproto.Traffic{
@@ -93,7 +113,9 @@ func (o *outbox) next() *agentproto.Traffic {
 		Seq:      o.data.NextSeq,
 		Inbounds: drain(o.data.Inbounds),
 		Clients:  drain(o.data.Clients),
+		Abuse:    o.data.Abuse,
 	}
+	o.data.Abuse = nil
 	o.data.NextSeq++
 	o.persist()
 	return o.data.InFlight

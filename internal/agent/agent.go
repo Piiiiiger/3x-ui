@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/abuse"
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
@@ -45,6 +46,7 @@ type Agent struct {
 	core     *xrayCore
 	outbox   *outbox
 	activity *activity
+	abuse    *abuseWatch
 	sampler  hostSampler
 
 	// statsMu orders stats polls with core restarts, so counters are read
@@ -79,7 +81,7 @@ func New(cfg Config, version string) (*Agent, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Agent{
+	a := &Agent{
 		cfg:      cfg,
 		version:  version,
 		interval: defaultInterval,
@@ -87,7 +89,10 @@ func New(cfg Config, version string) (*Agent, error) {
 		snell:    newSnellManager(cfg.StateDir),
 		outbox:   box,
 		activity: newActivity(onlineGrace),
-	}, nil
+		abuse:    newAbuseWatch(),
+	}
+	a.core.onStarted = a.abuse.attach
+	return a, nil
 }
 
 // Run serves until ctx ends, then queues the usage counted since the last poll
@@ -131,7 +136,11 @@ func (a *Agent) restoreConfig() {
 func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 	a.statsMu.Lock()
 	defer a.statsMu.Unlock()
-	coreRaw, instances, err := snell.Split(apply.Config)
+	withoutAbuse, abuseRules, err := abuse.SplitConfig(apply.Config)
+	if err != nil {
+		return agentproto.Result{Error: err.Error(), ConfigHash: a.applied.Hash}
+	}
+	coreRaw, instances, err := snell.Split(withoutAbuse)
 	if err != nil {
 		return agentproto.Result{Error: err.Error(), ConfigHash: a.applied.Hash}
 	}
@@ -148,7 +157,8 @@ func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 		return agentproto.Result{Error: err.Error(), ConfigHash: previous.Hash, Restarted: restarted}
 	}
 	rollback := func(cause error, restoreSnell bool) agentproto.Result {
-		oldCore, oldInstances, splitErr := snell.Split(previous.Config)
+		previousCore, _, _ := abuse.SplitConfig(previous.Config)
+		oldCore, oldInstances, splitErr := snell.Split(previousCore)
 		if len(previous.Config) > 0 && splitErr == nil {
 			if _, restoreErr := a.core.apply(oldCore, previous.Hash, false); restoreErr != nil {
 				cause = fmt.Errorf("%w; Xray rollback failed: %w", cause, restoreErr)
@@ -177,6 +187,7 @@ func (a *Agent) applyConfig(apply agentproto.Apply) agentproto.Result {
 		return rollback(fmt.Errorf("cannot persist applied configuration"), true)
 	}
 	a.applied = saved
+	a.abuse.configure(abuseRules)
 	return agentproto.Result{OK: true, ConfigHash: apply.Hash, Restarted: restarted}
 }
 
@@ -247,6 +258,7 @@ func (a *Agent) pollLocked(now time.Time) {
 		}
 		users = append(users, agentproto.Counter{Name: c.Email, Up: c.Up, Down: c.Down})
 		emails = append(emails, c.Email)
+		a.abuse.traffic(c.Email, c.Up+c.Down, now)
 	}
 	a.outbox.add(inbounds, users)
 
@@ -275,6 +287,7 @@ func (a *Agent) pollLoop(ctx context.Context) {
 			a.pollLocked(now)
 			status := a.statusLocked(now)
 			a.statsMu.Unlock()
+			a.outbox.addSignals(a.abuse.collect(now))
 			if a.send(agentproto.Message{Type: agentproto.TypeStatus, Status: &status}) == nil {
 				a.sendTraffic(false)
 			}
@@ -395,7 +408,7 @@ func (a *Agent) session(ctx context.Context) error {
 	a.statsMu.Lock()
 	hello := agentproto.Hello{AgentVersion: a.version, XrayVersion: xrayVersion(), ConfigHash: a.applied.Hash}
 	a.statsMu.Unlock()
-	hello.Capabilities = []string{agentproto.ProbeCapability}
+	hello.Capabilities = []string{agentproto.ProbeCapability, abuse.Capability}
 	if a.snell.ready {
 		hello.Capabilities = append(hello.Capabilities, snell.Capability)
 	}

@@ -5,6 +5,8 @@ package agentproto
 import (
 	"encoding/json"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/abuse"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 
@@ -78,6 +80,8 @@ type Traffic struct {
 	Seq      int64     `json:"seq"`
 	Inbounds []Counter `json:"inbounds,omitempty"`
 	Clients  []Counter `json:"clients,omitempty"`
+	// Abuse are the rules accounts tripped here, delivered once like the usage.
+	Abuse []abuse.Signal `json:"abuse,omitempty"`
 }
 
 // Counter is the traffic of one inbound tag or one client email.

@@ -34,6 +34,9 @@ type xrayCore struct {
 	refusedErr        error
 	refusedAt         time.Time
 	retryRefusedAfter time.Duration
+
+	// onStarted runs once each new core is up, to hook into it.
+	onStarted func(*xcore.Instance)
 }
 
 func newXrayCore() *xrayCore {
@@ -147,6 +150,9 @@ func (c *xrayCore) startLocked(raw []byte, hash string, cfg *xray.Config) error 
 		return err
 	}
 	c.instance, c.cfg, c.raw, c.hash, c.apiPort, c.lastErr = instance, cfg, raw, hash, apiPort, ""
+	if c.onStarted != nil {
+		c.onStarted(instance)
+	}
 	return nil
 }
 
