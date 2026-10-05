@@ -112,6 +112,9 @@ func (t *Tgbot) OnReceive() {
 			// Use goroutine with worker pool for concurrent callback processing
 			go runBotHandler(func() {
 				userStateMgr.clear(callbackActor(&query))
+				if t.handleAccountCallback(&query) {
+					return
+				}
 				if isAdmin, ok := t.gateCallback(&query); ok {
 					t.answerCallback(&query, isAdmin)
 				}

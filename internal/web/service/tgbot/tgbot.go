@@ -23,6 +23,7 @@ import (
 
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
+	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpproxy"
 )
@@ -381,6 +382,27 @@ func (t *Tgbot) Start(i18nFS embed.FS) error {
 	return nil
 }
 
+// The command menus Telegram offers: the account commands for everyone, the
+// admin set in each admin's own chat.
+var (
+	userBotCommands = []telego.BotCommand{
+		{Command: "start", Description: "主菜单"},
+		{Command: "report", Description: "查看用量"},
+		{Command: "ips", Description: "在线设备"},
+		{Command: "daily", Description: "日报设置"},
+		{Command: "bind", Description: "用激活码绑定账号"},
+		{Command: "help", Description: "使用帮助"},
+	}
+	adminBotCommands = []telego.BotCommand{
+		{Command: "start", Description: "管理菜单"},
+		{Command: "users", Description: "用户列表"},
+		{Command: "user", Description: "查找用户：/user 名字"},
+		{Command: "report", Description: "我的用量"},
+		{Command: "daily", Description: "我的日报设置"},
+		{Command: "help", Description: "帮助"},
+	}
+)
+
 func (t *Tgbot) trySetBotCommands(bot *telego.Bot) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -388,16 +410,15 @@ func (t *Tgbot) trySetBotCommands(bot *telego.Bot) {
 		}
 	}()
 
-	err := bot.SetMyCommands(context.Background(), &telego.SetMyCommandsParams{
-		Commands: []telego.BotCommand{
-			{Command: "start", Description: "绑定账号与使用说明"},
-			{Command: "bind", Description: "使用专属激活码绑定账号"},
-			{Command: "report", Description: "查询剩余流量和使用情况"},
-			{Command: "daily", Description: "日报开关和发送时间（北京时间）"},
-		},
-	})
-	if err != nil {
+	if err := bot.SetMyCommands(context.Background(), &telego.SetMyCommandsParams{Commands: userBotCommands}); err != nil {
 		logger.Warning("Failed to set bot commands:", err)
+	}
+	for _, admin := range adminSnapshot() {
+		if err := bot.SetMyCommands(context.Background(), &telego.SetMyCommandsParams{
+			Commands: adminBotCommands, Scope: tu.ScopeChat(tu.ID(admin)),
+		}); err != nil {
+			logger.Warning("Failed to set the admin's bot commands:", err)
+		}
 	}
 }
 

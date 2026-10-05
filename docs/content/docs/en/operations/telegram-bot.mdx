@@ -48,31 +48,59 @@ panel:
 
 ## Commands
 
-These appear in the Telegram command menu: `/start`, `/help`, `/status`, `/id`.
-Additional commands:
+Everyone's command menu holds the account commands; each admin's own chat gets
+the admin set. Everything is also reachable by buttons, and the account and admin
+menus are in Chinese.
 
-| Command            | Who    | Action                                                       |
-| ------------------ | ------ | ------------------------------------------------------------ |
-| `/start`           | anyone | Greeting and the menu of inline buttons; an unlinked account gets only its Telegram ID |
-| `/help`            | both   | The menu of inline buttons                                   |
-| `/status`          | both   | Confirm the bot is alive                                     |
-| `/id`              | anyone | Show your Telegram numeric ID                                |
-| `/usage <arg>`     | both   | Admins search clients; users look up their own usage         |
-| `/inbound <remark>`| admin  | Show an inbound's details                                    |
-| `/restart`         | admin  | Restart Xray                                                 |
+| Command          | Who    | Action                                                                 |
+| ---------------- | ------ | ---------------------------------------------------------------------- |
+| `/start`         | anyone | The admin menu for an admin, the account menu for a linked user, how to link for anyone else; `/start <code>` links the account the activation code names |
+| `/report`        | user   | Usage: remaining traffic, today's use, next reset, expiry, IPs online  |
+| `/ips`           | user   | The IPs online now, relays never among them, and running bans with the time left |
+| `/daily`         | user   | Daily report settings; also `/daily on`, `/daily off`, `/daily 21:30` (Beijing time) |
+| `/bind <code>`   | anyone | Link with an activation code; sending the bare code works too          |
+| `/help`          | anyone | How the bot works                                                      |
+| `/users`         | admin  | Every user, ten a page, with status, IP slots and expiry               |
+| `/user <name>`   | admin  | Find users by part of the name; a single hit opens its card            |
 
-A user is a Telegram account linked to at least one client. Any other account
-can run only `/start` and `/id`; the bot ignores its other commands and
-button taps. To link a customer, tap **Invite Link** on the client's card in the bot and
-send them the `t.me` link: the first account to open it is linked to every
-client that shares that Subscription ID. The Subscription ID is the invite code,
-so keep it long and random. Each account gets five claim attempts an hour, and
-admins are notified when one runs out.
+`/status`, `/id`, `/usage <arg>`, `/inbound <remark>` and `/restart` work as
+before.
 
-Admins also get inline-button flows for server usage, sorted traffic reports,
-resetting traffic, DB backups, ban logs, listing inbounds/clients, online
-clients, "depleting soon", and a full **add-client** wizard. Regular users get
-buttons for their own usage, subscription links, individual links, and QR codes.
+### Linking an account
+
+A user is a Telegram account linked to a client. In the user page,
+**我的激活码** → **一键绑定 Telegram** opens the bot with the account's
+activation code, and pressing Start links it; sending the code to the bot works
+too, in any case and with or without dashes. One code links one account to one
+Telegram account, and each Telegram account gets five tries an hour. The link is
+written into every inbound the client is on, so saving an inbound never drops it.
+
+### The account menu
+
+A linked user's `/start` shows their status, remaining traffic as a bar, the
+expiry with the days left and the IPs online, with buttons for the usage
+details, the devices online, the daily report and help. A button replaces the
+message it is on; one under a notification opens a new message instead, so the
+report or alert stays.
+
+### The admin menu
+
+The admin's `/start` counts users online, users due for renewal, expired,
+used-up and disabled users, running IP bans and nodes online. **用户列表** and
+**需要续期** (due within a week, lapsed within a month, or nine tenths through
+the quota) lead to a user's card: plan, usage, expiry, the IPs online and bans.
+From the card an admin can:
+
+- **续期** — add 7, 30, 90, 180 or 365 days, clearing the usage unless unticked,
+  the same renewal as on the users page. The confirmation shows the expiry
+  before and after, and pressing it twice renews once.
+- **清零流量** — reset the usage on every server; a user the quota cut off comes back.
+- **停用 / 启用** — on every inbound the user is on.
+- **解封 IP** — lift an IP-limit ban.
+
+**更多工具** opens the original admin buttons: server usage, the sorted traffic
+report, backups, ban logs, inbounds, online clients, the add-client wizard,
+broadcast and the rest.
 
 ## Reports & alerts
 
@@ -81,6 +109,12 @@ buttons for their own usage, subscription links, individual links, and QR codes.
   clients, traffic), a list of exhausted/expiring clients, and — if
   `tgBotBackup` is on — a database + Xray config backup. Clients linked by
   Telegram ID get their own expiry/quota warnings.
+- **Account notices** — once a minute the bot checks each linked user and, at
+  their daily time (default 20:00 Beijing time), sends the daily usage report if
+  it is on and a renewal reminder 7, 3 and 1 days before expiry. When the IP
+  limit bans one of a user's IPs, the user and the admins are told; the admins'
+  message has a button that lifts the ban. Admins also get a reminder 7, 3 and 1
+  days before a server's expiry in the probe.
 - **Event alerts** — selected by `tgEnabledEvents` (default `login.attempt,cpu.high`):
 
   | Event           | When                                                    |
@@ -107,7 +141,7 @@ The warning lead times come from `expireDiff` (days before expiry) and
 | `tgRunTime`    | `@daily`                   | Report schedule (cron / `@daily` / `@every …`).|
 | `tgBotBackup`  | `false`                    | Attach a DB backup to the periodic report.     |
 | `tgCpu` / `tgMemory` | `80` / `80`          | CPU / memory alert thresholds (percent).       |
-| `tgLang`       | `en-US`                    | Bot language.                                  |
+| `tgLang`       | `en-US`                    | Language of the original admin tools; the account and admin menus are Chinese. |
 | `tgEnabledEvents` | `login.attempt,cpu.high`| Which events to deliver.                       |
 
 <Callout type="warn">

@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"strings"
 	"sync"
 
 	"gorm.io/gorm"
@@ -62,7 +61,7 @@ func BindAccountActivation(code string, tgID int64) (*model.ClientRecord, bool, 
 	defer accountBindMu.Unlock()
 	db := database.GetDB()
 	var row model.AccountActivation
-	if err := db.Where("code = ?", strings.ToUpper(strings.TrimSpace(code))).First(&row).Error; err != nil {
+	if err := db.Where("code = ?", canonicalActivationCode(code)).First(&row).Error; err != nil {
 		return nil, false, ErrActivationCode
 	}
 	var client model.ClientRecord

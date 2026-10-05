@@ -140,20 +140,51 @@ func (t *Tgbot) SubmitAddClient(draft *clientDraft) (bool, error) {
 // buildSubscriptionURLs builds the HTML sub page URL and JSON subscription URL for a client email
 func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
 	// Resolve subId from client email
-	traffic, client, err := t.inboundService.GetClientByEmail(email)
-	_ = traffic
+	_, client, err := t.inboundService.GetClientByEmail(email)
 	if err != nil || client == nil {
 		return "", "", errors.New("client not found")
 	}
 
-	// Gather settings to construct absolute URLs
 	subURI, _ := t.settingService.GetSubURI()
 	subJsonURI, _ := t.settingService.GetSubJsonURI()
-	subDomain, _ := t.settingService.GetSubDomain()
-	subPort, _ := t.settingService.GetSubPort()
 	subPath, _ := t.settingService.GetSubPath()
 	subJsonPath, _ := t.settingService.GetSubJsonPath()
 	subJsonEnable, _ := t.settingService.GetSubJsonEnable()
+	origin, _ := t.subOrigin()
+
+	var subURL string
+	var subJsonURL string
+
+	// If pre-configured URIs are available, use them directly
+	if subURI != "" {
+		if !strings.HasSuffix(subURI, "/") {
+			subURI = subURI + "/"
+		}
+		subURL = fmt.Sprintf("%s%s", subURI, client.SubID)
+	} else {
+		subURL = origin + slashed(subPath) + client.SubID
+	}
+
+	if subJsonURI != "" {
+		if !strings.HasSuffix(subJsonURI, "/") {
+			subJsonURI = subJsonURI + "/"
+		}
+		subJsonURL = fmt.Sprintf("%s%s", subJsonURI, client.SubID)
+	} else {
+		subJsonURL = origin + slashed(subJsonPath) + client.SubID
+	}
+
+	if !subJsonEnable {
+		subJsonURL = ""
+	}
+	return subURL, subJsonURL, nil
+}
+
+// subOrigin is the subscription server's scheme and host; public is false when
+// the host falls back to a name only this machine knows.
+func (t *Tgbot) subOrigin() (origin string, public bool) {
+	subDomain, _ := t.settingService.GetSubDomain()
+	subPort, _ := t.settingService.GetSubPort()
 	subKeyFile, _ := t.settingService.GetSubKeyFile()
 	subCertFile, _ := t.settingService.GetSubCertFile()
 
@@ -163,11 +194,11 @@ func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
 		scheme = "https"
 	}
 
-	// Fallbacks
+	public = subDomain != ""
 	if subDomain == "" {
 		// try panel domain, otherwise OS hostname
 		if d, err := t.settingService.GetWebDomain(); err == nil && d != "" {
-			subDomain = d
+			subDomain, public = d, true
 		} else if hostname != "" {
 			subDomain = hostname
 		} else {
@@ -181,47 +212,18 @@ func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
 	} else {
 		host = fmt.Sprintf("%s:%d", subDomain, subPort)
 	}
+	return scheme + "://" + host, public
+}
 
-	// Ensure paths
-	if !strings.HasPrefix(subPath, "/") {
-		subPath = "/" + subPath
+// slashed gives a URL path its leading and trailing slash.
+func slashed(path string) string {
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
 	}
-	if !strings.HasSuffix(subPath, "/") {
-		subPath = subPath + "/"
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
 	}
-	if !strings.HasPrefix(subJsonPath, "/") {
-		subJsonPath = "/" + subJsonPath
-	}
-	if !strings.HasSuffix(subJsonPath, "/") {
-		subJsonPath = subJsonPath + "/"
-	}
-
-	var subURL string
-	var subJsonURL string
-
-	// If pre-configured URIs are available, use them directly
-	if subURI != "" {
-		if !strings.HasSuffix(subURI, "/") {
-			subURI = subURI + "/"
-		}
-		subURL = fmt.Sprintf("%s%s", subURI, client.SubID)
-	} else {
-		subURL = fmt.Sprintf("%s://%s%s%s", scheme, host, subPath, client.SubID)
-	}
-
-	if subJsonURI != "" {
-		if !strings.HasSuffix(subJsonURI, "/") {
-			subJsonURI = subJsonURI + "/"
-		}
-		subJsonURL = fmt.Sprintf("%s%s", subJsonURI, client.SubID)
-	} else {
-		subJsonURL = fmt.Sprintf("%s://%s%s%s", scheme, host, subJsonPath, client.SubID)
-	}
-
-	if !subJsonEnable {
-		subJsonURL = ""
-	}
-	return subURL, subJsonURL, nil
+	return path
 }
 
 // sendClientSubLinks sends the subscription links for the client to the chat.

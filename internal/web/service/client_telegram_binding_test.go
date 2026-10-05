@@ -1,6 +1,7 @@
 package service
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
@@ -76,4 +77,28 @@ func TestSetClientTelegramUserIDBindsEveryInbound(t *testing.T) {
 	}
 	resyncInbound(t, a)
 	assertTelegramBinding(t, "shared@tg", 0, a, b)
+}
+
+// A code is bound however it was typed, the way the portal reads one at sign-up.
+func TestBindAcceptsACodeTypedWithoutDashesOrCapitals(t *testing.T) {
+	a, _, _ := setupPlanDB(t)
+	createPlanClient(t, "typed@tg", []int{a}, 0)
+	act, err := EnsureAccountActivation(planRecord(t, "typed@tg"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	typed := strings.ToLower(strings.ReplaceAll(act.Code, "-", " "))
+
+	if !LooksLikeActivationCode(typed) {
+		t.Fatalf("LooksLikeActivationCode(%q) = false for a real code", typed)
+	}
+	if _, _, err := BindAccountActivation(typed, 7170); err != nil {
+		t.Fatalf("bind %q: %v", typed, err)
+	}
+	assertTelegramBinding(t, "typed@tg", 7170, a)
+	for _, text := range []string{"hello there", "IOIO-IOIO-IOIO-IOIO", "ABCD-EFGH-JKLM"} {
+		if LooksLikeActivationCode(text) {
+			t.Errorf("LooksLikeActivationCode(%q) = true for text that cannot be a code", text)
+		}
+	}
 }

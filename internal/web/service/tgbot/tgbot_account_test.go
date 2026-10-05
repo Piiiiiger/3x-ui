@@ -67,12 +67,12 @@ func TestAccountPrivateBindingAndPreferences(t *testing.T) {
 func TestAccountNotificationPersistsAndRenewalChangesKey(t *testing.T) {
 	tb, calls := newLevelTgbot(t)
 	now := time.Now()
-	tb.deliverAccountNotification(context.Background(), "account:1:4242:1000:7", ownerTgID, "test", now)
-	tb.deliverAccountNotification(context.Background(), "account:1:4242:1000:7", ownerTgID, "test", now)
+	tb.deliverAccountNotification(context.Background(), "account:1:4242:1000:7", ownerTgID, botView{text: "test"}, now)
+	tb.deliverAccountNotification(context.Background(), "account:1:4242:1000:7", ownerTgID, botView{text: "test"}, now)
 	if calls("sendMessage") != 1 {
 		t.Fatal("duplicate delivery")
 	}
-	tb.deliverAccountNotification(context.Background(), "account:1:4242:2000:7", ownerTgID, "renewed", now)
+	tb.deliverAccountNotification(context.Background(), "account:1:4242:2000:7", ownerTgID, botView{text: "renewed"}, now)
 	if calls("sendMessage") != 2 {
 		t.Fatal("new expiry suppressed")
 	}

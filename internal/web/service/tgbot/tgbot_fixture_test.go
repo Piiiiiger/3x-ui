@@ -1,6 +1,7 @@
 package tgbot
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -37,6 +38,70 @@ type botCall struct {
 type botRecorder struct {
 	mu    sync.Mutex
 	calls []botCall
+}
+
+func (r *botRecorder) all() []botCall {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]botCall(nil), r.calls...)
+}
+
+// shown returns what the person ended up looking at: each new message and each
+// edit, in order; callback toasts and keyboard-only edits are left out.
+func (r *botRecorder) shown() []botCall {
+	var out []botCall
+	for _, c := range r.all() {
+		if c.Method == "sendMessage" || c.Method == "editMessageText" {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+func (r *botRecorder) last(t *testing.T) botCall {
+	t.Helper()
+	shown := r.shown()
+	if len(shown) == 0 {
+		t.Fatal("the bot showed nothing")
+	}
+	return shown[len(shown)-1]
+}
+
+func (r *botRecorder) count(method string) int {
+	n := 0
+	for _, c := range r.all() {
+		if c.Method == method {
+			n++
+		}
+	}
+	return n
+}
+
+func (r *botRecorder) reset() {
+	r.mu.Lock()
+	r.calls = nil
+	r.mu.Unlock()
+}
+
+func (c botCall) hasButton(label string) bool {
+	for _, l := range c.Labels {
+		if l == label {
+			return true
+		}
+	}
+	return false
+}
+
+// dataFor returns the callback data behind the button whose label holds label.
+func (c botCall) dataFor(t *testing.T, label string) string {
+	t.Helper()
+	for i, l := range c.Labels {
+		if strings.Contains(l, label) && c.Data[i] != "" {
+			return c.Data[i]
+		}
+	}
+	t.Fatalf("no button %q among %q", label, c.Labels)
+	return ""
 }
 
 func recordingTelegram(t *testing.T) *botRecorder {
@@ -98,7 +163,48 @@ func newPiggerBot(t *testing.T) (*Tgbot, *botRecorder) {
 	withAdmins(t, adminTgID)
 	userStateMgr.reset()
 	t.Cleanup(userStateMgr.reset)
+	resetAccountPacing()
+	t.Cleanup(resetAccountPacing)
+	inviteAttemptsMu.Lock()
+	inviteAttemptsBy = map[int64]*inviteAttempts{}
+	inviteAttemptsMu.Unlock()
+	// A scan's snapshot outlives its test; an empty one starts this test clean.
+	if _, err := (&service.IpLimitService{}).Enforce(time.Now(), nil); err != nil {
+		t.Fatalf("clear online snapshot: %v", err)
+	}
 	return &Tgbot{}, rec
+}
+
+func resetAccountPacing() {
+	accountPacing.Lock()
+	accountPacing.serversAt, accountPacing.servers, accountPacing.prunedOn = time.Time{}, nil, ""
+	accountPacing.Unlock()
+}
+
+// withProbe stands in for Lite, counting how often the scheduler asks it.
+func withProbe(t *testing.T, servers ...service.ProbeServer) *int {
+	t.Helper()
+	calls := new(int)
+	orig := probeSnapshot
+	probeSnapshot = func(context.Context) (service.ProbeSnapshot, bool, error) {
+		*calls++
+		return service.ProbeSnapshot{Servers: servers}, true, nil
+	}
+	t.Cleanup(func() { probeSnapshot = orig })
+	return calls
+}
+
+// observe runs one IP-limit scan in which each email is online from the given
+// addresses, the way the 10 s job feeds it.
+func observe(t *testing.T, now time.Time, email string, ips ...string) {
+	t.Helper()
+	seen := make([]service.IpObservation, 0, len(ips))
+	for i, ip := range ips {
+		seen = append(seen, service.IpObservation{Email: email, IP: ip, LastSeen: now.Unix() - int64(len(ips)-i), Server: 0})
+	}
+	if _, err := (&service.IpLimitService{}).Enforce(now, seen); err != nil {
+		t.Fatalf("scan: %v", err)
+	}
 }
 
 const adminTgID = int64(9001)
@@ -159,6 +265,42 @@ func usageOf(t *testing.T, email string) int64 {
 	return traffic.Up + traffic.Down
 }
 
+// bindTelegram binds a client the way the account bot does.
+func bindTelegram(t *testing.T, email string, tgID int64) {
+	t.Helper()
+	act, err := service.EnsureAccountActivation(clientRecord(t, email))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := service.BindAccountActivation(act.Code, tgID); err != nil {
+		t.Fatalf("bind %s: %v", email, err)
+	}
+}
+
+func privateMessage(from int64, text string) *telego.Message {
+	return &telego.Message{
+		From: &telego.User{ID: from, FirstName: "Test"},
+		Chat: telego.Chat{ID: from, Type: telego.ChatTypePrivate},
+		Text: text,
+	}
+}
+
+// send runs a private message through the same steps the long-poll handlers do.
+func (tb *Tgbot) send(from int64, text string) {
+	m := privateMessage(from, text)
+	if strings.HasPrefix(text, "/") {
+		userStateMgr.clear(messageActor(*m))
+	}
+	if tb.handleAccountMessage(m) {
+		return
+	}
+	if strings.HasPrefix(text, "/") {
+		if isAdmin, ok := tb.gateCommand(m); ok {
+			tb.answerCommand(m, m.Chat.ID, isAdmin)
+		}
+	}
+}
+
 // tap presses a button the way Telegram delivers it, from a private chat.
 func (tb *Tgbot) tap(from int64, data string) {
 	q := &telego.CallbackQuery{
@@ -166,6 +308,9 @@ func (tb *Tgbot) tap(from int64, data string) {
 		From:    telego.User{ID: from},
 		Data:    data,
 		Message: &telego.Message{MessageID: 7, Chat: telego.Chat{ID: from, Type: telego.ChatTypePrivate}},
+	}
+	if tb.handleAccountCallback(q) {
+		return
 	}
 	if isAdmin, ok := tb.gateCallback(q); ok {
 		tb.answerCallback(q, isAdmin)

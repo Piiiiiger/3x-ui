@@ -402,3 +402,18 @@ func canonicalActivationCode(typed string) string {
 	}
 	return b.String()
 }
+
+// LooksLikeActivationCode reports whether text could be a code as a person types
+// one, so a chat can tell a code from a message.
+func LooksLikeActivationCode(text string) bool {
+	canonical := canonicalActivationCode(text)
+	if canonical == "" {
+		return false
+	}
+	for _, r := range strings.ReplaceAll(canonical, "-", "") {
+		if !strings.ContainsRune(activationCodeAlphabet, r) {
+			return false
+		}
+	}
+	return true
+}
