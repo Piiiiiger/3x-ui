@@ -441,7 +441,7 @@ func (t *Tgbot) answerCallback(callbackQuery *telego.CallbackQuery, isAdmin bool
 				)
 				t.editMessageCallbackTgBot(chatId, callbackQuery.Message.GetMessageID(), inlineKeyboard)
 			case "reset_traffic_c":
-				err := t.inboundService.ResetClientTrafficByEmail(email)
+				err := t.resetClientTraffic(email)
 				if err == nil {
 					t.sendCallbackAnswerTgBot(callbackQuery.ID, t.I18nBot("tgbot.answers.resetTrafficSuccess", "Email=="+email))
 					t.searchClient(chatId, email, callbackQuery.Message.GetMessageID())
@@ -1320,7 +1320,7 @@ func (t *Tgbot) answerCallback(callbackQuery *telego.CallbackQuery, isAdmin bool
 		// otherwise burst past Telegram's rate limit. SendMsgToTgbot pages it.
 		var report strings.Builder
 		for _, email := range emails {
-			if err := t.inboundService.ResetClientTrafficByEmail(email); err == nil {
+			if err := t.resetClientTraffic(email); err == nil {
 				report.WriteString(t.I18nBot("tgbot.messages.SuccessResetTraffic", "ClientEmail=="+email))
 			} else {
 				report.WriteString(t.I18nBot("tgbot.messages.FailedResetTraffic", "ClientEmail=="+email, "ErrorMessage=="+err.Error()))
@@ -1393,6 +1393,16 @@ func (t *Tgbot) answerCallback(callbackQuery *telego.CallbackQuery, isAdmin bool
 			t.sendClientQRLinks(chatId, email)
 		}
 	}
+}
+
+// resetClientTraffic resets as the panel does: every server zeroes the usage and
+// a user the quota cut off comes back, which zeroing the counters alone never did.
+func (t *Tgbot) resetClientTraffic(email string) error {
+	needRestart, err := t.clientService.ResetTrafficByEmail(&t.inboundService, email)
+	if needRestart {
+		t.xrayService.SetToNeedRestart()
+	}
+	return err
 }
 
 // checkAdmin checks if the given Telegram ID is an admin.
