@@ -11,10 +11,8 @@ import (
 	"log"
 	"math"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -100,6 +98,7 @@ func allModels() []any {
 		&model.AccountActivation{},
 		&model.AccountNotification{},
 		&model.ProxyChain{},
+		&model.ClientIpBan{},
 	}
 }
 
@@ -1278,7 +1277,7 @@ func runSeeders(isUsersEmpty bool) error {
 	}
 
 	if empty && isUsersEmpty {
-		seeders := []string{"UserPasswordHash", "ClientsTable", "InboundClientsArrayFix", "InboundClientTgIdFix2", "InboundClientSubIdFix", "FreedomFinalRulesReverseFix", "FreedomFinalRulesPrivateEgressBlock", "UppercaseFreedomFinalRulesFix", "InboundRealityFinalmaskTcpStrip", "ApiTokensHash", "LegacyProxySettingsCleanup", "OutboundRemovedKeysFix", "FreedomDomainStrategyFix", "DNSOutboundLegacyKeysFix", "DNSOutboundQTypeZeroFix", "WireguardPeersToClients", "MtprotoSecretsToClients", "NodeInboundsAdopted", "ResetIpLimitNoFail2ban"}
+		seeders := []string{"UserPasswordHash", "ClientsTable", "InboundClientsArrayFix", "InboundClientTgIdFix2", "InboundClientSubIdFix", "FreedomFinalRulesReverseFix", "FreedomFinalRulesPrivateEgressBlock", "UppercaseFreedomFinalRulesFix", "InboundRealityFinalmaskTcpStrip", "ApiTokensHash", "LegacyProxySettingsCleanup", "OutboundRemovedKeysFix", "FreedomDomainStrategyFix", "DNSOutboundLegacyKeysFix", "DNSOutboundQTypeZeroFix", "WireguardPeersToClients", "MtprotoSecretsToClients", "NodeInboundsAdopted"}
 		for _, name := range seeders {
 			if err := db.Create(&model.HistoryOfSeeders{SeederName: name}).Error; err != nil {
 				return err
@@ -1419,10 +1418,6 @@ func runSeeders(isUsersEmpty bool) error {
 		}
 	}
 
-	if err := resetIpLimitsWithoutFail2ban(); err != nil {
-		return err
-	}
-
 	if err := seedWireguardPeersToClients(); err != nil {
 		return err
 	}
@@ -1454,108 +1449,6 @@ func seedNodeInboundsAdopted() error {
 		return err
 	}
 	return db.Create(&model.HistoryOfSeeders{SeederName: "NodeInboundsAdopted"}).Error
-}
-
-func resetIpLimitsWithoutFail2ban() error {
-	var history []string
-	if err := db.Model(&model.HistoryOfSeeders{}).Pluck("seeder_name", &history).Error; err != nil {
-		return err
-	}
-	if slices.Contains(history, "ResetIpLimitNoFail2ban") {
-		return nil
-	}
-
-	state, probeErr := fail2banEnforcementState()
-	if state == fail2banEnforcing {
-		return db.Create(&model.HistoryOfSeeders{SeederName: "ResetIpLimitNoFail2ban"}).Error
-	}
-	if state == fail2banUnknown {
-		log.Printf("ResetIpLimitNoFail2ban: fail2ban-client present but not runnable (%v); keeping configured IP limits, will retry next start", probeErr)
-		return nil
-	}
-
-	var inbounds []model.Inbound
-	if err := db.Find(&inbounds).Error; err != nil {
-		return err
-	}
-
-	return db.Transaction(func(tx *gorm.DB) error {
-		for _, inbound := range inbounds {
-			if strings.TrimSpace(inbound.Settings) == "" {
-				continue
-			}
-			var settings map[string]any
-			if err := json.Unmarshal([]byte(inbound.Settings), &settings); err != nil {
-				log.Printf("ResetIpLimitNoFail2ban: skip inbound %d (invalid settings json): %v", inbound.Id, err)
-				continue
-			}
-			clients, ok := settings["clients"].([]any)
-			if !ok {
-				continue
-			}
-			mutated := false
-			for i, raw := range clients {
-				obj, ok := raw.(map[string]any)
-				if !ok {
-					continue
-				}
-				v, present := obj["limitIp"]
-				if !present {
-					continue
-				}
-				if n, isNum := v.(float64); isNum && n == 0 {
-					continue
-				}
-				obj["limitIp"] = 0
-				clients[i] = obj
-				mutated = true
-			}
-			if !mutated {
-				continue
-			}
-			settings["clients"] = clients
-			newSettings, err := json.MarshalIndent(settings, "", "  ")
-			if err != nil {
-				log.Printf("ResetIpLimitNoFail2ban: skip inbound %d (marshal failed): %v", inbound.Id, err)
-				continue
-			}
-			if err := tx.Model(&model.Inbound{}).Where("id = ?", inbound.Id).
-				Update("settings", string(newSettings)).Error; err != nil {
-				return err
-			}
-		}
-		if err := tx.Model(&model.ClientRecord{}).Where("limit_ip <> ?", 0).
-			Update("limit_ip", 0).Error; err != nil {
-			return err
-		}
-		return tx.Create(&model.HistoryOfSeeders{SeederName: "ResetIpLimitNoFail2ban"}).Error
-	})
-}
-
-type fail2banState int
-
-const (
-	fail2banEnforcing fail2banState = iota
-	fail2banAbsent
-	fail2banUnknown
-)
-
-// fail2banEnforcementState separates "fail2ban is not installed" from "the probe
-// itself failed", so a transient failure never drives an irreversible cleanup.
-func fail2banEnforcementState() (fail2banState, error) {
-	if v, ok := os.LookupEnv("XUI_ENABLE_FAIL2BAN"); ok && v != "true" {
-		return fail2banAbsent, nil
-	}
-	if runtime.GOOS == "windows" {
-		return fail2banAbsent, nil
-	}
-	if _, err := exec.LookPath("fail2ban-client"); err != nil {
-		return fail2banAbsent, nil
-	}
-	if err := exec.CommandContext(context.Background(), "fail2ban-client", "-h").Run(); err != nil {
-		return fail2banUnknown, err
-	}
-	return fail2banEnforcing, nil
 }
 
 func clearLegacyProxySettings() error {

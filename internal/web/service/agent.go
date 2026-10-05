@@ -7,10 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 	"slices"
 	"sync"
 	"time"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -134,28 +135,10 @@ func (s *AgentService) HandleStatus(nodeID int, st *agentproto.Status) {
 	if err := s.inboundService.BumpClientsLastOnline(st.Online); err != nil {
 		logger.Warning("agent", node.Name, "bump last online failed:", err)
 	}
-	if len(st.IPs) == 0 {
-		return
-	}
-	flat := make([]model.InboundClientIps, 0, len(st.IPs))
-	attributed := make(map[string][]model.ClientIpEntry, len(st.IPs))
-	for email, entries := range st.IPs {
-		converted := make([]model.ClientIpEntry, 0, len(entries))
-		for _, e := range entries {
-			converted = append(converted, model.ClientIpEntry{IP: e.IP, Timestamp: e.Timestamp})
-		}
-		raw, err := json.Marshal(converted)
-		if err != nil {
-			continue
-		}
-		flat = append(flat, model.InboundClientIps{ClientEmail: email, Ips: string(raw)})
-		attributed[email] = converted
-	}
-	if err := s.inboundService.MergeInboundClientIps(flat); err != nil {
-		logger.Warning("agent", node.Name, "merge client ips failed:", err)
-	}
-	if err := s.inboundService.MergeClientIpsByGuid(node, map[string]map[string][]model.ClientIpEntry{key: attributed}); err != nil {
-		logger.Warning("agent", node.Name, "merge client ip attribution failed:", err)
+	now := time.Now()
+	observed := observationsFromAgentStatus(runtime.AgentState{Status: *st, StatusAt: now}, now)
+	if err := (&IpLimitService{}).recordLive(key, observed, now); err != nil {
+		logger.Warning("agent", node.Name, "recording client ips failed:", err)
 	}
 }
 

@@ -446,14 +446,6 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'GET',
-        path: '/panel/api/server/fail2banStatus',
-        summary:
-          'Reports whether per-client IP limits can be enforced on this host. The panel uses it to gate the "IP Limit" field, since enforcement depends on Fail2ban being installed.',
-        response:
-          '{\n  "success": true,\n  "obj": {\n    "enabled": true,\n    "installed": true,\n    "usable": true,\n    "windows": false\n  }\n}',
-      },
-      {
-        method: 'GET',
         path: '/panel/api/server/cpuHistory/:bucket',
         summary:
           'Legacy: aggregated CPU history. Use /history/cpu/:bucket instead — same data with a uniform {t, v} shape.',
@@ -1525,14 +1517,42 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/clients/ips/:email',
         summary:
-          'List source IPs that have connected with the given client’s credentials. Returns an array of "ip (timestamp)" strings.',
+          'List the source IPs seen live with the given client’s credentials in the last 30 minutes, each with the server it connected through, why the IP limit ignores it (`exempt`: host, allowlist or private) and when its ban ends (`bannedUntil`, 0 = not banned).',
         params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientIpInfo',
+        responseSchemaArray: true,
       },
       {
         method: 'POST',
         path: '/panel/api/clients/clearIps/:email',
         summary: 'Reset the recorded IP list for a client.',
         params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/ipBans/:email',
+        summary:
+          'List the running IP-limit bans of a client. Each keeps the client off one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server that serves the client blocks it there.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientIpBan',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/unbanIp/:email',
+        summary:
+          'Lift one IP-limit ban before it expires. Agents drop the rule on their next config sync; the panel’s own core gets a hot apply.',
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email.' },
+          {
+            name: 'network',
+            in: 'body',
+            type: 'string',
+            desc: 'The banned network, exactly as the ban lists it.',
+          },
+        ],
+        body: '{\n  "network": "198.51.100.7"\n}',
+        response: '{\n  "success": true,\n  "msg": "Ban lifted"\n}',
       },
       {
         method: 'POST',
@@ -2146,6 +2166,14 @@ export const sections: readonly Section[] = [
         summary:
           'Persist every setting at once. The body mirrors the shape returned by /all. Invalid values (bad ports, missing cert pairs, etc.) are rejected before write.',
         body: '{\n  "webPort": 2053,\n  "webBasePath": "/",\n  "subPort": 10882,\n  "subPath": "/sub/",\n  "subClashAutoDetect": false,\n  "subClashUserAgentRegex": "",\n  "subJsonEnable": false,\n  "subJsonAutoDetect": false,\n  "subJsonAlwaysArray": false,\n  "subJsonUserAgentRegex": "",\n  "subJsonPath": "/json/",\n  "subJsonURI": "https://sub.example.com/json/",\n  "subClashEnable": true,\n  "subClashPath": "/clash/",\n  "subClashURI": "https://sub.example.com/clash/",\n  "tgBotEnable": false,\n  ...\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/ipLimitExempt',
+        summary:
+          'List the server addresses the IP limit never counts or bans: this panel’s own (name "") and every node’s address plus the address its agent connects from. IPv6 is shown per /64.',
+        responseSchema: 'IpLimitExemptHost',
+        responseSchemaArray: true,
       },
       {
         method: 'POST',

@@ -58,6 +58,9 @@ func (a *AgentController) connect(c *gin.Context) {
 		_ = conn.Close()
 		return
 	}
+	if err := a.nodeService.NoteAgentRemoteIP(node.Id, getRemoteIp(c)); err != nil {
+		logger.Warningf("agent remote address for node %d not saved: %v", node.Id, err)
+	}
 	logger.Infof("agent for node %s connected from %s", node.Name, getRemoteIp(c))
 	hub.Attach(node.Id, conn)
 	logger.Infof("agent for node %s disconnected", node.Name)

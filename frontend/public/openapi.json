@@ -59,7 +59,7 @@
             "type": "integer"
           },
           "totalGB": {
-            "description": "TotalGB is the quota in bytes, 0 for none; Days 0 never expires; ResetDay 0 never resets.",
+            "description": "TotalGB is the quota in bytes, 0 for none. Days counts from CreatedAt,\nincluding time spent unused; 0 never expires. ResetDay 0 never resets.",
             "example": 107374182400,
             "format": "int64",
             "type": "integer"
@@ -197,6 +197,11 @@
           },
           "ipLimitAllowlist": {
             "type": "string"
+          },
+          "ipLimitBanMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
           },
           "ldapAutoCreate": {
             "type": "boolean"
@@ -719,6 +724,7 @@
           "externalTrafficInformURI",
           "happLinkEnable",
           "ipLimitAllowlist",
+          "ipLimitBanMinutes",
           "ldapAutoCreate",
           "ldapAutoDelete",
           "ldapBaseDN",
@@ -954,6 +960,11 @@
           },
           "ipLimitAllowlist": {
             "type": "string"
+          },
+          "ipLimitBanMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
           },
           "ldapAutoCreate": {
             "type": "boolean"
@@ -1482,6 +1493,7 @@
           "hasTgBotToken",
           "hasTwoFactorToken",
           "ipLimitAllowlist",
+          "ipLimitBanMinutes",
           "ldapAutoCreate",
           "ldapAutoDelete",
           "ldapBaseDN",
@@ -1943,6 +1955,80 @@
           "createdAt",
           "flowOverride",
           "inboundId"
+        ],
+        "type": "object"
+      },
+      "ClientIpBan": {
+        "description": "ClientIpBan keeps one client off one network until ExpiresAt. Network is the\nunit the IP limit counts: an IPv4 address or an IPv6 /64.",
+        "properties": {
+          "bannedAt": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "expiresAt": {
+            "example": 1791174600,
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "network": {
+            "example": "198.51.100.7",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bannedAt",
+          "email",
+          "expiresAt",
+          "id",
+          "network"
+        ],
+        "type": "object"
+      },
+      "ClientIpInfo": {
+        "description": "ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with\nthe node it is connecting through (\"\" = this local panel).",
+        "properties": {
+          "bannedUntil": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "exempt": {
+            "description": "Exempt says why the IP limit ignores this address (IpExempt*, \"\" = it\ncounts); ExemptHost names the server for a host address, \"\" for this panel.",
+            "example": "host",
+            "type": "string"
+          },
+          "exemptHost": {
+            "example": "hk-relay",
+            "type": "string"
+          },
+          "ip": {
+            "example": "198.51.100.7",
+            "type": "string"
+          },
+          "node": {
+            "example": "hk-relay",
+            "type": "string"
+          },
+          "time": {
+            "example": "2026-10-05 12:00:00",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bannedUntil",
+          "exempt",
+          "exemptHost",
+          "ip",
+          "node",
+          "time"
         ],
         "type": "object"
       },
@@ -3402,6 +3488,30 @@
           "id",
           "total",
           "up"
+        ],
+        "type": "object"
+      },
+      "IpLimitExemptHost": {
+        "description": "IpLimitExemptHost is one Pigger server whose addresses the IP limit never\ncounts or bans; Name is \"\" for this panel's own host.",
+        "properties": {
+          "addresses": {
+            "example": [
+              "203.0.113.7",
+              "2001:db8:1:2::/64"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "example": "hk-relay",
+            "type": "string"
+          }
+        },
+        "required": [
+          "addresses",
+          "name"
         ],
         "type": "object"
       },
@@ -7717,45 +7827,6 @@
         }
       }
     },
-    "/panel/api/server/fail2banStatus": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Reports whether per-client IP limits can be enforced on this host. The panel uses it to gate the \"IP Limit\" field, since enforcement depends on Fail2ban being installed.",
-        "operationId": "get_panel_api_server_fail2banStatus",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "enabled": true,
-                    "installed": true,
-                    "usable": true,
-                    "windows": false
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/panel/api/server/cpuHistory/{bucket}": {
       "get": {
         "tags": [
@@ -11789,7 +11860,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "List source IPs that have connected with the given client’s credentials. Returns an array of \"ip (timestamp)\" strings.",
+        "summary": "List the source IPs seen live with the given client’s credentials in the last 30 minutes, each with the server it connected through, why the IP limit ignores it (`exempt`: host, allowlist or private) and when its ban ends (`bannedUntil`, 0 = not banned).",
         "operationId": "post_panel_api_clients_ips_email",
         "parameters": [
           {
@@ -11816,8 +11887,26 @@
                     "msg": {
                       "type": "string"
                     },
-                    "obj": {}
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClientIpInfo"
+                      }
+                    }
                   }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "bannedUntil": 0,
+                      "exempt": "host",
+                      "exemptHost": "hk-relay",
+                      "ip": "198.51.100.7",
+                      "node": "hk-relay",
+                      "time": "2026-10-05 12:00:00"
+                    }
+                  ]
                 }
               }
             }
@@ -11859,6 +11948,131 @@
                     },
                     "obj": {}
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/ipBans/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "List the running IP-limit bans of a client. Each keeps the client off one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server that serves the client blocks it there.",
+        "operationId": "post_panel_api_clients_ipBans_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClientIpBan"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "bannedAt": 1791172800,
+                      "email": "alice",
+                      "expiresAt": 1791174600,
+                      "id": 0,
+                      "network": "198.51.100.7"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/unbanIp/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Lift one IP-limit ban before it expires. Agents drop the rule on their next config sync; the panel’s own core gets a hot apply.",
+        "operationId": "post_panel_api_clients_unbanIp_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "network": {
+                    "type": "string",
+                    "description": "The banned network, exactly as the ban lists it."
+                  }
+                },
+                "required": [
+                  "network"
+                ]
+              },
+              "example": {
+                "network": "198.51.100.7"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Ban lifted"
                 }
               }
             }
@@ -15197,6 +15411,53 @@
                     },
                     "obj": {}
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/ipLimitExempt": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "List the server addresses the IP limit never counts or bans: this panel’s own (name \"\") and every node’s address plus the address its agent connects from. IPv6 is shown per /64.",
+        "operationId": "post_panel_api_setting_ipLimitExempt",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IpLimitExemptHost"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "addresses": [
+                        "203.0.113.7",
+                        "2001:db8:1:2::/64"
+                      ],
+                      "name": "hk-relay"
+                    }
+                  ]
                 }
               }
             }

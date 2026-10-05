@@ -41,6 +41,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "externalTrafficInformURI": "",
     "happLinkEnable": false,
     "ipLimitAllowlist": "",
+    "ipLimitBanMinutes": 1,
     "ldapAutoCreate": false,
     "ldapAutoDelete": false,
     "ldapBaseDN": "",
@@ -223,6 +224,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "hasTgBotToken": false,
     "hasTwoFactorToken": false,
     "ipLimitAllowlist": "",
+    "ipLimitBanMinutes": 1,
     "ldapAutoCreate": false,
     "ldapAutoDelete": false,
     "ldapBaseDN": "",
@@ -459,6 +461,21 @@ export const EXAMPLES: Record<string, unknown> = {
     "createdAt": 0,
     "flowOverride": "",
     "inboundId": 0
+  },
+  "ClientIpBan": {
+    "bannedAt": 1791172800,
+    "email": "alice",
+    "expiresAt": 1791174600,
+    "id": 0,
+    "network": "198.51.100.7"
+  },
+  "ClientIpInfo": {
+    "bannedUntil": 0,
+    "exempt": "host",
+    "exemptHost": "hk-relay",
+    "ip": "198.51.100.7",
+    "node": "hk-relay",
+    "time": "2026-10-05 12:00:00"
   },
   "ClientPageResponse": {
     "filtered": 47,
@@ -857,6 +874,13 @@ export const EXAMPLES: Record<string, unknown> = {
     "id": 1,
     "total": 10737418240,
     "up": 1048576
+  },
+  "IpLimitExemptHost": {
+    "addresses": [
+      "203.0.113.7",
+      "2001:db8:1:2::/64"
+    ],
+    "name": "hk-relay"
   },
   "LogEntry": {
     "DateTime": "2025-01-01T12:00:00Z",

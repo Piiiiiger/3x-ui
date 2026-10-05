@@ -1,4 +1,4 @@
-package job
+package service
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ func TestAllowlistValidatorAndParserAgree(t *testing.T) {
 // the queried address and Prefix.Contains is false across bit lengths.
 func TestAllowlistMatchesIPv4MappedPrefix(t *testing.T) {
 	list := parseIpLimitAllowlist("::ffff:198.51.100.0/120")
-	if !list.contains("198.51.100.5") {
+	if !allowlisted(list, "198.51.100.5") {
 		t.Fatal("an IPv4-mapped entry matched nothing: it protects no one")
 	}
 }

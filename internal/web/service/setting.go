@@ -78,6 +78,7 @@ var defaultValueMap = map[string]string{
 	"trustedProxyCIDRs":           DefaultTrustedProxyCIDRs,
 	"realityScanCandidates":       DefaultRealityScanCandidatesCSV,
 	"ipLimitAllowlist":            "",
+	"ipLimitBanMinutes":           "30",
 	"pageSize":                    "25",
 	"expireDiff":                  "0",
 	"trafficDiff":                 "0",
@@ -722,6 +723,15 @@ func (s *SettingService) GetSessionMaxAge() (int, error) {
 // which the IP limit neither counts nor bans.
 func (s *SettingService) GetIpLimitAllowlist() (string, error) {
 	return s.getString("ipLimitAllowlist")
+}
+
+// GetIpLimitBanMinutes is how long a network over a client's IP limit stays banned.
+func (s *SettingService) GetIpLimitBanMinutes() (int, error) {
+	minutes, err := s.getInt("ipLimitBanMinutes")
+	if err != nil || minutes <= 0 {
+		return defaultIpLimitBanMinutes, err
+	}
+	return minutes, nil
 }
 
 func (s *SettingService) GetTrustedProxyCIDRs() (string, error) {
@@ -1997,6 +2007,7 @@ func (s *SettingService) AccountBotUsername() string {
 	name, _ := s.getString("accountBotUsername")
 	return name
 }
+
 func (s *SettingService) SetAccountBotUsername(name string) error {
 	return s.setString("accountBotUsername", name)
 }

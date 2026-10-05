@@ -42,6 +42,7 @@ func run(root, outDir string) error {
 				"ActivationCode",
 				"RuleTemplate",
 				"PlanInbound",
+				"ClientIpBan",
 			),
 			AliasAllow: setOf("Protocol"),
 			Overrides: map[string][]walkOverride{
@@ -88,6 +89,8 @@ func run(root, outDir string) error {
 			Path: resolveRel(root, "internal/web/service"),
 			StructAllow: setOf(
 				"InboundOption",
+				"ClientIpInfo",
+				"IpLimitExemptHost",
 				"PlanInput",
 				"PlanProxyGroup",
 				"ActivationCodeInput",

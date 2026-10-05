@@ -58,6 +58,17 @@ func (s *NodeService) CreateFromProbe(ctx context.Context, req *NodeMutationRequ
 	return toNodeView(n), nil
 }
 
+// NoteAgentRemoteIP remembers the public address an agent last connected from;
+// the IP limit exempts it, since a relay behind NAT dials out from there.
+func (s *NodeService) NoteAgentRemoteIP(id int, address string) error {
+	ip, err := netip.ParseAddr(address)
+	if err != nil || !isPublicAddr(ip.Unmap()) {
+		return nil
+	}
+	return database.GetDB().Model(&model.Node{}).Where("id = ?", id).
+		Update("agent_remote_ip", ip.Unmap().String()).Error
+}
+
 // Only the first authenticated public connection fills an empty address;
 // a reconnect never replaces an address the administrator has chosen.
 func (s *NodeService) DiscoverAgentAddress(id int, address string) error {

@@ -216,9 +216,14 @@ func (s *InboundService) GetClientIpNodeAttribution(email string) (map[string]st
 // ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with
 // the node it is connecting through ("" = this local panel).
 type ClientIpInfo struct {
-	IP   string `json:"ip"`
-	Time string `json:"time"`
-	Node string `json:"node"`
+	IP   string `json:"ip" example:"198.51.100.7"`
+	Time string `json:"time" example:"2026-10-05 12:00:00"`
+	Node string `json:"node" example:"hk-relay"`
+	// Exempt says why the IP limit ignores this address (IpExempt*, "" = it
+	// counts); ExemptHost names the server for a host address, "" for this panel.
+	Exempt      string `json:"exempt" example:"host"`
+	ExemptHost  string `json:"exemptHost" example:"hk-relay"`
+	BannedUntil int64  `json:"bannedUntil" example:"0"`
 }
 
 // GetClientIpsWithNodes returns a client's recorded IPs (from the flat
@@ -250,6 +255,20 @@ func (s *InboundService) GetClientIpsWithNodes(email string) ([]ClientIpInfo, er
 	attr, _ := s.GetClientIpNodeAttribution(email)
 	guidName := s.nodeGuidNameMap()
 	localGuid, _ := (&SettingService{}).GetPanelGuid()
+	now := time.Now()
+	limits := &IpLimitService{}
+	exempt, err := limits.exemptions(now)
+	if err != nil {
+		return nil, err
+	}
+	bans, err := limits.BansForEmail(email, now)
+	if err != nil {
+		return nil, err
+	}
+	bannedUntil := make(map[string]int64, len(bans))
+	for _, b := range bans {
+		bannedUntil[b.Network] = b.ExpiresAt
+	}
 
 	out := make([]ClientIpInfo, 0, len(entries))
 	for _, e := range entries {
@@ -262,6 +281,10 @@ func (s *InboundService) GetClientIpsWithNodes(email string) ([]ClientIpInfo, er
 		}
 		if guid, ok := attr[e.IP]; ok && guid != "" && guid != localGuid {
 			info.Node = guidName[guid]
+		}
+		if network, addr, ok := ipLimitNetwork(e.IP); ok {
+			info.Exempt, info.ExemptHost = exempt.reason(addr)
+			info.BannedUntil = bannedUntil[network]
 		}
 		out = append(out, info)
 	}

@@ -77,6 +77,7 @@ export const AllSettingSchema = z.object({
   externalTrafficInformURI: z.string(),
   happLinkEnable: z.boolean(),
   ipLimitAllowlist: z.string(),
+  ipLimitBanMinutes: z.number().int().min(1).max(1440),
   ldapAutoCreate: z.boolean(),
   ldapAutoDelete: z.boolean(),
   ldapBaseDN: z.string(),
@@ -261,6 +262,7 @@ export const AllSettingViewSchema = z.object({
   hasTgBotToken: z.boolean(),
   hasTwoFactorToken: z.boolean(),
   ipLimitAllowlist: z.string(),
+  ipLimitBanMinutes: z.number().int().min(1).max(1440),
   ldapAutoCreate: z.boolean(),
   ldapAutoDelete: z.boolean(),
   ldapBaseDN: z.string(),
@@ -492,6 +494,25 @@ export const ClientInboundSchema = z.object({
   inboundId: z.number().int(),
 });
 export type ClientInbound = z.infer<typeof ClientInboundSchema>;
+
+export const ClientIpBanSchema = z.object({
+  bannedAt: z.number().int(),
+  email: z.string(),
+  expiresAt: z.number().int(),
+  id: z.number().int(),
+  network: z.string(),
+});
+export type ClientIpBan = z.infer<typeof ClientIpBanSchema>;
+
+export const ClientIpInfoSchema = z.object({
+  bannedUntil: z.number().int(),
+  exempt: z.string(),
+  exemptHost: z.string(),
+  ip: z.string(),
+  node: z.string(),
+  time: z.string(),
+});
+export type ClientIpInfo = z.infer<typeof ClientIpInfoSchema>;
 
 export const ClientPageResponseSchema = z.object({
   filtered: z.number().int(),
@@ -836,6 +857,12 @@ export const InboundTrafficSummarySchema = z.object({
   up: z.number().int(),
 });
 export type InboundTrafficSummary = z.infer<typeof InboundTrafficSummarySchema>;
+
+export const IpLimitExemptHostSchema = z.object({
+  addresses: z.array(z.string()),
+  name: z.string(),
+});
+export type IpLimitExemptHost = z.infer<typeof IpLimitExemptHostSchema>;
 
 export const LogEntrySchema = z.object({
   DateTime: z.string(),

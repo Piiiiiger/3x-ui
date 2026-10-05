@@ -824,6 +824,9 @@ type Node struct {
 	// so a report the agent resends after a lost ack is counted once.
 	AgentInstance  string `json:"-" form:"-" gorm:"column:agent_instance"`
 	AgentReportSeq int64  `json:"-" form:"-" gorm:"column:agent_report_seq;default:0"`
+	// AgentRemoteIP is where the agent last connected from: a relay behind NAT
+	// reaches other servers from this address, not from Address.
+	AgentRemoteIP string `json:"-" form:"-" gorm:"column:agent_remote_ip"`
 
 	// Guid is the remote panel's stable self-identifier (its panelGuid),
 	// learned from each heartbeat. It is the globally stable node identity used

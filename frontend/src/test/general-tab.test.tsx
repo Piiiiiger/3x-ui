@@ -39,4 +39,14 @@ describe('GeneralTab', () => {
 
     expect(updateSetting).toHaveBeenCalledWith({ pageSize: 0 });
   });
+
+  it('saves the IP limit ban duration under its own key', async () => {
+    const updateSetting = vi.fn();
+
+    await renderGeneralTab(updateSetting);
+
+    fireEvent.change(screen.getByDisplayValue('30'), { target: { value: '45' } });
+
+    expect(updateSetting).toHaveBeenCalledWith({ ipLimitBanMinutes: 45 });
+  });
 });

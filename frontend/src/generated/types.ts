@@ -54,6 +54,7 @@ export interface AllSetting {
   externalTrafficInformURI: string;
   happLinkEnable: boolean;
   ipLimitAllowlist: string;
+  ipLimitBanMinutes: number;
   ldapAutoCreate: boolean;
   ldapAutoDelete: boolean;
   ldapBaseDN: string;
@@ -237,6 +238,7 @@ export interface AllSettingView {
   hasTgBotToken: boolean;
   hasTwoFactorToken: boolean;
   ipLimitAllowlist: string;
+  ipLimitBanMinutes: number;
   ldapAutoCreate: boolean;
   ldapAutoDelete: boolean;
   ldapBaseDN: string;
@@ -461,6 +463,23 @@ export interface ClientInbound {
   createdAt: number;
   flowOverride: string;
   inboundId: number;
+}
+
+export interface ClientIpBan {
+  bannedAt: number;
+  email: string;
+  expiresAt: number;
+  id: number;
+  network: string;
+}
+
+export interface ClientIpInfo {
+  bannedUntil: number;
+  exempt: string;
+  exemptHost: string;
+  ip: string;
+  node: string;
+  time: string;
 }
 
 export interface ClientPageResponse {
@@ -778,6 +797,11 @@ export interface InboundTrafficSummary {
   id: number;
   total: number;
   up: number;
+}
+
+export interface IpLimitExemptHost {
+  addresses: string[];
+  name: string;
 }
 
 export interface LogEntry {

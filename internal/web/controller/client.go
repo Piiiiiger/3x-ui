@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
@@ -41,6 +42,7 @@ type ClientController struct {
 	settingService service.SettingService
 	portalService  service.ClientPortalService
 	happGenerator  service.HappLinkGenerator
+	ipLimit        service.IpLimitService
 }
 
 func NewClientController(g *gin.RouterGroup) *ClientController {
@@ -88,6 +90,8 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/updateTraffic/:email", a.updateTrafficByEmail)
 	g.POST("/ips/:email", a.getIps)
 	g.POST("/clearIps/:email", a.clearIps)
+	g.POST("/ipBans/:email", a.getIpBans)
+	g.POST("/unbanIp/:email", a.unbanIp)
 	g.POST("/hwids/:email", a.getHwids)
 	g.DELETE("/hwids/:email", a.clearHwids)
 	g.DELETE("/hwids/:email/:id", a.deleteHwid)
@@ -648,6 +652,31 @@ func (a *ClientController) clearIps(c *gin.Context) {
 		return
 	}
 	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.logCleanSuccess"), nil)
+}
+
+func (a *ClientController) getIpBans(c *gin.Context) {
+	bans, err := a.ipLimit.BansForEmail(c.Param("email"), time.Now())
+	jsonObj(c, bans, err)
+}
+
+type unbanIpRequest struct {
+	Network string `json:"network" binding:"required"`
+}
+
+// unbanIp lifts a ban early; agents drop its rule on their next sync, and the
+// local core on the hot apply flagged here.
+func (a *ClientController) unbanIp(c *gin.Context) {
+	var req unbanIpRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.ipLimit.Unban(c.Param("email"), req.Network); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	a.xrayService.SetToNeedRestart()
+	jsonMsg(c, I18nWeb(c, "pages.clients.ipUnbanned"), nil)
 }
 
 func (a *ClientController) getHwids(c *gin.Context) {

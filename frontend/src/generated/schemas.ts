@@ -33,7 +33,7 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "integer"
       },
       "totalGB": {
-        "description": "TotalGB is the quota in bytes, 0 for none; Days 0 never expires; ResetDay 0 never resets.",
+        "description": "TotalGB is the quota in bytes, 0 for none. Days counts from CreatedAt,\nincluding time spent unused; 0 never expires. ResetDay 0 never resets.",
         "example": 107374182400,
         "format": "int64",
         "type": "integer"
@@ -171,6 +171,11 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "ipLimitAllowlist": {
         "type": "string"
+      },
+      "ipLimitBanMinutes": {
+        "maximum": 1440,
+        "minimum": 1,
+        "type": "integer"
       },
       "ldapAutoCreate": {
         "type": "boolean"
@@ -693,6 +698,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "externalTrafficInformURI",
       "happLinkEnable",
       "ipLimitAllowlist",
+      "ipLimitBanMinutes",
       "ldapAutoCreate",
       "ldapAutoDelete",
       "ldapBaseDN",
@@ -928,6 +934,11 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "ipLimitAllowlist": {
         "type": "string"
+      },
+      "ipLimitBanMinutes": {
+        "maximum": 1440,
+        "minimum": 1,
+        "type": "integer"
       },
       "ldapAutoCreate": {
         "type": "boolean"
@@ -1456,6 +1467,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "hasTgBotToken",
       "hasTwoFactorToken",
       "ipLimitAllowlist",
+      "ipLimitBanMinutes",
       "ldapAutoCreate",
       "ldapAutoDelete",
       "ldapBaseDN",
@@ -1917,6 +1929,80 @@ export const SCHEMAS: Record<string, unknown> = {
       "createdAt",
       "flowOverride",
       "inboundId"
+    ],
+    "type": "object"
+  },
+  "ClientIpBan": {
+    "description": "ClientIpBan keeps one client off one network until ExpiresAt. Network is the\nunit the IP limit counts: an IPv4 address or an IPv6 /64.",
+    "properties": {
+      "bannedAt": {
+        "example": 1791172800,
+        "format": "int64",
+        "type": "integer"
+      },
+      "email": {
+        "example": "alice",
+        "type": "string"
+      },
+      "expiresAt": {
+        "example": 1791174600,
+        "format": "int64",
+        "type": "integer"
+      },
+      "id": {
+        "type": "integer"
+      },
+      "network": {
+        "example": "198.51.100.7",
+        "type": "string"
+      }
+    },
+    "required": [
+      "bannedAt",
+      "email",
+      "expiresAt",
+      "id",
+      "network"
+    ],
+    "type": "object"
+  },
+  "ClientIpInfo": {
+    "description": "ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with\nthe node it is connecting through (\"\" = this local panel).",
+    "properties": {
+      "bannedUntil": {
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "exempt": {
+        "description": "Exempt says why the IP limit ignores this address (IpExempt*, \"\" = it\ncounts); ExemptHost names the server for a host address, \"\" for this panel.",
+        "example": "host",
+        "type": "string"
+      },
+      "exemptHost": {
+        "example": "hk-relay",
+        "type": "string"
+      },
+      "ip": {
+        "example": "198.51.100.7",
+        "type": "string"
+      },
+      "node": {
+        "example": "hk-relay",
+        "type": "string"
+      },
+      "time": {
+        "example": "2026-10-05 12:00:00",
+        "type": "string"
+      }
+    },
+    "required": [
+      "bannedUntil",
+      "exempt",
+      "exemptHost",
+      "ip",
+      "node",
+      "time"
     ],
     "type": "object"
   },
@@ -3376,6 +3462,30 @@ export const SCHEMAS: Record<string, unknown> = {
       "id",
       "total",
       "up"
+    ],
+    "type": "object"
+  },
+  "IpLimitExemptHost": {
+    "description": "IpLimitExemptHost is one Pigger server whose addresses the IP limit never\ncounts or bans; Name is \"\" for this panel's own host.",
+    "properties": {
+      "addresses": {
+        "example": [
+          "203.0.113.7",
+          "2001:db8:1:2::/64"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "name": {
+        "example": "hk-relay",
+        "type": "string"
+      }
+    },
+    "required": [
+      "addresses",
+      "name"
     ],
     "type": "object"
   },

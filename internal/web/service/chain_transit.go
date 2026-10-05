@@ -3,35 +3,73 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
+
+// chainTransitRoute is one enabled chain with both of its inbounds enabled, and
+// the target's enabled clients, the only ones its relay may carry.
+type chainTransitRoute struct {
+	chain   model.ProxyChain
+	relay   model.Inbound
+	target  model.Inbound
+	granted map[string]bool
+}
+
+func loadChainTransitRoutes() ([]chainTransitRoute, error) {
+	db := database.GetDB()
+	var chains []model.ProxyChain
+	if err := db.Where("enabled = ?", true).Find(&chains).Error; err != nil {
+		return nil, err
+	}
+	var routes []chainTransitRoute
+	for _, chain := range chains {
+		r := chainTransitRoute{chain: chain, granted: map[string]bool{}}
+		if err := db.First(&r.relay, chain.RelayInboundId).Error; err != nil {
+			return nil, err
+		}
+		if err := db.First(&r.target, chain.TargetInboundId).Error; err != nil {
+			return nil, err
+		}
+		if !r.target.Enable || !r.relay.Enable {
+			continue
+		}
+		targets, err := (&ClientService{}).ListForInbound(nil, r.target.Id)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range targets {
+			if c.Enable {
+				r.granted[c.Email] = true
+			}
+		}
+		routes = append(routes, r)
+	}
+	return routes, nil
+}
+
+func chainTransitProtocol(p model.Protocol) bool {
+	return p == model.VLESS || p == model.VMESS || p == model.Trojan
+}
 
 // injectChainTransit creates non-billable relay identities. The destination hop
 // retains the user's original identity and charges once. Direct use of a relay
 // also retains its original identity. Transit credentials are destination-bound.
-func injectChainTransit(cfg *xray.Config) error {
-	db := database.GetDB()
-	var chains []model.ProxyChain
-	if err := db.Where("enabled = ?", true).Find(&chains).Error; err != nil {
-		return err
+// It returns each identity it installed with the client it stands in for.
+func injectChainTransit(cfg *xray.Config) (map[string]string, error) {
+	routes, err := loadChainTransitRoutes()
+	if err != nil {
+		return nil, err
 	}
+	owners := map[string]string{}
 	var extraRules []any
-	for _, chain := range chains {
-		var relay, target model.Inbound
-		if err := db.First(&relay, chain.RelayInboundId).Error; err != nil {
-			return err
-		}
-		if err := db.First(&target, chain.TargetInboundId).Error; err != nil {
-			return err
-		}
-		if !target.Enable || !relay.Enable {
-			continue
-		}
+	for _, r := range routes {
+		chain, relay, target := r.chain, r.relay, r.target
 		var ib *xray.InboundConfig
 		for i := range cfg.InboundConfigs {
 			if cfg.InboundConfigs[i].Tag == relay.Tag {
@@ -42,22 +80,12 @@ func injectChainTransit(cfg *xray.Config) error {
 		if ib == nil {
 			continue
 		}
-		if relay.Protocol != model.VLESS && relay.Protocol != model.VMESS && relay.Protocol != model.Trojan {
-			return fmt.Errorf("chain %d: relay protocol %s cannot isolate transit accounting", chain.Id, relay.Protocol)
-		}
-		targets, err := (&ClientService{}).ListForInbound(nil, target.Id)
-		if err != nil {
-			return err
-		}
-		granted := map[string]bool{}
-		for _, c := range targets {
-			if c.Enable {
-				granted[c.Email] = true
-			}
+		if !chainTransitProtocol(relay.Protocol) {
+			return nil, fmt.Errorf("chain %d: relay protocol %s cannot isolate transit accounting", chain.Id, relay.Protocol)
 		}
 		var settings map[string]any
 		if err := json.Unmarshal(ib.Settings, &settings); err != nil {
-			return err
+			return nil, err
 		}
 		clients, _ := settings["clients"].([]any)
 		users := []string{}
@@ -68,7 +96,7 @@ func injectChainTransit(cfg *xray.Config) error {
 				continue
 			}
 			email, _ := entry["email"].(string)
-			if !granted[email] {
+			if !r.granted[email] {
 				continue
 			}
 			field := "id"
@@ -89,6 +117,7 @@ func injectChainTransit(cfg *xray.Config) error {
 			delete(clone, "reverse")
 			clients = append(clients, clone)
 			users = append(users, alias)
+			owners[alias] = email
 		}
 		if len(users) == 0 {
 			continue
@@ -96,12 +125,12 @@ func injectChainTransit(cfg *xray.Config) error {
 		settings["clients"] = clients
 		raw, err := json.Marshal(settings)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		ib.Settings = raw
 		endpoints, err := chainTransitEndpoints(&target)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		for _, ep := range endpoints {
 			rule := map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "port": strconv.Itoa(ep.port), "outboundTag": "chain-transit-direct"}
@@ -115,18 +144,29 @@ func injectChainTransit(cfg *xray.Config) error {
 		extraRules = append(extraRules, map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "outboundTag": "chain-transit-block"})
 	}
 	if len(extraRules) == 0 {
-		return nil
+		return owners, nil
 	}
+	err = prependRoutingWithOutbound(cfg, extraRules,
+		map[string]any{"tag": "chain-transit-direct", "protocol": "freedom", "settings": map[string]any{}},
+		map[string]any{"tag": "chain-transit-block", "protocol": "blackhole", "settings": map[string]any{}})
+	return owners, err
+}
+
+// prependRoutingWithOutbound adds outbounds under tags the template must not use
+// and puts rules ahead of every existing rule.
+func prependRoutingWithOutbound(cfg *xray.Config, rules []any, added ...map[string]any) error {
 	var outbounds []map[string]any
 	if err := json.Unmarshal(cfg.OutboundConfigs, &outbounds); err != nil {
 		return err
 	}
 	for _, o := range outbounds {
-		if o["tag"] == "chain-transit-direct" || o["tag"] == "chain-transit-block" {
-			return fmt.Errorf("reserved chain transit outbound tag")
+		for _, a := range added {
+			if o["tag"] == a["tag"] {
+				return fmt.Errorf("reserved outbound tag %v is already in use", a["tag"])
+			}
 		}
 	}
-	outbounds = append(outbounds, map[string]any{"tag": "chain-transit-direct", "protocol": "freedom", "settings": map[string]any{}}, map[string]any{"tag": "chain-transit-block", "protocol": "blackhole", "settings": map[string]any{}})
+	outbounds = append(outbounds, added...)
 	raw, err := json.Marshal(outbounds)
 	if err != nil {
 		return err
@@ -138,8 +178,8 @@ func injectChainTransit(cfg *xray.Config) error {
 			return err
 		}
 	}
-	rules, _ := routing["rules"].([]any)
-	routing["rules"] = append(extraRules, rules...)
+	existing, _ := routing["rules"].([]any)
+	routing["rules"] = append(rules, existing...)
 	raw, err = json.Marshal(routing)
 	if err != nil {
 		return err

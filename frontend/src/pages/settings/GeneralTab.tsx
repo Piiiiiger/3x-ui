@@ -18,6 +18,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { catTabLabel } from './catTabLabel';
 import { sanitizePath } from './uriPath';
 import SecretInput from './SecretInput';
+import IpLimitExemptHosts from './IpLimitExemptHosts';
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -280,6 +281,34 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
                   value={allSetting.ipLimitAllowlist}
                   placeholder="203.0.113.10,198.51.100.0/24"
                   onChange={(e) => updateSetting({ ipLimitAllowlist: e.target.value })}
+                />
+              </SettingListItem>
+
+              <SettingListItem
+                paddings="small"
+                title={t('pages.settings.ipLimitExemptHosts')}
+                description={t('pages.settings.ipLimitExemptHostsDesc')}
+              >
+                <IpLimitExemptHosts />
+              </SettingListItem>
+
+              <SettingListItem
+                paddings="small"
+                title={t('pages.settings.ipLimitBanMinutes')}
+                badge={
+                  <DefaultSettingTag
+                    settingKey="ipLimitBanMinutes"
+                    value={allSetting.ipLimitBanMinutes}
+                  />
+                }
+                description={t('pages.settings.ipLimitBanMinutesDesc')}
+              >
+                <InputNumber
+                  value={allSetting.ipLimitBanMinutes}
+                  min={1}
+                  max={1440}
+                  style={{ width: '100%' }}
+                  onChange={onNumber((v) => updateSetting({ ipLimitBanMinutes: v }))}
                 />
               </SettingListItem>
 

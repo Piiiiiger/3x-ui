@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, Modal, Popover, Tag, Tooltip, message } from 'antd';
-import {
-  CopyOutlined,
-  DownloadOutlined,
-  EyeOutlined,
-  QrcodeOutlined,
-  ReloadOutlined,
-} from '@ant-design/icons';
+import { CopyOutlined, DownloadOutlined, EyeOutlined, QrcodeOutlined } from '@ant-design/icons';
 
 import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import { formatInboundLabel, formatTunnelConfigMeta } from '@/lib/inbounds/label';
-import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
+import ClientIpLogModal from '@/components/clients/ClientIpLog';
+import { useClientIpLog } from '@/hooks/useClientIpLog';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
 import type { ClientRecord, InboundOption } from '@/hooks/useClients';
@@ -113,9 +108,7 @@ export default function ClientInfoModal({
   const dateLabel = (ts?: number) => (!ts || ts <= 0 ? '-' : IntlUtil.formatDate(ts, datepicker));
   const [messageApi, messageContextHolder] = message.useMessage();
   const [links, setLinks] = useState<string[]>([]);
-  const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
-  const [ipsLoading, setIpsLoading] = useState(false);
-  const [ipsClearing, setIpsClearing] = useState(false);
+  const ipLog = useClientIpLog(client?.email);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
     clientHwids,
@@ -139,7 +132,7 @@ export default function ClientInfoModal({
     setSyncedSubId(openSubId);
     if (openSubId === null) {
       setLinks([]);
-      setClientIps([]);
+      ipLog.reset();
       setIpsModalOpen(false);
       resetHwids();
       setHwidsModalOpen(false);
@@ -246,39 +239,9 @@ export default function ClientInfoModal({
     }
   }
 
-  async function loadIps() {
-    if (!client?.email) return;
-    setIpsLoading(true);
-    try {
-      const msg = (await HttpUtil.post(
-        `/panel/api/clients/ips/${encodeURIComponent(client.email)}`,
-      )) as ApiMsg<unknown[]>;
-      if (!msg?.success) {
-        setClientIps([]);
-        return;
-      }
-      setClientIps(normalizeClientIps(msg.obj));
-    } finally {
-      setIpsLoading(false);
-    }
-  }
-
-  async function clearIps() {
-    if (!client?.email) return;
-    setIpsClearing(true);
-    try {
-      const msg = (await HttpUtil.post(
-        `/panel/api/clients/clearIps/${encodeURIComponent(client.email)}`,
-      )) as ApiMsg;
-      if (msg?.success) setClientIps([]);
-    } finally {
-      setIpsClearing(false);
-    }
-  }
-
   function openIpsModal() {
     setIpsModalOpen(true);
-    if (clientIps.length === 0) void loadIps();
+    if (ipLog.ips.length === 0) void ipLog.load();
   }
 
   function openHwidsModal() {
@@ -454,10 +417,10 @@ export default function ClientInfoModal({
                       size="small"
                       icon={<EyeOutlined />}
                       aria-label={t('pages.clients.ipLog')}
-                      loading={ipsLoading}
+                      loading={ipLog.loading}
                       onClick={openIpsModal}
                     >
-                      {clientIps.length > 0 ? clientIps.length : ''}
+                      {ipLog.ips.length > 0 ? ipLog.ips.length : ''}
                     </Button>
                   </td>
                 </tr>
@@ -834,58 +797,20 @@ export default function ClientInfoModal({
         )}
       </Modal>
 
-      <Modal
+      <ClientIpLogModal
         open={ipsModalOpen}
-        title={`${t('pages.inbounds.IPLimitlog')}${client?.email ? ` — ${client.email}` : ''}`}
-        width={440}
-        onCancel={() => setIpsModalOpen(false)}
-        footer={[
-          <Button key="refresh" icon={<ReloadOutlined />} loading={ipsLoading} onClick={loadIps}>
-            {t('refresh')}
-          </Button>,
-          <Button
-            key="clear"
-            danger
-            loading={ipsClearing}
-            disabled={clientIps.length === 0}
-            onClick={clearIps}
-          >
-            {t('pages.clients.clearAll')}
-          </Button>,
-          <Button key="close" type="primary" onClick={() => setIpsModalOpen(false)}>
-            {t('close')}
-          </Button>,
-        ]}
-      >
-        {clientIps.length > 0 ? (
-          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-            {clientIps.map((entry, idx) => (
-              <Tag
-                key={idx}
-                color="blue"
-                style={{
-                  display: 'block',
-                  width: 'fit-content',
-                  maxWidth: '100%',
-                  marginBottom: 6,
-                  padding: '2px 8px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                }}
-              >
-                {entry.ip}
-                {entry.time ? ` (${entry.time})` : ''}
-                {entry.node ? (
-                  <span style={{ marginInlineStart: 6, opacity: 0.85, fontWeight: 600 }}>
-                    @ {entry.node}
-                  </span>
-                ) : null}
-              </Tag>
-            ))}
-          </div>
-        ) : (
-          <Tag>{t('tgbot.noIpRecord')}</Tag>
-        )}
-      </Modal>
+        email={client?.email}
+        ips={ipLog.ips}
+        bans={ipLog.bans}
+        nowMs={ipLog.loadedAt}
+        loading={ipLog.loading}
+        clearing={ipLog.clearing}
+        unbanning={ipLog.unbanning}
+        onRefresh={ipLog.load}
+        onClear={ipLog.clear}
+        onUnban={ipLog.unban}
+        onClose={() => setIpsModalOpen(false)}
+      />
 
       <ClientHwidListModal
         open={hwidsModalOpen}

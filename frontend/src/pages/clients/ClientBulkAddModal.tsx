@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Space,
-  Switch,
-  Tooltip,
-  message,
-} from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Select, Space, Switch, message } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
@@ -23,7 +12,6 @@ import { TLS_FLOW_CONTROL, TRAFFIC_RESETS } from '@/schemas/primitives';
 import { DateTimePicker, SelectAllClearButtons } from '@/components/form';
 import { FormField } from '@/components/form/rhf';
 import { useClients, type InboundOption } from '@/hooks/useClients';
-import { useFail2banStatusQuery, getLimitIpNotice } from '@/api/queries/useFail2banStatusQuery';
 import ClientRenewalFields from './ClientRenewalFields';
 import { ClientBulkAddFormSchema, type ClientBulkAddFormValues } from '@/schemas/client';
 
@@ -91,9 +79,6 @@ export default function ClientBulkAddModal({
   const trafficReset = useWatch({ control: methods.control, name: 'trafficReset' });
   const [delayedStart, setDelayedStart] = useState(false);
   const [saving, setSaving] = useState(false);
-  const fail2ban = useFail2banStatusQuery();
-  const limitIpDisabled = !fail2ban.usable;
-  const limitIpNotice = getLimitIpNotice(fail2ban, t);
 
   const [wasOpen, setWasOpen] = useState(false);
   if (open !== wasOpen) {
@@ -371,17 +356,11 @@ export default function ClientBulkAddModal({
             )}
 
             <Form.Item label={t('pages.clients.limitIp')}>
-              <Tooltip title={limitIpNotice || undefined}>
-                <span style={{ display: 'inline-flex' }}>
-                  <InputNumber
-                    value={limitIp}
-                    min={0}
-                    disabled={limitIpDisabled}
-                    style={limitIpDisabled ? { pointerEvents: 'none' } : undefined}
-                    onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
-                  />
-                </span>
-              </Tooltip>
+              <InputNumber
+                value={limitIp}
+                min={0}
+                onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
+              />
             </Form.Item>
 
             <FormField

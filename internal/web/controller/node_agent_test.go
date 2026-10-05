@@ -194,3 +194,37 @@ func TestAgentConnectHandsTheSocketToTheHub(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 }
+
+// A relay behind NAT reaches other servers from the address it dials out from,
+// so the IP limit must learn that address, not only the one the node was saved with.
+func TestAgentConnectRemembersTheAddressTheAgentCameFrom(t *testing.T) {
+	srv, hub := agentConnectServer(t)
+	agent := &model.Node{Name: "edge-nat", Kind: model.NodeKindAgent, Address: "203.0.113.20", Enable: true}
+	if err := database.GetDB().Create(agent).Error; err != nil {
+		t.Fatal(err)
+	}
+	secret, err := (&service.NodeService{}).MintAgentSecret(agent.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	url := "ws" + strings.TrimPrefix(srv.URL, "http") + "/base/" + agentproto.ConnectPath
+	conn, _, err := websocket.DefaultDialer.Dial(url, http.Header{
+		"Authorization":   {"Bearer " + secret},
+		"X-Forwarded-For": {"198.51.100.120"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	deadline := time.Now().Add(3 * time.Second)
+	for len(hub.Connected()) == 0 && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+	}
+	var stored model.Node
+	if err := database.GetDB().First(&stored, agent.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	if stored.AgentRemoteIP != "198.51.100.120" || stored.Address != "203.0.113.20" {
+		t.Fatalf("remote ip %q, address %q; want the forwarded address remembered and the saved one kept", stored.AgentRemoteIP, stored.Address)
+	}
+}

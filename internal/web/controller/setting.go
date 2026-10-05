@@ -53,6 +53,7 @@ type SettingController struct {
 	panelService    panel.PanelService
 	apiTokenService panel.ApiTokenService
 	xrayService     service.XrayService
+	ipLimit         service.IpLimitService
 }
 
 // NewSettingController creates a new SettingController and initializes its routes.
@@ -71,6 +72,7 @@ func (a *SettingController) initRouter(g *gin.RouterGroup) {
 	g.POST("/factoryDefaults", a.getFactoryDefaults)
 	g.POST("/update", a.updateSetting)
 	g.POST("/validateRegex", a.validateRegex)
+	g.POST("/ipLimitExempt", a.getIpLimitExempt)
 	g.POST("/updateUser", a.updateUser)
 	g.POST("/restartPanel", a.restartPanel)
 	g.GET("/getDefaultJsonConfig", a.getDefaultXrayConfig)
@@ -105,6 +107,12 @@ func (a *SettingController) getAllSetting(c *gin.Context) {
 		return
 	}
 	jsonObj(c, allSetting, nil)
+}
+
+// getIpLimitExempt lists the server addresses the IP limit leaves alone.
+func (a *SettingController) getIpLimitExempt(c *gin.Context) {
+	hosts, err := a.ipLimit.ExemptHosts()
+	jsonObj(c, hosts, err)
 }
 
 // getDefaultSettings retrieves the default settings based on the host.

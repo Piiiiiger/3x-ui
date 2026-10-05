@@ -1,4 +1,4 @@
-package job
+package service
 
 import (
 	"net/netip"
@@ -44,12 +44,8 @@ func (l ipLimitAllowlist) empty() bool {
 	return len(l.prefixes) == 0 && len(l.addrs) == 0
 }
 
-func (l ipLimitAllowlist) contains(ip string) bool {
-	if l.empty() {
-		return false
-	}
-	addr, err := netip.ParseAddr(strings.TrimSpace(ip))
-	if err != nil {
+func (l ipLimitAllowlist) contains(addr netip.Addr) bool {
+	if !addr.IsValid() {
 		return false
 	}
 	addr = addr.Unmap()
@@ -62,21 +58,4 @@ func (l ipLimitAllowlist) contains(ip string) bool {
 		}
 	}
 	return false
-}
-
-// split separates the entries an allowlist protects from the ones the limit
-// still applies to, preserving the caller's ordering in both.
-func (l ipLimitAllowlist) split(entries []IPWithTimestamp) (limited, allowed []IPWithTimestamp) {
-	if l.empty() {
-		return entries, nil
-	}
-	limited = make([]IPWithTimestamp, 0, len(entries))
-	for _, entry := range entries {
-		if l.contains(entry.IP) {
-			allowed = append(allowed, entry)
-			continue
-		}
-		limited = append(limited, entry)
-	}
-	return limited, allowed
 }

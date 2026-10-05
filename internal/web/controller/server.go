@@ -63,7 +63,6 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 	g.GET("/getNewmlkem768", a.getNewmlkem768)
 	g.GET("/getNewVlessEnc", a.getNewVlessEnc)
 	g.GET("/clientIps", a.getClientIps)
-	g.GET("/fail2banStatus", a.getFail2banStatus)
 
 	g.POST("/stopXrayService", a.stopXrayService)
 	g.POST("/restartXrayService", a.restartXrayService)
@@ -107,10 +106,6 @@ func (a *ServerController) startTask() {
 
 // status returns the current server status information.
 func (a *ServerController) status(c *gin.Context) { jsonObj(c, a.serverService.CurrentStatus(), nil) }
-
-func (a *ServerController) getFail2banStatus(c *gin.Context) {
-	jsonObj(c, a.serverService.GetFail2banStatus(), nil)
-}
 
 func parseHistoryBucket(c *gin.Context) (int, bool) {
 	bucket, err := strconv.Atoi(c.Param("bucket"))

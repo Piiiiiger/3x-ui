@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
@@ -240,7 +241,11 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		injectNodeEgresses(xrayConfig, nodes)
 	}
 
-	if err := injectChainTransit(xrayConfig); err != nil {
+	transitOwners, err := injectChainTransit(xrayConfig)
+	if err != nil {
+		return nil, err
+	}
+	if err := injectIpLimitBans(xrayConfig, transitOwners, time.Now()); err != nil {
 		return nil, err
 	}
 	return xrayConfig, nil
@@ -270,7 +275,11 @@ func (s *XrayService) GetAgentXrayConfig(nodeID int) (*xray.Config, error) {
 		}
 		xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *inboundConfig)
 	}
-	if err := injectChainTransit(xrayConfig); err != nil {
+	transitOwners, err := injectChainTransit(xrayConfig)
+	if err != nil {
+		return nil, err
+	}
+	if err := injectIpLimitBans(xrayConfig, transitOwners, time.Now()); err != nil {
 		return nil, err
 	}
 	if err := inlineAgentPrivateGeoIP(xrayConfig); err != nil {

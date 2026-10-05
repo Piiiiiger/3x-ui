@@ -13,7 +13,6 @@ import {
   Space,
   Switch,
   Tabs,
-  Tag,
   Tooltip,
   Typography,
   message,
@@ -29,10 +28,11 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { Controller, FormProvider, useForm, useWatch, useFieldArray } from 'react-hook-form';
 
-import { HttpUtil, IntlUtil, RandomUtil, Wireguard } from '@/utils';
+import { IntlUtil, RandomUtil, Wireguard } from '@/utils';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { generateMtprotoSecret } from '@/lib/xray/inbound-defaults';
-import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
+import ClientIpLogModal from '@/components/clients/ClientIpLog';
+import { useClientIpLog } from '@/hooks/useClientIpLog';
 import { resolveExternalLinkExpiry } from '@/lib/clients/external-link';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
@@ -46,7 +46,6 @@ import type {
   ExternalLink,
   ExternalLinkInput,
 } from '@/hooks/useClients';
-import { useFail2banStatusQuery, getLimitIpNotice } from '@/api/queries/useFail2banStatusQuery';
 import ClientRenewalFields from './ClientRenewalFields';
 import { ClientFormSchema, ClientCreateFormSchema, type ClientFormValues } from '@/schemas/client';
 import './ClientFormModal.css';
@@ -280,9 +279,7 @@ export default function ClientFormModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
-  const [ipsLoading, setIpsLoading] = useState(false);
-  const [ipsClearing, setIpsClearing] = useState(false);
+  const ipLog = useClientIpLog(isEdit ? client?.email : undefined);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
     clientHwids,
@@ -297,9 +294,6 @@ export default function ClientFormModal({
   const { datepicker } = useDatepicker();
   const hwidDateLabel = (ts: number) =>
     !ts || ts <= 0 ? '-' : IntlUtil.formatDate(ts, datepicker);
-  const fail2ban = useFail2banStatusQuery();
-  const limitIpDisabled = !fail2ban.usable;
-  const limitIpNotice = getLimitIpNotice(fail2ban, t);
 
   // Declared ahead of the seeding effect below (which needs them to resolve
   // which specific wg/awg inbound this client is attached to, for seeding
@@ -396,7 +390,7 @@ export default function ClientFormModal({
         seed.expiryDate = et > 0 ? et : 0;
       }
       methods.reset(seed);
-      void loadIps();
+      void ipLog.load();
       void loadHwids();
     } else {
       const wgKeypair = Wireguard.generateKeypair();
@@ -586,39 +580,9 @@ export default function ClientFormModal({
     .map((field, index) => ({ field, index }))
     .filter((row) => row.field.kind === 'subscription');
 
-  async function loadIps() {
-    if (!isEdit || !client?.email) return;
-    setIpsLoading(true);
-    try {
-      const msg = (await HttpUtil.post(
-        `/panel/api/clients/ips/${encodeURIComponent(client.email)}`,
-      )) as ApiMsg<unknown[]>;
-      if (!msg?.success) {
-        setClientIps([]);
-        return;
-      }
-      setClientIps(normalizeClientIps(msg.obj));
-    } finally {
-      setIpsLoading(false);
-    }
-  }
-
   function openIpsModal() {
     setIpsModalOpen(true);
-    if (clientIps.length === 0) void loadIps();
-  }
-
-  async function clearIps() {
-    if (!isEdit || !client?.email) return;
-    setIpsClearing(true);
-    try {
-      const msg = (await HttpUtil.post(
-        `/panel/api/clients/clearIps/${encodeURIComponent(client.email)}`,
-      )) as ApiMsg;
-      if (msg?.success) setClientIps([]);
-    } finally {
-      setIpsClearing(false);
-    }
+    if (ipLog.ips.length === 0) void ipLog.load();
   }
 
   function openHwidsModal() {
@@ -892,34 +856,26 @@ export default function ClientFormModal({
                             label={t('pages.clients.limitIp')}
                             tooltip={t('pages.clients.limitIpDesc')}
                           >
-                            <Tooltip title={limitIpNotice || undefined}>
-                              <span style={{ display: 'flex', width: '100%' }}>
-                                <Space.Compact style={{ display: 'flex', flex: 1 }}>
-                                  <InputNumber
-                                    value={limitIp}
-                                    min={0}
-                                    disabled={limitIpDisabled}
-                                    style={{
-                                      flex: 1,
-                                      ...(limitIpDisabled ? { pointerEvents: 'none' } : null),
-                                    }}
-                                    onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
-                                  />
-                                  {isEdit && (
-                                    <Tooltip title={t('pages.clients.ipLog')}>
-                                      <Button
-                                        aria-label={t('pages.clients.ipLog')}
-                                        icon={<EyeOutlined />}
-                                        loading={ipsLoading}
-                                        onClick={openIpsModal}
-                                      >
-                                        {clientIps.length > 0 ? clientIps.length : ''}
-                                      </Button>
-                                    </Tooltip>
-                                  )}
-                                </Space.Compact>
-                              </span>
-                            </Tooltip>
+                            <Space.Compact style={{ display: 'flex', width: '100%' }}>
+                              <InputNumber
+                                value={limitIp}
+                                min={0}
+                                style={{ flex: 1 }}
+                                onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
+                              />
+                              {isEdit && (
+                                <Tooltip title={t('pages.clients.ipLog')}>
+                                  <Button
+                                    aria-label={t('pages.clients.ipLog')}
+                                    icon={<EyeOutlined />}
+                                    loading={ipLog.loading}
+                                    onClick={openIpsModal}
+                                  >
+                                    {ipLog.ips.length > 0 ? ipLog.ips.length : ''}
+                                  </Button>
+                                </Tooltip>
+                              )}
+                            </Space.Compact>
                           </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
@@ -1504,59 +1460,21 @@ export default function ClientFormModal({
         </FormProvider>
       </Modal>
 
-      <Modal
+      <ClientIpLogModal
         open={ipsModalOpen}
-        title={`${t('pages.clients.ipLog')}${client?.email ? ` — ${client.email}` : ''}`}
-        width={440}
+        email={client?.email}
         zIndex={CLIENT_IP_LOG_MODAL_Z_INDEX}
-        onCancel={() => setIpsModalOpen(false)}
-        footer={[
-          <Button key="refresh" icon={<ReloadOutlined />} loading={ipsLoading} onClick={loadIps}>
-            {t('refresh')}
-          </Button>,
-          <Button
-            key="clear"
-            danger
-            loading={ipsClearing}
-            disabled={clientIps.length === 0}
-            onClick={clearIps}
-          >
-            {t('pages.clients.clearAll')}
-          </Button>,
-          <Button key="close" type="primary" onClick={() => setIpsModalOpen(false)}>
-            {t('close')}
-          </Button>,
-        ]}
-      >
-        {clientIps.length > 0 ? (
-          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-            {clientIps.map((entry, idx) => (
-              <Tag
-                key={idx}
-                color="blue"
-                style={{
-                  display: 'block',
-                  width: 'fit-content',
-                  maxWidth: '100%',
-                  marginBottom: 6,
-                  padding: '2px 8px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                }}
-              >
-                {entry.ip}
-                {entry.time ? ` (${entry.time})` : ''}
-                {entry.node ? (
-                  <span style={{ marginInlineStart: 6, opacity: 0.85, fontWeight: 600 }}>
-                    @ {entry.node}
-                  </span>
-                ) : null}
-              </Tag>
-            ))}
-          </div>
-        ) : (
-          <Tag>{t('tgbot.noIpRecord')}</Tag>
-        )}
-      </Modal>
+        ips={ipLog.ips}
+        bans={ipLog.bans}
+        nowMs={ipLog.loadedAt}
+        loading={ipLog.loading}
+        clearing={ipLog.clearing}
+        unbanning={ipLog.unbanning}
+        onRefresh={ipLog.load}
+        onClear={ipLog.clear}
+        onUnban={ipLog.unban}
+        onClose={() => setIpsModalOpen(false)}
+      />
 
       <ClientHwidListModal
         open={hwidsModalOpen}
