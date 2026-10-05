@@ -12,9 +12,10 @@ _openapi:
   toc:
     - depth: 2
       title: Upload one computer's usage for the days from..to, its sessions
-        (upserted, or replacing all of the computer's sessions when
-        replaceSessions is true) and its latest plan-limit readings.
-      url: '#upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-or-replacing-all-of-the-computers-sessions-when-replacesessions-is-true-and-its-latest-plan-limit-readings'
+        (upserted; with sessionsSince set, the computer's sessions active since
+        then that the report leaves out are deleted) and its latest plan-limit
+        readings.
+      url: '#upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings'
     - depth: 2
       title: Get the period's totals and project/model rankings (busiest 100 by cost),
         30 days of daily cost and tokens per app, the period's 50 costliest
@@ -27,9 +28,10 @@ _openapi:
   structuredData:
     headings:
       - content: Upload one computer's usage for the days from..to, its sessions
-          (upserted, or replacing all of the computer's sessions when
-          replaceSessions is true) and its latest plan-limit readings.
-        id: upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-or-replacing-all-of-the-computers-sessions-when-replacesessions-is-true-and-its-latest-plan-limit-readings
+          (upserted; with sessionsSince set, the computer's sessions active
+          since then that the report leaves out are deleted) and its latest
+          plan-limit readings.
+        id: upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings
       - content: Get the period's totals and project/model rankings (busiest 100 by
           cost), 30 days of daily cost and tokens per app, the period's 50
           costliest sessions, each tool's newest plan-limit reading and the

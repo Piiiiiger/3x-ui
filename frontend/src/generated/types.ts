@@ -106,8 +106,8 @@ export interface AiUsageReport {
   device: AiUsageReportDevice;
   from: string;
   quotas: AiUsageReportQuota[];
-  replaceSessions: boolean;
   sessions: AiUsageReportSession[];
+  sessionsSince: number;
   to: string;
 }
 

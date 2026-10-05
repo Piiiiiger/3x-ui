@@ -138,8 +138,8 @@ export const AiUsageReportSchema = z.object({
   device: z.lazy(() => AiUsageReportDeviceSchema),
   from: z.string(),
   quotas: z.array(z.lazy(() => AiUsageReportQuotaSchema)),
-  replaceSessions: z.boolean(),
   sessions: z.array(z.lazy(() => AiUsageReportSessionSchema)),
+  sessionsSince: z.number().int(),
   to: z.string(),
 });
 export type AiUsageReport = z.infer<typeof AiUsageReportSchema>;

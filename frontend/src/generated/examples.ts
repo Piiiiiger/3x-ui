@@ -203,7 +203,6 @@ export const EXAMPLES: Record<string, unknown> = {
         "tool": "claude"
       }
     ],
-    "replaceSessions": false,
     "sessions": [
       {
         "app": "claude",
@@ -219,6 +218,7 @@ export const EXAMPLES: Record<string, unknown> = {
         "tokens": 900000
       }
     ],
+    "sessionsSince": 0,
     "to": "2026-10-06"
   },
   "AiUsageReportDay": {

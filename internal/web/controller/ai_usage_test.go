@@ -57,12 +57,12 @@ func TestAiUsageIngestThenOverviewOverHTTP(t *testing.T) {
 			 "requests": 2, "inputTokens": 20, "outputTokens": 200, "cacheReadTokens": 0,
 			 "cacheWriteTokens": 0, "costUsd": 0.5}
 		],
-		"replaceSessions": true,
+		"sessionsSince": %d,
 		"sessions": [{"app": "claude", "sessionId": "s1", "title": "fix login", "costUsd": 1.25,
 			"requests": 3, "firstAt": %d, "lastAt": %d}],
 		"quotas": [{"tool": "codex", "success": true, "planLabel": "Plus", "queriedAt": 1767229200000,
 			"tiers": [{"name": "seven_day", "utilization": 64.5, "resetsAt": "2026-01-05T00:00:00Z"}]}]
-	}`, lastAt-600, lastAt)
+	}`, lastAt-86400, lastAt-600, lastAt)
 	if reply := aiUsageCall(t, engine, http.MethodPost, "/panel/api/aiUsage/ingest", report); !reply.Success {
 		t.Fatalf("ingest refused: %s", reply.Msg)
 	}

@@ -430,15 +430,17 @@ export const SCHEMAS: Record<string, unknown> = {
         },
         "type": "array"
       },
-      "replaceSessions": {
-        "example": false,
-        "type": "boolean"
-      },
       "sessions": {
         "items": {
           "$ref": "#/components/schemas/AiUsageReportSession"
         },
         "type": "array"
+      },
+      "sessionsSince": {
+        "description": "SessionsSince (Unix seconds), when set, makes the report speak for every session of the\ndevice active since then: the ones it leaves out are deleted. Zero only upserts.",
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
       },
       "to": {
         "example": "2026-10-06",
@@ -450,8 +452,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "device",
       "from",
       "quotas",
-      "replaceSessions",
       "sessions",
+      "sessionsSince",
       "to"
     ],
     "type": "object"

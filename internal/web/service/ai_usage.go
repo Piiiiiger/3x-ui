@@ -97,13 +97,15 @@ type AiUsageReportQuota struct {
 // AiUsageReport is what Pigger Switch uploads: its usage on the whole days
 // From..To of its time zone, which replaces what Pigger held for those days.
 type AiUsageReport struct {
-	Device          AiUsageReportDevice    `json:"device"`
-	From            string                 `json:"from" example:"2026-10-05"`
-	To              string                 `json:"to" example:"2026-10-06"`
-	Daily           []AiUsageReportDay     `json:"daily"`
-	Sessions        []AiUsageReportSession `json:"sessions"`
-	ReplaceSessions bool                   `json:"replaceSessions" example:"false"`
-	Quotas          []AiUsageReportQuota   `json:"quotas"`
+	Device   AiUsageReportDevice    `json:"device"`
+	From     string                 `json:"from" example:"2026-10-05"`
+	To       string                 `json:"to" example:"2026-10-06"`
+	Daily    []AiUsageReportDay     `json:"daily"`
+	Sessions []AiUsageReportSession `json:"sessions"`
+	// SessionsSince (Unix seconds), when set, makes the report speak for every session of the
+	// device active since then: the ones it leaves out are deleted. Zero only upserts.
+	SessionsSince int64                `json:"sessionsSince" example:"0"`
+	Quotas        []AiUsageReportQuota `json:"quotas"`
 }
 
 // AiUsageIngestResult names the device a report landed on and what it stored.
@@ -178,6 +180,9 @@ func (r *AiUsageReport) normalize() (from, to int, rows []model.AiUsageDaily, se
 	}
 	if from > to {
 		return 0, 0, nil, nil, common.NewErrorf("report from %s is after to %s", r.From, r.To)
+	}
+	if r.SessionsSince < 0 {
+		return 0, 0, nil, nil, common.NewError("sessionsSince must be a Unix time, or 0")
 	}
 	if len(r.Daily) > aiMaxDailyRows || len(r.Sessions) > aiMaxSessions {
 		return 0, 0, nil, nil, common.NewError("report is too large: split it into smaller windows")
@@ -291,8 +296,8 @@ func (s *AiUsageService) Ingest(report *AiUsageReport, now time.Time) (*AiUsageI
 			}
 		}
 
-		if report.ReplaceSessions {
-			if err := tx.Where("device_id = ?", device.Id).Delete(&model.AiUsageSession{}).Error; err != nil {
+		if report.SessionsSince > 0 {
+			if err := tx.Where("device_id = ? AND last_at >= ?", device.Id, report.SessionsSince).Delete(&model.AiUsageSession{}).Error; err != nil {
 				return err
 			}
 		}

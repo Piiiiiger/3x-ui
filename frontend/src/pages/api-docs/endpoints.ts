@@ -2080,7 +2080,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/aiUsage/ingest',
         summary:
-          "Upload one computer's usage for the days from..to, its sessions (upserted, or replacing all of the computer's sessions when replaceSessions is true) and its latest plan-limit readings.",
+          "Upload one computer's usage for the days from..to, its sessions (upserted; with sessionsSince set, the computer's sessions active since then that the report leaves out are deleted) and its latest plan-limit readings.",
         requestSchema: { $ref: '#/components/schemas/AiUsageReport' },
         responseSchema: 'AiUsageIngestResult',
         errorResponse:

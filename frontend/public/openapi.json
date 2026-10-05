@@ -456,15 +456,17 @@
             },
             "type": "array"
           },
-          "replaceSessions": {
-            "example": false,
-            "type": "boolean"
-          },
           "sessions": {
             "items": {
               "$ref": "#/components/schemas/AiUsageReportSession"
             },
             "type": "array"
+          },
+          "sessionsSince": {
+            "description": "SessionsSince (Unix seconds), when set, makes the report speak for every session of the\ndevice active since then: the ones it leaves out are deleted. Zero only upserts.",
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
           },
           "to": {
             "example": "2026-10-06",
@@ -476,8 +478,8 @@
           "device",
           "from",
           "quotas",
-          "replaceSessions",
           "sessions",
+          "sessionsSince",
           "to"
         ],
         "type": "object"
@@ -15731,7 +15733,7 @@
         "tags": [
           "AI Usage"
         ],
-        "summary": "Upload one computer's usage for the days from..to, its sessions (upserted, or replacing all of the computer's sessions when replaceSessions is true) and its latest plan-limit readings.",
+        "summary": "Upload one computer's usage for the days from..to, its sessions (upserted; with sessionsSince set, the computer's sessions active since then that the report leaves out are deleted) and its latest plan-limit readings.",
         "operationId": "post_panel_api_aiUsage_ingest",
         "requestBody": {
           "required": true,

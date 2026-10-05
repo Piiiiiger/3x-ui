@@ -129,6 +129,7 @@ func TestAiUsageIngestRejectsBadReportsAndWritesNothing(t *testing.T) {
 		{"cost not a number", func(r *AiUsageReport) { r.Daily[0].CostUsd = math.NaN() }, "cost"},
 		{"short device key", func(r *AiUsageReport) { r.Device.Key = "abc" }, "device key"},
 		{"no device name", func(r *AiUsageReport) { r.Device.Name = "  " }, "device name"},
+		{"negative session window", func(r *AiUsageReport) { r.SessionsSince = -1 }, "sessionsSince"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -197,33 +198,41 @@ func aiSessionIds(t *testing.T, deviceId int) map[string]model.AiUsageSession {
 	return out
 }
 
-// A full sync replaces the device's sessions; a quick one only updates the
-// sessions it carries and must keep the rest.
-func TestAiUsageIngestSessionsUpsertOrReplace(t *testing.T) {
+// A report with sessionsSince speaks for the device's sessions active since then:
+// the ones it leaves out go, while older ones and other devices' stay.
+func TestAiUsageIngestSessionsSinceReplacesOnlyItsWindow(t *testing.T) {
 	setupAiUsageDB(t)
 	dev := aiDevice("device-key-1", "laptop")
 	at := aiNow.Unix()
-	sess := func(id string, cost float64) AiUsageReportSession {
-		return AiUsageReportSession{App: "claude", SessionId: id, Title: "t-" + id, Requests: 1, CostUsd: cost, FirstAt: at - 60, LastAt: at}
+	sess := func(id string, cost float64, lastAt int64) AiUsageReportSession {
+		return AiUsageReportSession{App: "claude", SessionId: id, Title: "t-" + id, Requests: 1, CostUsd: cost, FirstAt: lastAt - 60, LastAt: lastAt}
 	}
+	other := mustIngest(t, AiUsageReport{
+		Device: aiDevice("device-key-2", "desktop"), From: "2026-10-06", To: "2026-10-06",
+		Sessions: []AiUsageReportSession{sess("d", 1, at)},
+	})
 	id := mustIngest(t, AiUsageReport{
-		Device: dev, From: "2026-10-06", To: "2026-10-06", ReplaceSessions: true,
-		Sessions: []AiUsageReportSession{sess("a", 1), sess("b", 2)},
+		Device: dev, From: "2026-10-06", To: "2026-10-06",
+		Sessions: []AiUsageReportSession{sess("old", 9, at-40*86400), sess("a", 1, at), sess("b", 2, at)},
 	})
 	mustIngest(t, AiUsageReport{
 		Device: dev, From: "2026-10-06", To: "2026-10-06",
-		Sessions: []AiUsageReportSession{sess("b", 5), sess("c", 1)},
+		Sessions: []AiUsageReportSession{sess("b", 5, at), sess("c", 1, at)},
 	})
 	got := aiSessionIds(t, id)
-	if len(got) != 3 || got["b"].CostMicros != 5_000_000 {
-		t.Fatalf("after an upsert: %+v, want a, b ($5) and c", got)
+	if len(got) != 4 || got["b"].CostMicros != 5_000_000 {
+		t.Fatalf("after an upsert: %+v, want old, a, b ($5) and c", got)
 	}
 	mustIngest(t, AiUsageReport{
-		Device: dev, From: "2026-10-06", To: "2026-10-06", ReplaceSessions: true,
-		Sessions: []AiUsageReportSession{sess("c", 1)},
+		Device: dev, From: "2026-10-06", To: "2026-10-06", SessionsSince: at - 30*86400,
+		Sessions: []AiUsageReportSession{sess("c", 1, at)},
 	})
-	if got := aiSessionIds(t, id); len(got) != 1 || got["c"].SessionId != "c" {
-		t.Fatalf("after a replace: %+v, want only c", got)
+	got = aiSessionIds(t, id)
+	if len(got) != 2 || got["c"].SessionId != "c" || got["old"].SessionId != "old" {
+		t.Fatalf("after a windowed replace: %+v, want old and c", got)
+	}
+	if len(aiSessionIds(t, other)) != 1 {
+		t.Fatal("a report from one device deleted another device's session")
 	}
 }
 
@@ -256,7 +265,6 @@ func seedAiOverview(t *testing.T) (laptop, desktop int) {
 			aiDay("2026-10-06", "claude", "/w/app", "sonnet", 4, 1),
 			aiDay("2026-10-06", "codex", "/w/lib", "gpt-5.5", 8, 2),
 		},
-		ReplaceSessions: true,
 		Sessions: []AiUsageReportSession{
 			{App: "claude", SessionId: "s-old", Title: "september", CostUsd: 50, FirstAt: at - 20*86400, LastAt: at - 16*86400},
 			{App: "claude", SessionId: "s-app", Title: "fix login", Project: "/w/app", CostUsd: 7, Requests: 14, FirstAt: at - 4*86400, LastAt: at - 60},
