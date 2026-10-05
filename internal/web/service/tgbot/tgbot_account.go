@@ -165,6 +165,8 @@ func (t *Tgbot) answerUserCallback(q *telego.CallbackQuery, messageID int, rest 
 		view = t.ipsView(client, now)
 	case "daily":
 		toast, view = t.dailyButton(q, client, arg)
+	case "bans":
+		view = t.banHistoryView(client.Email, now, "pg:home")
 	default:
 		view = t.homeView(client, now, checkAdmin(q.From.ID))
 	}
@@ -291,9 +293,13 @@ func (t *Tgbot) homeView(client *model.ClientRecord, now time.Time, admin bool) 
 	if len(u.ips.Bans) > 0 {
 		fmt.Fprintf(&b, " · ⛔ %d 个暂停中", len(u.ips.Bans))
 	}
+	if line := abuseStatusLine(client.Email, now); line != "" {
+		b.WriteString("\n" + line)
+	}
 	rows := [][]telego.InlineKeyboardButton{
 		{button("📊 用量详情", "pg:use"), button("🌐 在线设备", "pg:ips")},
-		{button("🔔 日报设置", "pg:daily"), button("❓ 帮助", "pg:help")},
+		{button("🔔 日报设置", "pg:daily"), button("📜 封禁记录", "pg:bans")},
+		{button("❓ 帮助", "pg:help")},
 	}
 	if url := t.portalURL(); url != "" {
 		rows = append(rows, []telego.InlineKeyboardButton{tu.InlineKeyboardButton("🌍 打开用户页面").WithURL(url)})
@@ -515,7 +521,11 @@ func (t *Tgbot) helpView(tgID int64) botView {
 	b.WriteString("• <b>到期提醒</b>：到期前 7、3、1 天自动提醒，续费后按新日期计算。\n")
 	b.WriteString("• <b>在线设备</b>：同一时间在线的 IP 数有上限；超出时，最久未活动的 IP 会暂停一段时间，到时自动恢复。\n")
 	b.WriteString("• <b>续费</b>：请联系管理员。\n")
-	b.WriteString("• <b>更换 Telegram 账号</b>：请联系管理员解除绑定后重新绑定。")
+	b.WriteString("• <b>更换 Telegram 账号</b>：请联系管理员解除绑定后重新绑定。\n\n")
+	b.WriteString("📍 <b>手机使用时请关闭定位服务</b>，否则 App 能读到你的真实位置，真实位置和 IP 可能暴露。\n\n")
+	fmt.Fprintf(&b, "🚫 <b>使用规则</b>：禁止批量注册、爬虫、长时间满速占用、中转到自己的服务器、无故反复测速、端口扫描、网络攻击、发送垃圾邮件、BT 下载。"+
+		"正常下载软件、系统更新不受影响。违规一次封禁 %d 分钟，到时自动恢复；30 天内超过 %d 次，账号停用，需联系管理员。",
+		service.AbuseBanMinutes, service.AbuseStrikesLimit)
 	back := "pg:home"
 	if checkAdmin(tgID) {
 		back = "pg:a"
@@ -684,6 +694,7 @@ func (t *Tgbot) sendAccountNotifications(ctx context.Context, now time.Time) {
 		}
 	}
 	t.notifyIpBans(ctx, now)
+	t.notifyAbuse(ctx, now)
 	t.notifyServerRenewals(ctx, now, clock)
 
 	accountPacing.Lock()

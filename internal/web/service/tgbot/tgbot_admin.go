@@ -282,6 +282,10 @@ func (t *Tgbot) userCardView(id int, now time.Time, note string) botView {
 	} else {
 		b.WriteString("Telegram：未绑定\n")
 	}
+	status, statusErr := (&service.AbuseService{}).Status(rec.Email, now)
+	if line := abuseStatusLine(rec.Email, now); line != "" {
+		b.WriteString(line + "\n")
+	}
 	if rec.Comment != "" {
 		b.WriteString("备注：" + esc(rec.Comment) + "\n")
 	}
@@ -299,7 +303,15 @@ func (t *Tgbot) userCardView(id int, now time.Time, note string) botView {
 	if len(u.ips.Bans) > 0 {
 		switches = append(switches, button("🔓 解封 IP", fmt.Sprintf("pg:a:b:%d", id)))
 	}
-	return botView{b.String(), keyboard(actions, switches,
+	var abuseRow []telego.InlineKeyboardButton
+	if statusErr == nil && status.Ban != nil {
+		abuseRow = append(abuseRow, button("🔓 解除封禁", fmt.Sprintf("pg:a:u:%d", id)))
+	}
+	if statusErr == nil && status.Strikes > 0 {
+		abuseRow = append(abuseRow, button("🧹 清除违规", fmt.Sprintf("pg:a:f:%d", id)))
+	}
+	abuseRow = append(abuseRow, button("📜 封禁记录", fmt.Sprintf("pg:a:h:%d", id)))
+	return botView{b.String(), keyboard(actions, switches, abuseRow,
 		[]telego.InlineKeyboardButton{button("🔄 刷新", fmt.Sprintf("pg:a:c:%d", id)), button("⬅️ 用户列表", "pg:a:l:0")},
 	)}
 }
@@ -497,6 +509,16 @@ func (t *Tgbot) answerAdminCallback(q *telego.CallbackQuery, messageID int, rest
 		view = t.unbanMenuView(id, now)
 	case "bx":
 		toast, view = t.unbanNow(id, rest, now)
+	case "u":
+		toast, view = t.liftAbuseNow(id, now)
+	case "f":
+		toast, view = t.forgiveAbuseNow(id, now)
+	case "h":
+		if rec, ok := loadClient(id); ok {
+			view = t.banHistoryView(rec.Email, now, fmt.Sprintf("pg:a:c:%d", id))
+		} else {
+			view = goneView()
+		}
 	case "more":
 		t.sendCallbackAnswerTgBot(q.ID, "")
 		t.SendAnswer(chatID, t.I18nBot("tgbot.commands.pleaseChoose"), true)
