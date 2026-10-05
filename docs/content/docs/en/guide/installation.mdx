@@ -61,16 +61,12 @@ lines in `docker-compose.yml` and start with the profile:
 docker compose --profile postgres up -d
 ```
 
-Prefer the prebuilt image? It's published to the GitHub Container Registry. The
-image bundles Fail2ban (for [IP limits](/docs/operations/security)), which bans
-with `iptables` and therefore needs `NET_ADMIN` (and `NET_RAW` for IPv6) —
-otherwise bans are logged but never applied:
+Prefer the prebuilt image? It's published to the GitHub Container Registry. Add
+`--cap-add=NET_ADMIN` only if AmneziaWG peers should get their own IPv6 egress
+addresses:
 
 ```bash title="docker run"
 docker run -d \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  -e XUI_ENABLE_FAIL2BAN=true \
   -v $PWD/db/:/etc/x-ui/ \
   -v $PWD/cert/:/root/cert/ \
   --network=host \

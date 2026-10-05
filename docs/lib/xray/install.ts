@@ -6,7 +6,6 @@ export interface InstallOptions {
   method: InstallMethod;
   /** A release tag like `v3.4.1`, or empty/`latest` for the latest release. */
   version: string;
-  enableFail2ban: boolean;
   panelPort: string;
   webBasePath: string;
 }
@@ -35,7 +34,6 @@ export function buildScriptCommand(options: InstallOptions): string {
 export function buildDockerRun(options: InstallOptions): string {
   const lines = ['docker run -itd'];
   lines.push(`  -e XRAY_VMESS_AEAD_FORCED=false`);
-  lines.push(`  -e XUI_ENABLE_FAIL2BAN=${options.enableFail2ban ? 'true' : 'false'}`);
   if (options.panelPort.trim()) lines.push(`  -e XUI_PORT=${options.panelPort.trim()}`);
   if (options.webBasePath.trim())
     lines.push(`  -e XUI_INIT_WEB_BASE_PATH=${options.webBasePath.trim()}`);
@@ -50,10 +48,7 @@ export function buildDockerRun(options: InstallOptions): string {
 
 /** A `docker-compose.yml` reflecting the chosen options. */
 export function buildDockerCompose(options: InstallOptions): string {
-  const env: string[] = [
-    `      XRAY_VMESS_AEAD_FORCED: 'false'`,
-    `      XUI_ENABLE_FAIL2BAN: '${options.enableFail2ban ? 'true' : 'false'}'`,
-  ];
+  const env: string[] = [`      XRAY_VMESS_AEAD_FORCED: 'false'`];
   if (options.panelPort.trim()) env.push(`      XUI_PORT: '${options.panelPort.trim()}'`);
   if (options.webBasePath.trim())
     env.push(`      XUI_INIT_WEB_BASE_PATH: '${options.webBasePath.trim()}'`);

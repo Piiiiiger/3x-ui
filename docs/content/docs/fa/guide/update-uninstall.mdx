@@ -35,13 +35,12 @@ x-ui
 | 18–19 | Enable / Disable Autostart             | فعال/غیرفعال‌کردن اجرای خودکار در زمان بوت                 |
 | 20    | SSL Certificate Management             | Let's Encrypt (دامنه یا IP)، مسیرهای سفارشی، تمدید/ابطال   |
 | 21    | Cloudflare SSL Certificate             | گواهی wildcard از طریق DNS-01 با Cloudflare                |
-| 22    | IP Limit Management                    | محدودیت IP به‌ازای هر کلاینت مبتنی بر Fail2ban             |
-| 23    | Firewall Management                    | نصب `ufw` و قواعد پورت                                     |
-| 24    | SSH Port Forwarding Management         | اتصال پنل به localhost و تونل‌زدن روی SSH                  |
-| 25    | PostgreSQL Management                  | نصب/مهاجرت/مدیریت PostgreSQL                               |
-| 26    | Enable BBR                             | فعال/غیرفعال‌کردن sysctl کنترل ازدحام BBR                  |
-| 27    | Update Geo Files                       | به‌روزرسانی دادهٔ geoip/geosite (Loyalsoldier، IR، RU)     |
-| 28    | Speedtest by Ookla                     | اجرای تست سرعت Ookla                                       |
+| 22    | Firewall Management                    | نصب `ufw` و قواعد پورت                                     |
+| 23    | SSH Port Forwarding Management         | اتصال پنل به localhost و تونل‌زدن روی SSH                  |
+| 24    | PostgreSQL Management                  | نصب/مهاجرت/مدیریت PostgreSQL                               |
+| 25    | Enable BBR                             | فعال/غیرفعال‌کردن sysctl کنترل ازدحام BBR                  |
+| 26    | Update Geo Files                       | به‌روزرسانی دادهٔ geoip/geosite (Loyalsoldier، IR، RU)     |
+| 27    | Speedtest by Ookla                     | اجرای تست سرعت Ookla                                       |
 | 0     | Exit                                   | —                                                         |
 
 برخی از این موارد صفحهٔ مخصوص خود را دارند: [گواهی‌های SSL](/docs/config/ssl-certificates)
@@ -61,7 +60,7 @@ x-ui
 | `x-ui settings`            | نمایش تنظیمات فعلی                                   |
 | `x-ui enable` / `disable`  | فعال/غیرفعال‌کردن اجرای خودکار در زمان بوت           |
 | `x-ui log`                 | دنبال‌کردن لاگ دیباگ                                 |
-| `x-ui banlog`              | نمایش لاگ مسدودسازی Fail2ban                         |
+| `x-ui banlog`              | نمایش لاگ مسدودسازی محدودیت IP                       |
 | `x-ui update`              | به‌روزرسانی به آخرین نسخهٔ پایدار                     |
 | `x-ui update-dev`          | به‌روزرسانی به بیلد غلتان `dev-latest`               |
 | `x-ui legacy`              | نصب یک نسخهٔ قدیمی مشخص (می‌پرسد)                     |

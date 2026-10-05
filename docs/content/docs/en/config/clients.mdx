@@ -17,7 +17,7 @@ inbounds** at once, with per-client traffic accounting.
 | **Password**   | Trojan, Shadowsocks, TUIC | The client credential.                                             |
 | **Auth**       | Hysteria2             | The client credential.                                             |
 | **Flow**       | VLESS                 | XTLS flow, e.g. `xtls-rprx-vision`.                                |
-| **Limit IP**   | all (except TUIC)     | Max simultaneous source IPs (enforced via Fail2ban).               |
+| **Limit IP**   | all (except TUIC)     | Max networks online at once, counted across all servers.          |
 | **Total (GB)** | all (except TUIC)     | Traffic quota; the client is disabled when exhausted (for TUIC, limits are set at the inbound level). |
 | **Expiry**     | all                   | Date after which the client stops working.                        |
 | **Auto renewal** | all                 | Disabled, fixed interval in days, calendar weekly, or calendar monthly. |
@@ -35,9 +35,10 @@ inbounds** at once, with per-client traffic accounting.
 
 - **Traffic / expiry** caps disable the client when hit; a **Reset** period
   auto-renews the quota.
-- **Limit IP** caps simultaneous source IPs. Enforcement relies on Fail2ban —
-  see [Security](/docs/operations/security). You can view a client's recent IPs
-  and clear them from the client's actions.
+- **Limit IP** caps how many networks (an IPv4 address or an IPv6 /64) the client
+  can be online from at once, across all servers. The panel enforces it itself —
+  see [Security](/docs/operations/security). The client's IP log shows its recent
+  addresses and running bans, and can clear the log or lift a ban.
 - **Online status** and **last-online** times are tracked per client (and per
   node in multi-node setups).
 

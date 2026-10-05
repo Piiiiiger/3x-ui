@@ -51,12 +51,7 @@ func GetGeoipPath() string {
 	return config.GetBinFolderPath() + "/geoip.dat"
 }
 
-// GetIPLimitLogPath returns the path to the IP limit log file.
-func GetIPLimitLogPath() string {
-	return config.GetLogFolder() + "/3xipl.log"
-}
-
-// GetIPLimitBannedLogPath returns the path to the banned IP log file.
+// GetIPLimitBannedLogPath returns the log of the panel's IP-limit bans and unbans.
 func GetIPLimitBannedLogPath() string {
 	return config.GetLogFolder() + "/3xipl-banned.log"
 }

@@ -1,6 +1,6 @@
 ---
 title: 安全加固
-description: 加固 3x-ui——面板认证与 2FA、Fail2ban IP 限制、防火墙规则、BBR，以及保持更新。
+description: 加固 3x-ui——面板认证与 2FA、IP 限制、防火墙规则、BBR，以及保持更新。
 icon: ShieldCheck
 ---
 
@@ -16,31 +16,27 @@ icon: ShieldCheck
 
 完整的检查清单请参见[首次登录](/docs/guide/first-login)。
 
-## Fail2ban 与 IP 限制
+## IP 限制
 
-为每个客户端设置一个 **IP 限制**（参见[客户端](/docs/config/clients)），以限制同时使用的源
-IP 数量。限制的执行由 **Fail2ban** 负责，3x-ui 会为你安装并配置好它（脚本安装时默认启用，
-Docker 安装时通过 `XUI_ENABLE_FAIL2BAN=true` 启用）。
+为每个客户端设置 **IP 限制**（参见[客户端](/docs/config/clients)），限制它同时在线的网络数，
+按面板管理的所有服务器合计：一个 IPv4 地址算一个网络，一个 IPv6 /64 也算一个。
 
-可从 `x-ui` 菜单（**22 — IP Limit Management**）进行管理：安装/配置、修改封锁时长
-（默认 **30 分钟**）、封锁/解封某个 IP、查看封锁日志，以及检查状态。其底层机制如下：
+限制由面板自己执行，不需要 Fail2ban，也不需要防火墙规则。
 
-- 该 jail 名为 **`3x-ipl`**；封锁日志位于 `/var/log/x-ui/3xipl.log` 与
-  `/var/log/x-ui/3xipl-banned.log`（也可通过 `x-ui banlog` 查看）。
-- 封锁覆盖所有 TCP/UDP，**但不包括**你的 SSH 端口和面板端口，因此封锁不会把你
-  锁在服务器或面板之外。
+- 客户端超出限制时，最久未活动的网络会对该客户端封禁一段时间（面板设置中的
+  **IP 限制封禁时长**，默认 **30 分钟**）。封禁是为该客户端服务的每台服务器 Xray 配置里的
+  一条路由规则，生效时不重启 Xray；同一地址后的其他用户不受影响。
+- 面板自己的服务器（每个节点的地址，以及其 agent 连接面板时的地址，因此中转服务器也包括
+  在内）、**IP 限制白名单**和内网地址永远不会被计入或封禁。
+- 客户端的 IP 日志会标出豁免的地址和正在生效的封禁，并可提前解除封禁。每次封禁和解除也会
+  写入 `/var/log/x-ui/3xipl-banned.log`（`x-ui banlog`）。
 
-<Callout type="warn">
-  在 Docker 上，Fail2ban 使用 `iptables` 进行封锁，这需要 `NET_ADMIN`（以及
-  `NET_RAW`）权能——`docker-compose.yml` 已授予这些权能。若使用裸的
-  `docker run`，请添加 `--cap-add=NET_ADMIN --cap-add=NET_RAW`，否则封锁只会被
-  记录但永远不会真正生效。
-</Callout>
+封禁开始时已建立的连接会持续到自行关闭；来自被封网络的新连接会被拒绝。
 
 ## 防火墙
 
 只开放你实际使用的端口：SSH、面板端口、订阅端口以及你的入站端口。`x-ui` 菜单
-（**23 — Firewall Management**）封装了 `ufw`，或者你也可以在此生成规则：
+（**22 — Firewall Management**）封装了 `ufw`，或者你也可以在此生成规则：
 
 <FirewallRulesGenerator />
 
@@ -51,7 +47,7 @@ Docker 安装时通过 `XUI_ENABLE_FAIL2BAN=true` 启用）。
 
 ## 网络调优（BBR）
 
-`x-ui` 菜单（**26 — Enable BBR**）用于切换 Google 的 BBR 拥塞控制算法
+`x-ui` 菜单（**25 — Enable BBR**）用于切换 Google 的 BBR 拥塞控制算法
 （`net.ipv4.tcp_congestion_control = bbr`、`net.core.default_qdisc = fq`），它在拥塞链路
 上通常能提升吞吐量。
 

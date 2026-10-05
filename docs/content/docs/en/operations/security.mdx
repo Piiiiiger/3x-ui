@@ -1,6 +1,6 @@
 ---
 title: Security
-description: Harden 3x-ui — panel auth and 2FA, Fail2ban IP limits, firewall rules, BBR, and staying current.
+description: Harden 3x-ui — panel auth and 2FA, IP limits, firewall rules, BBR, and staying current.
 icon: ShieldCheck
 ---
 
@@ -17,33 +17,33 @@ A proxy panel is a high-value target. A few layers of hardening go a long way.
 
 See [First login](/docs/guide/first-login) for the full checklist.
 
-## Fail2ban & IP limits
+## IP limits
 
-Set an **IP limit** per client (see [Clients](/docs/config/clients)) to cap the
-number of simultaneous source IPs. Enforcement is handled by **Fail2ban**, which
-3x-ui installs and configures for you (enabled by default on script installs, and
-on Docker via `XUI_ENABLE_FAIL2BAN=true`).
+Set an **IP limit** per client (see [Clients](/docs/config/clients)) to cap how
+many networks the client can be online from at once, counted across every server
+the panel manages: an IPv4 address is one network, and so is an IPv6 /64.
 
-Manage it from the `x-ui` menu (**22 — IP Limit Management**): install/configure,
-change the ban duration (default **30 minutes**), ban/unban an IP, view ban logs,
-and check status. Under the hood:
+The panel enforces the limit itself; it needs no Fail2ban and no firewall rules.
 
-- The jail is named **`3x-ipl`**; ban logs live at `/var/log/x-ui/3xipl.log` and
-  `/var/log/x-ui/3xipl-banned.log` (also via `x-ui banlog`).
-- Bans cover all TCP/UDP **except** your SSH and panel ports, so a ban can't lock
-  you out of the server or panel.
+- When a client goes over its limit, the networks it used least recently are
+  banned for that client for the ban duration (**IP limit ban** in the panel
+  settings, default **30 minutes**). A ban is a routing rule in the Xray config of
+  every server that serves the client, applied without restarting Xray; other
+  users behind the same address are not affected.
+- The panel's own servers (each node's address and the address its agent
+  connects from, so relays are covered), the **IP limit allowlist** and private
+  ranges are never counted or banned.
+- A client's IP log marks exempt addresses and running bans and can lift a ban.
+  Every ban and unban is also logged to `/var/log/x-ui/3xipl-banned.log`
+  (`x-ui banlog`).
 
-<Callout type="warn">
-  On Docker, Fail2ban bans with `iptables`, which needs the `NET_ADMIN` (and
-  `NET_RAW`) capability — `docker-compose.yml` grants them. With a bare
-  `docker run`, add `--cap-add=NET_ADMIN --cap-add=NET_RAW` or bans are logged
-  but never applied.
-</Callout>
+Connections already open when a ban starts run until they close; new connections
+from the banned network are refused.
 
 ## Firewall
 
 Open only the ports you actually use: SSH, the panel port, the subscription
-port, and your inbound ports. The `x-ui` menu (**23 — Firewall Management**) wraps
+port, and your inbound ports. The `x-ui` menu (**22 — Firewall Management**) wraps
 `ufw`, or generate rules here:
 
 <FirewallRulesGenerator />
@@ -55,7 +55,7 @@ port, and your inbound ports. The `x-ui` menu (**23 — Firewall Management**) w
 
 ## Network tuning (BBR)
 
-The `x-ui` menu (**26 — Enable BBR**) toggles Google's BBR congestion control
+The `x-ui` menu (**25 — Enable BBR**) toggles Google's BBR congestion control
 (`net.ipv4.tcp_congestion_control = bbr`, `net.core.default_qdisc = fq`), which
 often improves throughput on congested links.
 

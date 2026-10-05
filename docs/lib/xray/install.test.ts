@@ -9,7 +9,6 @@ import {
 const base: InstallOptions = {
   method: 'script',
   version: '',
-  enableFail2ban: true,
   panelPort: '',
   webBasePath: '',
 };
@@ -37,22 +36,17 @@ describe('buildScriptCommand', () => {
 });
 
 describe('buildDockerRun', () => {
-  it('reflects fail2ban, port, and base path options', () => {
-    const cmd = buildDockerRun({
-      ...base,
-      enableFail2ban: false,
-      panelPort: '8443',
-      webBasePath: '/panel',
-    });
-    expect(cmd).toContain('XUI_ENABLE_FAIL2BAN=false');
+  it('reflects port and base path options', () => {
+    const cmd = buildDockerRun({ ...base, panelPort: '8443', webBasePath: '/panel' });
     expect(cmd).toContain('XUI_PORT=8443');
     expect(cmd).toContain('XUI_INIT_WEB_BASE_PATH=/panel');
     expect(cmd).toContain('ghcr.io/mhsanaei/3x-ui:latest');
     expect(cmd).toContain('-v $PWD/db/:/etc/x-ui/');
   });
 
-  it('omits unset port and path', () => {
+  it('omits unset port and path, and the retired fail2ban switch', () => {
     const cmd = buildDockerRun(base);
+    expect(cmd).not.toContain('FAIL2BAN');
     expect(cmd).not.toContain('XUI_PORT');
     expect(cmd).not.toContain('XUI_INIT_WEB_BASE_PATH');
   });
@@ -65,5 +59,6 @@ describe('buildDockerCompose', () => {
     expect(yaml).toContain('network_mode: host');
     expect(yaml).toContain("XUI_PORT: '2096'");
     expect(yaml).toContain('- ./db/:/etc/x-ui/');
+    expect(yaml).not.toContain('FAIL2BAN');
   });
 });

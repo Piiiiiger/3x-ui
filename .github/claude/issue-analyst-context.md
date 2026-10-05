@@ -182,9 +182,9 @@ test that cannot fail is invisible to CI. `make verify` is the local gate.
   `XUI_DB_TYPE`/`XUI_DB_DSN` in that file and `systemctl restart x-ui`. The
   source SQLite file is left in place.
 - Docker image `ghcr.io/mhsanaei/3x-ui`; PostgreSQL profile
-  `docker compose --profile postgres up -d`. Fail2ban IP-limit enforcement needs
-  `NET_ADMIN` + `NET_RAW` (compose grants them; a bare `docker run` must add
-  `--cap-add=NET_ADMIN --cap-add=NET_RAW`).
+  `docker compose --profile postgres up -d`. The panel enforces IP limits
+  itself (no fail2ban, no extra capabilities); only AmneziaWG's per-peer IPv6
+  egress addresses need `NET_ADMIN`.
 - Never state that a `XUI_*` variable does not exist without grepping
   `internal/config/` and `internal/tunnelmonitor/` first. The
   `XUI_TUNNEL_HEALTH_*` family is the usual answer to "the panel restarts Xray

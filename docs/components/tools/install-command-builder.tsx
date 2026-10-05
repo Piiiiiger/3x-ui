@@ -9,20 +9,18 @@ import {
   type InstallOptions,
 } from '@/lib/xray/install';
 import { ToolFrame } from './tool-frame';
-import { TextField, SelectField, CheckboxField } from './shared/fields';
+import { TextField, SelectField } from './shared/fields';
 import { OutputBlock } from './shared/output-block';
 
 export function InstallCommandBuilder() {
   const [method, setMethod] = useState<InstallMethod>('script');
   const [version, setVersion] = useState('');
-  const [enableFail2ban, setEnableFail2ban] = useState(true);
   const [panelPort, setPanelPort] = useState('');
   const [webBasePath, setWebBasePath] = useState('');
 
   const options: InstallOptions = {
     method,
     version,
-    enableFail2ban,
     panelPort,
     webBasePath,
   };
@@ -62,14 +60,6 @@ export function InstallCommandBuilder() {
             />
           </>
         ) : null}
-      </div>
-
-      <div className="mt-3">
-        <CheckboxField
-          label="Enable Fail2ban"
-          checked={enableFail2ban}
-          onChange={setEnableFail2ban}
-        />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4">

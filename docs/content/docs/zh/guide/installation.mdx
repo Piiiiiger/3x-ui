@@ -60,16 +60,11 @@ docker compose up -d
 docker compose --profile postgres up -d
 ```
 
-更想用预构建镜像？它已发布到 GitHub Container Registry。该镜像内置了 Fail2ban（用于
-[IP 限制](/docs/operations/security)），其封禁通过 `iptables` 实现，因此需要 `NET_ADMIN`
-（IPv6 还需 `NET_RAW`）——
-否则封禁只会被记录，而不会实际生效：
+更想用预构建镜像？它已发布到 GitHub Container Registry。只有当 AmneziaWG 对端需要各自的
+IPv6 出口地址时，才需要添加 `--cap-add=NET_ADMIN`：
 
 ```bash title="docker run"
 docker run -d \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  -e XUI_ENABLE_FAIL2BAN=true \
   -v $PWD/db/:/etc/x-ui/ \
   -v $PWD/cert/:/root/cert/ \
   --network=host \

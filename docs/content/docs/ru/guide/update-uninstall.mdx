@@ -36,13 +36,12 @@ x-ui
 | 18–19 | Enable / Disable Autostart             | Включить/выключить автозапуск при загрузке               |
 | 20    | SSL Certificate Management             | Let's Encrypt (домен или IP), пользовательские пути, продление/отзыв |
 | 21    | Cloudflare SSL Certificate             | Wildcard-сертификат через DNS-01 с помощью Cloudflare     |
-| 22    | IP Limit Management                    | Ограничения по IP на клиента на базе Fail2ban             |
-| 23    | Firewall Management                    | Установка `ufw` и правила для портов                      |
-| 24    | SSH Port Forwarding Management         | Привязать панель к localhost и туннелировать через SSH    |
-| 25    | PostgreSQL Management                  | Установка/миграция/управление PostgreSQL                  |
-| 26    | Enable BBR                             | Переключить sysctl-управление перегрузкой BBR             |
-| 27    | Update Geo Files                       | Обновить данные geoip/geosite (Loyalsoldier, IR, RU)      |
-| 28    | Speedtest by Ookla                     | Запустить тест скорости Ookla                             |
+| 22    | Firewall Management                    | Установка `ufw` и правила для портов                      |
+| 23    | SSH Port Forwarding Management         | Привязать панель к localhost и туннелировать через SSH    |
+| 24    | PostgreSQL Management                  | Установка/миграция/управление PostgreSQL                  |
+| 25    | Enable BBR                             | Переключить sysctl-управление перегрузкой BBR             |
+| 26    | Update Geo Files                       | Обновить данные geoip/geosite (Loyalsoldier, IR, RU)      |
+| 27    | Speedtest by Ookla                     | Запустить тест скорости Ookla                             |
 | 0     | Exit                                   | —                                                         |
 
 Некоторым из этих пунктов посвящены отдельные страницы: [SSL-сертификаты](/docs/config/ssl-certificates)
@@ -62,7 +61,7 @@ x-ui
 | `x-ui settings`            | Показать текущие настройки                          |
 | `x-ui enable` / `disable`  | Включить/выключить автозапуск при загрузке         |
 | `x-ui log`                 | Вывести отладочный лог в реальном времени           |
-| `x-ui banlog`              | Показать лог блокировок Fail2ban                    |
+| `x-ui banlog`              | Показать журнал блокировок по лимиту IP             |
 | `x-ui update`              | Обновить до последнего стабильного релиза           |
 | `x-ui update-dev`          | Обновить до скользящей сборки `dev-latest`          |
 | `x-ui legacy`              | Установить конкретную старую версию (с запросом)    |

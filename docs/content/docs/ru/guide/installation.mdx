@@ -62,16 +62,11 @@ docker compose up -d
 docker compose --profile postgres up -d
 ```
 
-Предпочитаете готовый образ? Он публикуется в GitHub Container Registry. Образ
-включает Fail2ban (для [ограничений по IP](/docs/operations/security)), который
-блокирует через `iptables` и поэтому требует `NET_ADMIN` (а для IPv6 — ещё и
-`NET_RAW`); в противном случае блокировки логируются, но никогда не применяются:
+Предпочитаете готовый образ? Он публикуется в GitHub Container Registry. Добавляйте
+`--cap-add=NET_ADMIN`, только если пирам AmneziaWG нужны собственные исходящие адреса IPv6:
 
 ```bash title="docker run"
 docker run -d \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  -e XUI_ENABLE_FAIL2BAN=true \
   -v $PWD/db/:/etc/x-ui/ \
   -v $PWD/cert/:/root/cert/ \
   --network=host \

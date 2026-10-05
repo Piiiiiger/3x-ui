@@ -45,51 +45,40 @@ func ensureFileExists(path string) error {
 	return nil
 }
 
-// Here Run is an interface method of the Job interface
+// Run keeps one day of IP-limit bans in the previous log, where the Telegram
+// backup picks them up, then empties the current one and the Xray logs.
 func (j *ClearLogsJob) Run() {
-	logFiles := []string{xray.GetIPLimitLogPath(), xray.GetIPLimitBannedLogPath()}
-	logFilesPrev := []string{xray.GetIPLimitBannedPrevLogPath()}
-
-	// Ensure all log files and their paths exist
-	for _, path := range append(logFiles, logFilesPrev...) {
+	current, previous := xray.GetIPLimitBannedLogPath(), xray.GetIPLimitBannedPrevLogPath()
+	for _, path := range []string{current, previous} {
 		if err := ensureFileExists(path); err != nil {
 			logger.Warning("Failed to ensure log file exists:", path, "-", err)
 		}
 	}
-
-	// Clear log files and copy to previous logs
-	for i := range len(logFiles) {
-		if i > 0 {
-			// Copy to previous logs
-			logFilePrev, err := os.OpenFile(logFilesPrev[i-1], os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
-			if err != nil {
-				logger.Warning("Failed to open previous log file for writing:", logFilesPrev[i-1], "-", err)
-				continue
-			}
-
-			logFile, err := os.OpenFile(logFiles[i], os.O_RDONLY, 0o644)
-			if err != nil {
-				logger.Warning("Failed to open current log file for reading:", logFiles[i], "-", err)
-				logFilePrev.Close()
-				continue
-			}
-
-			_, err = io.Copy(logFilePrev, logFile)
-			if err != nil {
-				logger.Warning("Failed to copy log file:", logFiles[i], "to", logFilesPrev[i-1], "-", err)
-			}
-
-			logFile.Close()
-			logFilePrev.Close()
-		}
-
-		err := os.Truncate(logFiles[i], 0)
-		if err != nil {
-			logger.Warning("Failed to truncate log file:", logFiles[i], "-", err)
-		}
+	if err := copyLogFile(current, previous); err != nil {
+		logger.Warning("Failed to copy log file:", current, "to", previous, "-", err)
+	}
+	if err := os.Truncate(current, 0); err != nil {
+		logger.Warning("Failed to truncate log file:", current, "-", err)
 	}
 
 	wipeXrayLogs()
+}
+
+func copyLogFile(from, to string) error {
+	src, err := os.Open(from)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	dst, err := os.OpenFile(to, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(dst, src); err != nil {
+		dst.Close()
+		return err
+	}
+	return dst.Close()
 }
 
 func (j *PruneXrayLogsJob) Run() {

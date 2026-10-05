@@ -63,15 +63,11 @@ docker compose --profile postgres up -d
 ```
 
 ترجیح می‌دهید از ایمیج از‌پیش‌ساخته استفاده کنید؟ این ایمیج روی GitHub Container Registry
-منتشر شده است. این ایمیج Fail2ban را به‌همراه دارد (برای [محدودیت‌های IP](/docs/operations/security))
-که با `iptables` مسدودسازی انجام می‌دهد و بنابراین به `NET_ADMIN` (و `NET_RAW` برای IPv6)
-نیاز دارد — در غیر این صورت مسدودسازی‌ها فقط ثبت می‌شوند ولی هرگز اعمال نمی‌شوند:
+منتشر شده است. `--cap-add=NET_ADMIN` را فقط وقتی اضافه کنید که peerهای AmneziaWG به نشانی
+خروجی IPv6 مخصوص خود نیاز دارند:
 
 ```bash title="docker run"
 docker run -d \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  -e XUI_ENABLE_FAIL2BAN=true \
   -v $PWD/db/:/etc/x-ui/ \
   -v $PWD/cert/:/root/cert/ \
   --network=host \

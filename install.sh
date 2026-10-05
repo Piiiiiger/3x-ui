@@ -1377,39 +1377,6 @@ EOF
     ${xui_folder}/x-ui migrate
 }
 
-# setup_fail2ban auto-installs and configures fail2ban for the IP Limit feature
-# by invoking the freshly installed x-ui CLI. IP Limit is load-bearing on
-# fail2ban (without it the panel disables the limitIp field and zeroes existing
-# limits), so a fresh install should make it work out of the box, just like the
-# Docker image already does. Non-fatal by design: a fail2ban failure must never
-# abort the panel install.
-setup_fail2ban() {
-    if [[ -n "${XUI_ENABLE_FAIL2BAN+x}" && "${XUI_ENABLE_FAIL2BAN}" != "true" ]]; then
-        echo -e "${yellow}XUI_ENABLE_FAIL2BAN=${XUI_ENABLE_FAIL2BAN}, skipping Fail2ban auto-setup.${plain}"
-        return 0
-    fi
-
-    if [[ ! -x /usr/bin/x-ui ]]; then
-        echo -e "${yellow}x-ui CLI not found; skipping Fail2ban auto-setup.${plain}"
-        return 0
-    fi
-
-    # Scripts older than v3.4.0 have no setup-fail2ban and exit 0 from the
-    # usage banner, which would read as success here.
-    if ! grep -q '"setup-fail2ban")' /usr/bin/x-ui; then
-        echo -e "${yellow}This x-ui.sh predates 'x-ui setup-fail2ban'; skipping Fail2ban auto-setup.${plain}"
-        return 0
-    fi
-
-    echo -e "${green}Setting up Fail2ban for the IP Limit feature...${plain}"
-    if /usr/bin/x-ui setup-fail2ban; then
-        echo -e "${green}Fail2ban setup complete.${plain}"
-    else
-        echo -e "${yellow}Fail2ban setup did not finish; IP Limit stays disabled until you run 'x-ui' and open the IP Limit menu. Continuing.${plain}"
-    fi
-    return 0
-}
-
 # Lands a systemd unit file at ${xui_service}/x-ui.service via a temp file +
 # atomic mv, so a failed cp/curl or an interrupted mv never leaves a
 # truncated unit file at the live path -- systemd would then fail to parse
@@ -1823,9 +1790,6 @@ install_x-ui() {
         fi
     fi
 
-    # IP Limit relies on fail2ban; install + configure it now so the feature
-    # works out of the box (no-op when XUI_ENABLE_FAIL2BAN=false). Never fatal.
-    setup_fail2ban
 
     echo -e "${green}x-ui ${tag_version}${plain} installation finished, it is running now..."
     echo -e ""
@@ -1841,7 +1805,7 @@ install_x-ui() {
 │  ${blue}x-ui enable${plain}       - Enable Autostart on OS Startup   │
 │  ${blue}x-ui disable${plain}      - Disable Autostart on OS Startup  │
 │  ${blue}x-ui log${plain}          - Check logs                       │
-│  ${blue}x-ui banlog${plain}       - Check Fail2ban ban logs          │
+│  ${blue}x-ui banlog${plain}       - Show IP-limit ban log            │
 │  ${blue}x-ui update${plain}       - Update                           │
 │  ${blue}x-ui legacy${plain}       - Legacy version                   │
 │  ${blue}x-ui install${plain}      - Install                          │

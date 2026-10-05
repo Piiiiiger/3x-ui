@@ -35,13 +35,12 @@ x-ui
 | 18–19 | Enable / Disable Autostart             | 开关开机自启                                               |
 | 20    | SSL Certificate Management             | Let's Encrypt（域名或 IP）、自定义路径、续期/吊销           |
 | 21    | Cloudflare SSL Certificate             | 通过 Cloudflare 的 DNS-01 通配符证书                        |
-| 22    | IP Limit Management                    | 基于 Fail2ban 的按客户端 IP 限制                            |
-| 23    | Firewall Management                    | `ufw` 安装与端口规则                                        |
-| 24    | SSH Port Forwarding Management         | 将面板绑定到 localhost 并通过 SSH 隧道访问                  |
-| 25    | PostgreSQL Management                  | 安装/迁移/管理 PostgreSQL                                   |
-| 26    | Enable BBR                             | 开关 BBR 拥塞控制 sysctl                                    |
-| 27    | Update Geo Files                       | 更新 geoip/geosite 数据（Loyalsoldier、IR、RU）            |
-| 28    | Speedtest by Ookla                     | 运行 Ookla 测速                                            |
+| 22    | Firewall Management                    | `ufw` 安装与端口规则                                        |
+| 23    | SSH Port Forwarding Management         | 将面板绑定到 localhost 并通过 SSH 隧道访问                  |
+| 24    | PostgreSQL Management                  | 安装/迁移/管理 PostgreSQL                                   |
+| 25    | Enable BBR                             | 开关 BBR 拥塞控制 sysctl                                    |
+| 26    | Update Geo Files                       | 更新 geoip/geosite 数据（Loyalsoldier、IR、RU）            |
+| 27    | Speedtest by Ookla                     | 运行 Ookla 测速                                            |
 | 0     | Exit                                   | —                                                         |
 
 其中部分功能有各自的页面：[SSL 证书](/docs/config/ssl-certificates)
@@ -61,7 +60,7 @@ x-ui
 | `x-ui settings`            | 显示当前设置                                       |
 | `x-ui enable` / `disable`  | 开关开机自启                                       |
 | `x-ui log`                 | 跟踪查看调试日志                                   |
-| `x-ui banlog`              | 显示 Fail2ban 封禁日志                             |
+| `x-ui banlog`              | 显示 IP 限制封禁日志                                 |
 | `x-ui update`              | 更新到最新的稳定版                                 |
 | `x-ui update-dev`          | 更新到滚动的 `dev-latest` 构建                     |
 | `x-ui legacy`              | 安装指定的旧版本（带提示）                         |
