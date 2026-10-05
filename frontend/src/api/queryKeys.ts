@@ -31,6 +31,11 @@ export const keys = {
     root: () => ['traffic'] as const,
     overview: (period: string) => ['traffic', 'overview', period] as const,
   },
+  abuse: {
+    root: () => ['abuse'] as const,
+    overview: () => ['abuse', 'overview'] as const,
+    history: (email: string) => ['abuse', 'history', email] as const,
+  },
   probe: {
     root: () => ['probe'] as const,
     servers: () => ['probe', 'servers'] as const,
@@ -66,6 +71,7 @@ export const keys = {
     // be handed what the cache holds of the first.
     probe: (base: string, email: string) => ['portal', 'probe', base, email] as const,
     onlineIps: (base: string, email: string) => ['portal', 'onlineIps', base, email] as const,
+    bans: (base: string, email: string) => ['portal', 'bans', base, email] as const,
   },
   xray: {
     root: () => ['xray'] as const,

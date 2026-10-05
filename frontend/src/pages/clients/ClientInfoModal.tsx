@@ -6,6 +6,7 @@ import { CopyOutlined, DownloadOutlined, EyeOutlined, QrcodeOutlined } from '@an
 import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import { formatInboundLabel, formatTunnelConfigMeta } from '@/lib/inbounds/label';
 import ClientOnlineIpsModal from '@/components/clients/ClientOnlineIps';
+import { ClientBanHistoryButton } from '@/components/abuse/ClientBanHistoryButton';
 import { useClientOnlineIps } from '@/hooks/useClientOnlineIps';
 import { formatIpSlots } from '@/lib/clients/online-ips';
 import { useDatepicker } from '@/hooks/useDatepicker';
@@ -425,6 +426,12 @@ export default function ClientInfoModal({
                         ? formatIpSlots(onlineIps.data.count, onlineIps.data.limit)
                         : ''}
                     </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{t('pages.clients.banHistory')}</td>
+                  <td>
+                    <ClientBanHistoryButton email={client.email} />
                   </td>
                 </tr>
                 {(traffic?.resetMax ?? 0) > 0 && (

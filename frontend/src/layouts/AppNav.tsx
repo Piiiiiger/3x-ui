@@ -57,7 +57,8 @@ type IconName =
   | 'setting'
   | 'tool'
   | 'cluster'
-  | 'logout';
+  | 'logout'
+  | 'shield';
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
@@ -69,6 +70,7 @@ const iconByName: Record<IconName, ComponentType> = {
   tool: ToolOutlined,
   cluster: ClusterOutlined,
   logout: LogoutOutlined,
+  shield: SafetyOutlined,
 };
 
 function ThemeIcon({ isDark, isUltra }: { isDark: boolean; isUltra: boolean }) {
@@ -110,6 +112,7 @@ export default function AppNav() {
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
       { key: '/chains', icon: 'tool', title: '链式管理' },
+      { key: '/abuse', icon: 'shield', title: '防滥用' },
       { key: LOGOUT_KEY, icon: 'logout', title: t('logout') },
     ],
     [t],

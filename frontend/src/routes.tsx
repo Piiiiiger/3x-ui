@@ -15,6 +15,7 @@ const HostPage = lazy(() => import('@/pages/nodes/HostPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
 const ChainsPage = lazy(() => import('@/pages/chains/ChainsPage'));
+const AbusePage = lazy(() => import('@/pages/abuse/AbusePage'));
 
 function withSuspense(node: React.ReactNode) {
   return (
@@ -55,6 +56,7 @@ const routes: RouteObject[] = [
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'xray', element: withSuspense(<XrayPage />) },
       { path: 'chains', element: withSuspense(<ChainsPage />) },
+      { path: 'abuse', element: withSuspense(<AbusePage />) },
     ],
   },
 ];

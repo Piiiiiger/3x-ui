@@ -16,6 +16,7 @@ import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
 import PortalOnlineIps from './PortalOnlineIps';
+import PortalBans, { PortalBanBanner } from './PortalBans';
 import PortalAccountCode from './PortalAccountCode';
 import PortalRules from './PortalRules';
 import PortalReminders from './PortalReminders';
@@ -163,6 +164,7 @@ export default function PortalApp({ base }: { base: string }) {
       }
       nav={
         <>
+          <PortalBanBanner base={base} email={data.email} />
           <PortalReminders data={data} />
           <Segmented<PortalView>
             className="portal-views"
@@ -200,6 +202,7 @@ export default function PortalApp({ base }: { base: string }) {
       )}
       {data.plan && <PortalPlanCard plan={data.plan} />}
       <PortalOnlineIps base={base} email={data.email} onSessionEnded={onSessionEnded} />
+      <PortalBans base={base} email={data.email} onSessionEnded={onSessionEnded} />
       <PortalUsageCard daily={data.daily} />
     </SubPage>
   );

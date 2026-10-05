@@ -82,6 +82,8 @@ export default function PortalLogin({ base, onSignedIn }: PortalLoginProps) {
       if (adminMode && res.status === 403) setErrorKey('subscription.portal.adminRequires2FA');
       else if (registering && res.status === 409) setErrorKey('subscription.portal.taken');
       else if (registering && text.includes('"code"')) setErrorKey('subscription.portal.badCode');
+      else if (registering && text.includes('"signup_limit"'))
+        setErrorKey('subscription.portal.signupLimit');
       else setErrorKey(loginErrorKey(res.status));
     } catch {
       setErrorKey('subscription.portal.failed');

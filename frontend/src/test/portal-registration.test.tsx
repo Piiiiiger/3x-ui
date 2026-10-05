@@ -49,4 +49,24 @@ describe('portal registration', () => {
     );
     expect(signedIn).not.toHaveBeenCalled();
   });
+
+  it('says a network at its sign-up limit must wait a day, not 15 minutes', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('{"error":"signup_limit"}', { status: 429 })),
+    );
+    renderWithProviders(<PortalLogin base="/x/portal" onSignedIn={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'newbie' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret-pass' } });
+    fireEvent.change(screen.getByLabelText('Activation code'), {
+      target: { value: 'ABCD-EFGH-JKLM-NPQR' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+    await waitFor(() =>
+      expect(screen.getByRole('alert').textContent).toContain(
+        'Too many accounts were registered from your network today.',
+      ),
+    );
+  });
 });
