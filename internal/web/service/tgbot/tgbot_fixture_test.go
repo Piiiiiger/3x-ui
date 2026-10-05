@@ -3,6 +3,7 @@ package tgbot
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -33,6 +34,8 @@ type botCall struct {
 	Data    []string
 	URLs    []string
 	Payload map[string]any
+	// Rejected is why Telegram would refuse the message's HTML; nobody sees it.
+	Rejected string
 }
 
 type botRecorder struct {
@@ -51,11 +54,60 @@ func (r *botRecorder) all() []botCall {
 func (r *botRecorder) shown() []botCall {
 	var out []botCall
 	for _, c := range r.all() {
-		if c.Method == "sendMessage" || c.Method == "editMessageText" {
+		if (c.Method == "sendMessage" || c.Method == "editMessageText") && c.Rejected == "" {
 			out = append(out, c)
 		}
 	}
 	return out
+}
+
+// telegramTags are the tags Telegram's HTML parse mode accepts.
+var telegramTags = map[string]bool{
+	"b": true, "strong": true, "i": true, "em": true, "u": true, "ins": true, "s": true, "strike": true,
+	"del": true, "span": true, "tg-spoiler": true, "a": true, "tg-emoji": true, "code": true, "pre": true,
+	"blockquote": true,
+}
+
+// telegramHTMLError checks text as Telegram's HTML parse mode does: each "<"
+// opens or closes a supported tag, tags nest, and each "&" starts an entity.
+func telegramHTMLError(text string) string {
+	var open []string
+	for i := 0; i < len(text); i++ {
+		switch text[i] {
+		case '<':
+			end := strings.IndexByte(text[i:], '>')
+			if end < 0 {
+				return fmt.Sprintf("Can't find end of the tag at byte offset %d", i)
+			}
+			tag := text[i+1 : i+end]
+			name := strings.ToLower(strings.TrimPrefix(strings.Fields(tag + " ")[0], "/"))
+			if !telegramTags[name] {
+				return fmt.Sprintf("Unsupported start tag %q at byte offset %d", tag, i)
+			}
+			if strings.HasPrefix(tag, "/") {
+				if len(open) == 0 || open[len(open)-1] != name {
+					return fmt.Sprintf("Unmatched end tag at byte offset %d", i)
+				}
+				open = open[:len(open)-1]
+			} else {
+				open = append(open, name)
+			}
+			i += end
+		case '&':
+			semi := strings.IndexByte(text[i:], ';')
+			entity := ""
+			if semi > 0 {
+				entity = text[i : i+semi+1]
+			}
+			if entity != "&lt;" && entity != "&gt;" && entity != "&amp;" && entity != "&quot;" && !strings.HasPrefix(entity, "&#") {
+				return fmt.Sprintf("Unsupported HTML entity at byte offset %d", i)
+			}
+		}
+	}
+	if len(open) > 0 {
+		return fmt.Sprintf("Can't find end tag corresponding to start tag %q", open[len(open)-1])
+	}
+	return ""
 }
 
 func (r *botRecorder) last(t *testing.T) botCall {
@@ -132,11 +184,21 @@ func recordingTelegram(t *testing.T) *botRecorder {
 				}
 			}
 		}
+		if mode, _ := payload["parse_mode"].(string); mode == "HTML" && (method == "sendMessage" || method == "editMessageText") {
+			call.Rejected = telegramHTMLError(call.Text)
+		}
 		rec.mu.Lock()
 		rec.calls = append(rec.calls, call)
 		rec.mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
+		if call.Rejected != "" {
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"ok": false, "error_code": 400, "description": "Bad Request: can't parse entities: " + call.Rejected,
+			})
+			return
+		}
 		result := any(true)
 		switch method {
 		case "sendMessage", "editMessageText":
@@ -152,11 +214,19 @@ func recordingTelegram(t *testing.T) *botRecorder {
 }
 
 // newPiggerBot gives each test a migrated DB, a recording Telegram API and a
-// running bot whose only admin is adminTgID.
+// running bot whose only admin is adminTgID. A message Telegram would refuse
+// fails the test, whatever else it checks.
 func newPiggerBot(t *testing.T) (*Tgbot, *botRecorder) {
 	t.Helper()
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 	rec := recordingTelegram(t)
+	t.Cleanup(func() {
+		for _, c := range rec.all() {
+			if c.Rejected != "" {
+				t.Errorf("Telegram would refuse this %s: %s\n%s", c.Method, c.Rejected, c.Text)
+			}
+		}
+	})
 	origRunning, origStorage := isRunning, hashStorage
 	isRunning, hashStorage = true, global.NewHashStorage(20*time.Minute)
 	t.Cleanup(func() { isRunning, hashStorage = origRunning, origStorage })

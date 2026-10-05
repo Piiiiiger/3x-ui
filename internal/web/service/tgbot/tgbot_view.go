@@ -79,7 +79,7 @@ func formatBytes(n int64) string {
 }
 
 // usageBar draws how much of a quota is used in ten blocks; any use shows at
-// least one, so a fresh period never looks the same as a barely used one.
+// least one. Views are HTML, so the label holds no "<": Telegram reads it as a tag.
 func usageBar(used, total int64) string {
 	if total <= 0 {
 		return ""
@@ -92,7 +92,7 @@ func usageBar(used, total int64) string {
 	}
 	label := fmt.Sprintf("%.0f%%", pct)
 	if used > 0 && pct < 1 {
-		label = "<1%"
+		label = "不到 1%"
 	}
 	return strings.Repeat("▰", filled) + strings.Repeat("▱", 10-filled) + " " + label
 }

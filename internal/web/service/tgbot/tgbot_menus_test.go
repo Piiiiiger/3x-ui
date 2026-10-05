@@ -176,3 +176,24 @@ func TestHomeLinksTheUserPageOnlyAtAPublicAddress(t *testing.T) {
 		t.Errorf("home links %q, want the user page under the subscription address", urls)
 	}
 }
+
+// Regression: a share of the quota under 1% drew "<1%", which Telegram reads as
+// an unknown tag, refusing the whole view: 我的账号 and 我的用量 did nothing.
+func TestAccountViewsUnderOnePercentOfTheQuotaReachTelegram(t *testing.T) {
+	tb, rec := newPiggerBot(t)
+	ib := seedVlessInbound(t, "a")
+	seedClient(t, "pigger", []int{ib}, func(c *model.Client) { c.TotalGB = 1000 << 30 })
+	setUsage(t, "pigger", 1<<30, 3<<30)
+	bindTelegram(t, "pigger", adminTgID)
+
+	tb.send(adminTgID, "/start")
+	home := rec.last(t)
+	tb.tap(adminTgID, home.dataFor(t, "我的账号"))
+	if account := rec.last(t); !strings.Contains(account.Text, "pigger") || !account.hasButton("🛠 管理菜单") {
+		t.Errorf("我的账号 showed %q, want the admin's own account", account.Text)
+	}
+	tb.tap(adminTgID, home.dataFor(t, "我的用量"))
+	if usage := rec.last(t); !strings.Contains(usage.Text, "用量详情") || !strings.Contains(usage.Text, "1%") {
+		t.Errorf("我的用量 showed %q, want the usage details with the share used", usage.Text)
+	}
+}
