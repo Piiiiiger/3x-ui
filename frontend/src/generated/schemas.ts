@@ -1969,20 +1969,6 @@ export const SCHEMAS: Record<string, unknown> = {
   "ClientIpInfo": {
     "description": "ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with\nthe node it is connecting through (\"\" = this local panel).",
     "properties": {
-      "bannedUntil": {
-        "example": 0,
-        "format": "int64",
-        "type": "integer"
-      },
-      "exempt": {
-        "description": "Exempt says why the IP limit ignores this address (IpExempt*, \"\" = it\ncounts); ExemptHost names the server for a host address, \"\" for this panel.",
-        "example": "host",
-        "type": "string"
-      },
-      "exemptHost": {
-        "example": "hk-relay",
-        "type": "string"
-      },
       "ip": {
         "example": "198.51.100.7",
         "type": "string"
@@ -1997,12 +1983,41 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "bannedUntil",
-      "exempt",
-      "exemptHost",
       "ip",
       "node",
       "time"
+    ],
+    "type": "object"
+  },
+  "ClientOnlineIps": {
+    "description": "ClientOnlineIps is what both panels show about a client's IP limit: Count of\nLimit slots in use now (0 = no limit), the networks online and running bans.",
+    "properties": {
+      "bans": {
+        "items": {
+          "$ref": "#/components/schemas/ClientIpBan"
+        },
+        "type": "array"
+      },
+      "count": {
+        "example": 1,
+        "type": "integer"
+      },
+      "limit": {
+        "example": 3,
+        "type": "integer"
+      },
+      "online": {
+        "items": {
+          "$ref": "#/components/schemas/OnlineNetwork"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "bans",
+      "count",
+      "limit",
+      "online"
     ],
     "type": "object"
   },
@@ -2343,6 +2358,10 @@ export const SCHEMAS: Record<string, unknown> = {
         },
         "type": "array"
       },
+      "ipBans": {
+        "example": 0,
+        "type": "integer"
+      },
       "limitHwid": {
         "example": 0,
         "type": "integer"
@@ -2355,6 +2374,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "NextReset is when the usage next returns to zero (its reset cycle or an\nauto-renewal), in Unix ms; 0 when nothing is scheduled.",
         "example": 1735689600000,
         "format": "int64",
+        "type": "integer"
+      },
+      "onlineIps": {
+        "description": "OnlineIps is how many of the client's LimitIP slots are in use right now,\nIpBans how many of its networks are banned for going over the limit.",
+        "example": 1,
         "type": "integer"
       },
       "planId": {
@@ -2406,9 +2430,11 @@ export const SCHEMAS: Record<string, unknown> = {
       "enable",
       "expiryTime",
       "inboundIds",
+      "ipBans",
       "limitHwid",
       "limitIp",
       "nextReset",
+      "onlineIps",
       "reset",
       "resetDay",
       "resetMax",
@@ -4146,6 +4172,51 @@ export const SCHEMAS: Record<string, unknown> = {
       "xrayError",
       "xrayState",
       "xrayVersion"
+    ],
+    "type": "object"
+  },
+  "OnlineNetwork": {
+    "description": "OnlineNetwork is one network a client is online from right now: an IPv4\naddress, or an IPv6 /64 with the addresses seen in it.",
+    "properties": {
+      "addresses": {
+        "example": [
+          "198.51.100.7"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "counted": {
+        "description": "Counted is false for an allowlisted network, which never uses a slot.",
+        "example": true,
+        "type": "boolean"
+      },
+      "lastSeen": {
+        "example": 1791172800,
+        "format": "int64",
+        "type": "integer"
+      },
+      "network": {
+        "example": "198.51.100.7",
+        "type": "string"
+      },
+      "servers": {
+        "example": [
+          "HK relay"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "addresses",
+      "counted",
+      "lastSeen",
+      "network",
+      "servers"
     ],
     "type": "object"
   },

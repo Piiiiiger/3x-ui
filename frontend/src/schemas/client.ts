@@ -59,6 +59,9 @@ export const ClientRecordSchema = z
     createdAt: z.number().optional(),
     updatedAt: z.number().optional(),
     nextReset: z.number().optional(),
+    // List rows only: IP-limit slots in use now, and networks banned for going over.
+    onlineIps: z.number().optional(),
+    ipBans: z.number().optional(),
   })
   .loose();
 

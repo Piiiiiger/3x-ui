@@ -421,3 +421,125 @@ func TestIpLimitBanChangeIsHotApplicable(t *testing.T) {
 		}
 	}
 }
+
+func TestOnlineIpsListOnlyTheClientsOwnNetworks(t *testing.T) {
+	setupIpLimitTest(t)
+	relayNode, exitNode := seedAgentNodeRow(t, "relay"), seedAgentNodeRow(t, "exit")
+	if err := database.GetDB().Model(exitNode).Update("address", "203.0.113.80").Error; err != nil {
+		t.Fatal(err)
+	}
+	user := model.Client{Email: "uma", ID: uuidFor("uma"), LimitIP: 3, Enable: true}
+	relay := seedNodeInbound(t, &relayNode.Id, "relay-in", 81, model.VLESS, true, []model.Client{user})
+	target := seedNodeInbound(t, &exitNode.Id, "exit-in", 443, model.VLESS, true, []model.Client{user})
+	for id, remark := range map[int]string{relay.Id: "HK relay", target.Id: "SG exit"} {
+		if err := database.GetDB().Model(&model.Inbound{}).Where("id = ?", id).Update("remark", remark).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	chain := model.ProxyChain{TargetInboundId: target.Id, RelayInboundId: relay.Id, Enabled: true}
+	if err := database.GetDB().Create(&chain).Error; err != nil {
+		t.Fatal(err)
+	}
+	_, alias := model.ChainTransitCredential(user.ID, chain.Id)
+	if err := (&SettingService{}).saveSetting("ipLimitAllowlist", "198.51.100.200"); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Unix(1_800_000_000, 0)
+	ban := model.ClientIpBan{Email: "uma", Network: "198.51.100.9", BannedAt: now.Unix() - 60, ExpiresAt: now.Unix() + 600}
+	if err := database.GetDB().Create(&ban).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	observed := []IpObservation{
+		{Email: alias, IP: "198.51.100.20", LastSeen: now.Unix() - 30, Server: relayNode.Id},
+		{Email: "uma", IP: relayNode.Address, LastSeen: now.Unix() - 30, Server: exitNode.Id},
+		{Email: "uma", IP: "10.10.16.1", LastSeen: now.Unix() - 20, Server: exitNode.Id},
+		{Email: "uma", IP: "2001:db8:1:2::10", LastSeen: now.Unix() - 15, Server: exitNode.Id},
+		{Email: "uma", IP: "2001:db8:1:2::20", LastSeen: now.Unix() - 12, Server: exitNode.Id},
+		{Email: "uma", IP: "198.51.100.200", LastSeen: now.Unix() - 5, Server: exitNode.Id},
+		{Email: "uma", IP: "198.51.100.9", LastSeen: now.Unix() - 1, Server: exitNode.Id},
+	}
+	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := (&IpLimitService{}).OnlineIps("uma", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []OnlineNetwork{
+		{Network: "198.51.100.200", Addresses: []string{"198.51.100.200"}, Servers: []string{"SG exit"}, LastSeen: now.Unix() - 5, Counted: false},
+		{Network: "2001:db8:1:2::/64", Addresses: []string{"2001:db8:1:2::10", "2001:db8:1:2::20"}, Servers: []string{"SG exit"}, LastSeen: now.Unix() - 12, Counted: true},
+		{Network: "198.51.100.20", Addresses: []string{"198.51.100.20"}, Servers: []string{"HK relay"}, LastSeen: now.Unix() - 30, Counted: true},
+	}
+	if got.Limit != 3 || got.Count != 2 || len(got.Online) != len(want) {
+		t.Fatalf("online ips = %+v; want limit 3, count 2 and %d networks", got, len(want))
+	}
+	for i := range want {
+		g, w := got.Online[i], want[i]
+		if g.Network != w.Network || !slices.Equal(g.Addresses, w.Addresses) || !slices.Equal(g.Servers, w.Servers) ||
+			g.LastSeen != w.LastSeen || g.Counted != w.Counted {
+			t.Fatalf("online[%d] = %+v, want %+v", i, g, w)
+		}
+	}
+	if len(got.Bans) != 1 || got.Bans[0].Network != "198.51.100.9" || got.Bans[0].ExpiresAt != now.Unix()+600 {
+		t.Fatalf("bans = %+v; want the running ban only", got.Bans)
+	}
+}
+
+// The panels read the last scan; one older than a few scans means the scan
+// stopped, and showing it would claim devices that may be long gone.
+func TestOnlineIpsIgnoreAStaleScan(t *testing.T) {
+	setupIpLimitTest(t)
+	node := seedAgentNodeRow(t, "edge")
+	seedLimitedClient(t, &node.Id, "in-s", 443, "val", 3)
+	now := time.Unix(1_800_000_000, 0)
+	observed := []IpObservation{{Email: "val", IP: "198.51.100.30", LastSeen: now.Unix() - 1, Server: node.Id}}
+	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+	if fresh, err := (&IpLimitService{}).OnlineIps("val", now.Add(20*time.Second)); err != nil || fresh.Count != 1 {
+		t.Fatalf("a 20 s old scan = %+v, %v; want the network counted", fresh, err)
+	}
+	stale, err := (&IpLimitService{}).OnlineIps("val", now.Add(2*time.Minute))
+	if err != nil || stale.Count != 0 || len(stale.Online) != 0 {
+		t.Fatalf("a 2 min old scan = %+v, %v; want nothing online", stale, err)
+	}
+}
+
+// The user list shows "slots in use / limit" per row without opening anything,
+// so the counts ride on the rows the list already polls.
+func TestClientListRowsCarryOnlineIpCounts(t *testing.T) {
+	setupIpLimitTest(t)
+	node := seedAgentNodeRow(t, "edge")
+	seedLimitedClient(t, &node.Id, "in-w1", 443, "wes", 3)
+	seedLimitedClient(t, &node.Id, "in-w2", 444, "xia", 3)
+	now := time.Now()
+	ban := model.ClientIpBan{Email: "wes", Network: "198.51.100.43", BannedAt: now.Unix(), ExpiresAt: now.Unix() + 600}
+	if err := database.GetDB().Create(&ban).Error; err != nil {
+		t.Fatal(err)
+	}
+	observed := []IpObservation{
+		{Email: "wes", IP: "198.51.100.41", LastSeen: now.Unix() - 9, Server: node.Id},
+		{Email: "wes", IP: "198.51.100.42", LastSeen: now.Unix() - 3, Server: node.Id},
+		{Email: "wes", IP: "198.51.100.43", LastSeen: now.Unix() - 1, Server: node.Id},
+	}
+	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+
+	page, err := (&ClientService{}).ListPaged(&InboundService{}, &SettingService{}, ClientPageParams{Page: 1, PageSize: 25})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := map[string]ClientSlim{}
+	for _, item := range page.Items {
+		rows[item.Email] = item
+	}
+	if r := rows["wes"]; r.OnlineIps != 2 || r.IpBans != 1 {
+		t.Fatalf("wes row = online %d, bans %d; want 2 slots in use and 1 ban", r.OnlineIps, r.IpBans)
+	}
+	if r := rows["xia"]; r.OnlineIps != 0 || r.IpBans != 0 {
+		t.Fatalf("xia row = online %d, bans %d; want nothing", r.OnlineIps, r.IpBans)
+	}
+}

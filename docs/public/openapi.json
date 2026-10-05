@@ -1995,20 +1995,6 @@
       "ClientIpInfo": {
         "description": "ClientIpInfo is one IP shown in the panel's per-client IP log, labelled with\nthe node it is connecting through (\"\" = this local panel).",
         "properties": {
-          "bannedUntil": {
-            "example": 0,
-            "format": "int64",
-            "type": "integer"
-          },
-          "exempt": {
-            "description": "Exempt says why the IP limit ignores this address (IpExempt*, \"\" = it\ncounts); ExemptHost names the server for a host address, \"\" for this panel.",
-            "example": "host",
-            "type": "string"
-          },
-          "exemptHost": {
-            "example": "hk-relay",
-            "type": "string"
-          },
           "ip": {
             "example": "198.51.100.7",
             "type": "string"
@@ -2023,12 +2009,41 @@
           }
         },
         "required": [
-          "bannedUntil",
-          "exempt",
-          "exemptHost",
           "ip",
           "node",
           "time"
+        ],
+        "type": "object"
+      },
+      "ClientOnlineIps": {
+        "description": "ClientOnlineIps is what both panels show about a client's IP limit: Count of\nLimit slots in use now (0 = no limit), the networks online and running bans.",
+        "properties": {
+          "bans": {
+            "items": {
+              "$ref": "#/components/schemas/ClientIpBan"
+            },
+            "type": "array"
+          },
+          "count": {
+            "example": 1,
+            "type": "integer"
+          },
+          "limit": {
+            "example": 3,
+            "type": "integer"
+          },
+          "online": {
+            "items": {
+              "$ref": "#/components/schemas/OnlineNetwork"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "bans",
+          "count",
+          "limit",
+          "online"
         ],
         "type": "object"
       },
@@ -2369,6 +2384,10 @@
             },
             "type": "array"
           },
+          "ipBans": {
+            "example": 0,
+            "type": "integer"
+          },
           "limitHwid": {
             "example": 0,
             "type": "integer"
@@ -2381,6 +2400,11 @@
             "description": "NextReset is when the usage next returns to zero (its reset cycle or an\nauto-renewal), in Unix ms; 0 when nothing is scheduled.",
             "example": 1735689600000,
             "format": "int64",
+            "type": "integer"
+          },
+          "onlineIps": {
+            "description": "OnlineIps is how many of the client's LimitIP slots are in use right now,\nIpBans how many of its networks are banned for going over the limit.",
+            "example": 1,
             "type": "integer"
           },
           "planId": {
@@ -2432,9 +2456,11 @@
           "enable",
           "expiryTime",
           "inboundIds",
+          "ipBans",
           "limitHwid",
           "limitIp",
           "nextReset",
+          "onlineIps",
           "reset",
           "resetDay",
           "resetMax",
@@ -4172,6 +4198,51 @@
           "xrayError",
           "xrayState",
           "xrayVersion"
+        ],
+        "type": "object"
+      },
+      "OnlineNetwork": {
+        "description": "OnlineNetwork is one network a client is online from right now: an IPv4\naddress, or an IPv6 /64 with the addresses seen in it.",
+        "properties": {
+          "addresses": {
+            "example": [
+              "198.51.100.7"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "counted": {
+            "description": "Counted is false for an allowlisted network, which never uses a slot.",
+            "example": true,
+            "type": "boolean"
+          },
+          "lastSeen": {
+            "example": 1791172800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "network": {
+            "example": "198.51.100.7",
+            "type": "string"
+          },
+          "servers": {
+            "example": [
+              "HK relay"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "addresses",
+          "counted",
+          "lastSeen",
+          "network",
+          "servers"
         ],
         "type": "object"
       },
@@ -10086,9 +10157,11 @@
                           3,
                           5
                         ],
+                        "ipBans": 0,
                         "limitHwid": 0,
                         "limitIp": 0,
                         "nextReset": 1735689600000,
+                        "onlineIps": 1,
                         "planId": 1,
                         "reset": 0,
                         "resetDay": 0,
@@ -11860,7 +11933,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "List the source IPs seen live with the given client’s credentials in the last 30 minutes, each with the server it connected through, why the IP limit ignores it (`exempt`: host, allowlist or private) and when its ban ends (`bannedUntil`, 0 = not banned).",
+        "summary": "List the source IPs seen with the given client’s credentials in the last 30 minutes, each with the node it connected through. For the IPs online right now and the IP limit, use onlineIps.",
         "operationId": "post_panel_api_clients_ips_email",
         "parameters": [
           {
@@ -11899,9 +11972,6 @@
                   "success": true,
                   "obj": [
                     {
-                      "bannedUntil": 0,
-                      "exempt": "host",
-                      "exemptHost": "hk-relay",
                       "ip": "198.51.100.7",
                       "node": "hk-relay",
                       "time": "2026-10-05 12:00:00"
@@ -11955,13 +12025,13 @@
         }
       }
     },
-    "/panel/api/clients/ipBans/{email}": {
+    "/panel/api/clients/onlineIps/{email}": {
       "post": {
         "tags": [
           "Clients"
         ],
-        "summary": "List the running IP-limit bans of a client. Each keeps the client off one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server that serves the client blocks it there.",
-        "operationId": "post_panel_api_clients_ipBans_email",
+        "summary": "How many of the client’s IP-limit slots are in use right now (`count` of `limit`, 0 = no limit), the networks it is online from (an IPv4 address, or an IPv6 /64 with the addresses seen) with the servers they connect to, and its running bans. Relay and other server addresses never appear; allowlisted networks are listed with `counted: false`. Taken from the last 10-second scan.",
+        "operationId": "post_panel_api_clients_onlineIps_email",
         "parameters": [
           {
             "name": "email",
@@ -11988,24 +12058,38 @@
                       "type": "string"
                     },
                     "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ClientIpBan"
-                      }
+                      "$ref": "#/components/schemas/ClientOnlineIps"
                     }
                   }
                 },
                 "example": {
                   "success": true,
-                  "obj": [
-                    {
-                      "bannedAt": 1791172800,
-                      "email": "alice",
-                      "expiresAt": 1791174600,
-                      "id": 0,
-                      "network": "198.51.100.7"
-                    }
-                  ]
+                  "obj": {
+                    "bans": [
+                      {
+                        "bannedAt": 1791172800,
+                        "email": "alice",
+                        "expiresAt": 1791174600,
+                        "id": 0,
+                        "network": "198.51.100.7"
+                      }
+                    ],
+                    "count": 1,
+                    "limit": 3,
+                    "online": [
+                      {
+                        "addresses": [
+                          "198.51.100.7"
+                        ],
+                        "counted": true,
+                        "lastSeen": 1791172800,
+                        "network": "198.51.100.7",
+                        "servers": [
+                          "HK relay"
+                        ]
+                      }
+                    ]
+                  }
                 }
               }
             }

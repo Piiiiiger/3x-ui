@@ -474,12 +474,16 @@ export interface ClientIpBan {
 }
 
 export interface ClientIpInfo {
-  bannedUntil: number;
-  exempt: string;
-  exemptHost: string;
   ip: string;
   node: string;
   time: string;
+}
+
+export interface ClientOnlineIps {
+  bans: ClientIpBan[];
+  count: number;
+  limit: number;
+  online: OnlineNetwork[];
 }
 
 export interface ClientPageResponse {
@@ -564,9 +568,11 @@ export interface ClientSlim {
   enable: boolean;
   expiryTime: number;
   inboundIds: number[];
+  ipBans: number;
   limitHwid: number;
   limitIp: number;
   nextReset: number;
+  onlineIps: number;
   planId?: number;
   reset: number;
   resetDay: number;
@@ -942,6 +948,14 @@ export interface NodeView {
   xrayError: string;
   xrayState: string;
   xrayVersion: string;
+}
+
+export interface OnlineNetwork {
+  addresses: string[];
+  counted: boolean;
+  lastSeen: number;
+  network: string;
+  servers: string[];
 }
 
 export interface PanelUpdateStatus {

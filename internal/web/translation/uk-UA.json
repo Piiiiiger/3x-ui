@@ -135,7 +135,8 @@
       "adminSignIn": "Вхід адміністратора",
       "twoFactorCode": "Код застосунку автентифікації",
       "adminRequires2FA": "Для входу адміністратора потрібна двофакторна автентифікація.",
-      "nextReset": "Наступне скидання трафіку"
+      "nextReset": "Наступне скидання трафіку",
+      "ipBannedHint": "Одночасно було онлайн більше {limit} IP, тому цей IP заблоковано до завершення часу."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "Скинути весь вхідний трафік",
       "email": "Email",
       "IPLimit": "Обмеження IP",
-      "IPLimitlog": "Журнал IP",
-      "IPLimitlogclear": "Очистити журнал",
       "setDefaultCert": "Установити сертифікат з панелі",
       "setDefaultCertEmpty": "Для панелі не налаштовано сертифікат. Спочатку встановіть його в Налаштуваннях.",
       "streamTab": "Потік",
@@ -813,7 +812,6 @@
       "method": "Метод",
       "first": "Перший",
       "last": "Останній",
-      "ipLog": "Журнал IP",
       "prefix": "Префікс",
       "postfix": "Постфікс",
       "delayedStart": "Запуск після першого використання",
@@ -847,12 +845,12 @@
       "addClients": "Додати користувачів",
       "limitIp": "Ліміт IP",
       "limitIpDesc": "Максимум одночасних IP-адрес. 0 = без обмежень.",
-      "ipExemptHost": "Сервер {name}",
       "ipExemptThisPanel": "Ця панель",
       "ipExemptAllowlist": "У білому списку",
-      "ipExemptPrivate": "Приватна адреса",
-      "ipExemptHint": "Не враховується в ліміті IP і ніколи не блокується",
       "ipNotCounted": "не враховується",
+      "onlineIps": "IP онлайн",
+      "noOnlineIps": "Зараз немає IP онлайн",
+      "ipBansCount": "IP заблоковано за перевищення ліміту: {count}",
       "ipBannedFor": "Заблоковано · залишилось {minutes} хв",
       "ipBans": "Блокування за лімітом IP",
       "ipUnban": "Розблокувати",

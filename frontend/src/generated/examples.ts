@@ -470,12 +470,35 @@ export const EXAMPLES: Record<string, unknown> = {
     "network": "198.51.100.7"
   },
   "ClientIpInfo": {
-    "bannedUntil": 0,
-    "exempt": "host",
-    "exemptHost": "hk-relay",
     "ip": "198.51.100.7",
     "node": "hk-relay",
     "time": "2026-10-05 12:00:00"
+  },
+  "ClientOnlineIps": {
+    "bans": [
+      {
+        "bannedAt": 1791172800,
+        "email": "alice",
+        "expiresAt": 1791174600,
+        "id": 0,
+        "network": "198.51.100.7"
+      }
+    ],
+    "count": 1,
+    "limit": 3,
+    "online": [
+      {
+        "addresses": [
+          "198.51.100.7"
+        ],
+        "counted": true,
+        "lastSeen": 1791172800,
+        "network": "198.51.100.7",
+        "servers": [
+          "HK relay"
+        ]
+      }
+    ]
   },
   "ClientPageResponse": {
     "filtered": 47,
@@ -490,9 +513,11 @@ export const EXAMPLES: Record<string, unknown> = {
           3,
           5
         ],
+        "ipBans": 0,
         "limitHwid": 0,
         "limitIp": 0,
         "nextReset": 1735689600000,
+        "onlineIps": 1,
         "planId": 1,
         "reset": 0,
         "resetDay": 0,
@@ -597,9 +622,11 @@ export const EXAMPLES: Record<string, unknown> = {
       3,
       5
     ],
+    "ipBans": 0,
     "limitHwid": 0,
     "limitIp": 0,
     "nextReset": 1735689600000,
+    "onlineIps": 1,
     "planId": 1,
     "reset": 0,
     "resetDay": 0,
@@ -1019,6 +1046,17 @@ export const EXAMPLES: Record<string, unknown> = {
     "xrayError": "",
     "xrayState": "running",
     "xrayVersion": "25.10.31"
+  },
+  "OnlineNetwork": {
+    "addresses": [
+      "198.51.100.7"
+    ],
+    "counted": true,
+    "lastSeen": 1791172800,
+    "network": "198.51.100.7",
+    "servers": [
+      "HK relay"
+    ]
   },
   "PanelUpdateStatus": {
     "exitCode": 0,

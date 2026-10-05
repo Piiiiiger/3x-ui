@@ -135,7 +135,8 @@
       "adminSignIn": "Administrator sign in",
       "twoFactorCode": "Authenticator code",
       "adminRequires2FA": "Administrator access requires two-factor authentication.",
-      "nextReset": "Next traffic reset"
+      "nextReset": "Next traffic reset",
+      "ipBannedHint": "More than {limit} IPs were online at once, so this IP is blocked until the time runs out."
     }
   },
   "menu": {
@@ -460,8 +461,6 @@
       "resetAllTrafficTitle": "Reset Traffic for All Inbounds",
       "email": "Email",
       "IPLimit": "IP Limit",
-      "IPLimitlog": "IP Log",
-      "IPLimitlogclear": "Clear the Log",
       "setDefaultCert": "Set Cert from Panel",
       "setDefaultCertEmpty": "No certificate is configured for the panel. Set one under Settings first.",
       "streamTab": "Stream",
@@ -813,7 +812,6 @@
       "method": "Method",
       "first": "First",
       "last": "Last",
-      "ipLog": "IP Log",
       "prefix": "Prefix",
       "postfix": "Postfix",
       "delayedStart": "Start After First Use",
@@ -847,12 +845,12 @@
       "addClients": "Add Users",
       "limitIp": "IP Limit",
       "limitIpDesc": "Most networks a user can be online from at once, across all servers (IPv6 counts per /64). 0 = no limit.",
-      "ipExemptHost": "Server {name}",
       "ipExemptThisPanel": "This panel",
       "ipExemptAllowlist": "Allowlisted",
-      "ipExemptPrivate": "Private address",
-      "ipExemptHint": "Not counted toward the IP limit and never banned",
       "ipNotCounted": "not counted",
+      "onlineIps": "Online IPs",
+      "noOnlineIps": "No IP online right now",
+      "ipBansCount": "{count} IP banned for going over the limit",
       "ipBannedFor": "Banned · {minutes} min left",
       "ipBans": "IP limit bans",
       "ipUnban": "Unban",

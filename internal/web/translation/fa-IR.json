@@ -135,7 +135,8 @@
       "adminSignIn": "ورود مدیر",
       "twoFactorCode": "کد برنامه احراز هویت",
       "adminRequires2FA": "ورود مدیر به احراز هویت دومرحله‌ای نیاز دارد.",
-      "nextReset": "بازنشانی بعدی ترافیک"
+      "nextReset": "بازنشانی بعدی ترافیک",
+      "ipBannedHint": "بیش از {limit} IP هم‌زمان آنلاین بودند، بنابراین این IP تا پایان زمان مسدود است."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "ریست ترافیک کل ورودی‌ها",
       "email": "ایمیل",
       "IPLimit": "محدودیت آی‌پی",
-      "IPLimitlog": "گزارش‌ها",
-      "IPLimitlogclear": "پاک کردن گزارش‌ها",
       "setDefaultCert": "استفاده از گواهی پنل",
       "setDefaultCertEmpty": "هیچ گواهی‌ای برای پنل پیکربندی نشده. ابتدا از تنظیمات یکی تعیین کنید.",
       "streamTab": "انتقال",
@@ -813,7 +812,6 @@
       "method": "روش",
       "first": "اول",
       "last": "آخر",
-      "ipLog": "گزارش IP",
       "prefix": "پیشوند",
       "postfix": "پسوند",
       "delayedStart": "شروع پس از اولین استفاده",
@@ -847,12 +845,12 @@
       "addClients": "افزودن کاربران",
       "limitIp": "محدودیت IP",
       "limitIpDesc": "حداکثر تعداد IP همزمان. ۰ = نامحدود",
-      "ipExemptHost": "سرور {name}",
       "ipExemptThisPanel": "همین پنل",
       "ipExemptAllowlist": "در فهرست مجاز",
-      "ipExemptPrivate": "آدرس خصوصی",
-      "ipExemptHint": "در محدودیت IP شمرده نمی‌شود و هرگز مسدود نمی‌شود",
       "ipNotCounted": "شمرده نمی‌شود",
+      "onlineIps": "IPهای آنلاین",
+      "noOnlineIps": "اکنون هیچ IPای آنلاین نیست",
+      "ipBansCount": "{count} IP به‌دلیل عبور از محدودیت مسدود شده است",
       "ipBannedFor": "مسدود · {minutes} دقیقه مانده",
       "ipBans": "مسدودسازی‌های محدودیت IP",
       "ipUnban": "رفع مسدودیت",

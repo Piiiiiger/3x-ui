@@ -24,11 +24,13 @@ import (
 )
 
 // IpObservation is one live source address of a client on one server. LastSeen
-// is when that address last opened a connection (unix seconds).
+// is when that address last opened a connection (unix seconds); Server is the
+// node it was seen on, 0 for this panel.
 type IpObservation struct {
 	Email    string
 	IP       string
 	LastSeen int64
+	Server   int
 }
 
 // IpLimitService enforces clients' IP limits across this panel and its agents.
@@ -49,6 +51,9 @@ const (
 	defaultIpLimitBanMinutes = 30
 	ipLimitResolveTTL        = 10 * time.Minute
 	ipLimitOwnersTTL         = 15 * time.Second
+	// ipLimitScanStaleAfter is a few missed 10 s scans; an older snapshot means
+	// the scan stopped and no longer says who is online.
+	ipLimitScanStaleAfter = time.Minute
 )
 
 var (
@@ -220,6 +225,7 @@ func resetIpLimitCaches() {
 	ipLimitOwners.Lock()
 	ipLimitOwners.owners, ipLimitOwners.at = nil, time.Time{}
 	ipLimitOwners.Unlock()
+	storeOnlineSnapshot(time.Time{}, nil)
 }
 
 // ChainTransitOwners maps every relay identity of an enabled chain to the client
@@ -280,8 +286,12 @@ func (s *IpLimitService) Enforce(now time.Time, observed []IpObservation) (bool,
 	}
 	changed := len(lifted) > 0
 	live, err := s.liveNetworks(now, observed)
-	if err != nil || len(live) == 0 {
+	if err != nil {
 		return changed, err
+	}
+	storeOnlineSnapshot(now, live)
+	if len(live) == 0 {
+		return changed, nil
 	}
 	emails := make([]string, 0, len(live))
 	for email := range live {
@@ -334,16 +344,16 @@ func (s *IpLimitService) Enforce(now time.Time, observed []IpObservation) (bool,
 }
 
 // networksOverLimit keeps the limit's worth of most recently seen networks and
-// returns the rest; banned networks are out of the count while their ban runs.
-func networksOverLimit(seen map[string]int64, banned map[string]bool, limit int) []string {
+// returns the rest; banned and allowlisted networks are out of the count.
+func networksOverLimit(seen map[string]*liveNetwork, banned map[string]bool, limit int) []string {
 	type network struct {
 		key      string
 		lastSeen int64
 	}
 	nets := make([]network, 0, len(seen))
-	for key, at := range seen {
-		if !banned[key] {
-			nets = append(nets, network{key, at})
+	for key, n := range seen {
+		if !banned[key] && !n.allowlisted {
+			nets = append(nets, network{key, n.lastSeen})
 		}
 	}
 	if len(nets) <= limit {
@@ -362,9 +372,18 @@ func networksOverLimit(seen map[string]int64, banned map[string]bool, limit int)
 	return out
 }
 
-// liveNetworks folds relay identities into their owners and drops exempt
-// addresses: owner email -> counted network -> most recent lastSeen.
-func (s *IpLimitService) liveNetworks(now time.Time, observed []IpObservation) (map[string]map[string]int64, error) {
+// liveNetwork is one network a client is online from, as one scan saw it.
+type liveNetwork struct {
+	lastSeen    int64
+	addresses   map[string]struct{}
+	servers     map[int]struct{}
+	allowlisted bool
+}
+
+// liveNetworks folds relay identities into their owners and drops the addresses
+// that are not the client's (Pigger servers, private ranges); allowlisted ones
+// stay, marked, since they are the client's but never count.
+func (s *IpLimitService) liveNetworks(now time.Time, observed []IpObservation) (map[string]map[string]*liveNetwork, error) {
 	if len(observed) == 0 {
 		return nil, nil
 	}
@@ -376,7 +395,7 @@ func (s *IpLimitService) liveNetworks(now time.Time, observed []IpObservation) (
 	if err != nil {
 		return nil, err
 	}
-	live := map[string]map[string]int64{}
+	live := map[string]map[string]*liveNetwork{}
 	for _, o := range observed {
 		email := o.Email
 		if owner, ok := owners[email]; ok {
@@ -386,17 +405,180 @@ func (s *IpLimitService) liveNetworks(now time.Time, observed []IpObservation) (
 		if !ok || email == "" {
 			continue
 		}
-		if kind, _ := ex.reason(addr); kind != "" {
+		kind, _ := ex.reason(addr)
+		if kind == IpExemptHost || kind == IpExemptPrivate {
 			continue
 		}
 		if live[email] == nil {
-			live[email] = map[string]int64{}
+			live[email] = map[string]*liveNetwork{}
 		}
-		if cur, seen := live[email][network]; !seen || o.LastSeen > cur {
-			live[email][network] = o.LastSeen
+		n := live[email][network]
+		if n == nil {
+			n = &liveNetwork{addresses: map[string]struct{}{}, servers: map[int]struct{}{}, allowlisted: kind == IpExemptAllowlist}
+			live[email][network] = n
 		}
+		n.addresses[addr.String()] = struct{}{}
+		n.servers[o.Server] = struct{}{}
+		n.lastSeen = max(n.lastSeen, o.LastSeen)
 	}
 	return live, nil
+}
+
+var ipLimitOnline = struct {
+	sync.Mutex
+	at   time.Time
+	live map[string]map[string]*liveNetwork
+}{}
+
+func storeOnlineSnapshot(now time.Time, live map[string]map[string]*liveNetwork) {
+	ipLimitOnline.Lock()
+	ipLimitOnline.at, ipLimitOnline.live = now, live
+	ipLimitOnline.Unlock()
+}
+
+// onlineSnapshot returns the last scan's networks, or nothing once that scan is
+// too old to say who is online; callers only read the maps.
+func onlineSnapshot(now time.Time) map[string]map[string]*liveNetwork {
+	ipLimitOnline.Lock()
+	defer ipLimitOnline.Unlock()
+	if ipLimitOnline.at.IsZero() || now.Sub(ipLimitOnline.at) > ipLimitScanStaleAfter {
+		return nil
+	}
+	return ipLimitOnline.live
+}
+
+// OnlineNetwork is one network a client is online from right now: an IPv4
+// address, or an IPv6 /64 with the addresses seen in it.
+type OnlineNetwork struct {
+	Network   string   `json:"network" example:"198.51.100.7"`
+	Addresses []string `json:"addresses" example:"[\"198.51.100.7\"]"`
+	Servers   []string `json:"servers" example:"[\"HK relay\"]"`
+	LastSeen  int64    `json:"lastSeen" example:"1791172800"`
+	// Counted is false for an allowlisted network, which never uses a slot.
+	Counted bool `json:"counted" example:"true"`
+}
+
+// ClientOnlineIps is what both panels show about a client's IP limit: Count of
+// Limit slots in use now (0 = no limit), the networks online and running bans.
+type ClientOnlineIps struct {
+	Limit  int                 `json:"limit" example:"3"`
+	Count  int                 `json:"count" example:"1"`
+	Online []OnlineNetwork     `json:"online"`
+	Bans   []model.ClientIpBan `json:"bans"`
+}
+
+// OnlineIps reports a client's networks online as of the last scan, without
+// the banned ones, which are listed with their bans instead.
+func (s *IpLimitService) OnlineIps(email string, now time.Time) (ClientOnlineIps, error) {
+	out := ClientOnlineIps{Online: []OnlineNetwork{}, Bans: []model.ClientIpBan{}}
+	db := database.GetDB()
+	var rec model.ClientRecord
+	if err := db.Select("limit_ip").Where("email = ?", email).First(&rec).Error; err != nil {
+		return out, err
+	}
+	out.Limit = rec.LimitIP
+	bans, err := s.BansForEmail(email, now)
+	if err != nil {
+		return out, err
+	}
+	out.Bans = bans
+	banned := make(map[string]bool, len(bans))
+	for _, b := range bans {
+		banned[b.Network] = true
+	}
+	networks := onlineSnapshot(now)[email]
+	if len(networks) == 0 {
+		return out, nil
+	}
+	labels, err := clientServerLabels(db, email)
+	if err != nil {
+		return out, err
+	}
+	for key, n := range networks {
+		if banned[key] {
+			continue
+		}
+		entry := OnlineNetwork{Network: key, LastSeen: n.lastSeen, Counted: !n.allowlisted}
+		for addr := range n.addresses {
+			entry.Addresses = append(entry.Addresses, addr)
+		}
+		slices.Sort(entry.Addresses)
+		for server := range n.servers {
+			entry.Servers = append(entry.Servers, labels[server]...)
+		}
+		slices.Sort(entry.Servers)
+		entry.Servers = slices.Compact(entry.Servers)
+		if entry.Counted {
+			out.Count++
+		}
+		out.Online = append(out.Online, entry)
+	}
+	sort.Slice(out.Online, func(i, j int) bool {
+		if out.Online[i].LastSeen != out.Online[j].LastSeen {
+			return out.Online[i].LastSeen > out.Online[j].LastSeen
+		}
+		return out.Online[i].Network < out.Online[j].Network
+	})
+	return out, nil
+}
+
+// clientServerLabels names each server by the remarks of the client's own
+// inbounds there, the names its subscription shows; key 0 is this panel.
+func clientServerLabels(db *gorm.DB, email string) (map[int][]string, error) {
+	var rows []struct {
+		NodeId *int
+		Remark string
+	}
+	err := db.Table("inbounds").Select("inbounds.node_id AS node_id, inbounds.remark AS remark").
+		Joins("JOIN client_inbounds ON client_inbounds.inbound_id = inbounds.id").
+		Joins("JOIN clients ON clients.id = client_inbounds.client_id").
+		Where("clients.email = ?", email).Order("inbounds.id").Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	labels := map[int][]string{}
+	for _, r := range rows {
+		node := 0
+		if r.NodeId != nil {
+			node = *r.NodeId
+		}
+		labels[node] = append(labels[node], r.Remark)
+	}
+	return labels, nil
+}
+
+// OnlineIpCounts maps each of emails online now to the slots it uses and its
+// running bans, for the client list.
+func (s *IpLimitService) OnlineIpCounts(emails []string, now time.Time) (online, bans map[string]int, err error) {
+	online, bans = map[string]int{}, map[string]int{}
+	if len(emails) == 0 {
+		return online, bans, nil
+	}
+	var active []model.ClientIpBan
+	for _, batch := range chunkStrings(emails, sqlInChunk) {
+		var page []model.ClientIpBan
+		if err := database.GetDB().Where("email IN ? AND expires_at > ?", batch, now.Unix()).Find(&page).Error; err != nil {
+			return nil, nil, err
+		}
+		active = append(active, page...)
+	}
+	banned := map[string]map[string]bool{}
+	for _, b := range active {
+		bans[b.Email]++
+		if banned[b.Email] == nil {
+			banned[b.Email] = map[string]bool{}
+		}
+		banned[b.Email][b.Network] = true
+	}
+	snapshot := onlineSnapshot(now)
+	for _, email := range emails {
+		for key, n := range snapshot[email] {
+			if !n.allowlisted && !banned[email][key] {
+				online[email]++
+			}
+		}
+	}
+	return online, bans, nil
 }
 
 func clientIpLimits(db *gorm.DB, emails []string) (map[string]int, error) {

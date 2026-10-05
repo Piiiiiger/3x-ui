@@ -15,6 +15,7 @@ import SubShell, { useSubLanguage } from '../SubShell';
 import { PortalPlanCard, PortalUsageCard } from './PortalCards';
 import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
+import PortalOnlineIps from './PortalOnlineIps';
 import PortalAccountCode from './PortalAccountCode';
 import PortalReminders from './PortalReminders';
 import PortalCustomize from './PortalCustomize';
@@ -196,6 +197,7 @@ export default function PortalApp({ base }: { base: string }) {
         <Alert type="warning" showIcon title={t('subscription.portal.noSubscription')} />
       )}
       {data.plan && <PortalPlanCard plan={data.plan} />}
+      <PortalOnlineIps base={base} email={data.email} onSessionEnded={onSessionEnded} />
       <PortalUsageCard daily={data.daily} />
     </SubPage>
   );

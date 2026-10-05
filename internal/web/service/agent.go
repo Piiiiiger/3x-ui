@@ -136,7 +136,7 @@ func (s *AgentService) HandleStatus(nodeID int, st *agentproto.Status) {
 		logger.Warning("agent", node.Name, "bump last online failed:", err)
 	}
 	now := time.Now()
-	observed := observationsFromAgentStatus(runtime.AgentState{Status: *st, StatusAt: now}, now)
+	observed := observationsFromAgentStatus(nodeID, runtime.AgentState{Status: *st, StatusAt: now}, now)
 	if err := (&IpLimitService{}).recordLive(key, observed, now); err != nil {
 		logger.Warning("agent", node.Name, "recording client ips failed:", err)
 	}

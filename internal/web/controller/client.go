@@ -90,7 +90,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/updateTraffic/:email", a.updateTrafficByEmail)
 	g.POST("/ips/:email", a.getIps)
 	g.POST("/clearIps/:email", a.clearIps)
-	g.POST("/ipBans/:email", a.getIpBans)
+	g.POST("/onlineIps/:email", a.getOnlineIps)
 	g.POST("/unbanIp/:email", a.unbanIp)
 	g.POST("/hwids/:email", a.getHwids)
 	g.DELETE("/hwids/:email", a.clearHwids)
@@ -654,9 +654,11 @@ func (a *ClientController) clearIps(c *gin.Context) {
 	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.logCleanSuccess"), nil)
 }
 
-func (a *ClientController) getIpBans(c *gin.Context) {
-	bans, err := a.ipLimit.BansForEmail(c.Param("email"), time.Now())
-	jsonObj(c, bans, err)
+// getOnlineIps reports the client's IP slots in use, the networks online and its
+// running bans, as of the last 10 s scan.
+func (a *ClientController) getOnlineIps(c *gin.Context) {
+	ips, err := a.ipLimit.OnlineIps(c.Param("email"), time.Now())
+	jsonObj(c, ips, err)
 }
 
 type unbanIpRequest struct {

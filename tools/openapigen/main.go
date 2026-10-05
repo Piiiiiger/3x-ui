@@ -90,6 +90,8 @@ func run(root, outDir string) error {
 			StructAllow: setOf(
 				"InboundOption",
 				"ClientIpInfo",
+				"ClientOnlineIps",
+				"OnlineNetwork",
 				"IpLimitExemptHost",
 				"PlanInput",
 				"PlanProxyGroup",

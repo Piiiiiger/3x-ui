@@ -5,8 +5,9 @@ import { CopyOutlined, DownloadOutlined, EyeOutlined, QrcodeOutlined } from '@an
 
 import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import { formatInboundLabel, formatTunnelConfigMeta } from '@/lib/inbounds/label';
-import ClientIpLogModal from '@/components/clients/ClientIpLog';
-import { useClientIpLog } from '@/hooks/useClientIpLog';
+import ClientOnlineIpsModal from '@/components/clients/ClientOnlineIps';
+import { useClientOnlineIps } from '@/hooks/useClientOnlineIps';
+import { formatIpSlots } from '@/lib/clients/online-ips';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
 import type { ClientRecord, InboundOption } from '@/hooks/useClients';
@@ -108,7 +109,7 @@ export default function ClientInfoModal({
   const dateLabel = (ts?: number) => (!ts || ts <= 0 ? '-' : IntlUtil.formatDate(ts, datepicker));
   const [messageApi, messageContextHolder] = message.useMessage();
   const [links, setLinks] = useState<string[]>([]);
-  const ipLog = useClientIpLog(client?.email);
+  const onlineIps = useClientOnlineIps(client?.email);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
     clientHwids,
@@ -132,7 +133,7 @@ export default function ClientInfoModal({
     setSyncedSubId(openSubId);
     if (openSubId === null) {
       setLinks([]);
-      ipLog.reset();
+      onlineIps.reset();
       setIpsModalOpen(false);
       resetHwids();
       setHwidsModalOpen(false);
@@ -241,7 +242,7 @@ export default function ClientInfoModal({
 
   function openIpsModal() {
     setIpsModalOpen(true);
-    if (ipLog.ips.length === 0) void ipLog.load();
+    void onlineIps.load();
   }
 
   function openHwidsModal() {
@@ -411,16 +412,18 @@ export default function ClientInfoModal({
                   <td>{!client.limitIp ? <Tag>∞</Tag> : <Tag>{client.limitIp}</Tag>}</td>
                 </tr>
                 <tr>
-                  <td>{t('pages.inbounds.IPLimitlog')}</td>
+                  <td>{t('pages.clients.onlineIps')}</td>
                   <td>
                     <Button
                       size="small"
                       icon={<EyeOutlined />}
-                      aria-label={t('pages.clients.ipLog')}
-                      loading={ipLog.loading}
+                      aria-label={t('pages.clients.onlineIps')}
+                      loading={onlineIps.loading}
                       onClick={openIpsModal}
                     >
-                      {ipLog.ips.length > 0 ? ipLog.ips.length : ''}
+                      {onlineIps.data
+                        ? formatIpSlots(onlineIps.data.count, onlineIps.data.limit)
+                        : ''}
                     </Button>
                   </td>
                 </tr>
@@ -797,18 +800,15 @@ export default function ClientInfoModal({
         )}
       </Modal>
 
-      <ClientIpLogModal
+      <ClientOnlineIpsModal
         open={ipsModalOpen}
         email={client?.email}
-        ips={ipLog.ips}
-        bans={ipLog.bans}
-        nowMs={ipLog.loadedAt}
-        loading={ipLog.loading}
-        clearing={ipLog.clearing}
-        unbanning={ipLog.unbanning}
-        onRefresh={ipLog.load}
-        onClear={ipLog.clear}
-        onUnban={ipLog.unban}
+        data={onlineIps.data}
+        nowMs={onlineIps.loadedAt}
+        loading={onlineIps.loading}
+        unbanning={onlineIps.unbanning}
+        onRefresh={onlineIps.load}
+        onUnban={onlineIps.unban}
         onClose={() => setIpsModalOpen(false)}
       />
 

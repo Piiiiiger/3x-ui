@@ -135,7 +135,8 @@
       "adminSignIn": "Acesso de administrador",
       "twoFactorCode": "Código do autenticador",
       "adminRequires2FA": "O acesso de administrador requer autenticação de dois fatores.",
-      "nextReset": "Próxima redefinição de tráfego"
+      "nextReset": "Próxima redefinição de tráfego",
+      "ipBannedHint": "Mais de {limit} IPs ficaram online ao mesmo tempo, então este IP fica bloqueado até o tempo acabar."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "Redefinir Tráfego de Todos os Inbounds",
       "email": "Email",
       "IPLimit": "Limite de IP",
-      "IPLimitlog": "Log de IP",
-      "IPLimitlogclear": "Limpar o Log",
       "setDefaultCert": "Definir Certificado pelo Painel",
       "setDefaultCertEmpty": "Nenhum certificado configurado para o painel. Configure um em Configurações primeiro.",
       "streamTab": "Transmissão",
@@ -813,7 +812,6 @@
       "method": "Método",
       "first": "Primeiro",
       "last": "Último",
-      "ipLog": "Registro de IP",
       "prefix": "Prefixo",
       "postfix": "Sufixo",
       "delayedStart": "Iniciar após o primeiro uso",
@@ -847,12 +845,12 @@
       "addClients": "Adicionar usuários",
       "limitIp": "Limite de IP",
       "limitIpDesc": "Máximo de IPs simultâneos. 0 = ilimitado.",
-      "ipExemptHost": "Servidor {name}",
       "ipExemptThisPanel": "Este painel",
       "ipExemptAllowlist": "Na lista de permissões",
-      "ipExemptPrivate": "Endereço privado",
-      "ipExemptHint": "Não conta para o limite de IP e nunca é bloqueado",
       "ipNotCounted": "não conta",
+      "onlineIps": "IPs online",
+      "noOnlineIps": "Nenhum IP online agora",
+      "ipBansCount": "{count} IP bloqueado por exceder o limite",
       "ipBannedFor": "Bloqueado · restam {minutes} min",
       "ipBans": "Bloqueios por limite de IP",
       "ipUnban": "Desbloquear",

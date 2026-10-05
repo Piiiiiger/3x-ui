@@ -15,6 +15,7 @@ import {
   Result,
   Segmented,
   Select,
+  Space,
   Spin,
   Table,
   Tag,
@@ -91,7 +92,7 @@ import CustomUserGroups, { CustomGroupCell } from './CustomUserGroups';
 import ClientCommentCell from './ClientCommentCell';
 import ClientRowMenu from './ClientRowMenu';
 import PlanUsageCell from './PlanUsageCell';
-import { ClientStateTag, DaysLeftText, OnlineDot } from './ClientCells';
+import { ClientStateTag, DaysLeftText, IpSlots, OnlineDot } from './ClientCells';
 import { clientState, daysToExpiry, usedBytes } from './clientState';
 import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
@@ -1054,10 +1055,17 @@ export default function ClientsPage() {
           key: 'online',
           align: 'center',
           render: (_v, record) => (
-            <OnlineDot
-              online={!!record.enable && isOnline(record.email)}
-              lastOnline={record.traffic?.lastOnline ?? 0}
-            />
+            <Space size={6}>
+              <OnlineDot
+                online={!!record.enable && isOnline(record.email)}
+                lastOnline={record.traffic?.lastOnline ?? 0}
+              />
+              <IpSlots
+                count={record.onlineIps ?? 0}
+                limit={record.limitIp ?? 0}
+                bans={record.ipBans ?? 0}
+              />
+            </Space>
           ),
         },
         {
@@ -1632,6 +1640,11 @@ export default function ClientsPage() {
                                 lastOnline={row.traffic?.lastOnline ?? 0}
                               />
                               <span className="tag-name">{row.email}</span>
+                              <IpSlots
+                                count={row.onlineIps ?? 0}
+                                limit={row.limitIp ?? 0}
+                                bans={row.ipBans ?? 0}
+                              />
                               <ClientStateTag state={stateOf(row)} />
                               <CustomGroupCell email={row.email} />
                               <div className="card-actions">

@@ -89,6 +89,7 @@ type SUBController struct {
 	codeService     service.ActivationCodeService
 	statsService    service.TrafficStatsService
 	probeService    service.ProbeService
+	ipLimitService  service.IpLimitService
 	portalLimiter   *loginlimit.Limiter
 	portalUserCap   *loginlimit.Limiter
 
@@ -345,6 +346,7 @@ func (a *SUBController) initRouter(g *gin.RouterGroup) {
 	gLink.DELETE("portal/customization", a.portalCustomizationReset)
 	gLink.POST("portal/customization/rollback", portalJSON, a.portalCustomizationRollback)
 	gLink.GET("portal/probe", a.portalProbe)
+	gLink.GET("portal/online-ips", a.portalOnlineIps)
 	gLink.POST("portal/login", portalJSON, a.portalLogin)
 	gLink.POST("portal/logout", a.portalLogout)
 	gLink.POST("portal/register", portalJSON, a.portalRegister)

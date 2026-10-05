@@ -7,10 +7,9 @@ import { keys } from '@/api/queryKeys';
 import ProbeServerCard from '@/components/probe/ProbeServerCard';
 import { PortalProbeSchema, type PortalProbe as PortalProbeData } from '@/generated/zod';
 import { TimeFormatter } from '@/utils';
+import { PortalSessionEnded } from './portalSession';
 
 const POLL_INTERVAL_MS = 5000;
-
-class PortalSessionEnded extends Error {}
 
 async function fetchPortalProbe(base: string): Promise<PortalProbeData> {
   const res = await fetch(`${base}/probe`, {

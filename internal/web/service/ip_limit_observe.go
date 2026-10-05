@@ -20,21 +20,21 @@ func (s *IpLimitService) AgentObservations(now time.Time) []IpObservation {
 	var out []IpObservation
 	for _, id := range hub.Connected() {
 		if state, ok := hub.Session(id); ok {
-			out = append(out, observationsFromAgentStatus(state, now)...)
+			out = append(out, observationsFromAgentStatus(id, state, now)...)
 		}
 	}
 	return out
 }
 
 // An agent that stopped reporting says nothing about who is online now.
-func observationsFromAgentStatus(state runtime.AgentState, now time.Time) []IpObservation {
+func observationsFromAgentStatus(nodeID int, state runtime.AgentState, now time.Time) []IpObservation {
 	if state.StatusAt.IsZero() || now.Sub(state.StatusAt) > agentStatusStaleAfter {
 		return nil
 	}
 	var out []IpObservation
 	for email, entries := range state.Status.IPs {
 		for _, e := range entries {
-			out = append(out, IpObservation{Email: email, IP: e.IP, LastSeen: e.Timestamp})
+			out = append(out, IpObservation{Email: email, IP: e.IP, LastSeen: e.Timestamp, Server: nodeID})
 		}
 	}
 	return out

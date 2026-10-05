@@ -266,3 +266,45 @@ func TestPortalDataShowsThePlanWithThePersonsOwnLimits(t *testing.T) {
 		}
 	}
 }
+
+// The portal shows a person how many of their IP slots are in use and which of
+// their networks are banned, never anyone else's, and only while signed in.
+func TestPortalOnlineIpsShowOnlyThePersonsOwnState(t *testing.T) {
+	router, _ := seedPortal(t)
+	db := database.GetDB()
+	if err := db.Model(&model.ClientRecord{}).Where("email IN ?", []string{"pa@e", "pb@e"}).Update("limit_ip", 3).Error; err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now()
+	for _, ban := range []model.ClientIpBan{
+		{Email: "pa@e", Network: "198.51.100.9", BannedAt: now.Unix() - 60, ExpiresAt: now.Unix() + 600},
+		{Email: "pb@e", Network: "198.51.100.8", BannedAt: now.Unix() - 60, ExpiresAt: now.Unix() + 600},
+	} {
+		if err := db.Create(&ban).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	observed := []service.IpObservation{
+		{Email: "pa@e", IP: "198.51.100.5", LastSeen: now.Unix() - 2},
+		{Email: "pb@e", IP: "198.51.100.6", LastSeen: now.Unix() - 2},
+	}
+	if _, err := (&service.IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+
+	if res := portalRequest(router, http.MethodGet, "/sub/portal/online-ips", "", "198.51.100.1", nil); res.Code != http.StatusUnauthorized {
+		t.Fatalf("signed out: %d %s, want 401", res.Code, res.Body)
+	}
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	res := portalRequest(router, http.MethodGet, "/sub/portal/online-ips", "", "198.51.100.1", cookie)
+	var got service.ClientOnlineIps
+	if err := json.Unmarshal(res.Body.Bytes(), &got); err != nil || res.Code != http.StatusOK {
+		t.Fatalf("online ips = %d %s", res.Code, res.Body)
+	}
+	if got.Limit != 3 || got.Count != 1 || len(got.Online) != 1 || got.Online[0].Network != "198.51.100.5" {
+		t.Fatalf("online = %+v; want pa@e's one network of 3", got)
+	}
+	if len(got.Bans) != 1 || got.Bans[0].Network != "198.51.100.9" {
+		t.Fatalf("bans = %+v; want pa@e's own ban only", got.Bans)
+	}
+}

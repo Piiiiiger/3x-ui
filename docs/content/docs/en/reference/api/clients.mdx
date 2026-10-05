@@ -219,19 +219,21 @@ _openapi:
         migrations from external accounting systems.
       url: '#manually-adjust-a-clients-upload--download-counters-useful-for-migrations-from-external-accounting-systems'
     - depth: 2
-      title: 'List the source IPs seen live with the given client’s credentials in the
-        last 30 minutes, each with the server it connected through, why the IP
-        limit ignores it (`exempt`: host, allowlist or private) and when its ban
-        ends (`bannedUntil`, 0 = not banned).'
-      url: '#list-the-source-ips-seen-live-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-server-it-connected-through-why-the-ip-limit-ignores-it-exempt-host-allowlist-or-private-and-when-its-ban-ends-banneduntil-0--not-banned'
+      title: List the source IPs seen with the given client’s credentials in the last
+        30 minutes, each with the node it connected through. For the IPs online
+        right now and the IP limit, use onlineIps.
+      url: '#list-the-source-ips-seen-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-node-it-connected-through-for-the-ips-online-right-now-and-the-ip-limit-use-onlineips'
     - depth: 2
       title: Reset the recorded IP list for a client.
       url: '#reset-the-recorded-ip-list-for-a-client'
     - depth: 2
-      title: List the running IP-limit bans of a client. Each keeps the client off one
-        network (an IPv4 address or an IPv6 /64) until `expiresAt`; every server
-        that serves the client blocks it there.
-      url: '#list-the-running-ip-limit-bans-of-a-client-each-keeps-the-client-off-one-network-an-ipv4-address-or-an-ipv6-64-until-expiresat-every-server-that-serves-the-client-blocks-it-there'
+      title: 'How many of the client’s IP-limit slots are in use right now (`count` of
+        `limit`, 0 = no limit), the networks it is online from (an IPv4 address,
+        or an IPv6 /64 with the addresses seen) with the servers they connect
+        to, and its running bans. Relay and other server addresses never appear;
+        allowlisted networks are listed with `counted: false`. Taken from the
+        last 10-second scan.'
+      url: '#how-many-of-the-clients-ip-limit-slots-are-in-use-right-now-count-of-limit-0--no-limit-the-networks-it-is-online-from-an-ipv4-address-or-an-ipv6-64-with-the-addresses-seen-with-the-servers-they-connect-to-and-its-running-bans-relay-and-other-server-addresses-never-appear-allowlisted-networks-are-listed-with-counted-false-taken-from-the-last-10-second-scan'
     - depth: 2
       title: Lift one IP-limit ban before it expires. Agents drop the rule on their
         next config sync; the panel’s own core gets a hot apply.
@@ -482,17 +484,19 @@ _openapi:
       - content: Manually adjust a client’s upload + download counters. Useful for
           migrations from external accounting systems.
         id: manually-adjust-a-clients-upload--download-counters-useful-for-migrations-from-external-accounting-systems
-      - content: 'List the source IPs seen live with the given client’s credentials in
-          the last 30 minutes, each with the server it connected through, why
-          the IP limit ignores it (`exempt`: host, allowlist or private) and
-          when its ban ends (`bannedUntil`, 0 = not banned).'
-        id: list-the-source-ips-seen-live-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-server-it-connected-through-why-the-ip-limit-ignores-it-exempt-host-allowlist-or-private-and-when-its-ban-ends-banneduntil-0--not-banned
+      - content: List the source IPs seen with the given client’s credentials in the
+          last 30 minutes, each with the node it connected through. For the IPs
+          online right now and the IP limit, use onlineIps.
+        id: list-the-source-ips-seen-with-the-given-clients-credentials-in-the-last-30-minutes-each-with-the-node-it-connected-through-for-the-ips-online-right-now-and-the-ip-limit-use-onlineips
       - content: Reset the recorded IP list for a client.
         id: reset-the-recorded-ip-list-for-a-client
-      - content: List the running IP-limit bans of a client. Each keeps the client off
-          one network (an IPv4 address or an IPv6 /64) until `expiresAt`; every
-          server that serves the client blocks it there.
-        id: list-the-running-ip-limit-bans-of-a-client-each-keeps-the-client-off-one-network-an-ipv4-address-or-an-ipv6-64-until-expiresat-every-server-that-serves-the-client-blocks-it-there
+      - content: 'How many of the client’s IP-limit slots are in use right now (`count`
+          of `limit`, 0 = no limit), the networks it is online from (an IPv4
+          address, or an IPv6 /64 with the addresses seen) with the servers they
+          connect to, and its running bans. Relay and other server addresses
+          never appear; allowlisted networks are listed with `counted: false`.
+          Taken from the last 10-second scan.'
+        id: how-many-of-the-clients-ip-limit-slots-are-in-use-right-now-count-of-limit-0--no-limit-the-networks-it-is-online-from-an-ipv4-address-or-an-ipv6-64-with-the-addresses-seen-with-the-servers-they-connect-to-and-its-running-bans-relay-and-other-server-addresses-never-appear-allowlisted-networks-are-listed-with-counted-false-taken-from-the-last-10-second-scan
       - content: Lift one IP-limit ban before it expires. Agents drop the rule on their
           next config sync; the panel’s own core gets a hot apply.
         id: lift-one-ip-limit-ban-before-it-expires-agents-drop-the-rule-on-their-next-config-sync-the-panels-own-core-gets-a-hot-apply
@@ -666,7 +670,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/customGroups","method":"get"},{"path":"/panel/api/clients/customGroups/save","method":"post"},{"path":"/panel/api/clients/customGroups/assign","method":"post"},{"path":"/panel/api/clients/customGroups/delete","method":"post"},{"path":"/panel/api/clients/list","method":"get"},{"path":"/panel/api/clients/list/paged","method":"get"},{"path":"/panel/api/clients/get/{email}","method":"get"},{"path":"/panel/api/clients/get/tgId/{tgId}","method":"get"},{"path":"/panel/api/clients/add","method":"post"},{"path":"/panel/api/clients/renewalPreview","method":"post"},{"path":"/panel/api/clients/update/{email}","method":"post"},{"path":"/panel/api/clients/del/{email}","method":"post"},{"path":"/panel/api/clients/{email}/attach","method":"post"},{"path":"/panel/api/clients/{email}/detach","method":"post"},{"path":"/panel/api/clients/{email}/externalLinks","method":"post"},{"path":"/panel/api/clients/{email}/comment","method":"post"},{"path":"/panel/api/clients/{email}/portal","method":"get"},{"path":"/panel/api/clients/{email}/portal","method":"post"},{"path":"/panel/api/clients/{email}/portal/clear","method":"post"},{"path":"/panel/api/clients/resetAllTraffics","method":"post"},{"path":"/panel/api/clients/delDepleted","method":"post"},{"path":"/panel/api/clients/delOrphans","method":"post"},{"path":"/panel/api/clients/export","method":"get"},{"path":"/panel/api/clients/import","method":"post"},{"path":"/panel/api/clients/renew","method":"post"},{"path":"/panel/api/clients/bulkAdjust","method":"post"},{"path":"/panel/api/clients/bulkEnable","method":"post"},{"path":"/panel/api/clients/bulkDisable","method":"post"},{"path":"/panel/api/clients/bulkDel","method":"post"},{"path":"/panel/api/clients/bulkCreate","method":"post"},{"path":"/panel/api/clients/bulkAttach","method":"post"},{"path":"/panel/api/clients/bulkDetach","method":"post"},{"path":"/panel/api/clients/bulkResetTraffic","method":"post"},{"path":"/panel/api/clients/resetTraffic/{email}","method":"post"},{"path":"/panel/api/clients/updateTraffic/{email}","method":"post"},{"path":"/panel/api/clients/ips/{email}","method":"post"},{"path":"/panel/api/clients/clearIps/{email}","method":"post"},{"path":"/panel/api/clients/ipBans/{email}","method":"post"},{"path":"/panel/api/clients/unbanIp/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"delete"},{"path":"/panel/api/clients/hwids/{email}/{id}","method":"delete"},{"path":"/panel/api/clients/onlines","method":"post"},{"path":"/panel/api/clients/onlinesByGuid","method":"post"},{"path":"/panel/api/clients/clientIpsByGuid","method":"post"},{"path":"/panel/api/clients/activeInbounds","method":"post"},{"path":"/panel/api/clients/lastOnline","method":"post"},{"path":"/panel/api/clients/traffic/{email}","method":"get"},{"path":"/panel/api/clients/subLinks/{subId}","method":"get"},{"path":"/panel/api/clients/happLink/{id}","method":"post"},{"path":"/panel/api/clients/links/{email}","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/customGroups","method":"get"},{"path":"/panel/api/clients/customGroups/save","method":"post"},{"path":"/panel/api/clients/customGroups/assign","method":"post"},{"path":"/panel/api/clients/customGroups/delete","method":"post"},{"path":"/panel/api/clients/list","method":"get"},{"path":"/panel/api/clients/list/paged","method":"get"},{"path":"/panel/api/clients/get/{email}","method":"get"},{"path":"/panel/api/clients/get/tgId/{tgId}","method":"get"},{"path":"/panel/api/clients/add","method":"post"},{"path":"/panel/api/clients/renewalPreview","method":"post"},{"path":"/panel/api/clients/update/{email}","method":"post"},{"path":"/panel/api/clients/del/{email}","method":"post"},{"path":"/panel/api/clients/{email}/attach","method":"post"},{"path":"/panel/api/clients/{email}/detach","method":"post"},{"path":"/panel/api/clients/{email}/externalLinks","method":"post"},{"path":"/panel/api/clients/{email}/comment","method":"post"},{"path":"/panel/api/clients/{email}/portal","method":"get"},{"path":"/panel/api/clients/{email}/portal","method":"post"},{"path":"/panel/api/clients/{email}/portal/clear","method":"post"},{"path":"/panel/api/clients/resetAllTraffics","method":"post"},{"path":"/panel/api/clients/delDepleted","method":"post"},{"path":"/panel/api/clients/delOrphans","method":"post"},{"path":"/panel/api/clients/export","method":"get"},{"path":"/panel/api/clients/import","method":"post"},{"path":"/panel/api/clients/renew","method":"post"},{"path":"/panel/api/clients/bulkAdjust","method":"post"},{"path":"/panel/api/clients/bulkEnable","method":"post"},{"path":"/panel/api/clients/bulkDisable","method":"post"},{"path":"/panel/api/clients/bulkDel","method":"post"},{"path":"/panel/api/clients/bulkCreate","method":"post"},{"path":"/panel/api/clients/bulkAttach","method":"post"},{"path":"/panel/api/clients/bulkDetach","method":"post"},{"path":"/panel/api/clients/bulkResetTraffic","method":"post"},{"path":"/panel/api/clients/resetTraffic/{email}","method":"post"},{"path":"/panel/api/clients/updateTraffic/{email}","method":"post"},{"path":"/panel/api/clients/ips/{email}","method":"post"},{"path":"/panel/api/clients/clearIps/{email}","method":"post"},{"path":"/panel/api/clients/onlineIps/{email}","method":"post"},{"path":"/panel/api/clients/unbanIp/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"post"},{"path":"/panel/api/clients/hwids/{email}","method":"delete"},{"path":"/panel/api/clients/hwids/{email}/{id}","method":"delete"},{"path":"/panel/api/clients/onlines","method":"post"},{"path":"/panel/api/clients/onlinesByGuid","method":"post"},{"path":"/panel/api/clients/clientIpsByGuid","method":"post"},{"path":"/panel/api/clients/activeInbounds","method":"post"},{"path":"/panel/api/clients/lastOnline","method":"post"},{"path":"/panel/api/clients/traffic/{email}","method":"get"},{"path":"/panel/api/clients/subLinks/{subId}","method":"get"},{"path":"/panel/api/clients/happLink/{id}","method":"post"},{"path":"/panel/api/clients/links/{email}","method":"get"}]} showTitle />
     </>
   );
 }

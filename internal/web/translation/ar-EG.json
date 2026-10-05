@@ -135,7 +135,8 @@
       "adminSignIn": "تسجيل دخول المسؤول",
       "twoFactorCode": "رمز تطبيق المصادقة",
       "adminRequires2FA": "يتطلب دخول المسؤول تفعيل المصادقة الثنائية.",
-      "nextReset": "إعادة تعيين الاستهلاك التالية"
+      "nextReset": "إعادة تعيين الاستهلاك التالية",
+      "ipBannedHint": "كان أكثر من {limit} عناوين IP متصلة في الوقت نفسه، لذا يُحظر هذا العنوان حتى انتهاء المدة."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "إعادة ضبط ترافيك كل الإدخالات",
       "email": "البريد",
       "IPLimit": "تحديد IP",
-      "IPLimitlog": "سجل IP",
-      "IPLimitlogclear": "امسح السجل",
       "setDefaultCert": "استخدم شهادة البانل",
       "setDefaultCertEmpty": "لا توجد شهادة معدّة للوحة. عينّ واحدة من الإعدادات أولاً.",
       "streamTab": "تدفق",
@@ -813,7 +812,6 @@
       "method": "الطريقة",
       "first": "أول",
       "last": "آخر",
-      "ipLog": "سجل IP",
       "prefix": "بادئة",
       "postfix": "لاحقة",
       "delayedStart": "البدء بعد أول استخدام",
@@ -847,12 +845,12 @@
       "addClients": "إضافة مستخدمين",
       "limitIp": "حد عناوين IP",
       "limitIpDesc": "الحد الأقصى لعناوين IP المتزامنة. 0 = غير محدود.",
-      "ipExemptHost": "الخادم {name}",
       "ipExemptThisPanel": "هذه اللوحة",
       "ipExemptAllowlist": "في قائمة السماح",
-      "ipExemptPrivate": "عنوان خاص",
-      "ipExemptHint": "لا يُحتسب ضمن حد IP ولا يُحظر أبدًا",
       "ipNotCounted": "لا يُحتسب",
+      "onlineIps": "عناوين IP المتصلة",
+      "noOnlineIps": "لا يوجد عنوان IP متصل الآن",
+      "ipBansCount": "{count} عنوان IP محظور لتجاوز الحد",
       "ipBannedFor": "محظور · متبقٍ {minutes} دقيقة",
       "ipBans": "حظر بسبب حد IP",
       "ipUnban": "إلغاء الحظر",

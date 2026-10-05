@@ -376,6 +376,23 @@ func (a *SUBController) portalData(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+// portalOnlineIps shows the signed-in client how many of its IP slots are in use,
+// the networks online and the ones banned for going over; the page polls it.
+func (a *SUBController) portalOnlineIps(c *gin.Context) {
+	setNoCacheHeaders(c)
+	client, ok := a.portalSessionClient(c)
+	if !ok {
+		return
+	}
+	ips, err := a.ipLimitService.OnlineIps(client.Email, time.Now())
+	if err != nil {
+		logger.Warning("portal: could not load the client's online IPs:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "online_ips"})
+		return
+	}
+	c.JSON(http.StatusOK, ips)
+}
+
 // portalProbe returns the status of the servers behind the signed-in client's
 // own inbounds; the page polls it while the probe view is open.
 func (a *SUBController) portalProbe(c *gin.Context) {

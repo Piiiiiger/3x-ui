@@ -135,7 +135,8 @@
       "adminSignIn": "管理者ログイン",
       "twoFactorCode": "認証アプリのコード",
       "adminRequires2FA": "管理者ログインには二要素認証が必要です。",
-      "nextReset": "次回の通信量リセット"
+      "nextReset": "次回の通信量リセット",
+      "ipBannedHint": "同時にオンラインの IP が {limit} 件を超えたため、この IP は時間切れまでブロックされます。"
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "すべてのインバウンドトラフィックをリセット",
       "email": "メール",
       "IPLimit": "IP制限",
-      "IPLimitlog": "IPログ",
-      "IPLimitlogclear": "ログをクリア",
       "setDefaultCert": "パネル設定から証明書を設定",
       "setDefaultCertEmpty": "パネル用の証明書が設定されていません。先に設定から指定してください。",
       "streamTab": "ストリーム",
@@ -813,7 +812,6 @@
       "method": "メソッド",
       "first": "最初",
       "last": "最後",
-      "ipLog": "IP ログ",
       "prefix": "プレフィックス",
       "postfix": "サフィックス",
       "delayedStart": "初回使用から開始",
@@ -847,12 +845,12 @@
       "addClients": "ユーザーを追加",
       "limitIp": "IP 制限",
       "limitIpDesc": "同時接続 IP の最大数。0 = 無制限。",
-      "ipExemptHost": "サーバー {name}",
       "ipExemptThisPanel": "このパネル",
       "ipExemptAllowlist": "許可リスト",
-      "ipExemptPrivate": "プライベートアドレス",
-      "ipExemptHint": "IP 制限に数えられず、ブロックもされません",
       "ipNotCounted": "カウント対象外",
+      "onlineIps": "オンライン IP",
+      "noOnlineIps": "現在オンラインの IP はありません",
+      "ipBansCount": "上限超過で {count} 件の IP がブロック中",
       "ipBannedFor": "ブロック中 · 残り {minutes} 分",
       "ipBans": "IP 制限によるブロック",
       "ipUnban": "解除",

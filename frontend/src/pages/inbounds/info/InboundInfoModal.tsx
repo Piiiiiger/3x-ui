@@ -1,13 +1,16 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, Modal, Space, Tabs, Tag, Tooltip } from 'antd';
-import { CopyOutlined, SyncOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
+import { CopyOutlined, SyncOutlined, DownloadOutlined } from '@ant-design/icons';
 
-import { HttpUtil, IntlUtil, SizeFormatter, ColorUtils, Wireguard } from '@/utils';
+import { IntlUtil, SizeFormatter, ColorUtils, Wireguard } from '@/utils';
 import { activateOnKey } from '@/utils/a11y';
 import { Protocols } from '@/schemas/primitives';
 import { InfinityIcon } from '@/components/ui';
 import { useDatepicker } from '@/hooks/useDatepicker';
+import { useClientOnlineIps } from '@/hooks/useClientOnlineIps';
+import { OnlineIpsList } from '@/components/clients/ClientOnlineIps';
+import { formatIpSlots } from '@/lib/clients/online-ips';
 import {
   genAllLinks,
   genAmneziaWGPeerConfigs,
@@ -23,7 +26,6 @@ import {
   buildInboundInfo,
   copyText,
   downloadText,
-  formatIpInfo,
   hasShareLink,
   peerConfFileName,
   statsColor,
@@ -57,53 +59,7 @@ export default function InboundInfoModal({
   const [amneziawgLinks, setAmneziawgLinks] = useState<string[][]>([]);
   const [subLink, setSubLink] = useState('');
   const [subJsonLink, setSubJsonLink] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  const [clientIpsArray, setClientIpsArray] = useState<string[]>([]);
-  const [clientIpsText, setClientIpsText] = useState('');
   const [activeTab, setActiveTab] = useState('client');
-
-  const loadClientIps = useCallback(async () => {
-    if (!clientStats?.email) return;
-    setRefreshing(true);
-    try {
-      const msg = await HttpUtil.post(`/panel/api/clients/ips/${clientStats.email}`);
-      if (!msg?.success) {
-        setClientIpsText((msg?.obj as string) || 'No IP record');
-        setClientIpsArray([]);
-        return;
-      }
-      let ips: unknown = msg.obj;
-      if (typeof ips === 'string') {
-        try {
-          ips = JSON.parse(ips);
-        } catch {
-          setClientIpsText(String(ips));
-          setClientIpsArray([String(ips)]);
-          return;
-        }
-      }
-      if (ips && !Array.isArray(ips) && typeof ips === 'object') ips = [ips];
-      if (Array.isArray(ips) && ips.length > 0) {
-        const arr = (ips as unknown[]).map(formatIpInfo).filter(Boolean) as string[];
-        setClientIpsArray(arr);
-        setClientIpsText(arr.join(' | '));
-      } else {
-        setClientIpsArray([]);
-        setClientIpsText(String(ips || t('tgbot.noIpRecord')));
-      }
-    } finally {
-      setRefreshing(false);
-    }
-  }, [clientStats, t]);
-
-  const clearClientIps = useCallback(async () => {
-    if (!clientStats?.email) return;
-    const msg = await HttpUtil.post(`/panel/api/clients/clearIps/${clientStats.email}`);
-    if (msg?.success) {
-      setClientIpsArray([]);
-      setClientIpsText(t('tgbot.noIpRecord'));
-    }
-  }, [clientStats, t]);
 
   // The panel's contents are a pure function of the props, so they are adopted
   // during render; only the IP lookup below stays asynchronous.
@@ -207,37 +163,14 @@ export default function InboundInfoModal({
       setSubLink('');
       setSubJsonLink('');
     }
-
-    setClientIpsArray([]);
-    setClientIpsText('');
-
-    if (ipLimitEnable && (clientSet?.limitIp ?? 0) > 0 && stats?.email) {
-      void HttpUtil.post(`/panel/api/clients/ips/${stats.email}`).then((msg) => {
-        if (!msg?.success) {
-          setClientIpsText((msg?.obj as string) || 'No IP record');
-          return;
-        }
-        let ips: unknown = msg.obj;
-        if (typeof ips === 'string') {
-          try {
-            ips = JSON.parse(ips);
-          } catch {
-            setClientIpsText(String(ips));
-            setClientIpsArray([String(ips)]);
-            return;
-          }
-        }
-        if (ips && !Array.isArray(ips) && typeof ips === 'object') ips = [ips];
-        if (Array.isArray(ips) && ips.length > 0) {
-          const arr = (ips as unknown[]).map(formatIpInfo).filter(Boolean) as string[];
-          setClientIpsArray(arr);
-          setClientIpsText(arr.join(' | '));
-        } else {
-          setClientIpsText(String(ips || t('tgbot.noIpRecord')));
-        }
-      });
-    }
   }
+
+  const onlineIps = useClientOnlineIps(clientStats?.email);
+  const onlineIpsEmail = open && ipLimitEnable ? clientStats?.email : undefined;
+  useEffect(() => {
+    if (onlineIpsEmail) void onlineIps.load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlineIpsEmail]);
 
   // The expiry tag colours against the current time; a state-backed clock keeps
   // render pure and still refreshes the tag while the modal stays open.
@@ -423,42 +356,27 @@ export default function InboundInfoModal({
               </td>
             </tr>
           )}
-          {ipLimitEnable && (clientSettings?.limitIp ?? 0) > 0 && (
+          {ipLimitEnable && (
             <tr>
-              <td>{t('pages.inbounds.IPLimitlog')}</td>
+              <td>{t('pages.clients.onlineIps')}</td>
               <td>
-                <div className="ip-log">
-                  {clientIpsArray.length > 0 ? (
-                    <div>
-                      {clientIpsArray.map((item, idx) => (
-                        <Tag color="blue" className="ip-log-row" key={idx}>
-                          {item}
-                        </Tag>
-                      ))}
-                    </div>
-                  ) : (
-                    <Tag>{clientIpsText || t('tgbot.noIpRecord')}</Tag>
-                  )}
-                </div>
-                <div className="ip-log-actions">
-                  <SyncOutlined
-                    spin={refreshing}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={t('refresh')}
-                    onClick={() => loadClientIps()}
-                    onKeyDown={activateOnKey(() => loadClientIps())}
-                  />
-                  <Tooltip title={t('pages.inbounds.IPLimitlogclear')}>
-                    <DeleteOutlined
-                      role="button"
-                      tabIndex={0}
-                      aria-label={t('pages.inbounds.IPLimitlogclear')}
-                      onClick={() => clearClientIps()}
-                      onKeyDown={activateOnKey(() => clearClientIps())}
-                    />
-                  </Tooltip>
-                </div>
+                {onlineIps.data ? (
+                  <Tag>{formatIpSlots(onlineIps.data.count, onlineIps.data.limit)}</Tag>
+                ) : null}
+                <SyncOutlined
+                  spin={onlineIps.loading}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('refresh')}
+                  onClick={() => void onlineIps.load()}
+                  onKeyDown={activateOnKey(() => void onlineIps.load())}
+                />
+                <OnlineIpsList
+                  data={onlineIps.data}
+                  nowMs={onlineIps.loadedAt}
+                  unbanning={onlineIps.unbanning}
+                  onUnban={(network) => void onlineIps.unban(network)}
+                />
               </td>
             </tr>
           )}

@@ -135,7 +135,8 @@
       "adminSignIn": "管理员登录",
       "twoFactorCode": "验证器验证码",
       "adminRequires2FA": "管理员登录需要开启两步验证。",
-      "nextReset": "下次流量重置"
+      "nextReset": "下次流量重置",
+      "ipBannedHint": "同时在线的 IP 超过 {limit} 个，此 IP 被暂时封禁，到时自动解除。"
     }
   },
   "menu": {
@@ -460,8 +461,6 @@
       "resetAllTrafficTitle": "重置所有入站流量",
       "email": "邮箱",
       "IPLimit": "IP 限制",
-      "IPLimitlog": "IP 日志",
-      "IPLimitlogclear": "清除日志",
       "setDefaultCert": "从面板设置证书",
       "setDefaultCertEmpty": "面板尚未配置证书。请先在“设置”中设置。",
       "streamTab": "传输",
@@ -813,7 +812,6 @@
       "method": "方式",
       "first": "首个",
       "last": "末位",
-      "ipLog": "IP 日志",
       "prefix": "前缀",
       "postfix": "后缀",
       "delayedStart": "首次使用后开始",
@@ -847,12 +845,12 @@
       "addClients": "添加用户",
       "limitIp": "IP 限制",
       "limitIpDesc": "同时在线的网络数上限，所有服务器合计（IPv6 按 /64 计）。0 = 不限制。",
-      "ipExemptHost": "服务器 {name}",
       "ipExemptThisPanel": "本机",
       "ipExemptAllowlist": "白名单",
-      "ipExemptPrivate": "内网地址",
-      "ipExemptHint": "不计入 IP 限制，也不会被封禁",
       "ipNotCounted": "不计入",
+      "onlineIps": "在线 IP",
+      "noOnlineIps": "当前没有在线 IP",
+      "ipBansCount": "{count} 个 IP 因超出上限被封禁",
       "ipBannedFor": "已封禁 · 剩 {minutes} 分钟",
       "ipBans": "IP 限制封禁",
       "ipUnban": "解除",

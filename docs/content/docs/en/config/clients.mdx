@@ -37,8 +37,9 @@ inbounds** at once, with per-client traffic accounting.
   auto-renews the quota.
 - **Limit IP** caps how many networks (an IPv4 address or an IPv6 /64) the client
   can be online from at once, across all servers. The panel enforces it itself —
-  see [Security](/docs/operations/security). The client's IP log shows its recent
-  addresses and running bans, and can clear the log or lift a ban.
+  see [Security](/docs/operations/security). The client's online IPs show the
+  slots in use (e.g. `2/3`), the IPs online now and running bans; the admin can
+  lift a ban, and the client sees the same in its portal.
 - **Online status** and **last-online** times are tracked per client (and per
   node in multi-node setups).
 

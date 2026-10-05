@@ -135,7 +135,8 @@
       "adminSignIn": "管理員登入",
       "twoFactorCode": "驗證器驗證碼",
       "adminRequires2FA": "管理員登入需要啟用雙重驗證。",
-      "nextReset": "下次流量重設"
+      "nextReset": "下次流量重設",
+      "ipBannedHint": "同時在線的 IP 超過 {limit} 個，此 IP 被暫時封鎖，到時自動解除。"
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "重置所有入站流量",
       "email": "電子郵件",
       "IPLimit": "IP 限制",
-      "IPLimitlog": "IP 日誌",
-      "IPLimitlogclear": "清除日誌",
       "setDefaultCert": "從面板設定證書",
       "setDefaultCertEmpty": "面板尚未設定憑證。請先在「設定」中設定。",
       "streamTab": "傳輸",
@@ -813,7 +812,6 @@
       "method": "方法",
       "first": "首個",
       "last": "末位",
-      "ipLog": "IP 日誌",
       "prefix": "前綴",
       "postfix": "後綴",
       "delayedStart": "首次使用後開始",
@@ -847,12 +845,12 @@
       "addClients": "新增使用者",
       "limitIp": "IP 限制",
       "limitIpDesc": "同時在線的網路數上限，所有伺服器合計（IPv6 按 /64 計）。0 = 不限制。",
-      "ipExemptHost": "伺服器 {name}",
       "ipExemptThisPanel": "本機",
       "ipExemptAllowlist": "白名單",
-      "ipExemptPrivate": "內網位址",
-      "ipExemptHint": "不計入 IP 限制，也不會被封鎖",
       "ipNotCounted": "不計入",
+      "onlineIps": "在線 IP",
+      "noOnlineIps": "目前沒有在線 IP",
+      "ipBansCount": "{count} 個 IP 因超出上限被封鎖",
       "ipBannedFor": "已封鎖 · 剩 {minutes} 分鐘",
       "ipBans": "IP 限制封鎖",
       "ipUnban": "解除",

@@ -505,14 +505,19 @@ export const ClientIpBanSchema = z.object({
 export type ClientIpBan = z.infer<typeof ClientIpBanSchema>;
 
 export const ClientIpInfoSchema = z.object({
-  bannedUntil: z.number().int(),
-  exempt: z.string(),
-  exemptHost: z.string(),
   ip: z.string(),
   node: z.string(),
   time: z.string(),
 });
 export type ClientIpInfo = z.infer<typeof ClientIpInfoSchema>;
+
+export const ClientOnlineIpsSchema = z.object({
+  bans: z.array(z.lazy(() => ClientIpBanSchema)),
+  count: z.number().int(),
+  limit: z.number().int(),
+  online: z.array(z.lazy(() => OnlineNetworkSchema)),
+});
+export type ClientOnlineIps = z.infer<typeof ClientOnlineIpsSchema>;
 
 export const ClientPageResponseSchema = z.object({
   filtered: z.number().int(),
@@ -602,9 +607,11 @@ export const ClientSlimSchema = z.object({
   enable: z.boolean(),
   expiryTime: z.number().int(),
   inboundIds: z.array(z.number().int()),
+  ipBans: z.number().int(),
   limitHwid: z.number().int(),
   limitIp: z.number().int(),
   nextReset: z.number().int(),
+  onlineIps: z.number().int(),
   planId: z.number().int().optional(),
   reset: z.number().int(),
   resetDay: z.number().int(),
@@ -1011,6 +1018,15 @@ export const NodeViewSchema = z.object({
   xrayVersion: z.string(),
 });
 export type NodeView = z.infer<typeof NodeViewSchema>;
+
+export const OnlineNetworkSchema = z.object({
+  addresses: z.array(z.string()),
+  counted: z.boolean(),
+  lastSeen: z.number().int(),
+  network: z.string(),
+  servers: z.array(z.string()),
+});
+export type OnlineNetwork = z.infer<typeof OnlineNetworkSchema>;
 
 export const PanelUpdateStatusSchema = z.object({
   exitCode: z.number().int(),

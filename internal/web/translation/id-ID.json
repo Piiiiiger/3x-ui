@@ -135,7 +135,8 @@
       "adminSignIn": "Masuk sebagai administrator",
       "twoFactorCode": "Kode autentikator",
       "adminRequires2FA": "Akses administrator memerlukan autentikasi dua faktor.",
-      "nextReset": "Reset trafik berikutnya"
+      "nextReset": "Reset trafik berikutnya",
+      "ipBannedHint": "Lebih dari {limit} IP online bersamaan, jadi IP ini diblokir sampai waktunya habis."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "Reset Semua Traffic Masuk",
       "email": "Email",
       "IPLimit": "Batas IP",
-      "IPLimitlog": "Log IP",
-      "IPLimitlogclear": "Hapus Log",
       "setDefaultCert": "Atur Sertifikat dari Panel",
       "setDefaultCertEmpty": "Tidak ada sertifikat yang dikonfigurasi untuk panel. Atur dulu di Pengaturan.",
       "streamTab": "Aliran",
@@ -813,7 +812,6 @@
       "method": "Metode",
       "first": "Pertama",
       "last": "Terakhir",
-      "ipLog": "Log IP",
       "prefix": "Awalan",
       "postfix": "Akhiran",
       "delayedStart": "Mulai setelah penggunaan pertama",
@@ -847,12 +845,12 @@
       "addClients": "Tambah pengguna",
       "limitIp": "Batas IP",
       "limitIpDesc": "Jumlah maksimum IP bersamaan. 0 = tidak terbatas.",
-      "ipExemptHost": "Server {name}",
       "ipExemptThisPanel": "Panel ini",
       "ipExemptAllowlist": "Dalam daftar izin",
-      "ipExemptPrivate": "Alamat privat",
-      "ipExemptHint": "Tidak dihitung dalam batas IP dan tidak pernah diblokir",
       "ipNotCounted": "tidak dihitung",
+      "onlineIps": "IP online",
+      "noOnlineIps": "Tidak ada IP online saat ini",
+      "ipBansCount": "{count} IP diblokir karena melebihi batas",
       "ipBannedFor": "Diblokir · sisa {minutes} menit",
       "ipBans": "Blokir karena batas IP",
       "ipUnban": "Buka blokir",

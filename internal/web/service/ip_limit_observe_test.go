@@ -3,7 +3,6 @@ package service
 import (
 	"net/netip"
 	"slices"
-	"strconv"
 	"testing"
 	"time"
 
@@ -26,7 +25,7 @@ func TestAgentObservationsReadOnlyFreshReports(t *testing.T) {
 		got = (&IpLimitService{}).AgentObservations(time.Now())
 		time.Sleep(5 * time.Millisecond)
 	}
-	want := []IpObservation{{Email: "nia", IP: "198.51.100.100", LastSeen: 1_799_999_990}}
+	want := []IpObservation{{Email: "nia", IP: "198.51.100.100", LastSeen: 1_799_999_990, Server: n.Id}}
 	if !slices.Equal(got, want) {
 		t.Fatalf("observations = %+v, want %+v", got, want)
 	}
@@ -96,46 +95,6 @@ func TestNoteAgentRemoteIPKeepsTheLatestPublicAddress(t *testing.T) {
 	}
 }
 
-func TestClientIpLogLabelsExemptAndBannedAddresses(t *testing.T) {
-	setupIpLimitTest(t)
-	relay := seedAgentNodeRow(t, "relay")
-	seedLimitedClient(t, &relay.Id, "in-l", 443, "quinn", 1)
-	now := time.Now()
-	row := model.InboundClientIps{ClientEmail: "quinn", Ips: `[` +
-		`{"ip":"203.0.113.7","timestamp":` + itoa(now.Unix()) + `},` +
-		`{"ip":"10.10.16.1","timestamp":` + itoa(now.Unix()) + `},` +
-		`{"ip":"2001:db8:7:7::1","timestamp":` + itoa(now.Unix()) + `},` +
-		`{"ip":"198.51.100.141","timestamp":` + itoa(now.Unix()) + `}]`}
-	if err := database.GetDB().Create(&row).Error; err != nil {
-		t.Fatal(err)
-	}
-	ban := model.ClientIpBan{Email: "quinn", Network: "2001:db8:7:7::/64", BannedAt: now.Unix(), ExpiresAt: now.Unix() + 900}
-	if err := database.GetDB().Create(&ban).Error; err != nil {
-		t.Fatal(err)
-	}
-
-	infos, err := (&InboundService{}).GetClientIpsWithNodes("quinn")
-	if err != nil {
-		t.Fatal(err)
-	}
-	got := map[string]ClientIpInfo{}
-	for _, info := range infos {
-		got[info.IP] = info
-	}
-	if i := got["203.0.113.7"]; i.Exempt != IpExemptHost || i.ExemptHost != "relay" || i.BannedUntil != 0 {
-		t.Fatalf("relay address = %+v; want it labelled as the relay server", i)
-	}
-	if i := got["10.10.16.1"]; i.Exempt != IpExemptPrivate {
-		t.Fatalf("NAT gateway = %+v; want it labelled private", i)
-	}
-	if i := got["2001:db8:7:7::1"]; i.Exempt != "" || i.BannedUntil != now.Unix()+900 {
-		t.Fatalf("banned address = %+v; want the /64 ban's expiry", i)
-	}
-	if i := got["198.51.100.141"]; i.Exempt != "" || i.BannedUntil != 0 {
-		t.Fatalf("plain address = %+v; want no label", i)
-	}
-}
-
 func TestIpLimitExemptHostsListsEveryServer(t *testing.T) {
 	setupIpLimitTest(t)
 	a := seedAgentNodeRow(t, "alpha")
@@ -163,5 +122,3 @@ func TestIpLimitExemptHostsListsEveryServer(t *testing.T) {
 		}
 	}
 }
-
-func itoa(v int64) string { return strconv.FormatInt(v, 10) }

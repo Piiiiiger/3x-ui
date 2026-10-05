@@ -33,9 +33,10 @@ The panel enforces the limit itself; it needs no Fail2ban and no firewall rules.
 - The panel's own servers (each node's address and the address its agent
   connects from, so relays are covered), the **IP limit allowlist** and private
   ranges are never counted or banned.
-- A client's IP log marks exempt addresses and running bans and can lift a ban.
-  Every ban and unban is also logged to `/var/log/x-ui/3xipl-banned.log`
-  (`x-ui banlog`).
+- The admin panel and the client's own portal both show the slots in use (e.g.
+  `2/3`), the IPs online right now with their servers, and running bans with the
+  time left; the admin can lift a ban. Relay addresses never appear there. Every
+  ban and unban is also logged to `/var/log/x-ui/3xipl-banned.log` (`x-ui banlog`).
 
 Connections already open when a ban starts run until they close; new connections
 from the banned network are refused.

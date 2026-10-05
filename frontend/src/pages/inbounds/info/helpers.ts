@@ -171,31 +171,3 @@ export function peerConfFileName(peerIndex: number, endpointIndex: number, endpo
 export function statsColor(stats: ClientStats, trafficDiff: number) {
   return ColorUtils.usageColor(stats.up + stats.down, trafficDiff, stats.total);
 }
-
-export function formatIpInfo(record: unknown) {
-  if (record == null) return '';
-  if (typeof record === 'string' || typeof record === 'number') return String(record);
-  const r = record as {
-    ip?: string;
-    IP?: string;
-    timestamp?: number | string;
-    Timestamp?: number | string;
-  };
-  const ip = r.ip || r.IP || '';
-  const ts = r.timestamp || r.Timestamp || 0;
-  if (!ip) return String(record);
-  if (!ts) return String(ip);
-  const date = new Date(Number(ts) * 1000);
-  const timeStr = date
-    .toLocaleString('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })
-    .replace(',', '');
-  return `${ip} (${timeStr})`;
-}

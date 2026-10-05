@@ -37,6 +37,10 @@ type ClientSlim struct {
 	// NextReset is when the usage next returns to zero (its reset cycle or an
 	// auto-renewal), in Unix ms; 0 when nothing is scheduled.
 	NextReset int64 `json:"nextReset" example:"1735689600000"`
+	// OnlineIps is how many of the client's LimitIP slots are in use right now,
+	// IpBans how many of its networks are banned for going over the limit.
+	OnlineIps int `json:"onlineIps" example:"1"`
+	IpBans    int `json:"ipBans" example:"0"`
 }
 
 // ClientPageParams are the query params accepted by /panel/api/clients/list/paged.
@@ -490,6 +494,10 @@ func (q clientQuery) pageRows(params ClientPageParams, onlines []string, offset,
 		loc = time.Local
 	}
 	now := time.UnixMilli(q.nowMs).In(loc)
+	onlineIps, ipBans, err := (&IpLimitService{}).OnlineIpCounts(emails, now)
+	if err != nil {
+		return nil, err
+	}
 	items := make([]ClientSlim, 0, len(ids))
 	for _, id := range ids {
 		rec := byId[id]
@@ -507,6 +515,7 @@ func (q clientQuery) pageRows(params ClientPageParams, onlines []string, offset,
 			resetCount = traffic.ResetCount
 		}
 		item.NextReset = nextClientReset(*rec, resetCount, now)
+		item.OnlineIps, item.IpBans = onlineIps[rec.Email], ipBans[rec.Email]
 		items = append(items, item)
 	}
 	return items, nil

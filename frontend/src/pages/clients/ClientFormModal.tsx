@@ -31,8 +31,9 @@ import { Controller, FormProvider, useForm, useWatch, useFieldArray } from 'reac
 import { IntlUtil, RandomUtil, Wireguard } from '@/utils';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { generateMtprotoSecret } from '@/lib/xray/inbound-defaults';
-import ClientIpLogModal from '@/components/clients/ClientIpLog';
-import { useClientIpLog } from '@/hooks/useClientIpLog';
+import ClientOnlineIpsModal from '@/components/clients/ClientOnlineIps';
+import { useClientOnlineIps } from '@/hooks/useClientOnlineIps';
+import { formatIpSlots } from '@/lib/clients/online-ips';
 import { resolveExternalLinkExpiry } from '@/lib/clients/external-link';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
@@ -279,7 +280,7 @@ export default function ClientFormModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const ipLog = useClientIpLog(isEdit ? client?.email : undefined);
+  const onlineIps = useClientOnlineIps(isEdit ? client?.email : undefined);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
     clientHwids,
@@ -390,7 +391,7 @@ export default function ClientFormModal({
         seed.expiryDate = et > 0 ? et : 0;
       }
       methods.reset(seed);
-      void ipLog.load();
+      void onlineIps.load();
       void loadHwids();
     } else {
       const wgKeypair = Wireguard.generateKeypair();
@@ -582,7 +583,7 @@ export default function ClientFormModal({
 
   function openIpsModal() {
     setIpsModalOpen(true);
-    if (ipLog.ips.length === 0) void ipLog.load();
+    void onlineIps.load();
   }
 
   function openHwidsModal() {
@@ -864,14 +865,16 @@ export default function ClientFormModal({
                                 onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
                               />
                               {isEdit && (
-                                <Tooltip title={t('pages.clients.ipLog')}>
+                                <Tooltip title={t('pages.clients.onlineIps')}>
                                   <Button
-                                    aria-label={t('pages.clients.ipLog')}
+                                    aria-label={t('pages.clients.onlineIps')}
                                     icon={<EyeOutlined />}
-                                    loading={ipLog.loading}
+                                    loading={onlineIps.loading}
                                     onClick={openIpsModal}
                                   >
-                                    {ipLog.ips.length > 0 ? ipLog.ips.length : ''}
+                                    {onlineIps.data
+                                      ? formatIpSlots(onlineIps.data.count, onlineIps.data.limit)
+                                      : ''}
                                   </Button>
                                 </Tooltip>
                               )}
@@ -1460,19 +1463,16 @@ export default function ClientFormModal({
         </FormProvider>
       </Modal>
 
-      <ClientIpLogModal
+      <ClientOnlineIpsModal
         open={ipsModalOpen}
         email={client?.email}
         zIndex={CLIENT_IP_LOG_MODAL_Z_INDEX}
-        ips={ipLog.ips}
-        bans={ipLog.bans}
-        nowMs={ipLog.loadedAt}
-        loading={ipLog.loading}
-        clearing={ipLog.clearing}
-        unbanning={ipLog.unbanning}
-        onRefresh={ipLog.load}
-        onClear={ipLog.clear}
-        onUnban={ipLog.unban}
+        data={onlineIps.data}
+        nowMs={onlineIps.loadedAt}
+        loading={onlineIps.loading}
+        unbanning={onlineIps.unbanning}
+        onRefresh={onlineIps.load}
+        onUnban={onlineIps.unban}
         onClose={() => setIpsModalOpen(false)}
       />
 

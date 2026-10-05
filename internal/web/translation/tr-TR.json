@@ -135,7 +135,8 @@
       "adminSignIn": "Yönetici girişi",
       "twoFactorCode": "Kimlik doğrulayıcı kodu",
       "adminRequires2FA": "Yönetici girişi iki faktörlü kimlik doğrulama gerektirir.",
-      "nextReset": "Sonraki trafik sıfırlama"
+      "nextReset": "Sonraki trafik sıfırlama",
+      "ipBannedHint": "Aynı anda {limit} taneden fazla IP çevrimiçiydi; bu IP süre dolana kadar engellendi."
     }
   },
   "menu": {
@@ -441,8 +442,6 @@
       "resetAllTrafficTitle": "Tüm Gelen Trafiği Sıfırla",
       "email": "E-posta",
       "IPLimit": "IP Limiti",
-      "IPLimitlog": "IP Günlüğü",
-      "IPLimitlogclear": "Günlüğü Temizle",
       "setDefaultCert": "Panelden Sertifikayı Ayarla",
       "setDefaultCertEmpty": "Panel için sertifika yapılandırılmamış. Önce Ayarlar'dan ayarlayın.",
       "streamTab": "Akış (Stream)",
@@ -813,7 +812,6 @@
       "method": "Yöntem",
       "first": "İlk",
       "last": "Son",
-      "ipLog": "IP Günlüğü",
       "prefix": "Önek",
       "postfix": "Sonek",
       "delayedStart": "İlk Kullanımdan Sonra Başla",
@@ -847,12 +845,12 @@
       "addClients": "Kullanıcı Ekle",
       "limitIp": "IP Limiti",
       "limitIpDesc": "Eş zamanlı en fazla IP sayısı. 0 = sınırsız.",
-      "ipExemptHost": "Sunucu {name}",
       "ipExemptThisPanel": "Bu panel",
       "ipExemptAllowlist": "İzin listesinde",
-      "ipExemptPrivate": "Özel adres",
-      "ipExemptHint": "IP sınırına sayılmaz ve asla engellenmez",
       "ipNotCounted": "sayılmaz",
+      "onlineIps": "Çevrimiçi IP'ler",
+      "noOnlineIps": "Şu anda çevrimiçi IP yok",
+      "ipBansCount": "Sınırı aştığı için engellenen IP: {count}",
       "ipBannedFor": "Engellendi · {minutes} dk kaldı",
       "ipBans": "IP sınırı engelleri",
       "ipUnban": "Engeli kaldır",
