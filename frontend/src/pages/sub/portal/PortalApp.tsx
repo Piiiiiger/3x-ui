@@ -17,6 +17,7 @@ import PortalLogin from './PortalLogin';
 import PortalProbe from './PortalProbe';
 import PortalOnlineIps from './PortalOnlineIps';
 import PortalAccountCode from './PortalAccountCode';
+import PortalRules from './PortalRules';
 import PortalReminders from './PortalReminders';
 import PortalCustomize from './PortalCustomize';
 import './Portal.css';
@@ -143,6 +144,7 @@ export default function PortalApp({ base }: { base: string }) {
       data={data.page ?? { emails: [data.email], enabled: true }}
       headerExtra={
         <>
+          <PortalRules limitIp={data.plan?.limitIp} />
           <PortalAccountCode data={data} />
           <Button
             size="large"

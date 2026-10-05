@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { keys } from '@/api/queryKeys';
 import type { PortalProbe, PortalProbeServer } from '@/generated/zod';
 import PortalApp from '@/pages/sub/portal/PortalApp';
+import { snoozePortalRules } from '@/pages/sub/portal/PortalRules';
 import { makeTestQueryClient, renderWithProviders } from './test-utils';
 
 // The usage chart draws on a canvas, which jsdom does not have.
@@ -117,6 +118,8 @@ async function openProbeView() {
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/x/portal');
+  // A returning reader has the rules snoozed; these tests are about the probe view.
+  snoozePortalRules();
 });
 
 afterEach(() => {
