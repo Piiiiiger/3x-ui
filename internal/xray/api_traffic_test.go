@@ -220,3 +220,24 @@ func TestGetTrafficCountsAFreshCoreFromZero(t *testing.T) {
 		t.Fatalf("poll after re-attaching = %+v, %v; want a baseline-only poll", clients, err)
 	}
 }
+
+// Regression: a fresh core polled before any counter existed spent the mark on
+// that empty poll, so the next one baselined and dropped its first traffic.
+func TestGetTrafficCountsAFreshCoreWhoseCountersAppearLater(t *testing.T) {
+	api := startFakeStats(t, [][]*statsService.Stat{
+		{},
+		{stat("user>>>alice>>>traffic>>>downlink", 354)},
+	})
+	api.CountFromZero()
+
+	if _, clients, err := api.GetTraffic(); err != nil || len(clients) != 0 {
+		t.Fatalf("first poll = %+v, %v; want nothing yet", clients, err)
+	}
+	_, clients, err := api.GetTraffic()
+	if err != nil {
+		t.Fatalf("GetTraffic: %v", err)
+	}
+	if got := clientTrafficByEmail(t, clients)["alice"]; got == nil || got.Down != 354 {
+		t.Fatalf("poll after the counter appeared = %+v, want alice down 354", got)
+	}
+}

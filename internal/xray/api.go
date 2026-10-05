@@ -785,7 +785,11 @@ func (x *XrayAPI) GetTraffic() ([]*Traffic, []*ClientTraffic, error) {
 	emailTrafficMap := make(map[string]*ClientTraffic)
 
 	baselinePass := len(x.StatsLastValues) == 0 && !x.freshCore
-	x.freshCore = false
+	// A fresh core may answer before it has any counter: the mark waits for the
+	// first poll that has one, or that core's first traffic is baselined away.
+	if len(resp.GetStat()) > 0 {
+		x.freshCore = false
+	}
 
 	for _, stat := range resp.GetStat() {
 		lastValue, ok := x.StatsLastValues[stat.Name]
