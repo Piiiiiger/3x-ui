@@ -1,0 +1,165 @@
+/* AI 用量 — the traffic page's ov-* cards plus the plan-limit cards. Colours come
+   from the AntD tokens so light / dark / ultra-dark keep working. */
+
+.ai-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Equal rows keep both plan cards one size, side by side or stacked. */
+.ai-quota-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: var(--ov-gap);
+}
+
+@media (max-width: 900px) {
+  .ai-quota-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ai-quota-card.ant-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ai-quota-card.ant-card > .ant-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.ai-plan-tag.ant-tag {
+  margin-inline-start: 4px;
+  font-weight: 500;
+}
+
+.ai-quota-rows {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 14px var(--ov-pad) 0;
+  list-style: none;
+}
+
+.ai-quota-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--ant-color-text);
+}
+
+.ai-quota-percent {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-quota-reset {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--ov-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* An empty slot keeps the rainbow bar's height, so a card with fewer windows lines up. */
+.ai-quota-row-empty .ai-quota-row-head {
+  color: var(--ov-faint);
+}
+
+.ai-quota-empty-bar {
+  height: 6px;
+  background: var(--ant-color-fill-quaternary);
+}
+
+.ai-quota-foot {
+  min-height: 20px;
+  margin: 14px var(--ov-pad) 0;
+  padding: 12px 0 var(--ov-pad);
+  border-top: 1px solid var(--ov-line);
+  font-size: 12px;
+  color: var(--ov-label);
+}
+
+.ai-quota-foot-warn {
+  color: var(--ant-color-warning);
+}
+
+/* Two app totals and the metric switch: on a phone they wrap as whole items, never inside a name. */
+.ai-daily-legend {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+
+.ai-daily-legend .ov-legend-label {
+  white-space: nowrap;
+}
+
+.ai-legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+}
+
+.ai-rank-cost {
+  min-width: 64px;
+  text-align: end;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.ai-session-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.ai-app-tag.ant-tag {
+  margin-inline-end: 0;
+}
+
+.ai-stale {
+  color: var(--ant-color-warning);
+}
+
+.ai-empty-hint,
+.ai-connect-hint {
+  color: var(--ov-label);
+}
+
+.ai-connect-done {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-connect-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-connect-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-connect-value code {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  background: var(--ant-color-fill-tertiary);
+  font-size: 12px;
+}

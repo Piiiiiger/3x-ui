@@ -225,6 +225,273 @@ export const EXAMPLES: Record<string, unknown> = {
   "AgentSecretView": {
     "secret": "q3vE0mXo1c8lYk2Rr9tW4uZp6aSd7fGh8jKl0zXcVbN"
   },
+  "AiUsageDay": {
+    "claudeCostUsd": 12.5,
+    "claudeTokens": 45000000,
+    "codexCostUsd": 1.2,
+    "codexTokens": 3000000,
+    "day": "2026-10-06"
+  },
+  "AiUsageDeviceView": {
+    "appVersion": "1.0.0",
+    "costUsd": 912.3,
+    "firstDay": "2026-08-01",
+    "id": 1,
+    "lastDay": "2026-10-06",
+    "lastSyncAt": 1791203600,
+    "name": "laptop"
+  },
+  "AiUsageIngestResult": {
+    "days": 2,
+    "deviceId": 1,
+    "rows": 18,
+    "sessions": 6
+  },
+  "AiUsageOverview": {
+    "daily": [
+      {
+        "claudeCostUsd": 12.5,
+        "claudeTokens": 45000000,
+        "codexCostUsd": 1.2,
+        "codexTokens": 3000000,
+        "day": "2026-10-06"
+      }
+    ],
+    "devices": [
+      {
+        "appVersion": "1.0.0",
+        "costUsd": 912.3,
+        "firstDay": "2026-08-01",
+        "id": 1,
+        "lastDay": "2026-10-06",
+        "lastSyncAt": 1791203600,
+        "name": "laptop"
+      }
+    ],
+    "models": [
+      {
+        "app": "claude",
+        "claudeCostUsd": 40,
+        "codexCostUsd": 2.5,
+        "costUsd": 42.5,
+        "name": "/home/dev/app",
+        "requests": 812,
+        "tokens": 1200000
+      }
+    ],
+    "period": "month",
+    "periodStart": "2026-10-01",
+    "projects": [
+      {
+        "app": "claude",
+        "claudeCostUsd": 40,
+        "codexCostUsd": 2.5,
+        "costUsd": 42.5,
+        "name": "/home/dev/app",
+        "requests": 812,
+        "tokens": 1200000
+      }
+    ],
+    "quotas": [
+      {
+        "activeUntil": "",
+        "deviceName": "laptop",
+        "error": "",
+        "planLabel": "Max 5x",
+        "queriedAt": 1791203600000,
+        "success": true,
+        "tiers": [
+          {
+            "name": "five_hour",
+            "resetsAt": "2026-10-06T18:00:00Z",
+            "utilization": 45
+          }
+        ],
+        "tool": "claude"
+      }
+    ],
+    "sessions": [
+      {
+        "app": "claude",
+        "costUsd": 3.25,
+        "deviceName": "laptop",
+        "firstAt": 1791200000,
+        "lastAt": 1791203600,
+        "model": "claude-opus-5-5",
+        "project": "/home/dev/app",
+        "requests": 64,
+        "sessionId": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+        "title": "Fix the login flow",
+        "tokens": 900000
+      }
+    ],
+    "totals": {
+      "cacheReadTokens": 410000000,
+      "cacheWriteTokens": 9800000,
+      "claudeCostUsd": 120.1,
+      "codexCostUsd": 8.3,
+      "costUsd": 128.4,
+      "inputTokens": 420000,
+      "outputTokens": 3100000,
+      "requests": 5120,
+      "sessions": 23
+    }
+  },
+  "AiUsageQuotaTier": {
+    "name": "five_hour",
+    "resetsAt": "2026-10-06T18:00:00Z",
+    "utilization": 45
+  },
+  "AiUsageQuotaView": {
+    "activeUntil": "",
+    "deviceName": "laptop",
+    "error": "",
+    "planLabel": "Max 5x",
+    "queriedAt": 1791203600000,
+    "success": true,
+    "tiers": [
+      {
+        "name": "five_hour",
+        "resetsAt": "2026-10-06T18:00:00Z",
+        "utilization": 45
+      }
+    ],
+    "tool": "claude"
+  },
+  "AiUsageRank": {
+    "app": "claude",
+    "claudeCostUsd": 40,
+    "codexCostUsd": 2.5,
+    "costUsd": 42.5,
+    "name": "/home/dev/app",
+    "requests": 812,
+    "tokens": 1200000
+  },
+  "AiUsageReport": {
+    "daily": [
+      {
+        "app": "claude",
+        "cacheReadTokens": 2400000,
+        "cacheWriteTokens": 56000,
+        "costUsd": 3.51,
+        "day": "2026-10-06",
+        "inputTokens": 1200,
+        "model": "claude-opus-5-5",
+        "outputTokens": 34000,
+        "project": "/home/dev/app",
+        "requests": 42
+      }
+    ],
+    "device": {
+      "appVersion": "1.0.0",
+      "key": "5b0d8a1f6c2e4f7a9d3b",
+      "name": "laptop"
+    },
+    "from": "2026-10-05",
+    "quotas": [
+      {
+        "activeUntil": "",
+        "error": "",
+        "planLabel": "Max 5x",
+        "queriedAt": 1791203600000,
+        "success": true,
+        "tiers": [
+          {
+            "name": "five_hour",
+            "resetsAt": "2026-10-06T18:00:00Z",
+            "utilization": 45
+          }
+        ],
+        "tool": "claude"
+      }
+    ],
+    "sessions": [
+      {
+        "app": "claude",
+        "cacheReadTokens": 12000000,
+        "costUsd": 3.25,
+        "firstAt": 1791200000,
+        "lastAt": 1791203600,
+        "model": "claude-opus-5-5",
+        "project": "/home/dev/app",
+        "requests": 64,
+        "sessionId": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+        "title": "Fix the login flow",
+        "tokens": 900000
+      }
+    ],
+    "sessionsSince": 0,
+    "to": "2026-10-06"
+  },
+  "AiUsageReportDay": {
+    "app": "claude",
+    "cacheReadTokens": 2400000,
+    "cacheWriteTokens": 56000,
+    "costUsd": 3.51,
+    "day": "2026-10-06",
+    "inputTokens": 1200,
+    "model": "claude-opus-5-5",
+    "outputTokens": 34000,
+    "project": "/home/dev/app",
+    "requests": 42
+  },
+  "AiUsageReportDevice": {
+    "appVersion": "1.0.0",
+    "key": "5b0d8a1f6c2e4f7a9d3b",
+    "name": "laptop"
+  },
+  "AiUsageReportQuota": {
+    "activeUntil": "",
+    "error": "",
+    "planLabel": "Max 5x",
+    "queriedAt": 1791203600000,
+    "success": true,
+    "tiers": [
+      {
+        "name": "five_hour",
+        "resetsAt": "2026-10-06T18:00:00Z",
+        "utilization": 45
+      }
+    ],
+    "tool": "claude"
+  },
+  "AiUsageReportSession": {
+    "app": "claude",
+    "cacheReadTokens": 12000000,
+    "costUsd": 3.25,
+    "firstAt": 1791200000,
+    "lastAt": 1791203600,
+    "model": "claude-opus-5-5",
+    "project": "/home/dev/app",
+    "requests": 64,
+    "sessionId": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+    "title": "Fix the login flow",
+    "tokens": 900000
+  },
+  "AiUsageSessionView": {
+    "app": "claude",
+    "costUsd": 3.25,
+    "deviceName": "laptop",
+    "firstAt": 1791200000,
+    "lastAt": 1791203600,
+    "model": "claude-opus-5-5",
+    "project": "/home/dev/app",
+    "requests": 64,
+    "sessionId": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+    "title": "Fix the login flow",
+    "tokens": 900000
+  },
+  "AiUsageTotals": {
+    "cacheReadTokens": 410000000,
+    "cacheWriteTokens": 9800000,
+    "claudeCostUsd": 120.1,
+    "codexCostUsd": 8.3,
+    "costUsd": 128.4,
+    "inputTokens": 420000,
+    "outputTokens": 3100000,
+    "requests": 5120,
+    "sessions": 23
+  },
   "AllSetting": {
     "datepicker": "",
     "discordAdminIds": "",

@@ -119,7 +119,12 @@ var nodeSyncScopeAllow = map[string]map[string]struct{}{
 	"/inbounds/:id/subSortIndex":   {http.MethodPost: {}},
 }
 
-// enforceTokenScope applies explicit allowlists to monitor and node-sync tokens.
+// aiUsageScopeAllow is all an ai-usage token may do: upload its device's report.
+var aiUsageScopeAllow = map[string]map[string]struct{}{
+	"/aiUsage/ingest": {http.MethodPost: {}},
+}
+
+// enforceTokenScope applies explicit allowlists to monitor, node-sync and ai-usage tokens.
 // Admin tokens and session-login users retain their existing behavior.
 func (a *APIController) enforceTokenScope(c *gin.Context) {
 	scopeVal, ok := c.Get("api_token_scope")
@@ -147,6 +152,13 @@ func (a *APIController) enforceTokenScope(c *gin.Context) {
 		}
 	case model.ApiScopeNodeSync:
 		if methods, allowed := nodeSyncScopeAllow[rel]; allowed {
+			if _, allowedMethod := methods[c.Request.Method]; allowedMethod {
+				c.Next()
+				return
+			}
+		}
+	case model.ApiScopeAiUsage:
+		if methods, allowed := aiUsageScopeAllow[rel]; allowed {
 			if _, allowedMethod := methods[c.Request.Method]; allowedMethod {
 				c.Next()
 				return
@@ -210,6 +222,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 
 	traffic := api.Group("/traffic")
 	NewTrafficController(traffic)
+
+	// AI usage — Claude Code / Codex usage reported by Pigger Switch
+	aiUsage := api.Group("/aiUsage")
+	NewAiUsageController(aiUsage)
 
 	// Probe API — server status read from the Lite monitor on this host
 	probe := api.Group("/probe")

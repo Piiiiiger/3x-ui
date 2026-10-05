@@ -171,10 +171,12 @@ const (
 	ApiScopeAdmin    = "admin"
 	ApiScopeMonitor  = "monitor"
 	ApiScopeNodeSync = "node-sync"
+	// ApiScopeAiUsage lets a desktop upload its Claude Code / Codex usage, nothing more.
+	ApiScopeAiUsage = "ai-usage"
 )
 
 func IsKnownApiScope(s string) bool {
-	return s == ApiScopeAdmin || s == ApiScopeMonitor || s == ApiScopeNodeSync
+	return s == ApiScopeAdmin || s == ApiScopeMonitor || s == ApiScopeNodeSync || s == ApiScopeAiUsage
 }
 
 type ApiToken struct {

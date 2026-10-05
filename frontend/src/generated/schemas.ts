@@ -445,6 +445,686 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AiUsageDay": {
+    "description": "AiUsageDay is one day of the 30-day chart, split by app.",
+    "properties": {
+      "claudeCostUsd": {
+        "example": 12.5,
+        "type": "number"
+      },
+      "claudeTokens": {
+        "example": 45000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "codexCostUsd": {
+        "example": 1.2,
+        "type": "number"
+      },
+      "codexTokens": {
+        "example": 3000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "day": {
+        "example": "2026-10-06",
+        "type": "string"
+      }
+    },
+    "required": [
+      "claudeCostUsd",
+      "claudeTokens",
+      "codexCostUsd",
+      "codexTokens",
+      "day"
+    ],
+    "type": "object"
+  },
+  "AiUsageDeviceView": {
+    "description": "AiUsageDeviceView is a reporting computer with its all-time spend.",
+    "properties": {
+      "appVersion": {
+        "example": "1.0.0",
+        "type": "string"
+      },
+      "costUsd": {
+        "example": 912.3,
+        "type": "number"
+      },
+      "firstDay": {
+        "example": "2026-08-01",
+        "type": "string"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "lastDay": {
+        "example": "2026-10-06",
+        "type": "string"
+      },
+      "lastSyncAt": {
+        "example": 1791203600,
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "example": "laptop",
+        "type": "string"
+      }
+    },
+    "required": [
+      "appVersion",
+      "costUsd",
+      "firstDay",
+      "id",
+      "lastDay",
+      "lastSyncAt",
+      "name"
+    ],
+    "type": "object"
+  },
+  "AiUsageIngestResult": {
+    "description": "AiUsageIngestResult names the device a report landed on and what it stored.",
+    "properties": {
+      "days": {
+        "example": 2,
+        "type": "integer"
+      },
+      "deviceId": {
+        "example": 1,
+        "type": "integer"
+      },
+      "rows": {
+        "example": 18,
+        "type": "integer"
+      },
+      "sessions": {
+        "example": 6,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "days",
+      "deviceId",
+      "rows",
+      "sessions"
+    ],
+    "type": "object"
+  },
+  "AiUsageOverview": {
+    "description": "AiUsageOverview is the AI usage page: the period's totals and rankings, the\nlast 30 days, the sessions of the period, the plan limits and the devices.",
+    "properties": {
+      "daily": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageDay"
+        },
+        "type": "array"
+      },
+      "devices": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageDeviceView"
+        },
+        "type": "array"
+      },
+      "models": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageRank"
+        },
+        "type": "array"
+      },
+      "period": {
+        "enum": [
+          "today",
+          "week",
+          "month",
+          "all"
+        ],
+        "example": "month",
+        "type": "string"
+      },
+      "periodStart": {
+        "example": "2026-10-01",
+        "type": "string"
+      },
+      "projects": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageRank"
+        },
+        "type": "array"
+      },
+      "quotas": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageQuotaView"
+        },
+        "type": "array"
+      },
+      "sessions": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageSessionView"
+        },
+        "type": "array"
+      },
+      "totals": {
+        "$ref": "#/components/schemas/AiUsageTotals"
+      }
+    },
+    "required": [
+      "daily",
+      "devices",
+      "models",
+      "period",
+      "periodStart",
+      "projects",
+      "quotas",
+      "sessions",
+      "totals"
+    ],
+    "type": "object"
+  },
+  "AiUsageQuotaTier": {
+    "description": "AiUsageQuotaTier is one rate-limit window: percent used and when it resets.",
+    "properties": {
+      "name": {
+        "example": "five_hour",
+        "type": "string"
+      },
+      "resetsAt": {
+        "example": "2026-10-06T18:00:00Z",
+        "type": "string"
+      },
+      "utilization": {
+        "example": 45,
+        "type": "number"
+      }
+    },
+    "required": [
+      "name",
+      "resetsAt",
+      "utilization"
+    ],
+    "type": "object"
+  },
+  "AiUsageQuotaView": {
+    "description": "AiUsageQuotaView is the newest plan-limit reading of one tool.",
+    "properties": {
+      "activeUntil": {
+        "type": "string"
+      },
+      "deviceName": {
+        "example": "laptop",
+        "type": "string"
+      },
+      "error": {
+        "type": "string"
+      },
+      "planLabel": {
+        "example": "Max 5x",
+        "type": "string"
+      },
+      "queriedAt": {
+        "example": 1791203600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "success": {
+        "example": true,
+        "type": "boolean"
+      },
+      "tiers": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageQuotaTier"
+        },
+        "type": "array"
+      },
+      "tool": {
+        "example": "claude",
+        "type": "string"
+      }
+    },
+    "required": [
+      "activeUntil",
+      "deviceName",
+      "error",
+      "planLabel",
+      "queriedAt",
+      "success",
+      "tiers",
+      "tool"
+    ],
+    "type": "object"
+  },
+  "AiUsageRank": {
+    "description": "AiUsageRank is a project or a model over the period; Tokens leaves out cache reads.",
+    "properties": {
+      "app": {
+        "example": "claude",
+        "type": "string"
+      },
+      "claudeCostUsd": {
+        "example": 40,
+        "type": "number"
+      },
+      "codexCostUsd": {
+        "example": 2.5,
+        "type": "number"
+      },
+      "costUsd": {
+        "example": 42.5,
+        "type": "number"
+      },
+      "name": {
+        "example": "/home/dev/app",
+        "type": "string"
+      },
+      "requests": {
+        "example": 812,
+        "format": "int64",
+        "type": "integer"
+      },
+      "tokens": {
+        "example": 1200000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "app",
+      "claudeCostUsd",
+      "codexCostUsd",
+      "costUsd",
+      "name",
+      "requests",
+      "tokens"
+    ],
+    "type": "object"
+  },
+  "AiUsageReport": {
+    "description": "AiUsageReport is what Pigger Switch uploads: its usage on the whole days\nFrom..To of its time zone, which replaces what Pigger held for those days.",
+    "properties": {
+      "daily": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageReportDay"
+        },
+        "type": "array"
+      },
+      "device": {
+        "$ref": "#/components/schemas/AiUsageReportDevice"
+      },
+      "from": {
+        "example": "2026-10-05",
+        "type": "string"
+      },
+      "quotas": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageReportQuota"
+        },
+        "type": "array"
+      },
+      "sessions": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageReportSession"
+        },
+        "type": "array"
+      },
+      "sessionsSince": {
+        "description": "SessionsSince (Unix seconds), when set, makes the report speak for every session of the\ndevice active since then: the ones it leaves out are deleted. Zero only upserts.",
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "to": {
+        "example": "2026-10-06",
+        "type": "string"
+      }
+    },
+    "required": [
+      "daily",
+      "device",
+      "from",
+      "quotas",
+      "sessions",
+      "sessionsSince",
+      "to"
+    ],
+    "type": "object"
+  },
+  "AiUsageReportDay": {
+    "description": "AiUsageReportDay is one model's use in one project on one day; input tokens\nexclude cache reads and cost is the API-price equivalent in USD.",
+    "properties": {
+      "app": {
+        "enum": [
+          "claude",
+          "codex"
+        ],
+        "example": "claude",
+        "type": "string"
+      },
+      "cacheReadTokens": {
+        "example": 2400000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "cacheWriteTokens": {
+        "example": 56000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "costUsd": {
+        "example": 3.51,
+        "type": "number"
+      },
+      "day": {
+        "example": "2026-10-06",
+        "type": "string"
+      },
+      "inputTokens": {
+        "example": 1200,
+        "format": "int64",
+        "type": "integer"
+      },
+      "model": {
+        "example": "claude-opus-5-5",
+        "type": "string"
+      },
+      "outputTokens": {
+        "example": 34000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "project": {
+        "example": "/home/dev/app",
+        "type": "string"
+      },
+      "requests": {
+        "example": 42,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "app",
+      "cacheReadTokens",
+      "cacheWriteTokens",
+      "costUsd",
+      "day",
+      "inputTokens",
+      "model",
+      "outputTokens",
+      "project",
+      "requests"
+    ],
+    "type": "object"
+  },
+  "AiUsageReportDevice": {
+    "description": "AiUsageReportDevice identifies the reporting computer; Key is random and stable.",
+    "properties": {
+      "appVersion": {
+        "example": "1.0.0",
+        "type": "string"
+      },
+      "key": {
+        "example": "5b0d8a1f6c2e4f7a9d3b",
+        "type": "string"
+      },
+      "name": {
+        "example": "laptop",
+        "type": "string"
+      }
+    },
+    "required": [
+      "appVersion",
+      "key",
+      "name"
+    ],
+    "type": "object"
+  },
+  "AiUsageReportQuota": {
+    "description": "AiUsageReportQuota is a plan-limit reading; QueriedAt is unix milliseconds.",
+    "properties": {
+      "activeUntil": {
+        "type": "string"
+      },
+      "error": {
+        "type": "string"
+      },
+      "planLabel": {
+        "example": "Max 5x",
+        "type": "string"
+      },
+      "queriedAt": {
+        "example": 1791203600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "success": {
+        "example": true,
+        "type": "boolean"
+      },
+      "tiers": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageQuotaTier"
+        },
+        "type": "array"
+      },
+      "tool": {
+        "enum": [
+          "claude",
+          "codex"
+        ],
+        "example": "claude",
+        "type": "string"
+      }
+    },
+    "required": [
+      "activeUntil",
+      "error",
+      "planLabel",
+      "queriedAt",
+      "success",
+      "tiers",
+      "tool"
+    ],
+    "type": "object"
+  },
+  "AiUsageReportSession": {
+    "description": "AiUsageReportSession is one session's totals; times are unix seconds.",
+    "properties": {
+      "app": {
+        "enum": [
+          "claude",
+          "codex"
+        ],
+        "example": "claude",
+        "type": "string"
+      },
+      "cacheReadTokens": {
+        "example": 12000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "costUsd": {
+        "example": 3.25,
+        "type": "number"
+      },
+      "firstAt": {
+        "example": 1791200000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "lastAt": {
+        "example": 1791203600,
+        "format": "int64",
+        "type": "integer"
+      },
+      "model": {
+        "example": "claude-opus-5-5",
+        "type": "string"
+      },
+      "project": {
+        "example": "/home/dev/app",
+        "type": "string"
+      },
+      "requests": {
+        "example": 64,
+        "format": "int64",
+        "type": "integer"
+      },
+      "sessionId": {
+        "example": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+        "type": "string"
+      },
+      "title": {
+        "example": "Fix the login flow",
+        "type": "string"
+      },
+      "tokens": {
+        "example": 900000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "app",
+      "cacheReadTokens",
+      "costUsd",
+      "firstAt",
+      "lastAt",
+      "model",
+      "project",
+      "requests",
+      "sessionId",
+      "title",
+      "tokens"
+    ],
+    "type": "object"
+  },
+  "AiUsageSessionView": {
+    "description": "AiUsageSessionView is a session that was active in the period.",
+    "properties": {
+      "app": {
+        "example": "claude",
+        "type": "string"
+      },
+      "costUsd": {
+        "example": 3.25,
+        "type": "number"
+      },
+      "deviceName": {
+        "example": "laptop",
+        "type": "string"
+      },
+      "firstAt": {
+        "example": 1791200000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "lastAt": {
+        "example": 1791203600,
+        "format": "int64",
+        "type": "integer"
+      },
+      "model": {
+        "example": "claude-opus-5-5",
+        "type": "string"
+      },
+      "project": {
+        "example": "/home/dev/app",
+        "type": "string"
+      },
+      "requests": {
+        "example": 64,
+        "format": "int64",
+        "type": "integer"
+      },
+      "sessionId": {
+        "example": "0f6a2d4e-1b3c-4d5e-8f90-a1b2c3d4e5f6",
+        "type": "string"
+      },
+      "title": {
+        "example": "Fix the login flow",
+        "type": "string"
+      },
+      "tokens": {
+        "example": 900000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "app",
+      "costUsd",
+      "deviceName",
+      "firstAt",
+      "lastAt",
+      "model",
+      "project",
+      "requests",
+      "sessionId",
+      "title",
+      "tokens"
+    ],
+    "type": "object"
+  },
+  "AiUsageTotals": {
+    "description": "AiUsageTotals adds up the period; tokens are split the way the models bill them.",
+    "properties": {
+      "cacheReadTokens": {
+        "example": 410000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "cacheWriteTokens": {
+        "example": 9800000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "claudeCostUsd": {
+        "example": 120.1,
+        "type": "number"
+      },
+      "codexCostUsd": {
+        "example": 8.3,
+        "type": "number"
+      },
+      "costUsd": {
+        "example": 128.4,
+        "type": "number"
+      },
+      "inputTokens": {
+        "example": 420000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "outputTokens": {
+        "example": 3100000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "requests": {
+        "example": 5120,
+        "format": "int64",
+        "type": "integer"
+      },
+      "sessions": {
+        "example": 23,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "cacheReadTokens",
+      "cacheWriteTokens",
+      "claudeCostUsd",
+      "codexCostUsd",
+      "costUsd",
+      "inputTokens",
+      "outputTokens",
+      "requests",
+      "sessions"
+    ],
+    "type": "object"
+  },
   "AllSetting": {
     "properties": {
       "datepicker": {

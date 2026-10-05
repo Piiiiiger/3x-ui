@@ -2071,6 +2071,62 @@ export const sections: readonly Section[] = [
     ],
   },
   {
+    id: 'ai-usage',
+    title: 'AI Usage',
+    description:
+      "Claude Code and Codex usage reported by Pigger Switch from each computer. A report covers whole days of the computer's time zone and replaces what the panel held for them, so resending is safe. Costs are API-price equivalents in USD; input tokens exclude cache reads. An ai-usage API token may call the ingest endpoint and nothing else.",
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/panel/api/aiUsage/ingest',
+        summary:
+          "Upload one computer's usage for the days from..to, its sessions (upserted; with sessionsSince set, the computer's sessions active since then that the report leaves out are deleted) and its latest plan-limit readings.",
+        requestSchema: { $ref: '#/components/schemas/AiUsageReport' },
+        responseSchema: 'AiUsageIngestResult',
+        errorResponse:
+          '{\n  "success": false,\n  "msg": "day 2026-10-07 is outside the report\'s window 2026-10-05..2026-10-06"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/aiUsage/overview',
+        summary:
+          "Get the period's totals and project/model rankings (busiest 100 by cost), 30 days of daily cost and tokens per app, the period's 50 costliest sessions, each tool's newest plan-limit reading and the reporting computers.",
+        params: [
+          {
+            name: 'period',
+            in: 'query',
+            type: 'string',
+            desc: 'today, week (from Monday), month (from the 1st) or all, in the panel time zone. Defaults to month.',
+            optional: true,
+            defaultValue: 'month',
+          },
+          {
+            name: 'deviceId',
+            in: 'query',
+            type: 'integer',
+            desc: 'Only this computer; 0 or absent for all of them.',
+            optional: true,
+          },
+          {
+            name: 'app',
+            in: 'query',
+            type: 'string',
+            desc: 'claude or codex; all or absent for both.',
+            optional: true,
+          },
+        ],
+        responseSchema: 'AiUsageOverview',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/aiUsage/devices/delete/:id',
+        summary: 'Forget a computer and everything it reported.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Device id.' }],
+        response: '{\n  "success": true\n}',
+      },
+    ],
+  },
+  {
     id: 'probe',
     title: 'Probe',
     description:
@@ -2295,7 +2351,7 @@ export const sections: readonly Section[] = [
     id: 'api-tokens',
     title: 'API Tokens',
     description:
-      'Manage scoped Bearer tokens for programmatic auth. Tokens grant admin, monitor, or node-sync access, may expire, and are stored as SHA-256 hashes. The plaintext is returned only once at creation.',
+      'Manage scoped Bearer tokens for programmatic auth. Tokens grant admin, monitor, node-sync or ai-usage access, may expire, and are stored as SHA-256 hashes. The plaintext is returned only once at creation.',
     endpoints: [
       {
         method: 'GET',
@@ -2321,7 +2377,7 @@ export const sections: readonly Section[] = [
             name: 'scope',
             in: 'body',
             type: 'string',
-            desc: 'admin (default), monitor, or node-sync.',
+            desc: 'admin (default), monitor, node-sync, or ai-usage.',
             optional: true,
           },
           {

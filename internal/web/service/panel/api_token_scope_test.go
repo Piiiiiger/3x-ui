@@ -136,3 +136,17 @@ func TestAPITokenAdditiveDefaultsPreserveLegacyAccess(t *testing.T) {
 		t.Fatalf("legacy defaults = scope %q expiry %d, want admin/0", row.Scope, row.ExpiresAt)
 	}
 }
+
+// The AI usage page mints this scope for each desktop that reports usage.
+func TestAPITokenAiUsageScopeCanBeCreated(t *testing.T) {
+	setupAPITokenTestDB(t)
+	svc := &ApiTokenService{}
+	created, err := svc.Create("ai-usage · laptop", model.ApiScopeAiUsage, 0)
+	if err != nil {
+		t.Fatalf("create ai-usage token: %v", err)
+	}
+	row, ok := svc.MatchToken(created.Token)
+	if !ok || row.Scope != model.ApiScopeAiUsage {
+		t.Fatalf("matched = %v, scope = %q; want an ai-usage token", ok, row.Scope)
+	}
+}

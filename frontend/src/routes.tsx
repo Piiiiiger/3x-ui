@@ -15,6 +15,7 @@ const HostPage = lazy(() => import('@/pages/nodes/HostPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
 const ChainsPage = lazy(() => import('@/pages/chains/ChainsPage'));
+const AiUsagePage = lazy(() => import('@/pages/ai-usage/AiUsagePage'));
 const AbusePage = lazy(() => import('@/pages/abuse/AbusePage'));
 
 function withSuspense(node: React.ReactNode) {
@@ -51,6 +52,7 @@ const routes: RouteObject[] = [
       { path: 'clients', element: withSuspense(<ClientsPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },
       { path: 'rules', element: withSuspense(<RulesPage />) },
+      { path: 'ai-usage', element: withSuspense(<AiUsagePage />) },
       { path: 'nodes', element: withSuspense(<NodesPage />) },
       { path: 'nodes/:hostId', element: withSuspense(<HostPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },

@@ -23,6 +23,7 @@ import {
   MoonOutlined,
   PlusOutlined,
   ProfileOutlined,
+  RobotOutlined,
   ReloadOutlined,
   SafetyOutlined,
   SearchOutlined,
@@ -378,6 +379,12 @@ export default function CommandPalette() {
         title: t('menu.rules'),
         keywords: ['rules', 'templates', 'clash', 'yaml', '规则', '模板'],
         icon: <FileTextOutlined />,
+      },
+      {
+        path: '/ai-usage',
+        title: t('menu.aiUsage'),
+        keywords: ['ai', 'usage', 'claude', 'codex', 'tokens', 'cost', '用量'],
+        icon: <RobotOutlined />,
       },
       {
         path: '/nodes',

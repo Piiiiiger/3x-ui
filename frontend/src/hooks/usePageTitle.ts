@@ -10,6 +10,7 @@ const TITLE_KEYS: Record<string, string> = {
   '/clients': 'menu.clients',
   '/plans': 'menu.plans',
   '/rules': 'menu.rules',
+  '/ai-usage': 'menu.aiUsage',
   '/nodes': 'menu.nodes',
   '/settings': 'menu.settings',
   '/xray': 'menu.xray',
