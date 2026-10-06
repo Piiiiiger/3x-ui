@@ -94,6 +94,12 @@ To avoid Mihomo-only syntax entering the legacy profile, this endpoint always
 uses its minimal `PROXY` group and `MATCH,PROXY` rule and ignores the plans'
 rule templates.
 
+A Mihomo profile built from a rule template starts with a comment saying when its
+rules last changed, in Beijing time: `# 规则最近更新：2026-10-07 00:12（北京时间）`.
+That is the latest change to the plan's template, its base, the rule sets it uses
+and the person's own portal rules; own rules that replace the whole list count
+alone. Previews leave the line out.
+
 If an administrator has already assigned `/mihomo/` or `/clash-legacy/` to a
 different configurable subscription path, that existing path is preserved and
 the conflicting alias is skipped with a warning at startup.

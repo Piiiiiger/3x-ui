@@ -10,8 +10,8 @@ import (
 )
 
 // expandRuleSets writes each RULE-SET line naming one of the panel's rule sets as
-// that set's rules, sent to the line's target; clients fetch nothing extra.
-func (s *SubClashService) expandRuleSets(config map[string]any) error {
+// that set's rules, sent to the line's target, and says when the newest one changed.
+func (s *SubClashService) expandRuleSets(config map[string]any) (int64, error) {
 	rules, _ := asAnySlice(config["rules"])
 	providers, _ := config["rule-providers"].(map[string]any)
 	var names []string
@@ -21,21 +21,23 @@ func (s *SubClashService) expandRuleSets(config map[string]any) error {
 		}
 	}
 	if len(names) == 0 {
-		return nil
+		return 0, nil
 	}
 	sets, err := s.ruleSetsNamed(names)
 	if err != nil {
-		return err
+		return 0, err
 	}
+	var changedAt int64
 	out := make([]any, 0, len(rules))
 	for _, value := range rules {
 		ref, ok := ruleSetReference(value, providers)
-		text, known := sets[ref.name]
+		set, known := sets[ref.name]
 		if !ok || !known {
 			out = append(out, value)
 			continue
 		}
-		rules := ruleset.Parse(text)
+		changedAt = max(changedAt, set.updatedAt)
+		rules := ruleset.Parse(set.rules)
 		if ref.provider != "" {
 			rules = slices.DeleteFunc(rules, func(r ruleset.Rule) bool { return r.Provider != ref.provider })
 		}
@@ -44,7 +46,7 @@ func (s *SubClashService) expandRuleSets(config map[string]any) error {
 		}
 	}
 	config["rules"] = out
-	return nil
+	return changedAt, nil
 }
 
 // ruleSetRef is a RULE-SET line naming a set, or with set:provider only the rules
@@ -78,19 +80,24 @@ func ruleSetReference(value any, providers map[string]any) (ruleSetRef, bool) {
 	return ref, true
 }
 
+type savedRuleSet struct {
+	rules     string
+	updatedAt int64
+}
+
 // ruleSetsNamed reads the saved rules of the named sets; a preview's proposed rules
 // stand in for them.
-func (s *SubClashService) ruleSetsNamed(names []string) (map[string]string, error) {
+func (s *SubClashService) ruleSetsNamed(names []string) (map[string]savedRuleSet, error) {
 	var rows []model.RuleSet
-	if err := database.GetDB().Select("name", "rules").Where("name IN ?", names).Find(&rows).Error; err != nil {
+	if err := database.GetDB().Select("name", "rules", "updated_at").Where("name IN ?", names).Find(&rows).Error; err != nil {
 		return nil, err
 	}
-	out := make(map[string]string, len(rows)+len(s.ruleSetOverride))
+	out := make(map[string]savedRuleSet, len(rows)+len(s.ruleSetOverride))
 	for _, row := range rows {
-		out[row.Name] = row.Rules
+		out[row.Name] = savedRuleSet{rules: row.Rules, updatedAt: row.UpdatedAt}
 	}
 	for name, rules := range s.ruleSetOverride {
-		out[name] = rules
+		out[name] = savedRuleSet{rules: rules}
 	}
 	return out, nil
 }

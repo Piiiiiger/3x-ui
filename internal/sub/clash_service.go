@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-json"
 	yaml "github.com/goccy/go-yaml"
@@ -36,6 +37,8 @@ type RuleTemplateSource struct {
 	Content string
 	Base    string
 	Variant bool
+	// UpdatedAt is when the template, or a variant's base, last changed; 0 in a preview.
+	UpdatedAt int64
 }
 
 var errNoLegacyClashProxies = errors.New("no Clash for Windows-compatible proxies found; use the Mihomo subscription for modern proxy types")
@@ -335,6 +338,7 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
+	var rulesChangedAt int64
 	if !legacy {
 		source, err := s.routingRules(subId)
 		if err != nil {
@@ -353,13 +357,21 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 				return "", "", err
 			}
 		}
-		if err := s.expandRuleSets(config); err != nil {
+		setsChangedAt, err := s.expandRuleSets(config)
+		if err != nil {
 			return "", "", err
 		}
+		rulesChangedAt = max(source.UpdatedAt, setsChangedAt)
 		preferSingaporeResidentialForAI(config)
 		if customization != nil && strings.TrimSpace(customization.Rules) != "" {
-			if err := mergePortalClashRules(config, customization.Rules); err != nil {
+			replaced, err := mergePortalClashRules(config, customization.Rules)
+			if err != nil {
 				return "", "", fmt.Errorf("invalid private subscription rules: %w", err)
+			}
+			if replaced {
+				rulesChangedAt = customization.UpdatedAt
+			} else {
+				rulesChangedAt = max(rulesChangedAt, customization.UpdatedAt)
 			}
 		}
 	}
@@ -369,8 +381,18 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	if err != nil {
 		return "", "", err
 	}
-
+	if rulesChangedAt > 0 && s.templateOverride == nil {
+		return rulesChangedLine(rulesChangedAt) + string(finalYAML), header, nil
+	}
 	return string(finalYAML), header, nil
+}
+
+// beijingTime dates what people read: they and the bot keep Beijing time.
+var beijingTime = time.FixedZone("UTC+8", 8*60*60)
+
+// rulesChangedLine tells people, at the top of their profile, when its rules last changed.
+func rulesChangedLine(changedAt int64) string {
+	return "# 规则最近更新：" + time.UnixMilli(changedAt).In(beijingTime).Format("2006-01-02 15:04") + "（北京时间）\n"
 }
 
 // Select groups default to their first member. Only reorder existing, available
@@ -442,7 +464,8 @@ func (s *SubClashService) routingRules(subId string) (RuleTemplateSource, error)
 		return *s.templateOverride, nil
 	}
 	db := database.GetDB()
-	const columns = "t.content AS content, COALESCE(b.content, '') AS base, t.base_id <> 0 AS variant"
+	const columns = "t.content AS content, COALESCE(b.content, '') AS base, t.base_id <> 0 AS variant, " +
+		"CASE WHEN COALESCE(b.updated_at, 0) > t.updated_at THEN b.updated_at ELSE t.updated_at END AS updated_at"
 	var found []RuleTemplateSource
 	err := db.Table("clients AS c").
 		Joins("JOIN plans AS p ON p.id = c.plan_id").

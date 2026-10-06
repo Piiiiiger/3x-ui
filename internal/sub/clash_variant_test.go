@@ -129,7 +129,7 @@ func TestClashMergesTheDefaultTemplateWhenItIsAVariant(t *testing.T) {
 func TestPreviewMergesAnUnsavedVariantOntoItsBase(t *testing.T) {
 	seedPlanSub(t, model.VLESS, vlessPlanSettings, tcpStream)
 	putS1OnPlan(t, seedRuleTemplate(t, "full", mineFullTemplate, false))
-	want := clashFor(t)
+	want := withoutRulesDate(clashFor(t))
 
 	got, err := PreviewClash("s1", "req.example.com", "", RuleTemplateSource{
 		Content: mineVariant, Base: mmwxStyleTemplate, Variant: true,

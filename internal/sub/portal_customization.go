@@ -32,13 +32,14 @@ const (
 )
 
 type portalCustomizationEntry struct {
-	ClientId int
-	Email    string
-	Nodes    string
-	Links    string
-	Rules    string
-	Enable   bool
-	Expiry   int64
+	ClientId  int
+	Email     string
+	Nodes     string
+	Links     string
+	Rules     string
+	Enable    bool
+	Expiry    int64
+	UpdatedAt int64
 }
 
 type portalCustomizationLink struct {
@@ -89,7 +90,7 @@ func (s *SubService) getClientSubscriptionCustomization(subId string) (*portalCu
 	err := database.GetDB().Table("client_subscription_customizations AS x").
 		Joins("JOIN clients AS c ON c.id = x.client_id").
 		Where("c.sub_id = ?", subId).
-		Select("x.client_id, c.email, x.nodes, x.links, x.rules, c.enable, c.expiry_time").
+		Select("x.client_id, c.email, x.nodes, x.links, x.rules, c.enable, c.expiry_time, x.updated_at").
 		Limit(1).Scan(&rows).Error
 	if err != nil || len(rows) == 0 {
 		return nil, err
@@ -265,16 +266,19 @@ func portalRulesDocument(raw string) (map[string]any, error) {
 	return object, nil
 }
 
-func mergePortalClashRules(config map[string]any, raw string) error {
+// mergePortalClashRules adds a person's own rules, and says whether they replaced the
+// whole list: a list with its own MATCH does.
+func mergePortalClashRules(config map[string]any, raw string) (bool, error) {
 	document, err := portalRulesDocument(raw)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if len(document) == 0 {
-		return nil
+		return false, nil
 	}
 	dropRetiredPortalGroupMembers(config, document)
-	return mergeRemoteClashRules(config, document)
+	rules, _ := asAnySlice(document["rules"])
+	return hasClashMatchRule(rules), mergeRemoteClashRules(config, document)
 }
 
 // dropRetiredPortalGroupMembers removes proxies that no longer exist from the
