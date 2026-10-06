@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	yaml "github.com/goccy/go-yaml"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
@@ -59,6 +61,73 @@ func TestPortalCustomizationIsPrivateAndReachesOnlyThatClashSubscription(t *test
 	}
 	if len(rows) != 1 || rows[0].ClientId != clientIdOf(t, "pa@e") {
 		t.Fatalf("customization rows = %+v, want only pa@e", rows)
+	}
+}
+
+// A private group keeps the proxy names its owner saw when saving it. A node
+// retired later must leave the group, not fail the whole Clash subscription.
+func TestPortalCustomizationLeavesRetiredProxiesOutOfPrivateGroups(t *testing.T) {
+	router, controller := seedPortal(t)
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	payload := map[string]any{
+		"nodesYaml": "proxies:\n  - name: personal-vless\n    type: vless\n    server: example.com\n    port: 443\n    uuid: 00000000-0000-0000-0000-000000000001\n    tls: true\n",
+		"rulesYaml": "proxy-groups:\n  - name: PERSONAL\n    type: select\n    proxies: [personal-vless, retired-node, DIRECT]\n  - name: STREAMING\n    type: select\n    proxies: [retired-node, PERSONAL]\nrules:\n  - DOMAIN-SUFFIX,video.example,STREAMING\n  - MATCH,PERSONAL\n",
+		"links":     []any{},
+	}
+	body, _ := json.Marshal(payload)
+	res := portalRequest(router, http.MethodPut, "/sub/portal/customization", string(body), "198.51.100.1", cookie)
+	if res.Code != http.StatusOK {
+		t.Fatalf("save customization = %d %s, want 200", res.Code, res.Body)
+	}
+
+	clash, _, err := controller.subClashService.GetClash("s1", "example.com")
+	if err != nil {
+		t.Fatalf("Clash with a retired proxy in private groups = %v", err)
+	}
+	var config struct {
+		Groups []struct {
+			Name    string   `yaml:"name"`
+			Proxies []string `yaml:"proxies"`
+		} `yaml:"proxy-groups"`
+	}
+	if err := yaml.Unmarshal([]byte(clash), &config); err != nil {
+		t.Fatalf("decode Clash: %v", err)
+	}
+	members := map[string][]string{}
+	for _, group := range config.Groups {
+		members[group.Name] = group.Proxies
+	}
+	if got := strings.Join(members["PERSONAL"], ","); got != "personal-vless,DIRECT" {
+		t.Errorf("PERSONAL proxies = %q, want personal-vless,DIRECT", got)
+	}
+	if got := strings.Join(members["STREAMING"], ","); got != "PERSONAL" {
+		t.Errorf("STREAMING proxies = %q, want PERSONAL", got)
+	}
+	if strings.Contains(clash, "retired-node") {
+		t.Errorf("Clash still names the retired proxy:\n%s", clash)
+	}
+}
+
+// A group left with no proxies at all cannot be repaired by dropping names, so
+// the subscription still reports the missing proxy instead of serving an
+// empty group that Clash clients reject.
+func TestPortalCustomizationStillRejectsAGroupOfOnlyRetiredProxies(t *testing.T) {
+	router, controller := seedPortal(t)
+	cookie := sessionCookie(t, portalLogin(router, "pa@e", "alpha-pass", "198.51.100.1"))
+	payload := map[string]any{
+		"nodesYaml": "",
+		"rulesYaml": "proxy-groups:\n  - name: GONE\n    type: select\n    proxies: [retired-node]\nrules:\n  - MATCH,GONE\n",
+		"links":     []any{},
+	}
+	body, _ := json.Marshal(payload)
+	res := portalRequest(router, http.MethodPut, "/sub/portal/customization", string(body), "198.51.100.1", cookie)
+	if res.Code != http.StatusOK {
+		t.Fatalf("save customization = %d %s, want 200", res.Code, res.Body)
+	}
+
+	_, _, err := controller.subClashService.GetClash("s1", "example.com")
+	if err == nil || !strings.Contains(err.Error(), `"retired-node"`) {
+		t.Fatalf("Clash with an all-retired group = %v, want an error naming retired-node", err)
 	}
 }
 

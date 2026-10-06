@@ -273,7 +273,48 @@ func mergePortalClashRules(config map[string]any, raw string) error {
 	if len(document) == 0 {
 		return nil
 	}
+	dropRetiredPortalGroupMembers(config, document)
 	return mergeRemoteClashRules(config, document)
+}
+
+// dropRetiredPortalGroupMembers removes proxies that no longer exist from the
+// private groups. The groups list the proxies their owner saw when saving them,
+// so a node retired since then leaves the groups, as it would from a provider's
+// list, instead of failing the whole subscription. A group that would be left
+// empty keeps its names, and the route check reports the missing proxy.
+func dropRetiredPortalGroupMembers(config map[string]any, document map[string]any) {
+	groups, ok := asAnySlice(document["proxy-groups"])
+	if !ok {
+		return
+	}
+	known := clashRouteTargets(config)
+	for _, value := range groups {
+		if name := clashProxyGroupName(value); name != "" {
+			known[name] = struct{}{}
+		}
+	}
+	for _, value := range groups {
+		group, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		members, ok := asAnySlice(group["proxies"])
+		if !ok {
+			continue
+		}
+		kept := make([]any, 0, len(members))
+		for _, member := range members {
+			if name, ok := member.(string); ok {
+				if _, exists := known[strings.TrimSpace(name)]; !exists {
+					continue
+				}
+			}
+			kept = append(kept, member)
+		}
+		if len(kept) > 0 && len(kept) < len(members) {
+			group["proxies"] = kept
+		}
+	}
 }
 
 func mergePortalClashRulesForEditor(config map[string]any, raw string) error {

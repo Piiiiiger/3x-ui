@@ -32,13 +32,14 @@ const (
 
 // writeSubError translates a service-layer result into an HTTP response.
 // A nil error with no rows means the subId doesn't match anything (deleted
-// client, never-existed id) and becomes 404. A real error becomes 500. No
-// body — VPN clients only look at the status.
+// client, never-existed id) and becomes 404. A real error becomes 500 and is
+// logged, since the response has no body — VPN clients only look at the status.
 func writeSubError(c *gin.Context, err error) {
 	if err == nil {
 		c.Status(http.StatusNotFound)
 		return
 	}
+	logger.Warning("sub: could not build a subscription:", err)
 	c.Status(http.StatusInternalServerError)
 }
 

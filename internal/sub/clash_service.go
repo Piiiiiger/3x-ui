@@ -1875,7 +1875,9 @@ func remoteClashAllowedKey(key string) bool {
 	}
 }
 
-func validateClashRouteGraph(config map[string]any) error {
+// clashRouteTargets returns every name a group member or rule may point at:
+// the built-in policies, the config's proxies and its proxy groups.
+func clashRouteTargets(config map[string]any) map[string]struct{} {
 	known := map[string]struct{}{
 		"DIRECT": {}, "REJECT": {}, "REJECT-DROP": {}, "REJECT-TINYGIF": {}, "PASS": {}, "GLOBAL": {},
 	}
@@ -1890,13 +1892,18 @@ func validateClashRouteGraph(config map[string]any) error {
 			}
 		}
 	}
-
 	groups, _ := asAnySlice(config["proxy-groups"])
 	for _, value := range groups {
 		if name := clashProxyGroupName(value); name != "" {
 			known[name] = struct{}{}
 		}
 	}
+	return known
+}
+
+func validateClashRouteGraph(config map[string]any) error {
+	known := clashRouteTargets(config)
+	groups, _ := asAnySlice(config["proxy-groups"])
 	for _, value := range groups {
 		group, ok := value.(map[string]any)
 		if !ok {
