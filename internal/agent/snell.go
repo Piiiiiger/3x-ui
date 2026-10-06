@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 )
 
@@ -25,6 +26,7 @@ type snellManager struct {
 	dir, units, binary string
 	run                func(...string) (string, error)
 	known              map[int]snell.Instance
+	counter            *snellTraffic
 	ready              bool
 	reconciled         bool
 	initErr            error
@@ -42,7 +44,10 @@ func systemctl(args ...string) (string, error) {
 }
 
 func newSnellManager(stateDir string) *snellManager {
-	m := &snellManager{dir: filepath.Join(stateDir, "snell"), units: "/etc/systemd/system", binary: snellBinary, run: systemctl, known: map[int]snell.Instance{}}
+	m := &snellManager{
+		dir: filepath.Join(stateDir, "snell"), units: "/etc/systemd/system", binary: snellBinary, run: systemctl,
+		known: map[int]snell.Instance{}, counter: &snellTraffic{nft: nftCommand},
+	}
 	data, err := os.ReadFile(filepath.Join(m.dir, "manifest.json"))
 	if err == nil {
 		m.initErr = json.Unmarshal(data, &m.known)
@@ -297,4 +302,12 @@ func (m *snellManager) statuses(now time.Time) map[string]snell.Status {
 		out[i.Tag] = st
 	}
 	return out
+}
+
+// traffic is what each managed Snell port moved since the last call.
+func (m *snellManager) traffic() []agentproto.Counter {
+	if m == nil || m.counter == nil {
+		return nil
+	}
+	return m.counter.collect(m.known)
 }

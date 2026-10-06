@@ -235,16 +235,22 @@ func (a *Agent) closeStatsLocked() {
 // pollLocked moves the core's traffic since the last poll into the outbox and
 // notes who is active and from where.
 func (a *Agent) pollLocked(now time.Time) {
+	var inbounds, users []agentproto.Counter
+	var tags, emails []string
+	for _, c := range a.snell.traffic() {
+		inbounds = append(inbounds, c)
+		tags = append(tags, c.Name)
+	}
 	if a.stats == nil {
+		a.outbox.add(inbounds, nil)
 		return
 	}
 	traffics, clients, err := a.stats.GetTraffic()
 	if err != nil {
 		logger.Debug("agent: reading traffic failed:", err)
+		a.outbox.add(inbounds, nil)
 		return
 	}
-	var inbounds, users []agentproto.Counter
-	var tags, emails []string
 	for _, t := range traffics {
 		if t == nil || !t.IsInbound || t.Up+t.Down <= 0 {
 			continue
