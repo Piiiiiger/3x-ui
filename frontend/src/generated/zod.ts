@@ -164,6 +164,13 @@ export const AiUsageDeviceViewSchema = z.object({
 });
 export type AiUsageDeviceView = z.infer<typeof AiUsageDeviceViewSchema>;
 
+export const AiUsageEstimatesSchema = z.object({
+  fiveHourHistory: z.array(z.lazy(() => AiUsagePastWindowSchema)),
+  weeklyHistory: z.array(z.lazy(() => AiUsagePastWindowSchema)),
+  windows: z.array(z.lazy(() => AiUsageWindowEstimateSchema)),
+});
+export type AiUsageEstimates = z.infer<typeof AiUsageEstimatesSchema>;
+
 export const AiUsageIngestResultSchema = z.object({
   days: z.number().int(),
   deviceId: z.number().int(),
@@ -171,6 +178,16 @@ export const AiUsageIngestResultSchema = z.object({
   sessions: z.number().int(),
 });
 export type AiUsageIngestResult = z.infer<typeof AiUsageIngestResultSchema>;
+
+export const AiUsageLimitEstimateSchema = z.object({
+  basis: z.enum(['current', 'typical']),
+  costHigh: z.number(),
+  costLow: z.number(),
+  costUsd: z.number(),
+  tokens: z.number().int(),
+  windows: z.number().int(),
+});
+export type AiUsageLimitEstimate = z.infer<typeof AiUsageLimitEstimateSchema>;
 
 export const AiUsageOverviewSchema = z.object({
   daily: z.array(z.lazy(() => AiUsageDaySchema)),
@@ -185,6 +202,17 @@ export const AiUsageOverviewSchema = z.object({
 });
 export type AiUsageOverview = z.infer<typeof AiUsageOverviewSchema>;
 
+export const AiUsagePastWindowSchema = z.object({
+  current: z.boolean(),
+  end: z.number().int(),
+  exact: z.boolean(),
+  limit: z.lazy(() => AiUsageLimitEstimateSchema).nullable().optional(),
+  peakUtilization: z.number().nullable().optional(),
+  start: z.number().int(),
+  used: z.lazy(() => AiUsageWindowUsageSchema),
+});
+export type AiUsagePastWindow = z.infer<typeof AiUsagePastWindowSchema>;
+
 export const AiUsageQuotaTierSchema = z.object({
   name: z.string(),
   resetsAt: z.string(),
@@ -196,6 +224,7 @@ export const AiUsageQuotaViewSchema = z.object({
   activeUntil: z.string(),
   deviceName: z.string(),
   error: z.string(),
+  estimates: z.lazy(() => AiUsageEstimatesSchema).nullable().optional(),
   planLabel: z.string(),
   queriedAt: z.number().int(),
   success: z.boolean(),
@@ -250,6 +279,7 @@ export type AiUsageReportDevice = z.infer<typeof AiUsageReportDeviceSchema>;
 export const AiUsageReportQuotaSchema = z.object({
   activeUntil: z.string(),
   error: z.string(),
+  estimates: z.lazy(() => AiUsageEstimatesSchema).nullable().optional(),
   planLabel: z.string(),
   queriedAt: z.number().int(),
   success: z.boolean(),
@@ -300,6 +330,32 @@ export const AiUsageTotalsSchema = z.object({
   sessions: z.number().int(),
 });
 export type AiUsageTotals = z.infer<typeof AiUsageTotalsSchema>;
+
+export const AiUsageWindowEstimateSchema = z.object({
+  end: z.number().int().nullable().optional(),
+  estimatedUtilization: z.number().nullable().optional(),
+  exhaustsAt: z.number().int().nullable().optional(),
+  fiveHourWindowsLeft: z.number().int().nullable().optional(),
+  limit: z.lazy(() => AiUsageLimitEstimateSchema).nullable().optional(),
+  perFiveHourCostUsd: z.number().nullable().optional(),
+  perFiveHourTokens: z.number().int().nullable().optional(),
+  projectedUtilization: z.number().nullable().optional(),
+  remainingCostUsd: z.number().nullable().optional(),
+  remainingTokens: z.number().int().nullable().optional(),
+  reportedAt: z.number().int().nullable().optional(),
+  reportedUtilization: z.number().nullable().optional(),
+  start: z.number().int().nullable().optional(),
+  tier: z.string(),
+  used: z.lazy(() => AiUsageWindowUsageSchema),
+});
+export type AiUsageWindowEstimate = z.infer<typeof AiUsageWindowEstimateSchema>;
+
+export const AiUsageWindowUsageSchema = z.object({
+  costUsd: z.number(),
+  requests: z.number().int(),
+  totalTokens: z.number().int(),
+});
+export type AiUsageWindowUsage = z.infer<typeof AiUsageWindowUsageSchema>;
 
 export const AllSettingSchema = z.object({
   datepicker: z.string(),

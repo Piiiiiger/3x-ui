@@ -200,6 +200,9 @@ func initModels() error {
 	if err := migrateClientPlanColumn(); err != nil {
 		return err
 	}
+	if err := migrateAiUsageEstimatesColumn(); err != nil {
+		return err
+	}
 	if err := migrateClientEmailLowerIndex(); err != nil {
 		return err
 	}
@@ -424,6 +427,15 @@ func migrateClientPlanColumn() error {
 		return nil
 	}
 	return db.Exec("UPDATE clients SET plan_id = 0 WHERE plan_id IS NULL").Error
+}
+
+// AutoMigrate adds the column; this only backfills the NULLs an older SQLite
+// ALTER TABLE leaves behind, which would fail every plan-reading scan.
+func migrateAiUsageEstimatesColumn() error {
+	if !db.Migrator().HasColumn(&model.AiUsageQuota{}, "estimates") {
+		return nil
+	}
+	return db.Exec("UPDATE ai_usage_quotas SET estimates = '' WHERE estimates IS NULL").Error
 }
 
 // moveHostsOntoInbounds retires entries (the hosts table): an inbound's first enabled

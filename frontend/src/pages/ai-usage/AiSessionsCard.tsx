@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Card, Empty, Table, Tag } from 'antd';
+import { Card, Empty, Table } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
 
 import type { AiUsageSessionView } from '@/generated/zod';
@@ -11,7 +11,7 @@ interface AiSessionsCardProps {
   showDevice: boolean;
 }
 
-/** The period's costliest sessions, named by Claude Code's own title when it gave one. */
+/** One tool's costliest sessions of the period, named by Claude Code's own title when it gave one. */
 export default function AiSessionsCard({
   sessions,
   relativeTime,
@@ -50,7 +50,6 @@ export default function AiSessionsCard({
                 ellipsis: true,
                 render: (_, s) => (
                   <span className="ai-session-title" title={s.sessionId}>
-                    <Tag className="ai-app-tag">{s.app === 'codex' ? 'Codex' : 'Claude'}</Tag>
                     {s.title || t('pages.aiUsage.untitled')}
                   </span>
                 ),

@@ -109,6 +109,18 @@ func TestAiUsageIngestTwiceCountsOnce(t *testing.T) {
 	}
 }
 
+// estimatesQuota is a claude reading whose estimates are valid until mutate breaks them.
+func estimatesQuota(mutate func(e *AiUsageEstimates)) AiUsageReportQuota {
+	start, end, util := int64(1_000), int64(19_000), 16.0
+	e := &AiUsageEstimates{Windows: []AiUsageWindowEstimate{{
+		Tier: "five_hour", Start: &start, End: &end, ReportedUtilization: &util,
+		Used:  AiUsageWindowUsage{Requests: 3, CostUsd: 1.5, TotalTokens: 300},
+		Limit: &AiUsageLimitEstimate{CostUsd: 9.4, CostLow: 9.1, CostHigh: 9.7, Tokens: 1900, Basis: "current", Windows: 1},
+	}}}
+	mutate(e)
+	return AiUsageReportQuota{Tool: "claude", Success: true, QueriedAt: 1, Estimates: e}
+}
+
 func TestAiUsageIngestRejectsBadReportsAndWritesNothing(t *testing.T) {
 	good := func() AiUsageReport {
 		return AiUsageReport{
@@ -129,6 +141,25 @@ func TestAiUsageIngestRejectsBadReportsAndWritesNothing(t *testing.T) {
 		{"cost not a number", func(r *AiUsageReport) { r.Daily[0].CostUsd = math.NaN() }, "cost"},
 		{"short device key", func(r *AiUsageReport) { r.Device.Key = "abc" }, "device key"},
 		{"no device name", func(r *AiUsageReport) { r.Device.Name = "  " }, "device name"},
+		{"estimate cost not a number", func(r *AiUsageReport) {
+			r.Quotas = []AiUsageReportQuota{estimatesQuota(func(e *AiUsageEstimates) { e.Windows[0].Used.CostUsd = math.NaN() })}
+		}, "estimate"},
+		{"negative remaining", func(r *AiUsageReport) {
+			r.Quotas = []AiUsageReportQuota{estimatesQuota(func(e *AiUsageEstimates) { left := -1.0; e.Windows[0].RemainingCostUsd = &left })}
+		}, "estimate"},
+		{"unknown estimate basis", func(r *AiUsageReport) {
+			r.Quotas = []AiUsageReportQuota{estimatesQuota(func(e *AiUsageEstimates) { e.Windows[0].Limit.Basis = "guess" })}
+		}, "basis"},
+		{"window without a tier", func(r *AiUsageReport) {
+			r.Quotas = []AiUsageReportQuota{estimatesQuota(func(e *AiUsageEstimates) { e.Windows[0].Tier = " " })}
+		}, "tier"},
+		{"too many windows", func(r *AiUsageReport) {
+			r.Quotas = []AiUsageReportQuota{estimatesQuota(func(e *AiUsageEstimates) {
+				for len(e.Windows) <= aiMaxEstimateWindows {
+					e.Windows = append(e.Windows, e.Windows[0])
+				}
+			})}
+		}, "estimates"},
 		{"negative session window", func(r *AiUsageReport) { r.SessionsSince = -1 }, "sessionsSince"},
 	}
 	for _, tc := range cases {
@@ -233,6 +264,76 @@ func TestAiUsageIngestSessionsSinceReplacesOnlyItsWindow(t *testing.T) {
 	}
 	if len(aiSessionIds(t, other)) != 1 {
 		t.Fatal("a report from one device deleted another device's session")
+	}
+}
+
+// Estimates travel with a tool's plan reading: the newest reading's are shown, and a
+// reading from an older Pigger Switch without them clears them instead of leaving stale ones.
+func TestAiUsageIngestKeepsEachToolsWindowEstimates(t *testing.T) {
+	setupAiUsageDB(t)
+	dev := aiDevice("device-key-1", "laptop")
+	start, end, util, left := aiNow.Unix()-3600, aiNow.Unix()+4*3600, 16.0, 155.5
+	estimates := &AiUsageEstimates{
+		Windows: []AiUsageWindowEstimate{{
+			Tier: "five_hour", Start: &start, End: &end, ReportedUtilization: &util,
+			Used:             AiUsageWindowUsage{Requests: 164, CostUsd: 29.62, TotalTokens: 91_200_000},
+			Limit:            &AiUsageLimitEstimate{CostUsd: 185.15, CostLow: 179.54, CostHigh: 191.13, Tokens: 570_000_000, Basis: "current", Windows: 1},
+			RemainingCostUsd: &left,
+		}},
+		FiveHourHistory: []AiUsagePastWindow{{
+			Start: start, End: end, Exact: true, Current: true,
+			Used: AiUsageWindowUsage{Requests: 164, CostUsd: 29.62}, PeakUtilization: &util,
+		}},
+	}
+	reading := func(at int64, e *AiUsageEstimates) AiUsageReport {
+		return AiUsageReport{Device: dev, From: "2026-10-06", To: "2026-10-06", Quotas: []AiUsageReportQuota{{
+			Tool: "claude", Success: true, QueriedAt: at, Estimates: e,
+			Tiers: []AiUsageQuotaTier{{Name: "five_hour", Utilization: 16}},
+		}}}
+	}
+	mustIngest(t, reading(1, estimates))
+	ov, err := (&AiUsageService{}).Overview(aiNow, AiUsageMonth, 0, "claude")
+	if err != nil {
+		t.Fatalf("overview: %v", err)
+	}
+	got := ov.Quotas[0].Estimates
+	if got == nil || len(got.Windows) != 1 || got.Windows[0].Limit.CostUsd != 185.15 ||
+		*got.Windows[0].RemainingCostUsd != 155.5 || len(got.FiveHourHistory) != 1 || got.WeeklyHistory == nil {
+		t.Fatalf("estimates = %+v", got)
+	}
+
+	mustIngest(t, reading(2, nil))
+	if ov, err = (&AiUsageService{}).Overview(aiNow, AiUsageMonth, 0, "claude"); err != nil {
+		t.Fatalf("overview: %v", err)
+	}
+	if ov.Quotas[0].Estimates != nil {
+		t.Fatalf("a reading without estimates left %+v behind", ov.Quotas[0].Estimates)
+	}
+}
+
+// Each tool's page counts a computer's spend on that tool only.
+func TestAiUsageDevicesCountOnlyTheChosenApp(t *testing.T) {
+	setupAiUsageDB(t)
+	laptop, desktop := seedAiOverview(t)
+	cost := func(app string) map[int]float64 {
+		ov, err := (&AiUsageService{}).Overview(aiNow, AiUsageMonth, 0, app)
+		if err != nil {
+			t.Fatalf("overview: %v", err)
+		}
+		out := map[int]float64{}
+		for _, d := range ov.Devices {
+			out[d.Id] = d.CostUsd
+		}
+		return out
+	}
+	if c := cost("codex"); c[laptop] != 2 || c[desktop] != 0 {
+		t.Fatalf("codex spend per computer = %v, want laptop $2, desktop $0", c)
+	}
+	if c := cost("claude"); c[laptop] != 57 || c[desktop] != 4 {
+		t.Fatalf("claude spend per computer = %v, want laptop $57, desktop $4", c)
+	}
+	if c := cost(""); c[laptop] != 59 {
+		t.Fatalf("all spend = %v, want laptop $59", c)
 	}
 }
 

@@ -11,32 +11,36 @@ _openapi:
     - ./public/openapi.json
   toc:
     - depth: 2
-      title: Upload one computer's usage for the days from..to, its sessions
+      title: "Upload one computer's usage for the days from..to, its sessions
         (upserted; with sessionsSince set, the computer's sessions active since
         then that the report leaves out are deleted) and its latest plan-limit
-        readings.
-      url: '#upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings'
+        readings. A reading may carry estimates: each window's usage, its
+        estimated limit (usage ÷ reported share) and past windows; a reading
+        without them clears the old ones."
+      url: '#upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings-a-reading-may-carry-estimates-each-windows-usage-its-estimated-limit-usage--reported-share-and-past-windows-a-reading-without-them-clears-the-old-ones'
     - depth: 2
       title: Get the period's totals and project/model rankings (busiest 100 by cost),
         30 days of daily cost and tokens per app, the period's 50 costliest
-        sessions, each tool's newest plan-limit reading and the reporting
-        computers.
-      url: '#get-the-periods-totals-and-projectmodel-rankings-busiest-100-by-cost-30-days-of-daily-cost-and-tokens-per-app-the-periods-50-costliest-sessions-each-tools-newest-plan-limit-reading-and-the-reporting-computers'
+        sessions, each tool's newest plan-limit reading with its window
+        estimates, and the reporting computers with their spend.
+      url: '#get-the-periods-totals-and-projectmodel-rankings-busiest-100-by-cost-30-days-of-daily-cost-and-tokens-per-app-the-periods-50-costliest-sessions-each-tools-newest-plan-limit-reading-with-its-window-estimates-and-the-reporting-computers-with-their-spend'
     - depth: 2
       title: Forget a computer and everything it reported.
       url: '#forget-a-computer-and-everything-it-reported'
   structuredData:
     headings:
-      - content: Upload one computer's usage for the days from..to, its sessions
+      - content: "Upload one computer's usage for the days from..to, its sessions
           (upserted; with sessionsSince set, the computer's sessions active
           since then that the report leaves out are deleted) and its latest
-          plan-limit readings.
-        id: upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings
+          plan-limit readings. A reading may carry estimates: each window's
+          usage, its estimated limit (usage ÷ reported share) and past windows;
+          a reading without them clears the old ones."
+        id: upload-one-computers-usage-for-the-days-fromto-its-sessions-upserted-with-sessionssince-set-the-computers-sessions-active-since-then-that-the-report-leaves-out-are-deleted-and-its-latest-plan-limit-readings-a-reading-may-carry-estimates-each-windows-usage-its-estimated-limit-usage--reported-share-and-past-windows-a-reading-without-them-clears-the-old-ones
       - content: Get the period's totals and project/model rankings (busiest 100 by
           cost), 30 days of daily cost and tokens per app, the period's 50
-          costliest sessions, each tool's newest plan-limit reading and the
-          reporting computers.
-        id: get-the-periods-totals-and-projectmodel-rankings-busiest-100-by-cost-30-days-of-daily-cost-and-tokens-per-app-the-periods-50-costliest-sessions-each-tools-newest-plan-limit-reading-and-the-reporting-computers
+          costliest sessions, each tool's newest plan-limit reading with its
+          window estimates, and the reporting computers with their spend.
+        id: get-the-periods-totals-and-projectmodel-rankings-busiest-100-by-cost-30-days-of-daily-cost-and-tokens-per-app-the-periods-50-costliest-sessions-each-tools-newest-plan-limit-reading-with-its-window-estimates-and-the-reporting-computers-with-their-spend
       - content: Forget a computer and everything it reported.
         id: forget-a-computer-and-everything-it-reported
     contents: []

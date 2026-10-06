@@ -39,45 +39,84 @@
   font-weight: 500;
 }
 
-.ai-quota-rows {
+/* One plan window: the plan's percentage, then rows that every card draws, so a grid's
+   cards keep one size and their dividers line up. */
+.ai-plan-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* The legend's place in the traffic page's card heads: pushed to the right edge. */
+.ai-window-span {
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
+
+.ai-window-body {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 12px;
-  margin: 0;
   padding: 14px var(--ov-pad) 0;
-  list-style: none;
 }
 
-.ai-quota-row-head {
+.ai-window-big {
   display: flex;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 8px;
-  margin-bottom: 6px;
-  font-size: 13px;
+}
+
+.ai-window-percent {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--ant-color-text);
 }
 
-.ai-quota-percent {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.ai-quota-reset {
-  margin-top: 5px;
+.ai-window-caption {
   font-size: 12px;
-  color: var(--ov-faint);
+  color: var(--ov-label);
+}
+
+.ai-window-now {
+  margin-inline-start: auto;
+  font-size: 12px;
+  color: var(--ov-label);
   font-variant-numeric: tabular-nums;
 }
 
-/* An empty slot keeps the rainbow bar's height, so a card with fewer windows lines up. */
-.ai-quota-row-empty .ai-quota-row-head {
-  color: var(--ov-faint);
+.ai-window-rows {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 13px;
 }
 
-.ai-quota-empty-bar {
-  height: 6px;
-  background: var(--ant-color-fill-quaternary);
+.ai-window-rows dt {
+  color: var(--ov-label);
+}
+
+.ai-window-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  text-align: end;
+  color: var(--ant-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-window-strong > span:first-child {
+  font-weight: 600;
+}
+
+.ai-window-detail {
+  font-size: 11px;
+  color: var(--ov-faint);
 }
 
 .ai-quota-foot {
@@ -89,8 +128,35 @@
   color: var(--ov-label);
 }
 
-.ai-quota-foot-warn {
+.ai-window-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai-window-foot > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-window-warn {
+  font-weight: 500;
   color: var(--ant-color-warning);
+}
+
+.ai-window-budget,
+.ai-window-estimated,
+.ai-window-inferred {
+  color: var(--ov-faint);
+}
+
+.ai-window-inferred {
+  cursor: help;
+}
+
+.ai-window-current > td {
+  background: var(--ant-color-fill-quaternary);
 }
 
 /* Two app totals and the metric switch: on a phone they wrap as whole items, never inside a name. */

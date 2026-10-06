@@ -519,6 +519,35 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AiUsageEstimates": {
+    "description": "AiUsageEstimates are a tool's plan windows measured against one computer's usage.",
+    "properties": {
+      "fiveHourHistory": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsagePastWindow"
+        },
+        "type": "array"
+      },
+      "weeklyHistory": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsagePastWindow"
+        },
+        "type": "array"
+      },
+      "windows": {
+        "items": {
+          "$ref": "#/components/schemas/AiUsageWindowEstimate"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "fiveHourHistory",
+      "weeklyHistory",
+      "windows"
+    ],
+    "type": "object"
+  },
   "AiUsageIngestResult": {
     "description": "AiUsageIngestResult names the device a report landed on and what it stored.",
     "properties": {
@@ -544,6 +573,49 @@ export const SCHEMAS: Record<string, unknown> = {
       "deviceId",
       "rows",
       "sessions"
+    ],
+    "type": "object"
+  },
+  "AiUsageLimitEstimate": {
+    "description": "AiUsageLimitEstimate is a window's total limit, usage ÷ the reported share, with the range a\nwhole-number percentage allows; Basis typical means the median of recent windows.",
+    "properties": {
+      "basis": {
+        "enum": [
+          "current",
+          "typical"
+        ],
+        "example": "current",
+        "type": "string"
+      },
+      "costHigh": {
+        "example": 191.13,
+        "type": "number"
+      },
+      "costLow": {
+        "example": 179.54,
+        "type": "number"
+      },
+      "costUsd": {
+        "example": 185.15,
+        "type": "number"
+      },
+      "tokens": {
+        "example": 570000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "windows": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "basis",
+      "costHigh",
+      "costLow",
+      "costUsd",
+      "tokens",
+      "windows"
     ],
     "type": "object"
   },
@@ -617,6 +689,53 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AiUsagePastWindow": {
+    "description": "AiUsagePastWindow is an earlier or the current window; Exact is false when its start was\ninferred from the first request because no plan reading covers it.",
+    "properties": {
+      "current": {
+        "example": false,
+        "type": "boolean"
+      },
+      "end": {
+        "example": 1791221400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "exact": {
+        "example": true,
+        "type": "boolean"
+      },
+      "limit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiUsageLimitEstimate"
+          }
+        ],
+        "nullable": true
+      },
+      "peakUtilization": {
+        "example": 45,
+        "nullable": true,
+        "type": "number"
+      },
+      "start": {
+        "example": 1791203400,
+        "format": "int64",
+        "type": "integer"
+      },
+      "used": {
+        "$ref": "#/components/schemas/AiUsageWindowUsage"
+      }
+    },
+    "required": [
+      "current",
+      "end",
+      "exact",
+      "start",
+      "used"
+    ],
+    "type": "object"
+  },
   "AiUsageQuotaTier": {
     "description": "AiUsageQuotaTier is one rate-limit window: percent used and when it resets.",
     "properties": {
@@ -652,6 +771,15 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "error": {
         "type": "string"
+      },
+      "estimates": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiUsageEstimates"
+          }
+        ],
+        "description": "Estimates are the reading device's window estimates; null from an older Pigger Switch.",
+        "nullable": true
       },
       "planLabel": {
         "example": "Max 5x",
@@ -882,6 +1010,14 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "error": {
         "type": "string"
+      },
+      "estimates": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiUsageEstimates"
+          }
+        ],
+        "nullable": true
       },
       "planLabel": {
         "example": "Max 5x",
@@ -1117,6 +1253,122 @@ export const SCHEMAS: Record<string, unknown> = {
       "outputTokens",
       "requests",
       "sessions"
+    ],
+    "type": "object"
+  },
+  "AiUsageWindowEstimate": {
+    "description": "AiUsageWindowEstimate is a current plan window as Pigger Switch measured it (times in\nUnix seconds); null fields are unknown, such as a limit before there is usage to divide.",
+    "properties": {
+      "end": {
+        "example": 1791221400,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "estimatedUtilization": {
+        "example": 18,
+        "nullable": true,
+        "type": "number"
+      },
+      "exhaustsAt": {
+        "example": 1791219000,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "fiveHourWindowsLeft": {
+        "example": 27,
+        "nullable": true,
+        "type": "integer"
+      },
+      "limit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiUsageLimitEstimate"
+          }
+        ],
+        "nullable": true
+      },
+      "perFiveHourCostUsd": {
+        "example": 35.67,
+        "nullable": true,
+        "type": "number"
+      },
+      "perFiveHourTokens": {
+        "example": 121000000,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "projectedUtilization": {
+        "example": 67,
+        "nullable": true,
+        "type": "number"
+      },
+      "remainingCostUsd": {
+        "example": 155.53,
+        "nullable": true,
+        "type": "number"
+      },
+      "remainingTokens": {
+        "example": 479000000,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "reportedAt": {
+        "example": 1791207000,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "reportedUtilization": {
+        "example": 16,
+        "nullable": true,
+        "type": "number"
+      },
+      "start": {
+        "example": 1791203400,
+        "format": "int64",
+        "nullable": true,
+        "type": "integer"
+      },
+      "tier": {
+        "example": "five_hour",
+        "type": "string"
+      },
+      "used": {
+        "$ref": "#/components/schemas/AiUsageWindowUsage"
+      }
+    },
+    "required": [
+      "tier",
+      "used"
+    ],
+    "type": "object"
+  },
+  "AiUsageWindowUsage": {
+    "description": "AiUsageWindowUsage is what one computer used inside a plan window.",
+    "properties": {
+      "costUsd": {
+        "example": 29.62,
+        "type": "number"
+      },
+      "requests": {
+        "example": 164,
+        "format": "int64",
+        "type": "integer"
+      },
+      "totalTokens": {
+        "example": 91200000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "costUsd",
+      "requests",
+      "totalTokens"
     ],
     "type": "object"
   },

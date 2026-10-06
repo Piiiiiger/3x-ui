@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Empty, Segmented, Select } from 'antd';
+import { Alert, Button, Card, Empty, Segmented, Select, Tag } from 'antd';
 import {
   ApiOutlined,
   AppstoreOutlined,
@@ -15,29 +15,71 @@ import {
 import { HttpUtil } from '@/utils';
 import { PageHeader } from '@/components/ui';
 import { keys } from '@/api/queryKeys';
-import {
-  useAiUsageOverviewQuery,
-  type AiUsageApp,
-  type AiUsagePeriod,
-} from '@/api/queries/useAiUsageOverviewQuery';
-import type { AiUsageDeviceView } from '@/generated/zod';
+import { useAiUsageOverviewQuery, type AiUsagePeriod } from '@/api/queries/useAiUsageOverviewQuery';
+import type { AiUsageDeviceView, AiUsageQuotaView } from '@/generated/zod';
 import StatTile from '@/pages/index/StatTile';
 import { useRelativeTime } from '@/pages/nodes/relativeTime';
-import AiQuotaCard from './AiQuotaCard';
+import AiWindowCard from './AiWindowCard';
+import AiWindowHistoryCard from './AiWindowHistoryCard';
 import AiDailyCard from './AiDailyCard';
 import AiRankCard from './AiRankCard';
 import AiSessionsCard from './AiSessionsCard';
 import AiDevicesCard from './AiDevicesCard';
 import ConnectDeviceModal from './ConnectDeviceModal';
-import { cacheHitRate, formatTokens, formatUsd, projectName, quotaSlots } from './aiUsageFormat';
+import {
+  AI_TOOL_NAME,
+  AI_TOOLS,
+  cacheHitRate,
+  formatTokens,
+  formatUsd,
+  localDay,
+  periodDays,
+  planEndDate,
+  projectName,
+  windowsForTool,
+  type AiTool,
+} from './aiUsageFormat';
 
-/** AI 用量: what Claude Code and Codex cost, where it went, and the plans' limits. */
+const TOOL_STORAGE = 'pigger-ai-usage-tool';
+
+function readTool(): AiTool {
+  try {
+    return localStorage.getItem(TOOL_STORAGE) === 'codex' ? 'codex' : 'claude';
+  } catch {
+    return 'claude';
+  }
+}
+
+/** What the plan head says about the newest reading: whose, how fresh, and why it failed. */
+function readingLine(
+  t: (key: string, values?: Record<string, unknown>) => string,
+  quota: AiUsageQuotaView | undefined,
+  relativeTime: (unixSeconds?: number) => string,
+): string {
+  if (!quota) return t('pages.aiUsage.limitsNone');
+  if (!quota.success) {
+    return quota.error
+      ? t('pages.aiUsage.limitsFailed', { error: quota.error })
+      : t('pages.aiUsage.limitsSignedOut', { device: quota.deviceName });
+  }
+  const read = t('pages.aiUsage.limitsRead', {
+    device: quota.deviceName,
+    time: relativeTime(Math.floor(quota.queriedAt / 1000)),
+  });
+  const end = planEndDate(quota.activeUntil);
+  return end ? `${read} · ${t('pages.aiUsage.planActiveUntil', { date: end })}` : read;
+}
+
+/**
+ * AI 用量: one tool at a time, Claude Code or Codex, never the two mixed. What it cost,
+ * where it went, and each plan window with the limit Pigger Switch worked out for it.
+ */
 export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const relativeTime = useRelativeTime();
+  const [tool, setTool] = useState<AiTool>(readTool);
   const [period, setPeriod] = useState<AiUsagePeriod>('month');
-  const [app, setApp] = useState<AiUsageApp>('all');
   const [deviceId, setDeviceId] = useState(0);
   const [connectOpen, setConnectOpen] = useState(false);
   // Ticks the reset countdowns and the stale-sync marks between refetches.
@@ -46,7 +88,20 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
     const timer = window.setInterval(() => setNowMs(Date.now()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
-  const { overview, fetched, fetchError, refetch } = useAiUsageOverviewQuery(period, deviceId, app);
+  const { overview, fetched, fetchError, refetch } = useAiUsageOverviewQuery(
+    period,
+    deviceId,
+    tool,
+  );
+
+  const chooseTool = (next: AiTool) => {
+    setTool(next);
+    try {
+      localStorage.setItem(TOOL_STORAGE, next);
+    } catch {
+      // Without storage the choice lasts for this visit only.
+    }
+  };
 
   const devices = overview?.devices ?? [];
   const header = (
@@ -54,31 +109,26 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
       title={t('pages.aiUsage.title')}
       description={t('pages.aiUsage.intro')}
       extra={
-        devices.length > 0 && (
-          <div className="ai-filters">
-            {devices.length > 1 && (
-              <Select<number>
-                value={deviceId}
-                onChange={setDeviceId}
-                popupMatchSelectWidth={false}
-                aria-label={t('pages.aiUsage.colDevice')}
-                options={[
-                  { value: 0, label: t('pages.aiUsage.deviceAll') },
-                  ...devices.map((d) => ({ value: d.id, label: d.name })),
-                ]}
-              />
-            )}
-            <Segmented<AiUsageApp>
-              value={app}
-              onChange={setApp}
+        <div className="ai-filters">
+          {devices.length > 1 && (
+            <Select<number>
+              value={deviceId}
+              onChange={setDeviceId}
+              popupMatchSelectWidth={false}
+              aria-label={t('pages.aiUsage.colDevice')}
               options={[
-                { label: t('pages.aiUsage.appAll'), value: 'all' },
-                { label: 'Claude', value: 'claude' },
-                { label: 'Codex', value: 'codex' },
+                { value: 0, label: t('pages.aiUsage.deviceAll') },
+                ...devices.map((d) => ({ value: d.id, label: d.name })),
               ]}
             />
-          </div>
-        )
+          )}
+          <Segmented<AiTool>
+            aria-label={t('pages.aiUsage.tool')}
+            value={tool}
+            onChange={chooseTool}
+            options={AI_TOOLS.map((value) => ({ label: AI_TOOL_NAME[value], value }))}
+          />
+        </div>
       }
     />
   );
@@ -133,6 +183,19 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
   const tokens =
     totals.inputTokens + totals.outputTokens + totals.cacheReadTokens + totals.cacheWriteTokens;
   const hit = cacheHitRate(totals);
+  const firstDay = devices
+    .map((d) => d.firstDay)
+    .filter(Boolean)
+    .sort()[0];
+  const days = periodDays(
+    overview.period,
+    overview.periodStart,
+    firstDay,
+    localDay(new Date(nowMs)),
+  );
+  const quota = overview.quotas.find((q) => q.tool === tool);
+  const windows = windowsForTool(quota);
+  const history = quota?.estimates;
   const deleteDevice = async (device: AiUsageDeviceView) => {
     const msg = await HttpUtil.post(`/panel/api/aiUsage/devices/delete/${device.id}`);
     if (msg?.success) {
@@ -149,10 +212,7 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
           icon={<DollarOutlined />}
           label={t('pages.aiUsage.cost')}
           value={formatUsd(totals.costUsd)}
-          detail={t('pages.aiUsage.costDetail', {
-            claude: formatUsd(totals.claudeCostUsd),
-            codex: formatUsd(totals.codexCostUsd),
-          })}
+          detail={t('pages.aiUsage.costPerDay', { cost: formatUsd(totals.costUsd / days) })}
         />
         <StatTile
           icon={<ThunderboltOutlined />}
@@ -181,13 +241,20 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
         />
       </div>
 
-      <div className="ai-quota-grid">
-        {quotaSlots(overview.quotas).map((slot) => (
-          <AiQuotaCard key={slot.tool} slot={slot} nowMs={nowMs} relativeTime={relativeTime} />
-        ))}
+      <div className="ai-plan-head">
+        <span className="ov-kicker ov-card-title">{t('pages.aiUsage.plan')}</span>
+        {quota?.success && quota.planLabel && <Tag className="ai-plan-tag">{quota.planLabel}</Tag>}
+        <span className="ov-sub">{readingLine(t, quota, relativeTime)}</span>
       </div>
+      {windows.length > 0 && (
+        <div className="ai-quota-grid">
+          {windows.map((slot) => (
+            <AiWindowCard key={slot.tier} slot={slot} nowMs={nowMs} />
+          ))}
+        </div>
+      )}
 
-      <AiDailyCard daily={overview.daily} isMobile={isMobile} />
+      <AiDailyCard tool={tool} daily={overview.daily} isMobile={isMobile} />
 
       <div className="ov-period">
         <Segmented<AiUsagePeriod>
@@ -228,6 +295,10 @@ export default function AiUsageSection({ isMobile }: { isMobile: boolean }) {
         relativeTime={relativeTime}
         showDevice={devices.length > 1}
       />
+
+      {history && (history.fiveHourHistory.length > 0 || history.weeklyHistory.length > 0) && (
+        <AiWindowHistoryCard estimates={history} />
+      )}
 
       <AiDevicesCard
         devices={devices}

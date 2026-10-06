@@ -232,11 +232,74 @@ export const EXAMPLES: Record<string, unknown> = {
     "lastSyncAt": 1791203600,
     "name": "laptop"
   },
+  "AiUsageEstimates": {
+    "fiveHourHistory": [
+      {
+        "current": false,
+        "end": 1791221400,
+        "exact": true,
+        "limit": null,
+        "peakUtilization": 45,
+        "start": 1791203400,
+        "used": {
+          "costUsd": 29.62,
+          "requests": 164,
+          "totalTokens": 91200000
+        }
+      }
+    ],
+    "weeklyHistory": [
+      {
+        "current": false,
+        "end": 1791221400,
+        "exact": true,
+        "limit": null,
+        "peakUtilization": 45,
+        "start": 1791203400,
+        "used": {
+          "costUsd": 29.62,
+          "requests": 164,
+          "totalTokens": 91200000
+        }
+      }
+    ],
+    "windows": [
+      {
+        "end": 1791221400,
+        "estimatedUtilization": 18,
+        "exhaustsAt": 1791219000,
+        "fiveHourWindowsLeft": 27,
+        "limit": null,
+        "perFiveHourCostUsd": 35.67,
+        "perFiveHourTokens": 121000000,
+        "projectedUtilization": 67,
+        "remainingCostUsd": 155.53,
+        "remainingTokens": 479000000,
+        "reportedAt": 1791207000,
+        "reportedUtilization": 16,
+        "start": 1791203400,
+        "tier": "five_hour",
+        "used": {
+          "costUsd": 29.62,
+          "requests": 164,
+          "totalTokens": 91200000
+        }
+      }
+    ]
+  },
   "AiUsageIngestResult": {
     "days": 2,
     "deviceId": 1,
     "rows": 18,
     "sessions": 6
+  },
+  "AiUsageLimitEstimate": {
+    "basis": "current",
+    "costHigh": 191.13,
+    "costLow": 179.54,
+    "costUsd": 185.15,
+    "tokens": 570000000,
+    "windows": 1
   },
   "AiUsageOverview": {
     "daily": [
@@ -288,6 +351,7 @@ export const EXAMPLES: Record<string, unknown> = {
         "activeUntil": "",
         "deviceName": "laptop",
         "error": "",
+        "estimates": null,
         "planLabel": "Max 5x",
         "queriedAt": 1791203600000,
         "success": true,
@@ -328,6 +392,19 @@ export const EXAMPLES: Record<string, unknown> = {
       "sessions": 23
     }
   },
+  "AiUsagePastWindow": {
+    "current": false,
+    "end": 1791221400,
+    "exact": true,
+    "limit": null,
+    "peakUtilization": 45,
+    "start": 1791203400,
+    "used": {
+      "costUsd": 29.62,
+      "requests": 164,
+      "totalTokens": 91200000
+    }
+  },
   "AiUsageQuotaTier": {
     "name": "five_hour",
     "resetsAt": "2026-10-06T18:00:00Z",
@@ -337,6 +414,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "activeUntil": "",
     "deviceName": "laptop",
     "error": "",
+    "estimates": null,
     "planLabel": "Max 5x",
     "queriedAt": 1791203600000,
     "success": true,
@@ -383,6 +461,7 @@ export const EXAMPLES: Record<string, unknown> = {
       {
         "activeUntil": "",
         "error": "",
+        "estimates": null,
         "planLabel": "Max 5x",
         "queriedAt": 1791203600000,
         "success": true,
@@ -434,6 +513,7 @@ export const EXAMPLES: Record<string, unknown> = {
   "AiUsageReportQuota": {
     "activeUntil": "",
     "error": "",
+    "estimates": null,
     "planLabel": "Max 5x",
     "queriedAt": 1791203600000,
     "success": true,
@@ -482,6 +562,32 @@ export const EXAMPLES: Record<string, unknown> = {
     "outputTokens": 3100000,
     "requests": 5120,
     "sessions": 23
+  },
+  "AiUsageWindowEstimate": {
+    "end": 1791221400,
+    "estimatedUtilization": 18,
+    "exhaustsAt": 1791219000,
+    "fiveHourWindowsLeft": 27,
+    "limit": null,
+    "perFiveHourCostUsd": 35.67,
+    "perFiveHourTokens": 121000000,
+    "projectedUtilization": 67,
+    "remainingCostUsd": 155.53,
+    "remainingTokens": 479000000,
+    "reportedAt": 1791207000,
+    "reportedUtilization": 16,
+    "start": 1791203400,
+    "tier": "five_hour",
+    "used": {
+      "costUsd": 29.62,
+      "requests": 164,
+      "totalTokens": 91200000
+    }
+  },
+  "AiUsageWindowUsage": {
+    "costUsd": 29.62,
+    "requests": 164,
+    "totalTokens": 91200000
   },
   "AllSetting": {
     "datepicker": "",

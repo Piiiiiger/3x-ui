@@ -1,4 +1,4 @@
-import type { AiUsageQuotaTier, AiUsageQuotaView } from '@/generated/zod';
+import type { AiUsageQuotaTier, AiUsageQuotaView, AiUsageWindowEstimate } from '@/generated/zod';
 
 const usd = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -56,6 +56,19 @@ export function planEndDate(iso: string): string | null {
 
 export const AI_TOOLS = ['claude', 'codex'] as const;
 export type AiTool = (typeof AI_TOOLS)[number];
+/** Brand names stay as they are in every language. */
+export const AI_TOOL_NAME: Record<AiTool, string> = { claude: 'Claude Code', codex: 'Codex' };
+
+/** A window's span in Unix seconds: "10/6 11:50 – 16:50" within a day, both dates when longer. */
+export function formatWindowSpan(start: number, end: number, locale?: string): string {
+  const day = (unix: number) =>
+    new Date(unix * 1000).toLocaleDateString(locale, { month: 'numeric', day: 'numeric' });
+  const time = (unix: number) =>
+    new Date(unix * 1000).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
+  return day(start) === day(end - 1)
+    ? `${day(start)} ${time(start)} – ${time(end)}`
+    : `${day(start)} ${time(start)} – ${day(end)} ${time(end)}`;
+}
 
 const TIER_ORDER = [
   'five_hour',
@@ -65,32 +78,44 @@ const TIER_ORDER = [
   'seven_day_fable',
   '30_day',
 ];
-const MIN_TIER_ROWS = 2;
-
-export interface QuotaSlot {
-  tool: AiTool;
-  quota: AiUsageQuotaView | null;
-  tiers: (AiUsageQuotaTier | null)[];
-}
-
 function tierRank(name: string): number {
   const i = TIER_ORDER.indexOf(name);
   return i < 0 ? TIER_ORDER.length : i;
 }
 
-/** One card per tool, each padded to the same number of window rows. */
-export function quotaSlots(quotas: AiUsageQuotaView[]): QuotaSlot[] {
-  const byTool = new Map(quotas.map((q) => [q.tool, q]));
-  const sorted = AI_TOOLS.map((tool) => {
-    const quota = byTool.get(tool) ?? null;
-    const tiers = quota?.success
-      ? [...quota.tiers].sort((a, b) => tierRank(a.name) - tierRank(b.name))
-      : [];
-    return { tool, quota, tiers };
-  });
-  const rows = Math.max(MIN_TIER_ROWS, ...sorted.map((s) => s.tiers.length));
-  return sorted.map((s) => ({
-    ...s,
-    tiers: [...s.tiers, ...Array<null>(rows - s.tiers.length).fill(null)],
-  }));
+/** A window of one tool: Pigger Switch's estimate when it sent one, and the plan's reading. */
+export interface WindowSlot {
+  tier: string;
+  estimate: AiUsageWindowEstimate | null;
+  reading: AiUsageQuotaTier | null;
+}
+
+/** A tool's windows, shortest first; an older Pigger Switch sends no estimates, so the bare readings. */
+export function windowsForTool(quota: AiUsageQuotaView | undefined): WindowSlot[] {
+  if (!quota?.success) return [];
+  const readings = new Map(quota.tiers.map((t) => [t.name, t]));
+  const estimates = quota.estimates?.windows ?? [];
+  const slots: WindowSlot[] =
+    estimates.length > 0
+      ? estimates.map((e) => ({ tier: e.tier, estimate: e, reading: readings.get(e.tier) ?? null }))
+      : quota.tiers.map((t) => ({ tier: t.name, estimate: null, reading: t }));
+  return slots.sort((a, b) => tierRank(a.tier) - tierRank(b.tier));
+}
+
+/** The local date as YYYY-MM-DD. */
+export function localDay(now: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+/** Days a period covers up to today, for a per-day average; "all" starts at the first data day. */
+export function periodDays(
+  period: 'today' | 'week' | 'month' | 'all',
+  periodStart: string,
+  firstDay: string | undefined,
+  today: string,
+): number {
+  const start = period === 'today' ? today : period === 'all' ? firstDay || today : periodStart;
+  const ms = Date.parse(`${today}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
+  return Number.isFinite(ms) ? Math.max(1, Math.round(ms / 86_400_000) + 1) : 1;
 }

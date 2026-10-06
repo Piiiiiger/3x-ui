@@ -60,6 +60,8 @@ type AiUsageQuota struct {
 	Tiers       string `gorm:"column:tiers;type:text;not null"`
 	Error       string `gorm:"column:error;size:500;not null;default:''"`
 	QueriedAt   int64  `gorm:"column:queried_at;not null"`
+	// Estimates is the tool's window estimates as JSON; empty when the app sent none.
+	Estimates string `gorm:"column:estimates;type:text;default:''"`
 }
 
 func (AiUsageQuota) TableName() string { return "ai_usage_quotas" }

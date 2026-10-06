@@ -119,7 +119,7 @@ func run(root, outDir string) error {
 				"AiUsageReportDay",
 				"AiUsageReportSession",
 				"AiUsageReportQuota",
-				"AiUsageQuotaTier",
+				"AiUsageQuotaTier", "AiUsageWindowUsage", "AiUsageLimitEstimate", "AiUsageWindowEstimate", "AiUsagePastWindow", "AiUsageEstimates",
 				"AiUsageIngestResult",
 				"AiUsageOverview",
 				"AiUsageTotals",

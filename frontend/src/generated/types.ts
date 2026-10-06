@@ -129,11 +129,26 @@ export interface AiUsageDeviceView {
   name: string;
 }
 
+export interface AiUsageEstimates {
+  fiveHourHistory: AiUsagePastWindow[];
+  weeklyHistory: AiUsagePastWindow[];
+  windows: AiUsageWindowEstimate[];
+}
+
 export interface AiUsageIngestResult {
   days: number;
   deviceId: number;
   rows: number;
   sessions: number;
+}
+
+export interface AiUsageLimitEstimate {
+  basis: string;
+  costHigh: number;
+  costLow: number;
+  costUsd: number;
+  tokens: number;
+  windows: number;
 }
 
 export interface AiUsageOverview {
@@ -148,6 +163,16 @@ export interface AiUsageOverview {
   totals: AiUsageTotals;
 }
 
+export interface AiUsagePastWindow {
+  current: boolean;
+  end: number;
+  exact: boolean;
+  limit?: AiUsageLimitEstimate | null;
+  peakUtilization?: number | null;
+  start: number;
+  used: AiUsageWindowUsage;
+}
+
 export interface AiUsageQuotaTier {
   name: string;
   resetsAt: string;
@@ -158,6 +183,7 @@ export interface AiUsageQuotaView {
   activeUntil: string;
   deviceName: string;
   error: string;
+  estimates?: AiUsageEstimates | null;
   planLabel: string;
   queriedAt: number;
   success: boolean;
@@ -207,6 +233,7 @@ export interface AiUsageReportDevice {
 export interface AiUsageReportQuota {
   activeUntil: string;
   error: string;
+  estimates?: AiUsageEstimates | null;
   planLabel: string;
   queriedAt: number;
   success: boolean;
@@ -252,6 +279,30 @@ export interface AiUsageTotals {
   outputTokens: number;
   requests: number;
   sessions: number;
+}
+
+export interface AiUsageWindowEstimate {
+  end?: number | null;
+  estimatedUtilization?: number | null;
+  exhaustsAt?: number | null;
+  fiveHourWindowsLeft?: number | null;
+  limit?: AiUsageLimitEstimate | null;
+  perFiveHourCostUsd?: number | null;
+  perFiveHourTokens?: number | null;
+  projectedUtilization?: number | null;
+  remainingCostUsd?: number | null;
+  remainingTokens?: number | null;
+  reportedAt?: number | null;
+  reportedUtilization?: number | null;
+  start?: number | null;
+  tier: string;
+  used: AiUsageWindowUsage;
+}
+
+export interface AiUsageWindowUsage {
+  costUsd: number;
+  requests: number;
+  totalTokens: number;
 }
 
 export interface AllSetting {

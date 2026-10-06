@@ -2080,7 +2080,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/aiUsage/ingest',
         summary:
-          "Upload one computer's usage for the days from..to, its sessions (upserted; with sessionsSince set, the computer's sessions active since then that the report leaves out are deleted) and its latest plan-limit readings.",
+          "Upload one computer's usage for the days from..to, its sessions (upserted; with sessionsSince set, the computer's sessions active since then that the report leaves out are deleted) and its latest plan-limit readings. A reading may carry estimates: each window's usage, its estimated limit (usage ÷ reported share) and past windows; a reading without them clears the old ones.",
         requestSchema: { $ref: '#/components/schemas/AiUsageReport' },
         responseSchema: 'AiUsageIngestResult',
         errorResponse:
@@ -2090,7 +2090,7 @@ export const sections: readonly Section[] = [
         method: 'GET',
         path: '/panel/api/aiUsage/overview',
         summary:
-          "Get the period's totals and project/model rankings (busiest 100 by cost), 30 days of daily cost and tokens per app, the period's 50 costliest sessions, each tool's newest plan-limit reading and the reporting computers.",
+          "Get the period's totals and project/model rankings (busiest 100 by cost), 30 days of daily cost and tokens per app, the period's 50 costliest sessions, each tool's newest plan-limit reading with its window estimates, and the reporting computers with their spend.",
         params: [
           {
             name: 'period',
@@ -2111,7 +2111,7 @@ export const sections: readonly Section[] = [
             name: 'app',
             in: 'query',
             type: 'string',
-            desc: 'claude or codex; all or absent for both.',
+            desc: "claude or codex (the page shows one tool at a time); all or absent for both. Also scopes each computer's spend.",
             optional: true,
           },
         ],

@@ -5,9 +5,10 @@ import {
   formatTokens,
   formatUsd,
   planEndDate,
+  periodDays,
   projectName,
-  quotaSlots,
   resetCountdown,
+  windowsForTool,
 } from '@/pages/ai-usage/aiUsageFormat';
 import type { AiUsageQuotaView } from '@/generated/zod';
 
@@ -49,38 +50,51 @@ describe('aiUsageFormat', () => {
     expect(resetCountdown('', now)).toBeNull();
   });
 
-  // Cards in a grid share one size, so every card gets as many window rows as
-  // the busiest one, the missing ones drawn empty.
-  it('gives every plan card the same number of window rows, shortest window first', () => {
-    const quota = (tool: string, names: string[]): AiUsageQuotaView => ({
-      tool,
+  // One tool's windows, shortest first: the estimates Pigger Switch sent, each with the
+  // plan's own reading beside it; an older Pigger Switch sends none, so the bare readings.
+  it("lists a tool's windows from its estimates, or its readings without them", () => {
+    const quota = (estimates: AiUsageQuotaView['estimates']): AiUsageQuotaView => ({
+      tool: 'claude',
       deviceName: 'laptop',
       success: true,
-      planLabel: '',
+      planLabel: 'Pro',
       activeUntil: '',
       error: '',
       queriedAt: 0,
-      tiers: names.map((name) => ({ name, utilization: 10, resetsAt: '' })),
+      tiers: ['seven_day', 'five_hour'].map((name) => ({ name, utilization: 10, resetsAt: '' })),
+      estimates,
     });
-    const slots = quotaSlots([
-      quota('codex', ['seven_day']),
-      quota('claude', ['seven_day_opus', 'five_hour', 'seven_day']),
+    const window = (tier: string) => ({
+      tier,
+      used: { requests: 1, costUsd: 1, totalTokens: 1 },
+    });
+    const withEstimates = windowsForTool(
+      quota({
+        windows: [window('seven_day_opus'), window('seven_day'), window('five_hour')],
+        fiveHourHistory: [],
+        weeklyHistory: [],
+      }),
+    );
+    expect(withEstimates.map((w) => [w.tier, w.estimate?.tier, w.reading?.name ?? null])).toEqual([
+      ['five_hour', 'five_hour', 'five_hour'],
+      ['seven_day', 'seven_day', 'seven_day'],
+      ['seven_day_opus', 'seven_day_opus', null],
     ]);
-    expect(slots.map((s) => s.tool)).toEqual(['claude', 'codex']);
-    expect(slots[0].tiers.map((t) => t?.name)).toEqual([
-      'five_hour',
-      'seven_day',
-      'seven_day_opus',
+    const bare = windowsForTool(quota(null));
+    expect(bare.map((w) => [w.tier, w.estimate])).toEqual([
+      ['five_hour', null],
+      ['seven_day', null],
     ]);
-    expect(slots[1].tiers.map((t) => t?.name ?? null)).toEqual(['seven_day', null, null]);
+    expect(windowsForTool({ ...quota(null), success: false })).toEqual([]);
+    expect(windowsForTool(undefined)).toEqual([]);
   });
 
-  it('keeps a card for a tool that has not reported yet', () => {
-    const slots = quotaSlots([]);
-    expect(slots.map((s) => [s.tool, s.quota, s.tiers.length])).toEqual([
-      ['claude', null, 2],
-      ['codex', null, 2],
-    ]);
+  it('counts the days a period covers so far, at least one', () => {
+    expect(periodDays('month', '2026-10-01', undefined, '2026-10-06')).toBe(6);
+    expect(periodDays('week', '2026-10-05', undefined, '2026-10-06')).toBe(2);
+    expect(periodDays('today', '2026-10-06', undefined, '2026-10-06')).toBe(1);
+    expect(periodDays('all', '', '2026-09-24', '2026-10-06')).toBe(13);
+    expect(periodDays('all', '', undefined, '2026-10-06')).toBe(1);
   });
 
   it("gives the plan's last day only when the reading has a real one", () => {
