@@ -82,6 +82,8 @@ func TestAccountNotificationPersistsAndRenewalChangesKey(t *testing.T) {
 // reminder window suppress delivery, while the new 7-day window can notify.
 func TestAccountScheduleRespectsRenewalAndDailyOff(t *testing.T) {
 	tb, calls := newLevelTgbot(t)
+	// Only the owner's own reminders count here; the admins' notice of a due user is tested apart.
+	withAdmins(t)
 	now := time.Date(2026, 10, 4, 20, 0, 0, 0, accountLocation)
 	db := database.GetDB()
 	var c model.ClientRecord
