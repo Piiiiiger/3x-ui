@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Card, ConfigProvider, Layout } from 'antd';
+import type { ThemeConfig } from 'antd';
 
 import { LanguageManager } from '@/utils';
 import { useTheme } from '@/hooks/useTheme';
@@ -35,6 +36,30 @@ export function useSubLanguage() {
   return { lang, onLangChange };
 }
 
+// subPageTheme is the panel theme with the sub page's AA-safe accent.
+export function subPageTheme(antdThemeConfig: ThemeConfig, isDark: boolean): ThemeConfig {
+  const accent = isDark ? ACCENT.dark : ACCENT.light;
+  const primary = {
+    colorPrimary: accent.primary,
+    colorPrimaryHover: accent.hover,
+    colorPrimaryActive: accent.active,
+  };
+  return {
+    ...antdThemeConfig,
+    token: {
+      ...antdThemeConfig.token,
+      ...primary,
+      colorLink: accent.primary,
+      colorInfo: accent.primary,
+    },
+    components: {
+      ...antdThemeConfig.components,
+      Button: { ...antdThemeConfig.components?.Button, ...primary },
+      Progress: { ...antdThemeConfig.components?.Progress, remainingColor: accent.rail },
+    },
+  };
+}
+
 // The themed frame shared by the subscription page and the client portal.
 export default function SubShell({ lang, children }: { lang: string; children: ReactNode }) {
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -43,28 +68,10 @@ export default function SubShell({ lang, children }: { lang: string; children: R
     .filter(Boolean)
     .join(' ');
 
-  const themeConfig = useMemo(() => {
-    const accent = isDark ? ACCENT.dark : ACCENT.light;
-    const primary = {
-      colorPrimary: accent.primary,
-      colorPrimaryHover: accent.hover,
-      colorPrimaryActive: accent.active,
-    };
-    return {
-      ...antdThemeConfig,
-      token: {
-        ...antdThemeConfig.token,
-        ...primary,
-        colorLink: accent.primary,
-        colorInfo: accent.primary,
-      },
-      components: {
-        ...antdThemeConfig.components,
-        Button: { ...antdThemeConfig.components?.Button, ...primary },
-        Progress: { ...antdThemeConfig.components?.Progress, remainingColor: accent.rail },
-      },
-    };
-  }, [antdThemeConfig, isDark]);
+  const themeConfig = useMemo(
+    () => subPageTheme(antdThemeConfig, isDark),
+    [antdThemeConfig, isDark],
+  );
 
   return (
     <ConfigProvider theme={themeConfig} direction={direction}>
