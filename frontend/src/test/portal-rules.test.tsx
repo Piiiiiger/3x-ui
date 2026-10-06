@@ -18,7 +18,7 @@ afterEach(() => {
 it('opens on a visit with the location warning first', async () => {
   renderWithProviders(<PortalRules limitIp={3} />);
   const dialog = await screen.findByRole('dialog');
-  const warning = screen.getByText('手机使用时请务必关闭定位服务');
+  const warning = screen.getByText('手机请务必关闭定位服务，防止节点「送中」');
   expect(dialog.textContent?.indexOf('定位服务')).toBeLessThan(
     dialog.textContent?.indexOf('禁止') ?? 0,
   );

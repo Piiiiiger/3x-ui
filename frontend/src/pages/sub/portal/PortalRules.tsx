@@ -60,13 +60,16 @@ export default function PortalRules({ limitIp }: { limitIp?: number }) {
             icon={<EnvironmentOutlined />}
             style={{ marginBottom: 16 }}
             title={
-              <span style={{ fontSize: 18, fontWeight: 700 }}>手机使用时请务必关闭定位服务</span>
+              <span style={{ fontSize: 18, fontWeight: 700 }}>
+                手机请务必关闭定位服务，防止节点「送中」
+              </span>
             }
             description={
               <>
                 <div>
-                  开着定位时，App 可以直接读取你的真实位置，代理无法隐藏，你的真实位置和 IP
-                  可能因此暴露。
+                  开着定位时，Google 会读到手机的真实位置，把你正在用的节点 IP
+                  判定为中国大陆，也就是「送中」；代理改变不了定位。节点被送中后，所有人用它访问
+                  Google、YouTube、Gemini 等都会受影响。
                 </div>
                 <div>iPhone：设置 → 隐私与安全性 → 定位服务，关闭。</div>
                 <div>安卓：下拉快捷开关，关闭「位置信息」。</div>
