@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import ActivationCodesModal, { activationCodeExpiry } from '@/pages/plans/ActivationCodesModal';
 import { HttpUtil, Msg } from '@/utils';
-import { renderWithProviders } from './test-utils';
+import { chooseSelectOption, listSelectOptions, renderWithProviders } from './test-utils';
 
 const plan = {
   id: 2,
@@ -89,6 +89,28 @@ describe('activation codes', () => {
       '/panel/api/plans/codes/add',
       { planId: 2, count: 1, totalGB: 10 * 1024 ** 3, days: 30, resetDay: 22, note: '' },
       expect.anything(),
+    );
+  });
+
+  // A plan sold by terms gets codes for one of those terms only, the shortest offered first.
+  it('offers only the terms of a plan sold by them', async () => {
+    get.mockResolvedValue(new Msg(true, '', []));
+    post.mockResolvedValue(new Msg(true, '', [code]));
+    renderWithProviders(
+      <ActivationCodesModal plan={{ ...plan, termDays: [90, 365] }} onClose={() => {}} />,
+    );
+    const days = screen.getByLabelText('Validity in days').id;
+    const shown = document.getElementById(days)?.closest('.ant-select');
+    expect(shown?.querySelector('.ant-select-content')?.textContent).toBe('季付（90 天）');
+    expect(listSelectOptions(days)).toEqual(['季付（90 天）', '年付（365 天）']);
+    chooseSelectOption(days, '年付（365 天）');
+    fireEvent.click(screen.getByRole('button', { name: 'Create codes' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/panel/api/plans/codes/add',
+        expect.objectContaining({ planId: 2, days: 365 }),
+        expect.anything(),
+      ),
     );
   });
 });

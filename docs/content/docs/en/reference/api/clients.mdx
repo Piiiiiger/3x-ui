@@ -139,8 +139,10 @@ _openapi:
         whose period starts at first use gets a longer one. resetUsage also
         zeroes usage and re-enables the client; without it, only a client
         auto-disabled for expiry or quota is re-enabled, once the renewal lifts
-        it out of depletion. days must be at least 1.'
-      url: '#renew-clients-each-expiry-moves-forward-by-days-from-the-later-of-now-and-the-current-expiry-a-client-without-an-expiry-keeps-none-and-one-whose-period-starts-at-first-use-gets-a-longer-one-resetusage-also-zeroes-usage-and-re-enables-the-client-without-it-only-a-client-auto-disabled-for-expiry-or-quota-is-re-enabled-once-the-renewal-lifts-it-out-of-depletion-days-must-be-at-least-1'
+        it out of depletion. days must be at least 1, and one of the terms of
+        the plan each client is on when that plan has termDays; otherwise nobody
+        is renewed.'
+      url: '#renew-clients-each-expiry-moves-forward-by-days-from-the-later-of-now-and-the-current-expiry-a-client-without-an-expiry-keeps-none-and-one-whose-period-starts-at-first-use-gets-a-longer-one-resetusage-also-zeroes-usage-and-re-enables-the-client-without-it-only-a-client-auto-disabled-for-expiry-or-quota-is-re-enabled-once-the-renewal-lifts-it-out-of-depletion-days-must-be-at-least-1-and-one-of-the-terms-of-the-plan-each-client-is-on-when-that-plan-has-termdays-otherwise-nobody-is-renewed'
     - depth: 2
       title: 'Shift expiry and/or traffic quota for many clients in one call.
         addDays/addBytes may be negative. Clients with unlimited expiry
@@ -413,8 +415,10 @@ _openapi:
           whose period starts at first use gets a longer one. resetUsage also
           zeroes usage and re-enables the client; without it, only a client
           auto-disabled for expiry or quota is re-enabled, once the renewal
-          lifts it out of depletion. days must be at least 1.'
-        id: renew-clients-each-expiry-moves-forward-by-days-from-the-later-of-now-and-the-current-expiry-a-client-without-an-expiry-keeps-none-and-one-whose-period-starts-at-first-use-gets-a-longer-one-resetusage-also-zeroes-usage-and-re-enables-the-client-without-it-only-a-client-auto-disabled-for-expiry-or-quota-is-re-enabled-once-the-renewal-lifts-it-out-of-depletion-days-must-be-at-least-1
+          lifts it out of depletion. days must be at least 1, and one of the
+          terms of the plan each client is on when that plan has termDays;
+          otherwise nobody is renewed.'
+        id: renew-clients-each-expiry-moves-forward-by-days-from-the-later-of-now-and-the-current-expiry-a-client-without-an-expiry-keeps-none-and-one-whose-period-starts-at-first-use-gets-a-longer-one-resetusage-also-zeroes-usage-and-re-enables-the-client-without-it-only-a-client-auto-disabled-for-expiry-or-quota-is-re-enabled-once-the-renewal-lifts-it-out-of-depletion-days-must-be-at-least-1-and-one-of-the-terms-of-the-plan-each-client-is-on-when-that-plan-has-termdays-otherwise-nobody-is-renewed
       - content: 'Shift expiry and/or traffic quota for many clients in one call.
           addDays/addBytes may be negative. Clients with unlimited expiry
           (expiryTime=0) or unlimited traffic (totalGB=0) are skipped for the

@@ -20,6 +20,7 @@ import {
 } from 'antd';
 import {
   AppstoreOutlined,
+  CalendarOutlined,
   ClusterOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -45,7 +46,7 @@ import type { PlanFormValues } from '@/schemas/plan';
 import AssignPlanModal from './AssignPlanModal';
 import PlanFormModal from './PlanFormModal';
 import ActivationCodesModal from './ActivationCodesModal';
-import { useInboundChoices } from './planText';
+import { termsText, useInboundChoices } from './planText';
 import { usePlanNodeOptions } from '@/api/queries/usePlanNodeOptions';
 import './PlansPage.css';
 
@@ -265,6 +266,9 @@ export default function PlansPage() {
             <PlanRow icon={<SafetyOutlined />} label={t('pages.clients.limitIp')}>
               {ipLimitOf(plan)}
             </PlanRow>
+            <PlanRow icon={<CalendarOutlined />} label="计费周期">
+              {termsText(plan.termDays)}
+            </PlanRow>
             <PlanRow icon={<ClusterOutlined />} label={t('pages.plans.servers')}>
               {nodesOf(plan)}
             </PlanRow>
@@ -296,6 +300,7 @@ export default function PlansPage() {
             key: 'ip',
             render: (_, plan) => ipLimitOf(plan),
           },
+          { title: '计费周期', key: 'terms', render: (_, plan) => termsText(plan.termDays) },
           { title: t('pages.plans.servers'), key: 'nodes', render: (_, plan) => nodesOf(plan) },
           { title: t('pages.plans.people'), key: 'users', render: (_, plan) => membersOf(plan) },
           {

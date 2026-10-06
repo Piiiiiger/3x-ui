@@ -10,6 +10,7 @@ import { useRuleTemplatesQuery } from '@/api/queries/useRuleTemplates';
 import type { PlanSummary } from '@/generated/zod';
 import { PlanFormSchema, type PlanFormValues } from '@/schemas/plan';
 import { usePlanNodeOptions } from '@/api/queries/usePlanNodeOptions';
+import { PLAN_TERMS, termLabel } from './planText';
 
 // reapplyLimits rides along in the form so reopening the modal resets it too.
 type PlanFormState = PlanFormValues & { reapplyLimits: boolean };
@@ -27,6 +28,7 @@ function initialState(plan: PlanSummary | null): PlanFormState {
       inboundIds: [...group.inboundIds],
       nodeKeys: group.nodeKeys ? [...group.nodeKeys] : undefined,
     })),
+    termDays: [...(plan?.termDays ?? [])],
     reapplyLimits: false,
   };
 }
@@ -169,6 +171,16 @@ export default function PlanFormModal({ open, plan, onClose, onConfirm }: PlanFo
             tooltip={t('pages.plans.zeroUnlimited')}
           >
             <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+          </FormField>
+
+          <FormField
+            label="计费周期"
+            name="termDays"
+            extra="勾选后，续期和激活码只能用这些周期；都不勾表示不限。"
+          >
+            <Checkbox.Group
+              options={PLAN_TERMS.map((days) => ({ value: days, label: termLabel(days) }))}
+            />
           </FormField>
 
           {nodeQuery.isError && <Alert type="error" title="节点加载失败，请刷新后重试" />}

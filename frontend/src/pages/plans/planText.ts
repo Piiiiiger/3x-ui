@@ -37,3 +37,17 @@ export function useInboundChoices() {
     return { options, flat, labelOf: (id: number) => byId.get(id) ?? `#${id}` };
   }, [inbounds, nodes, t]);
 }
+
+// The terms a plan can be sold by, and how people name them.
+export const PLAN_TERMS = [30, 90, 180, 365];
+const TERM_NAMES: Record<number, string> = { 30: '月付', 90: '季付', 180: '半年付', 365: '年付' };
+
+export function termLabel(days: number): string {
+  const name = TERM_NAMES[days];
+  return name ? `${name}（${days} 天）` : `${days} 天`;
+}
+
+export function termsText(days: number[] | undefined): string {
+  if (!days?.length) return '不限';
+  return days.map((d) => TERM_NAMES[d] ?? `${d} 天`).join(' · ');
+}

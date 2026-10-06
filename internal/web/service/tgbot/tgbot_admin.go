@@ -329,14 +329,25 @@ func (t *Tgbot) renewMenuView(id int, reset bool, now time.Time) botView {
 		r, toggle = 1, "☑️ 同时清零已用流量"
 	}
 	text := fmt.Sprintf("🔁 为 <b>%s</b> 续期\n当前到期：%s\n天数从当前到期日往后加；已到期的从现在算。", esc(rec.Email), expiryText(rec.ExpiryTime, now))
-	days := make([]telego.InlineKeyboardButton, 0, len(renewDayChoices))
-	for _, d := range renewDayChoices {
-		days = append(days, button(fmt.Sprintf("+%d 天", d), fmt.Sprintf("pg:a:rc:%d:%d:%d", id, d, r)))
+	choices := renewDayChoices
+	var plan model.Plan
+	if rec.PlanId > 0 && database.GetDB().First(&plan, rec.PlanId).Error == nil {
+		if terms := service.PlanTermDays(&plan); len(terms) > 0 {
+			choices = terms
+			text += fmt.Sprintf("\n套餐「%s」只按这些周期续费。", esc(plan.Name))
+		}
 	}
-	return botView{text, keyboard(days[:3], days[3:],
+	var rows [][]telego.InlineKeyboardButton
+	for i, d := range choices {
+		if i%3 == 0 {
+			rows = append(rows, nil)
+		}
+		rows[len(rows)-1] = append(rows[len(rows)-1], button(fmt.Sprintf("+%d 天", d), fmt.Sprintf("pg:a:rc:%d:%d:%d", id, d, r)))
+	}
+	return botView{text, keyboard(append(rows,
 		[]telego.InlineKeyboardButton{button(toggle, fmt.Sprintf("pg:a:r:%d:%d", id, 1-r))},
 		cardBack(id),
-	)}
+	)...)}
 }
 
 func (t *Tgbot) renewConfirmView(id, days int, reset bool, now time.Time) botView {

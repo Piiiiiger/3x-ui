@@ -5753,6 +5753,17 @@ export const SCHEMAS: Record<string, unknown> = {
       "templateId": {
         "example": 1,
         "type": "integer"
+      },
+      "termDays": {
+        "description": "TermDays are the only terms the plan is sold and renewed by; none allows any.",
+        "example": [
+          90,
+          365
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
       }
     },
     "required": [
@@ -5858,6 +5869,16 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "TemplateId is the rule template its members' Clash subscriptions use; 0 is the\ndefault template.",
         "example": 1,
         "type": "integer"
+      },
+      "termDays": {
+        "example": [
+          90,
+          365
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
       },
       "updatedAt": {
         "example": 1735689600000,

@@ -5779,6 +5779,17 @@
           "templateId": {
             "example": 1,
             "type": "integer"
+          },
+          "termDays": {
+            "description": "TermDays are the only terms the plan is sold and renewed by; none allows any.",
+            "example": [
+              90,
+              365
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -5884,6 +5895,16 @@
             "description": "TemplateId is the rule template its members' Clash subscriptions use; 0 is the\ndefault template.",
             "example": 1,
             "type": "integer"
+          },
+          "termDays": {
+            "example": [
+              90,
+              365
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
           },
           "updatedAt": {
             "example": 1735689600000,
@@ -13021,7 +13042,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "Renew clients: each expiry moves forward by days from the later of now and the current expiry. A client without an expiry keeps none, and one whose period starts at first use gets a longer one. resetUsage also zeroes usage and re-enables the client; without it, only a client auto-disabled for expiry or quota is re-enabled, once the renewal lifts it out of depletion. days must be at least 1.",
+        "summary": "Renew clients: each expiry moves forward by days from the later of now and the current expiry. A client without an expiry keeps none, and one whose period starts at first use gets a longer one. resetUsage also zeroes usage and re-enables the client; without it, only a client auto-disabled for expiry or quota is re-enabled, once the renewal lifts it out of depletion. days must be at least 1, and one of the terms of the plan each client is on when that plan has termDays; otherwise nobody is renewed.",
         "operationId": "post_panel_api_clients_renew",
         "requestBody": {
           "required": true,
@@ -16651,7 +16672,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days counted from creation (including unused time), and monthly reset day. Expired codes cannot be redeemed; renewal adds only their remaining validity. Zero means unlimited quota, no expiry or no reset respectively.",
+        "summary": "Create 1 to 200 single-use activation codes for a plan with nodes. Each grants the quota in bytes, validity in days counted from creation (including unused time), and monthly reset day. Expired codes cannot be redeemed; renewal adds only their remaining validity. Zero means unlimited quota, no expiry or no reset respectively. A plan with termDays only takes days that are one of its terms.",
         "operationId": "post_panel_api_plans_codes_add",
         "requestBody": {
           "required": true,
@@ -16826,6 +16847,10 @@
                       "remark": "Hong Kong and Singapore",
                       "sortIndex": 0,
                       "templateId": 1,
+                      "termDays": [
+                        90,
+                        365
+                      ],
                       "updatedAt": 1735689600000
                     }
                   ]
@@ -16841,7 +16866,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Create a plan. Inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template. limitIp 0 means no IP limit.",
+        "summary": "Create a plan. Inbound ids must exist. templateId names the rule template members' Clash subscriptions use; 0 leaves them on the default template. limitIp 0 means no IP limit. termDays, 1 to 36500 each, are the only terms the plan is sold and renewed by (renewals and activation codes); none allows any.",
         "operationId": "post_panel_api_plans_add",
         "requestBody": {
           "required": true,
@@ -16858,6 +16883,10 @@
                 "inboundIds": [
                   1,
                   2
+                ],
+                "termDays": [
+                  90,
+                  365
                 ]
               }
             }
@@ -16906,7 +16935,7 @@
         "tags": [
           "Plans"
         ],
-        "summary": "Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan IP limit is also re-stamped onto them; their quota, expiry and usage are left alone.",
+        "summary": "Replace a plan. Every client on the plan is attached to the inbounds the plan gained and detached from those it lost; their other inbounds stay. With applyToMembers, the plan IP limit is also re-stamped onto them; their quota, expiry and usage are left alone. termDays replaces the terms of the plan; leaving it out allows any.",
         "operationId": "post_panel_api_plans_update_id",
         "parameters": [
           {

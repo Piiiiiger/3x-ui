@@ -1694,7 +1694,11 @@ export const EXAMPLES: Record<string, unknown> = {
       }
     ],
     "remark": "Hong Kong and Singapore",
-    "templateId": 1
+    "templateId": 1,
+    "termDays": [
+      90,
+      365
+    ]
   },
   "PlanProxyGroup": {
     "inboundIds": [
@@ -1737,6 +1741,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "remark": "Hong Kong and Singapore",
     "sortIndex": 0,
     "templateId": 1,
+    "termDays": [
+      90,
+      365
+    ],
     "updatedAt": 1735689600000
   },
   "PortalProbe": {

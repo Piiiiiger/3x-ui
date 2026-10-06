@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,6 +38,8 @@ type PlanInput struct {
 	InboundIds  []int            `json:"inboundIds" example:"[1,2]"`
 	ProxyGroups []PlanProxyGroup `json:"proxyGroups,omitempty"`
 	NodeKeys    []string         `json:"nodeKeys,omitempty"`
+	// TermDays are the only terms the plan is sold and renewed by; none allows any.
+	TermDays []int `json:"termDays,omitempty" example:"[90,365]"`
 }
 
 // PlanSummary is a plan with the inbounds it grants and how many clients use it.
@@ -47,6 +50,7 @@ type PlanSummary struct {
 	ProxyGroupNames []string         `json:"proxyGroupNames,omitempty"`
 	MemberCount     int              `json:"memberCount" example:"4"`
 	NodeKeys        []string         `json:"nodeKeys,omitempty"`
+	TermDays        []int            `json:"termDays,omitempty" example:"[90,365]"`
 }
 
 const planDayMillis = int64(24 * time.Hour / time.Millisecond)
@@ -83,6 +87,7 @@ func (s *PlanService) List() ([]PlanSummary, error) {
 			InboundIds:      ids,
 			ProxyGroups:     groups,
 			NodeKeys:        nodeKeys,
+			TermDays:        PlanTermDays(&p),
 			ProxyGroupNames: planTemplateGroupNames(db, p.TemplateId),
 			MemberCount:     int(members),
 		})
@@ -422,6 +427,12 @@ func validatePlanInput(tx *gorm.DB, selfId int, in *PlanInput) error {
 	if in.LimitIP < 0 {
 		return common.NewError("the IP limit cannot be negative")
 	}
+	for _, days := range in.TermDays {
+		if days < 1 || days > activationCodeMaxDays {
+			return common.NewErrorf("a term is 1 to %d days", activationCodeMaxDays)
+		}
+	}
+	in.TermDays = uniqueSortedIds(in.TermDays)
 	if in.TemplateId < 0 {
 		in.TemplateId = 0
 	}
@@ -463,6 +474,37 @@ func applyPlanInput(plan *model.Plan, in PlanInput) {
 		encoded, _ := json.Marshal(in.NodeKeys)
 		plan.NodeKeys = string(encoded)
 	}
+	plan.TermDays = ""
+	if len(in.TermDays) > 0 {
+		encoded, _ := json.Marshal(in.TermDays)
+		plan.TermDays = string(encoded)
+	}
+}
+
+// PlanTermDays are the only terms a plan is sold and renewed by; none allows any.
+func PlanTermDays(plan *model.Plan) []int {
+	var days []int
+	if plan == nil || plan.TermDays == "" || json.Unmarshal([]byte(plan.TermDays), &days) != nil {
+		return nil
+	}
+	return days
+}
+
+// checkPlanTerm refuses days that are not one of the plan's terms.
+func checkPlanTerm(plan *model.Plan, days int, refusal string) error {
+	terms := PlanTermDays(plan)
+	if len(terms) == 0 || slices.Contains(terms, days) {
+		return nil
+	}
+	list := make([]string, len(terms))
+	for i, d := range terms {
+		list[i] = strconv.Itoa(d)
+	}
+	words := list[len(list)-1]
+	if len(list) > 1 {
+		words = strings.Join(list[:len(list)-1], ", ") + " or " + words
+	}
+	return common.NewErrorf(refusal, plan.Name, words)
 }
 
 func replacePlanInbounds(tx *gorm.DB, planId int, inboundIds []int) error {

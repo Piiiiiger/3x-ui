@@ -28,7 +28,10 @@ const plan = (
   updatedAt: 0,
 });
 
-const PLANS = [plan(1, 'Starter 125G', 5, 1, [7, 8]), plan(2, 'Duo 150G', 0, 4, [7])];
+const PLANS = [
+  plan(1, 'Starter 125G', 5, 1, [7, 8]),
+  { ...plan(2, 'Duo 150G', 0, 4, [7]), termDays: [90, 365] },
+];
 const TEMPLATES = [
   {
     id: 3,
@@ -100,10 +103,12 @@ describe('PlansPage', () => {
     const labels = Array.from(cardOf('Starter 125G').querySelectorAll('.plan-row-label')).map(
       (el) => el.textContent,
     );
-    expect(labels).toEqual(['Rule template', 'IP Limit', 'Nodes', 'Users']);
+    expect(labels).toEqual(['Rule template', 'IP Limit', '计费周期', 'Nodes', 'Users']);
     expect(
       within(cardOf('Starter 125G')).getByText('3', { selector: '.plan-row-value' }),
     ).toBeTruthy();
+    expect(within(cardOf('Starter 125G')).getByText('不限')).toBeTruthy();
+    expect(within(cardOf('Duo 150G')).getByText('季付 · 年付')).toBeTruthy();
   });
 
   it('says so when a plan names no template and none is the default', async () => {

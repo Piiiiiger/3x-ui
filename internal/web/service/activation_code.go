@@ -69,10 +69,12 @@ func (s *ActivationCodeService) Create(in ActivationCodeInput) ([]model.Activati
 	case utf8.RuneCountInString(in.Note) > 256:
 		return nil, common.NewError("the note must be at most 256 characters")
 	}
-	if _, inboundIds, err := s.planService.Get(in.PlanId); err != nil {
+	if plan, inboundIds, err := s.planService.Get(in.PlanId); err != nil {
 		return nil, err
 	} else if len(inboundIds) == 0 {
 		return nil, common.NewError("the plan has no nodes yet, so a code for it would give nothing")
+	} else if err := checkPlanTerm(plan, in.Days, "plan %q is sold by %s days only"); err != nil {
+		return nil, err
 	}
 	codes := make([]model.ActivationCode, 0, in.Count)
 	err := database.GetDB().Transaction(func(tx *gorm.DB) error {

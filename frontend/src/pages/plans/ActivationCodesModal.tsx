@@ -8,6 +8,7 @@ import {
   InputNumber,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Table,
   Tag,
@@ -21,6 +22,7 @@ import { useActivationCodes } from '@/api/queries/useActivationCodes';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { ActivationCodeFormSchema, type ActivationCodeFormValues } from '@/schemas/activationCode';
 import { ClipboardManager, SizeFormatter } from '@/utils';
+import { termLabel } from './planText';
 
 export function activationCodeExpiry(code: { days: number; createdAt: number }, now: number) {
   const expiresAt = code.days > 0 ? code.createdAt + code.days * 86_400_000 : 0;
@@ -51,8 +53,9 @@ export default function ActivationCodesModal({
     };
   }, []);
   const [messageApi, contextHolder] = message.useMessage();
+  const terms = plan.termDays ?? [];
   const methods = useForm<ActivationCodeFormValues>({
-    defaultValues: { count: 1, quotaGB: 0, days: 30, resetDay: 0, note: '' },
+    defaultValues: { count: 1, quotaGB: 0, days: terms[0] ?? 30, resetDay: 0, note: '' },
   });
 
   async function create(values: ActivationCodeFormValues) {
@@ -107,7 +110,11 @@ export default function ActivationCodesModal({
               label={t('pages.plans.codes.days')}
               rules={{ validate: rhfZodValidate(ActivationCodeFormSchema.shape.days) }}
             >
-              <InputNumber min={0} max={36500} precision={0} style={{ width: '100%' }} />
+              {terms.length > 0 ? (
+                <Select options={terms.map((days) => ({ value: days, label: termLabel(days) }))} />
+              ) : (
+                <InputNumber min={0} max={36500} precision={0} style={{ width: '100%' }} />
+              )}
             </FormField>
             <FormField
               name="resetDay"

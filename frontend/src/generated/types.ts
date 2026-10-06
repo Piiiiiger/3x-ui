@@ -1287,6 +1287,7 @@ export interface PlanInput {
   proxyGroups?: PlanProxyGroup[];
   remark: string;
   templateId: number;
+  termDays?: number[];
 }
 
 export interface PlanProxyGroup {
@@ -1308,6 +1309,7 @@ export interface PlanSummary {
   remark: string;
   sortIndex: number;
   templateId: number;
+  termDays?: number[];
   updatedAt: number;
 }
 

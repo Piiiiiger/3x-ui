@@ -16,7 +16,10 @@ type Plan struct {
 	ProxyGroups string `json:"-" gorm:"column:proxy_groups;type:text;default:''"`
 	// NodeKeys distinguishes direct and relay subscription variants of an inbound.
 	// Empty storage keeps the historical behavior of including both variants.
-	NodeKeys  string `json:"-" gorm:"column:node_keys;type:text;default:''"`
+	NodeKeys string `json:"-" gorm:"column:node_keys;type:text;default:''"`
+	// TermDays lists, as JSON, the only terms in days the plan is sold and renewed by;
+	// empty allows any.
+	TermDays  string `json:"-" gorm:"column:term_days;type:text;default:''"`
 	SortIndex int    `json:"sortIndex" gorm:"column:sort_index;default:0" example:"0"`
 	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime:milli" example:"1735689600000"`
 	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime:milli" example:"1735689600000"`

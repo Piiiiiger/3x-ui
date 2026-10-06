@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
@@ -14,6 +15,11 @@ import (
 func (s *ClientService) Renew(inboundSvc *InboundService, emails []string, days int, resetUsage bool) (bool, error) {
 	if _, err := RenewedExpiry(0, days, time.Now()); err != nil {
 		return false, err
+	}
+	for _, email := range emails {
+		if err := s.checkRenewalTerm(email, days); err != nil {
+			return false, err
+		}
 	}
 	needRestart := false
 	for _, email := range emails {
@@ -94,4 +100,18 @@ func depletedNow(email string) (bool, error) {
 	var found int64
 	err := db.Model(xray.ClientTraffic{}).Where(cond+" AND email = ?", append(args, email)...).Count(&found).Error
 	return found > 0, err
+}
+
+// checkRenewalTerm refuses days that are not one of the terms the user's plan is
+// sold by, before any user of the renewal changes.
+func (s *ClientService) checkRenewalTerm(email string, days int) error {
+	rec, err := s.GetRecordByEmail(nil, email)
+	if err != nil || rec.PlanId == 0 {
+		return err
+	}
+	var plan model.Plan
+	if err := database.GetDB().First(&plan, rec.PlanId).Error; err != nil {
+		return err
+	}
+	return checkPlanTerm(&plan, days, email+" is on plan %q, which renews by %s days only")
 }

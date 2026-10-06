@@ -80,7 +80,35 @@ describe('PlanFormModal', () => {
   // Quota, validity and reset belong to each user now; a plan is its servers, rules and IP limit.
   it('asks only for what a plan holds', () => {
     renderWithProviders(<PlanFormModal open plan={plan} onClose={() => {}} onConfirm={vi.fn()} />);
-    expect(fieldLabels()).toEqual(['Name', 'IP Limit', 'Nodes', 'Rule template', 'Remark']);
+    expect(fieldLabels()).toEqual([
+      'Name',
+      'IP Limit',
+      '计费周期',
+      'Nodes',
+      'Rule template',
+      'Remark',
+    ]);
+  });
+
+  // A plan sold only by some terms saves them, shortest first; none ticked sells it for any.
+  it('saves the terms the plan is sold by', async () => {
+    const onConfirm = vi.fn();
+    renderWithProviders(
+      <PlanFormModal
+        open
+        plan={{ ...plan, termDays: [30] }}
+        onClose={() => {}}
+        onConfirm={onConfirm}
+      />,
+    );
+    const monthly = screen.getByRole('checkbox', { name: '月付（30 天）' }) as HTMLInputElement;
+    expect(monthly.checked).toBe(true);
+    fireEvent.click(monthly);
+    fireEvent.click(screen.getByRole('checkbox', { name: '年付（365 天）' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '季付（90 天）' }));
+    await save();
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
+    expect(onConfirm.mock.calls[0][0].termDays).toEqual([90, 365]);
   });
 
   // Ticked by default, every edit re-stamped the members' limits, even one that only added a server.

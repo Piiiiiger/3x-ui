@@ -186,3 +186,30 @@ func TestAdminRenewalListShowsOnlyUsersDueOrRecentlyLapsed(t *testing.T) {
 		}
 	}
 }
+
+// The renew menu offers only the terms a user's plan is sold by.
+func TestRenewMenuOffersOnlyThePlansTerms(t *testing.T) {
+	tb, rec := newPiggerBot(t)
+	ib := seedVlessInbound(t, "a")
+	alice := seedClient(t, "alice", []int{ib}, func(c *model.Client) { c.ExpiryTime = time.Now().Add(5 * 24 * time.Hour).UnixMilli() })
+	plan, err := (&service.PlanService{}).Create(service.PlanInput{Name: "SG", InboundIds: []int{ib}, TermDays: []int{90, 365}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := (&service.PlanService{}).Assign(&service.InboundService{}, []string{"alice"}, plan.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	tb.tap(adminTgID, fmt.Sprintf("pg:a:r:%d:0", alice.Id))
+	menu := rec.last(t)
+	for _, want := range []string{"+90 天", "+365 天"} {
+		if !menu.hasButton(want) {
+			t.Errorf("the menu lacks %q: %v", want, menu.Labels)
+		}
+	}
+	for _, other := range []string{"+7 天", "+30 天", "+180 天"} {
+		if menu.hasButton(other) {
+			t.Errorf("the menu offers %q, which the plan is not sold by", other)
+		}
+	}
+}

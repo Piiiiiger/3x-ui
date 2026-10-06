@@ -1391,6 +1391,7 @@ export const PlanInputSchema = z.object({
   proxyGroups: z.array(z.lazy(() => PlanProxyGroupSchema)).optional(),
   remark: z.string(),
   templateId: z.number().int(),
+  termDays: z.array(z.number().int()).optional(),
 });
 export type PlanInput = z.infer<typeof PlanInputSchema>;
 
@@ -1414,6 +1415,7 @@ export const PlanSummarySchema = z.object({
   remark: z.string(),
   sortIndex: z.number().int(),
   templateId: z.number().int(),
+  termDays: z.array(z.number().int()).optional(),
   updatedAt: z.number().int(),
 });
 export type PlanSummary = z.infer<typeof PlanSummarySchema>;

@@ -17,5 +17,7 @@ export const PlanFormSchema = z.object({
   inboundIds: z.array(z.number().int().positive()),
   nodeKeys: z.array(z.string().regex(/^[1-9]\d*:(direct|relay(?::[1-9]\d*)?)$/)).optional(),
   proxyGroups: z.array(PlanProxyGroupSchema).optional(),
+  // The only terms, in days, the plan is sold and renewed by; empty allows any.
+  termDays: z.array(z.number().int().min(1).max(36500)).optional(),
 });
 export type PlanFormValues = z.infer<typeof PlanFormSchema>;
