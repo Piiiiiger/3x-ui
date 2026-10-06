@@ -773,12 +773,11 @@
       "intro": "Dinlenen portlar, protokoller ve taşıma türleri ile her birinin hizmet verdiği kullanıcılar.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Snell v5 kurulu bir agent sunucusu gerekir. Bu düğümü planlar üzerinden atayın. Tüm kullanıcılar tek bir anahtarı (PSK) paylaşır, bu yüzden Snell onları ayırt edemez: tek kullanıcısı varsa trafiği o kullanıcının kullanımına ve kotasına sayılır ve kullanıcı devre dışı, süresi dolmuş ya da trafiği bitmişken durur; birden çok kullanıcı paylaşıyorsa trafik yalnızca sunucu için sayılır. Daha önce verilen kimlik bilgilerini iptal etmek için PSK'yı değiştirin.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Askıya alındı"
         }
       }
     },

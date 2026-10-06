@@ -773,12 +773,11 @@
       "intro": "Порти, протоколи й транспорти для вхідних підключень і користувачі кожного з них.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Потрібен хост-агент із встановленим Snell v5. Призначайте цей вузол через тарифи. Усі користувачі мають один спільний ключ (PSK), тому Snell не розрізняє їх: якщо користувач один, трафік зараховується до його використання та квоти, а вузол призупиняється, поки користувач вимкнений, прострочений або вичерпав трафік; якщо користувачів кілька, трафік враховується лише для сервера. Змініть PSK, щоб відкликати раніше видані дані.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Призупинено"
         }
       }
     },

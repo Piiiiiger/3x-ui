@@ -773,12 +773,11 @@
       "intro": "Port, protokol, dan transport yang didengarkan, beserta pengguna yang dilayani masing-masing.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Memerlukan host agen dengan Snell v5 terpasang. Tetapkan node ini melalui paket. Semua pengguna berbagi satu kunci (PSK), jadi Snell tidak dapat membedakan mereka: dengan satu pengguna, trafiknya dihitung ke penggunaan dan kuota pengguna itu dan node berhenti selama pengguna dinonaktifkan, kedaluwarsa, atau kehabisan trafik; bila dipakai bersama beberapa pengguna, trafiknya hanya dihitung untuk server. Ganti PSK untuk mencabut kredensial yang sudah diberikan.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Ditangguhkan"
         }
       }
     },

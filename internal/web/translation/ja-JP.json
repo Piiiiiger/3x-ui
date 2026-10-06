@@ -773,12 +773,11 @@
       "intro": "待ち受けポート、プロトコル、トランスポートと、それぞれが受け持つユーザー。",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Snell v5 をインストールしたエージェントホストが必要です。このノードはプランで割り当ててください。全ユーザーが 1 つの鍵（PSK）を共有するため、Snell はユーザーを区別できません。ユーザーが 1 人だけの場合、トラフィックはそのユーザーの使用量とクォータに計上され、そのユーザーが無効・期限切れ・トラフィック超過の間は停止します。複数のユーザーで共有している場合、トラフィックはサーバー分としてのみ計上されます。発行済みの認証情報を無効にするには PSK を変更してください。",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "一時停止中"
         }
       }
     },

@@ -353,12 +353,11 @@
     "inbounds": {
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Users share one key (PSK), so Snell cannot tell them apart: with a single user, its traffic counts toward that user's usage and quota, and it stops while that user is disabled, expired or out of traffic; shared by several users, its traffic counts for the server only. Rotate the PSK to revoke previously issued credentials.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -367,7 +366,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Suspended"
         }
       },
       "totalDownUp": "Total Sent/Received",

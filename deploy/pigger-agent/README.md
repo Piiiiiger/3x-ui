@@ -53,7 +53,13 @@ absolute expiry is enforced while the agent runs. Standalone services are never
 adopted automatically: stop the specific old listener before enabling its
 replacement, and keep the original configuration for rollback.
 
-Snell uses a shared PSK, not individual panel user credentials. Plan assignment
-controls subscription visibility only. Per-user byte accounting, traffic/IP
-limits and independent revocation cannot be enforced. Rotate the PSK to revoke
-previously issued access; existing clients must refresh their configurations.
+Snell uses a shared PSK, not individual panel user credentials, so it cannot
+tell users apart. The agent counts each Snell port's traffic with nftables
+counters in a table of its own (`inet pigger_snell`, counters only, accepts
+everything) and reports it as the inbound's traffic; without `nft`, Snell runs
+uncounted. When exactly one user has access to a Snell inbound, its traffic
+counts toward that user's usage and quota, and the panel stops the listener
+while that user is disabled, expired or out of traffic. Shared by several users,
+its traffic counts for the host only, and IP limits and per-user revocation
+cannot be enforced. Rotate the PSK to revoke previously issued access; existing
+clients must refresh their configurations.

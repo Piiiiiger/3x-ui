@@ -773,12 +773,11 @@
       "intro": "پورت‌ها، پروتکل‌ها و ترنسپورت‌های در حال شنود، همراه با کاربران هر کدام.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "به میزبان agent با Snell v5 نصب‌شده نیاز دارد. این نود را از طریق پلن‌ها اختصاص دهید. همهٔ کاربران یک کلید مشترک (PSK) دارند، پس Snell آن‌ها را از هم تشخیص نمی‌دهد: اگر فقط یک کاربر داشته باشد، ترافیکش جزو مصرف و سهمیهٔ همان کاربر حساب می‌شود و تا وقتی آن کاربر غیرفعال، منقضی یا بدون ترافیک باشد متوقف می‌ماند؛ اگر بین چند کاربر مشترک باشد، ترافیک فقط برای سرور ثبت می‌شود. برای لغو اعتبارنامه‌های صادرشده، PSK را عوض کنید.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "معلق"
         }
       }
     },

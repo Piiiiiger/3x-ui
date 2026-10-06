@@ -773,12 +773,11 @@
       "intro": "Puertos, protocolos y transportes de escucha, con los usuarios que atiende cada uno.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Requiere un host agente con Snell v5 instalado. Asigna este nodo mediante planes. Todos los usuarios comparten una clave (PSK), así que Snell no puede distinguirlos: con un solo usuario, su tráfico cuenta en el uso y la cuota de ese usuario y se detiene mientras esté deshabilitado, caducado o sin tráfico; compartido por varios usuarios, su tráfico solo cuenta para el servidor. Cambia la PSK para revocar las credenciales emitidas.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Suspendido"
         }
       }
     },

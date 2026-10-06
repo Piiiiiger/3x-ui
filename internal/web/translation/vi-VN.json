@@ -773,12 +773,11 @@
       "intro": "Cổng, giao thức và phương thức truyền tải đang lắng nghe, cùng người dùng của từng inbound.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "Yêu cầu máy chủ agent đã cài Snell v5. Gán node này qua các gói. Mọi người dùng chung một khóa (PSK) nên Snell không phân biệt được họ: khi chỉ có một người dùng, lưu lượng được tính vào mức sử dụng và hạn mức của người đó, và node tạm ngưng khi người đó bị vô hiệu hóa, hết hạn hoặc hết lưu lượng; khi nhiều người dùng chung, lưu lượng chỉ được tính cho máy chủ. Đổi PSK để thu hồi thông tin xác thực đã cấp.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "Tạm ngưng"
         }
       }
     },

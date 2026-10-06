@@ -442,38 +442,31 @@ export function useInboundColumns({
         align: 'center',
         width: 140,
         sorter: (a, b) => a.up + a.down - (b.up + b.down),
-        render: (_, record) =>
-          record.protocol === 'snell' ? (
-            <Tooltip title={t('pages.inbounds.snell.help')}>
-              <Tag>{t('pages.inbounds.snell.noStats')}</Tag>
-            </Tooltip>
-          ) : (
-            <Popover
-              content={
-                <table cellPadding={2}>
-                  <tbody>
+        render: (_, record) => (
+          <Popover
+            content={
+              <table cellPadding={2}>
+                <tbody>
+                  <tr>
+                    <td>↑ {SizeFormatter.sizeFormat(record.up)}</td>
+                    <td>↓ {SizeFormatter.sizeFormat(record.down)}</td>
+                  </tr>
+                  {record.total > 0 && record.up + record.down < record.total && (
                     <tr>
-                      <td>↑ {SizeFormatter.sizeFormat(record.up)}</td>
-                      <td>↓ {SizeFormatter.sizeFormat(record.down)}</td>
+                      <td>{t('remained')}</td>
+                      <td>{SizeFormatter.sizeFormat(record.total - record.up - record.down)}</td>
                     </tr>
-                    {record.total > 0 && record.up + record.down < record.total && (
-                      <tr>
-                        <td>{t('remained')}</td>
-                        <td>{SizeFormatter.sizeFormat(record.total - record.up - record.down)}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              }
-            >
-              <Tag
-                color={ColorUtils.usageColor(record.up + record.down, trafficDiff, record.total)}
-              >
-                {SizeFormatter.sizeFormat(record.up + record.down)} /{' '}
-                {record.total > 0 ? SizeFormatter.sizeFormat(record.total) : <InfinityIcon />}
-              </Tag>
-            </Popover>
-          ),
+                  )}
+                </tbody>
+              </table>
+            }
+          >
+            <Tag color={ColorUtils.usageColor(record.up + record.down, trafficDiff, record.total)}>
+              {SizeFormatter.sizeFormat(record.up + record.down)} /{' '}
+              {record.total > 0 ? SizeFormatter.sizeFormat(record.total) : <InfinityIcon />}
+            </Tag>
+          </Popover>
+        ),
       },
       {
         title: t('pages.inbounds.speed'),

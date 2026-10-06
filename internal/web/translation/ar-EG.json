@@ -773,12 +773,11 @@
       "intro": "المنافذ والبروتوكولات وطرق النقل المستمعة، مع المستخدمين الذين يخدمهم كل منها.",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "يتطلب مضيف agent مثبّتًا عليه Snell v5. خصّص هذه العقدة عبر الخطط. يتشارك جميع المستخدمين مفتاحًا واحدًا (PSK)، لذا لا يميّز Snell بينهم: إذا كان له مستخدم واحد تُحتسب حركة مروره ضمن استخدام هذا المستخدم وحصته، ويتوقف ما دام المستخدم معطّلًا أو منتهي الصلاحية أو نفدت حصته؛ وإذا تشاركه عدة مستخدمين تُحتسب حركة المرور للخادم فقط. غيّر الـ PSK لإلغاء بيانات الاعتماد الصادرة سابقًا.",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "معلّق"
         }
       }
     },

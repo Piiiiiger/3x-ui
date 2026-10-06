@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/snell"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/agentproto"
@@ -119,6 +120,10 @@ func (s *AgentService) HandleTraffic(nodeID int, t *agentproto.Traffic) error {
 	clients := make([]*xray.ClientTraffic, 0, len(t.Clients))
 	for _, c := range t.Clients {
 		clients = append(clients, &xray.ClientTraffic{Email: c.Name, Up: c.Up, Down: c.Down})
+	}
+	clients, err := creditSnellUsers(database.GetDB(), nodeID, inbounds, clients)
+	if err != nil {
+		return err
 	}
 	applied, err := s.inboundService.AddAgentTraffic(nodeID, t.Instance, t.Seq, inbounds, clients)
 	if err != nil || !applied || len(t.Abuse) == 0 {

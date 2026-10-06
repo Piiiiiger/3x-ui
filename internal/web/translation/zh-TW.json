@@ -773,12 +773,11 @@
       "intro": "監聽連接埠、協定與傳輸方式，以及每個節點下的使用者。",
       "snell": {
         "managed": "Independent Snell service managed by the agent",
-        "help": "Requires an agent host with Snell v5 installed. Assign this node through plans. Assignment controls subscription visibility only: users share a PSK; per-user quotas, rate/IP limits and access revocation are unavailable. Rotate the PSK to revoke previously issued credentials.",
+        "help": "需要安裝了 Snell v5 的 agent 主機。請透過方案分配此節點。所有使用者共用一個金鑰（PSK），Snell 無法區分使用者：只有一個使用者時，它的流量計入該使用者的用量和配額，該使用者被停用、過期或流量用盡時節點會暫停；多人共用時，流量只計入伺服器。更換 PSK 可撤銷已發放的憑證。",
         "psk": "Shared key (PSK)",
         "pskHelp": "Use 16–256 letters, digits or _ + / = - without spaces or line breaks.",
         "regenerate": "Generate a new key (invalidates the old key after saving)",
         "reuse": "Enable connection reuse in subscriptions",
-        "noStats": "Stats unavailable",
         "states": {
           "running": "Running",
           "starting": "Starting",
@@ -787,7 +786,8 @@
           "pending": "Pending",
           "unknown": "Unknown",
           "error": "Failed",
-          "expired": "Expired"
+          "expired": "Expired",
+          "suspended": "已暫停"
         }
       }
     },
