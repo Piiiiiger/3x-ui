@@ -106,6 +106,8 @@ func allModels() []any {
 		&model.AbuseEvent{},
 		&model.BanRecord{},
 		&model.PortalSignup{},
+		&model.RuleSet{},
+		&model.RuleSetVersion{},
 	}
 }
 
@@ -225,6 +227,9 @@ func initModels() error {
 		return err
 	}
 	if err := dropPlanLimitColumns(); err != nil {
+		return err
+	}
+	if err := ensureAIRuleSets(); err != nil {
 		return err
 	}
 	if IsPostgres() {

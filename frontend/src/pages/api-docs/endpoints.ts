@@ -1941,8 +1941,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/ruleTemplates/preview',
         summary:
-          "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. Refused for a plan without members.",
-        body: '{\n  "planId": 1,\n  "content": "DOMAIN-SUFFIX,example.com,DIRECT",\n  "baseId": 0\n}',
+          "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. ruleSets, by name, tries proposed rules in place of those rule sets' saved ones, checked as a rule set save would check them. Refused for a plan without members.",
+        body: '{\n  "planId": 1,\n  "content": "RULE-SET,ai,PROXY\\nMATCH,DIRECT",\n  "baseId": 0,\n  "ruleSets": { "ai": "DOMAIN-SUFFIX,example.com" }\n}',
         responseSchema: 'RuleTemplatePreview',
       },
       {
@@ -1953,6 +1953,62 @@ export const sections: readonly Section[] = [
         params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Template id.' }],
         body: '{\n  "baseId": 1,\n  "allowReorder": false,\n  "apply": false\n}',
         responseSchema: 'RuleTemplateConversion',
+      },
+    ],
+  },
+  {
+    id: 'rule-sets',
+    title: 'Rule sets',
+    description:
+      "Rule lists templates use as RULE-SET,<name>,<target> without declaring a rule-provider: the subscription writes the set's rules in that line's place, each sent to its target, so clients fetch nothing extra. RULE-SET,<name>:<provider>,<target> takes only the rules under that provider's headings. A set holds classical rules without targets (DOMAIN, DOMAIN-SUFFIX, DOMAIN-KEYWORD, DOMAIN-REGEX, IP-CIDR, IP-CIDR6, PROCESS-NAME), as plain lines or a payload list, with '# Provider / Tier' headings. A set may follow an upstream list: a daily check at 10:00 (UTC+8) fetches it and scores what changed since the last review, and the Telegram bot tells the admins when a review is due. Fetching never changes what subscriptions get; only a save does. Each save is kept as a version, the newest 30 per set.",
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/list',
+        summary:
+          'List the sets without their lists: how many rules each serves, when they were saved and reviewed, the last fetch and any failures in a row, and since when upstream has changes not yet reviewed.',
+        responseSchema: 'RuleSetSummary',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/get/:name',
+        summary:
+          "Get one set: the rules it serves, the upstream list as last reviewed and as last fetched, the latest list's hash for a save to name, and what upstream added and removed between the two, with risks flagged.",
+        params: [{ name: 'name', in: 'path', type: 'string', desc: 'Rule set name, e.g. ai.' }],
+        responseSchema: 'RuleSetDetail',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/update/:name',
+        summary:
+          'Save a review: the rules the set serves from now on, checked as a client would read them (no IP-ASN, options only no-resolve on IP rules, no repeats, at most 5000). reviewedHash, the latestHash the review read, marks that upstream list reviewed; one naming an older list is refused, since the review has not seen what changed after it. Without reviewedHash the reviewed list stays as it was. Kept as a version.',
+        params: [{ name: 'name', in: 'path', type: 'string', desc: 'Rule set name.' }],
+        body: '{\n  "rules": "# Example AI / Core\\nDOMAIN-SUFFIX,example.com",\n  "reviewedHash": "a3f1c2",\n  "note": "Example AI added"\n}',
+        responseSchema: 'RuleSetSummary',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/versions/:name',
+        summary: "List the set's kept versions, newest first, without their lists.",
+        params: [{ name: 'name', in: 'path', type: 'string', desc: 'Rule set name.' }],
+        responseSchema: 'RuleSetVersionView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/restore/:versionId',
+        summary:
+          'Put a kept version back: its rules and the upstream list it reviewed, so what upstream changed since then is pending again. The restore is itself a new version.',
+        params: [{ name: 'versionId', in: 'path', type: 'integer', desc: 'Version id.' }],
+        responseSchema: 'RuleSetSummary',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/check',
+        summary:
+          "Fetch every set's upstream list now, as the daily check does, and answer what changed since each review: per set the new and gone providers, the rules added and removed, and the score; overall the score with the days pending, the threshold, and whether a review is due.",
+        responseSchema: 'RuleSetWatch',
       },
     ],
   },

@@ -1575,6 +1575,79 @@ export const RealityScanResultSchema = z.object({
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
 
+export const RuleSetChangeSchema = z.object({
+  provider: z.string(),
+  risk: z.string().optional(),
+  rule: z.string(),
+  tier: z.string(),
+});
+export type RuleSetChange = z.infer<typeof RuleSetChangeSchema>;
+
+export const RuleSetChangesSchema = z.object({
+  added: z.array(z.lazy(() => RuleSetChangeSchema)),
+  goneProviders: z.array(z.string()),
+  name: z.string(),
+  newProviders: z.array(z.string()),
+  removed: z.array(z.lazy(() => RuleSetChangeSchema)),
+  reviewedAt: z.number().int(),
+  score: z.number(),
+});
+export type RuleSetChanges = z.infer<typeof RuleSetChangesSchema>;
+
+export const RuleSetDetailSchema = z.object({
+  changes: z.lazy(() => RuleSetChangesSchema),
+  fetchedAt: z.number().int(),
+  latest: z.string(),
+  latestHash: z.string(),
+  name: z.string(),
+  pendingSince: z.number().int(),
+  reviewed: z.string(),
+  reviewedAt: z.number().int(),
+  rules: z.string(),
+  upstreamUrl: z.string(),
+});
+export type RuleSetDetail = z.infer<typeof RuleSetDetailSchema>;
+
+export const RuleSetInputSchema = z.object({
+  note: z.string(),
+  reviewedHash: z.string(),
+  rules: z.string(),
+});
+export type RuleSetInput = z.infer<typeof RuleSetInputSchema>;
+
+export const RuleSetSummarySchema = z.object({
+  fetchError: z.string(),
+  fetchFailures: z.number().int(),
+  fetchedAt: z.number().int(),
+  name: z.string(),
+  pendingSince: z.number().int(),
+  reviewedAt: z.number().int(),
+  ruleCount: z.number().int(),
+  updatedAt: z.number().int(),
+  upstreamUrl: z.string(),
+});
+export type RuleSetSummary = z.infer<typeof RuleSetSummarySchema>;
+
+export const RuleSetVersionViewSchema = z.object({
+  id: z.number().int(),
+  note: z.string(),
+  ruleCount: z.number().int(),
+  savedAt: z.number().int(),
+});
+export type RuleSetVersionView = z.infer<typeof RuleSetVersionViewSchema>;
+
+export const RuleSetWatchSchema = z.object({
+  due: z.boolean(),
+  failingSince: z.number().int(),
+  fetchError: z.string(),
+  fetchFailures: z.number().int(),
+  pendingSince: z.number().int(),
+  score: z.number(),
+  sets: z.array(z.lazy(() => RuleSetChangesSchema)),
+  threshold: z.number(),
+});
+export type RuleSetWatch = z.infer<typeof RuleSetWatchSchema>;
+
 export const RuleTemplateSchema = z.object({
   baseId: z.number().int(),
   content: z.string(),

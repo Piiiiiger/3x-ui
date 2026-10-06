@@ -594,6 +594,15 @@ func notificationSent(key string) bool {
 	return err != nil || count > 0
 }
 
+// notificationSentAt says when a notification went out, if it did.
+func notificationSentAt(key string) (time.Time, bool) {
+	var row model.AccountNotification
+	if err := database.GetDB().Where("key = ?", key).First(&row).Error; err != nil {
+		return time.Time{}, false
+	}
+	return time.UnixMilli(row.SentAt), true
+}
+
 // Single scheduler goroutine; mark only successful delivery, allowing retries
 // after transient failures. Durable keys survive restarts and include new expiry.
 func (t *Tgbot) deliverAccountNotification(ctx context.Context, key string, chatID int64, view botView, now time.Time) {
@@ -695,6 +704,7 @@ func (t *Tgbot) sendAccountNotifications(ctx context.Context, now time.Time) {
 	}
 	t.notifyIpBans(ctx, now)
 	t.notifyAbuse(ctx, now)
+	t.notifyRuleSets(ctx, now)
 	t.notifyServerRenewals(ctx, now, clock)
 
 	accountPacing.Lock()

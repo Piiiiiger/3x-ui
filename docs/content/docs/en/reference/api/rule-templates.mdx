@@ -53,9 +53,10 @@ _openapi:
     - depth: 2
       title: Render the Clash config the plan's first member would get with this
         content as their template, checked as on save; with baseId the content
-        is a variant merged onto that template. Refused for a plan without
-        members.
-      url: '#render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-refused-for-a-plan-without-members'
+        is a variant merged onto that template. ruleSets, by name, tries
+        proposed rules in place of those rule sets' saved ones, checked as a
+        rule set save would check them. Refused for a plan without members.
+      url: '#render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-rulesets-by-name-tries-proposed-rules-in-place-of-those-rule-sets-saved-ones-checked-as-a-rule-set-save-would-check-them-refused-for-a-plan-without-members'
     - depth: 2
       title: "Keep a full YAML template as a variant of baseId, holding only what
         differs. A template identical to the base is folded into it instead: its
@@ -97,9 +98,10 @@ _openapi:
         id: put-a-kept-version-back-as-its-templates-content-the-restore-is-itself-a-new-version
       - content: Render the Clash config the plan's first member would get with this
           content as their template, checked as on save; with baseId the content
-          is a variant merged onto that template. Refused for a plan without
-          members.
-        id: render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-refused-for-a-plan-without-members
+          is a variant merged onto that template. ruleSets, by name, tries
+          proposed rules in place of those rule sets' saved ones, checked as a
+          rule set save would check them. Refused for a plan without members.
+        id: render-the-clash-config-the-plans-first-member-would-get-with-this-content-as-their-template-checked-as-on-save-with-baseid-the-content-is-a-variant-merged-onto-that-template-rulesets-by-name-tries-proposed-rules-in-place-of-those-rule-sets-saved-ones-checked-as-a-rule-set-save-would-check-them-refused-for-a-plan-without-members
       - content: "Keep a full YAML template as a variant of baseId, holding only what
           differs. A template identical to the base is folded into it instead:
           its plans and default star move to the base and it is deleted. Rules

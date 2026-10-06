@@ -1456,6 +1456,72 @@ export interface RealityScanResult {
   x25519: boolean;
 }
 
+export interface RuleSetChange {
+  provider: string;
+  risk?: string;
+  rule: string;
+  tier: string;
+}
+
+export interface RuleSetChanges {
+  added: RuleSetChange[];
+  goneProviders: string[];
+  name: string;
+  newProviders: string[];
+  removed: RuleSetChange[];
+  reviewedAt: number;
+  score: number;
+}
+
+export interface RuleSetDetail {
+  changes: RuleSetChanges;
+  fetchedAt: number;
+  latest: string;
+  latestHash: string;
+  name: string;
+  pendingSince: number;
+  reviewed: string;
+  reviewedAt: number;
+  rules: string;
+  upstreamUrl: string;
+}
+
+export interface RuleSetInput {
+  note: string;
+  reviewedHash: string;
+  rules: string;
+}
+
+export interface RuleSetSummary {
+  fetchError: string;
+  fetchFailures: number;
+  fetchedAt: number;
+  name: string;
+  pendingSince: number;
+  reviewedAt: number;
+  ruleCount: number;
+  updatedAt: number;
+  upstreamUrl: string;
+}
+
+export interface RuleSetVersionView {
+  id: number;
+  note: string;
+  ruleCount: number;
+  savedAt: number;
+}
+
+export interface RuleSetWatch {
+  due: boolean;
+  failingSince: number;
+  fetchError: string;
+  fetchFailures: number;
+  pendingSince: number;
+  score: number;
+  sets: RuleSetChanges[];
+  threshold: number;
+}
+
 export interface RuleTemplate {
   baseId: number;
   content: string;

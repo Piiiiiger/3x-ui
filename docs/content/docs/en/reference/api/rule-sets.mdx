@@ -1,0 +1,96 @@
+---
+title: Rule sets
+description: "Rule lists templates use as RULE-SET,<name>,<target> without
+  declaring a rule-provider: the subscription writes the set's rules in that
+  line's place, each sent to its target, so clients fetch nothing extra.
+  RULE-SET,<name>:<provider>,<target> takes only the rules under that provider's
+  headings. A set holds classical rules without targets (DOMAIN, DOMAIN-SUFFIX,
+  DOMAIN-KEYWORD, DOMAIN-REGEX, IP-CIDR, IP-CIDR6, PROCESS-NAME), as plain lines
+  or a payload list, with '# Provider / Tier' headings. A set may follow an
+  upstream list: a daily check at 10:00 (UTC+8) fetches it and scores what
+  changed since the last review, and the Telegram bot tells the admins when a
+  review is due. Fetching never changes what subscriptions get; only a save
+  does. Each save is kept as a version, the newest 30 per set."
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: 'List the sets without their lists: how many rules each serves, when they
+        were saved and reviewed, the last fetch and any failures in a row, and
+        since when upstream has changes not yet reviewed.'
+      url: '#list-the-sets-without-their-lists-how-many-rules-each-serves-when-they-were-saved-and-reviewed-the-last-fetch-and-any-failures-in-a-row-and-since-when-upstream-has-changes-not-yet-reviewed'
+    - depth: 2
+      title: "Get one set: the rules it serves, the upstream list as last reviewed and
+        as last fetched, the latest list's hash for a save to name, and what
+        upstream added and removed between the two, with risks flagged."
+      url: '#get-one-set-the-rules-it-serves-the-upstream-list-as-last-reviewed-and-as-last-fetched-the-latest-lists-hash-for-a-save-to-name-and-what-upstream-added-and-removed-between-the-two-with-risks-flagged'
+    - depth: 2
+      title: 'Save a review: the rules the set serves from now on, checked as a client
+        would read them (no IP-ASN, options only no-resolve on IP rules, no
+        repeats, at most 5000). reviewedHash, the latestHash the review read,
+        marks that upstream list reviewed; one naming an older list is refused,
+        since the review has not seen what changed after it. Without
+        reviewedHash the reviewed list stays as it was. Kept as a version.'
+      url: '#save-a-review-the-rules-the-set-serves-from-now-on-checked-as-a-client-would-read-them-no-ip-asn-options-only-no-resolve-on-ip-rules-no-repeats-at-most-5000-reviewedhash-the-latesthash-the-review-read-marks-that-upstream-list-reviewed-one-naming-an-older-list-is-refused-since-the-review-has-not-seen-what-changed-after-it-without-reviewedhash-the-reviewed-list-stays-as-it-was-kept-as-a-version'
+    - depth: 2
+      title: List the set's kept versions, newest first, without their lists.
+      url: '#list-the-sets-kept-versions-newest-first-without-their-lists'
+    - depth: 2
+      title: 'Put a kept version back: its rules and the upstream list it reviewed, so
+        what upstream changed since then is pending again. The restore is itself
+        a new version.'
+      url: '#put-a-kept-version-back-its-rules-and-the-upstream-list-it-reviewed-so-what-upstream-changed-since-then-is-pending-again-the-restore-is-itself-a-new-version'
+    - depth: 2
+      title: "Fetch every set's upstream list now, as the daily check does, and answer
+        what changed since each review: per set the new and gone providers, the
+        rules added and removed, and the score; overall the score with the days
+        pending, the threshold, and whether a review is due."
+      url: '#fetch-every-sets-upstream-list-now-as-the-daily-check-does-and-answer-what-changed-since-each-review-per-set-the-new-and-gone-providers-the-rules-added-and-removed-and-the-score-overall-the-score-with-the-days-pending-the-threshold-and-whether-a-review-is-due'
+  structuredData:
+    headings:
+      - content: 'List the sets without their lists: how many rules each serves, when
+          they were saved and reviewed, the last fetch and any failures in a
+          row, and since when upstream has changes not yet reviewed.'
+        id: list-the-sets-without-their-lists-how-many-rules-each-serves-when-they-were-saved-and-reviewed-the-last-fetch-and-any-failures-in-a-row-and-since-when-upstream-has-changes-not-yet-reviewed
+      - content: "Get one set: the rules it serves, the upstream list as last reviewed
+          and as last fetched, the latest list's hash for a save to name, and
+          what upstream added and removed between the two, with risks flagged."
+        id: get-one-set-the-rules-it-serves-the-upstream-list-as-last-reviewed-and-as-last-fetched-the-latest-lists-hash-for-a-save-to-name-and-what-upstream-added-and-removed-between-the-two-with-risks-flagged
+      - content: 'Save a review: the rules the set serves from now on, checked as a
+          client would read them (no IP-ASN, options only no-resolve on IP
+          rules, no repeats, at most 5000). reviewedHash, the latestHash the
+          review read, marks that upstream list reviewed; one naming an older
+          list is refused, since the review has not seen what changed after it.
+          Without reviewedHash the reviewed list stays as it was. Kept as a
+          version.'
+        id: save-a-review-the-rules-the-set-serves-from-now-on-checked-as-a-client-would-read-them-no-ip-asn-options-only-no-resolve-on-ip-rules-no-repeats-at-most-5000-reviewedhash-the-latesthash-the-review-read-marks-that-upstream-list-reviewed-one-naming-an-older-list-is-refused-since-the-review-has-not-seen-what-changed-after-it-without-reviewedhash-the-reviewed-list-stays-as-it-was-kept-as-a-version
+      - content: List the set's kept versions, newest first, without their lists.
+        id: list-the-sets-kept-versions-newest-first-without-their-lists
+      - content: 'Put a kept version back: its rules and the upstream list it reviewed,
+          so what upstream changed since then is pending again. The restore is
+          itself a new version.'
+        id: put-a-kept-version-back-its-rules-and-the-upstream-list-it-reviewed-so-what-upstream-changed-since-then-is-pending-again-the-restore-is-itself-a-new-version
+      - content: "Fetch every set's upstream list now, as the daily check does, and
+          answer what changed since each review: per set the new and gone
+          providers, the rules added and removed, and the score; overall the
+          score with the days pending, the threshold, and whether a review is
+          due."
+        id: fetch-every-sets-upstream-list-now-as-the-daily-check-does-and-answer-what-changed-since-each-review-per-set-the-new-and-gone-providers-the-rules-added-and-removed-and-the-score-overall-the-score-with-the-days-pending-the-threshold-and-whether-a-review-is-due
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/ruleSets/list","method":"get"},{"path":"/panel/api/ruleSets/get/{name}","method":"get"},{"path":"/panel/api/ruleSets/update/{name}","method":"post"},{"path":"/panel/api/ruleSets/versions/{name}","method":"get"},{"path":"/panel/api/ruleSets/restore/{versionId}","method":"post"},{"path":"/panel/api/ruleSets/check","method":"post"}]} showTitle />
+    </>
+  );
+}

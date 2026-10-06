@@ -220,6 +220,10 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	ruleTemplates := api.Group("/ruleTemplates")
 	NewRuleTemplateController(ruleTemplates)
 
+	// Rule sets API — reviewed rule lists templates reference by RULE-SET
+	ruleSets := api.Group("/ruleSets")
+	NewRuleSetController(ruleSets)
+
 	traffic := api.Group("/traffic")
 	NewTrafficController(traffic)
 

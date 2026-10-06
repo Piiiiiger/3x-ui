@@ -133,7 +133,7 @@ func TestPreviewMergesAnUnsavedVariantOntoItsBase(t *testing.T) {
 
 	got, err := PreviewClash("s1", "req.example.com", "", RuleTemplateSource{
 		Content: mineVariant, Base: mmwxStyleTemplate, Variant: true,
-	})
+	}, nil)
 	if err != nil {
 		t.Fatalf("PreviewClash: %v", err)
 	}

@@ -2001,6 +2001,137 @@ export const EXAMPLES: Record<string, unknown> = {
     "tlsVersion": "1.3",
     "x25519": true
   },
+  "RuleSetChange": {
+    "provider": "Example AI",
+    "risk": "keyword",
+    "rule": "DOMAIN-SUFFIX,example.com",
+    "tier": "Core"
+  },
+  "RuleSetChanges": {
+    "added": [
+      {
+        "provider": "Example AI",
+        "risk": "keyword",
+        "rule": "DOMAIN-SUFFIX,example.com",
+        "tier": "Core"
+      }
+    ],
+    "goneProviders": [
+      ""
+    ],
+    "name": "ai",
+    "newProviders": [
+      ""
+    ],
+    "removed": [
+      {
+        "provider": "Example AI",
+        "risk": "keyword",
+        "rule": "DOMAIN-SUFFIX,example.com",
+        "tier": "Core"
+      }
+    ],
+    "reviewedAt": 1735689600000,
+    "score": 14
+  },
+  "RuleSetDetail": {
+    "changes": {
+      "added": [
+        {
+          "provider": "Example AI",
+          "risk": "keyword",
+          "rule": "DOMAIN-SUFFIX,example.com",
+          "tier": "Core"
+        }
+      ],
+      "goneProviders": [
+        ""
+      ],
+      "name": "ai",
+      "newProviders": [
+        ""
+      ],
+      "removed": [
+        {
+          "provider": "Example AI",
+          "risk": "keyword",
+          "rule": "DOMAIN-SUFFIX,example.com",
+          "tier": "Core"
+        }
+      ],
+      "reviewedAt": 1735689600000,
+      "score": 14
+    },
+    "fetchedAt": 1735689600000,
+    "latest": "payload:\n  - DOMAIN-SUFFIX,example.com",
+    "latestHash": "a3f1c2",
+    "name": "ai",
+    "pendingSince": 0,
+    "reviewed": "payload:\n  - DOMAIN-SUFFIX,example.com",
+    "reviewedAt": 1735689600000,
+    "rules": "DOMAIN-SUFFIX,example.com",
+    "upstreamUrl": "https://example.com/rules.yaml"
+  },
+  "RuleSetInput": {
+    "note": "Factory added",
+    "reviewedHash": "a3f1c2",
+    "rules": "DOMAIN-SUFFIX,example.com"
+  },
+  "RuleSetSummary": {
+    "fetchError": "",
+    "fetchFailures": 0,
+    "fetchedAt": 1735689600000,
+    "name": "ai",
+    "pendingSince": 0,
+    "reviewedAt": 1735689600000,
+    "ruleCount": 334,
+    "updatedAt": 1735689600000,
+    "upstreamUrl": "https://example.com/rules.yaml"
+  },
+  "RuleSetVersionView": {
+    "id": 7,
+    "note": "Factory added",
+    "ruleCount": 334,
+    "savedAt": 1735689600000
+  },
+  "RuleSetWatch": {
+    "due": true,
+    "failingSince": 0,
+    "fetchError": "",
+    "fetchFailures": 0,
+    "pendingSince": 1735689600000,
+    "score": 14,
+    "sets": [
+      {
+        "added": [
+          {
+            "provider": "Example AI",
+            "risk": "keyword",
+            "rule": "DOMAIN-SUFFIX,example.com",
+            "tier": "Core"
+          }
+        ],
+        "goneProviders": [
+          ""
+        ],
+        "name": "ai",
+        "newProviders": [
+          ""
+        ],
+        "removed": [
+          {
+            "provider": "Example AI",
+            "risk": "keyword",
+            "rule": "DOMAIN-SUFFIX,example.com",
+            "tier": "Core"
+          }
+        ],
+        "reviewedAt": 1735689600000,
+        "score": 14
+      }
+    ],
+    "threshold": 10
+  },
   "RuleTemplate": {
     "baseId": 0,
     "content": "DOMAIN-SUFFIX,example.com,DIRECT",

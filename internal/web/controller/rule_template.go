@@ -16,6 +16,7 @@ import (
 type RuleTemplateController struct {
 	templateService service.RuleTemplateService
 	settingService  service.SettingService
+	ruleSetService  service.RuleSetService
 }
 
 func NewRuleTemplateController(g *gin.RouterGroup) *RuleTemplateController {
@@ -34,11 +35,12 @@ func NewRuleTemplateController(g *gin.RouterGroup) *RuleTemplateController {
 }
 
 // ruleTemplatePreviewRequest is a template's content tried on one plan's member;
-// BaseId previews it as a variant of that template.
+// BaseId previews it as a variant, RuleSets tries proposed rules for those sets.
 type ruleTemplatePreviewRequest struct {
-	PlanId  int    `json:"planId"`
-	Content string `json:"content"`
-	BaseId  int    `json:"baseId"`
+	PlanId   int               `json:"planId"`
+	Content  string            `json:"content"`
+	BaseId   int               `json:"baseId"`
+	RuleSets map[string]string `json:"ruleSets"`
 }
 
 // ruleTemplateVariantRequest turns a template into a variant of BaseId; without
@@ -159,6 +161,9 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 		return
 	}
 	member, base, err := a.templateService.PreviewMember(in.PlanId, in.Content, in.BaseId)
+	if err == nil {
+		err = a.ruleSetService.CheckProposed(in.RuleSets)
+	}
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
@@ -168,7 +173,7 @@ func (a *RuleTemplateController) preview(c *gin.Context) {
 		remark = ""
 	}
 	source := sub.RuleTemplateSource{Content: in.Content, Base: base, Variant: in.BaseId != 0}
-	out, err := sub.PreviewClash(member.SubID, resolveHost(c), remark, source)
+	out, err := sub.PreviewClash(member.SubID, resolveHost(c), remark, source, in.RuleSets)
 	if err == nil && strings.TrimSpace(out) == "" {
 		err = common.NewError("the plan's first user has no enabled nodes to show")
 	}

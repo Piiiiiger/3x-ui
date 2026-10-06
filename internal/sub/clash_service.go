@@ -26,6 +26,8 @@ type SubClashService struct {
 	SubService *SubService
 	// templateOverride, when set, stands in for the subscription's template (a preview).
 	templateOverride *RuleTemplateSource
+	// ruleSetOverride holds a preview's proposed rules for rule sets, by name.
+	ruleSetOverride map[string]string
 }
 
 // RuleTemplateSource is the rule template a subscription renders with: its content
@@ -122,9 +124,9 @@ func NewSubClashService(subService *SubService) *SubClashService {
 }
 
 // PreviewClash renders the Clash config subId would get with source in place of its
-// plan's template, for the rule templates page.
-func PreviewClash(subId, host, remarkTemplate string, source RuleTemplateSource) (string, error) {
-	s := &SubClashService{SubService: NewSubService(remarkTemplate), templateOverride: &source}
+// plan's template, and ruleSets in place of those sets' saved rules.
+func PreviewClash(subId, host, remarkTemplate string, source RuleTemplateSource, ruleSets map[string]string) (string, error) {
+	s := &SubClashService{SubService: NewSubService(remarkTemplate), templateOverride: &source, ruleSetOverride: ruleSets}
 	out, _, err := s.GetClash(subId, host)
 	return out, err
 }
@@ -350,6 +352,9 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 			} else if err := mergeClashRulesYAML(config, resolved); err != nil {
 				return "", "", err
 			}
+		}
+		if err := s.expandRuleSets(config); err != nil {
+			return "", "", err
 		}
 		preferSingaporeResidentialForAI(config)
 		if customization != nil && strings.TrimSpace(customization.Rules) != "" {

@@ -343,6 +343,8 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 
 	_, _ = s.cron.AddJob(cadenceDailyTraffic, job.NewDailyTrafficJob())
 
+	s.cron.Schedule(job.RuleSetWatchSchedule(), job.NewRuleSetWatchJob())
+
 	// Warm permanent routing URLs immediately and refresh them outside the
 	// latency-sensitive subscription request path.
 	remoteRoutingJob := job.NewRemoteRoutingJob()

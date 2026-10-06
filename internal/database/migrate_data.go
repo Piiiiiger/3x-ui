@@ -81,6 +81,8 @@ func migrationModels() []any {
 		&model.AbuseEvent{},
 		&model.BanRecord{},
 		&model.PortalSignup{},
+		&model.RuleSet{},
+		&model.RuleSetVersion{},
 	}
 }
 

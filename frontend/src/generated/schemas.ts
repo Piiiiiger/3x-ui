@@ -6569,6 +6569,304 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "RuleSetChange": {
+    "description": "RuleSetChange is one rule upstream added or removed. Risk says why an added rule\nmay reach beyond one service: keyword, regex, asn, wide, shared, tld or unknown.",
+    "properties": {
+      "provider": {
+        "example": "Example AI",
+        "type": "string"
+      },
+      "risk": {
+        "example": "keyword",
+        "type": "string"
+      },
+      "rule": {
+        "example": "DOMAIN-SUFFIX,example.com",
+        "type": "string"
+      },
+      "tier": {
+        "example": "Core",
+        "type": "string"
+      }
+    },
+    "required": [
+      "provider",
+      "rule",
+      "tier"
+    ],
+    "type": "object"
+  },
+  "RuleSetChanges": {
+    "description": "RuleSetChanges is what upstream changed in one set's list since its last review.",
+    "properties": {
+      "added": {
+        "items": {
+          "$ref": "#/components/schemas/RuleSetChange"
+        },
+        "type": "array"
+      },
+      "goneProviders": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "name": {
+        "example": "ai",
+        "type": "string"
+      },
+      "newProviders": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "removed": {
+        "items": {
+          "$ref": "#/components/schemas/RuleSetChange"
+        },
+        "type": "array"
+      },
+      "reviewedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "score": {
+        "example": 14,
+        "type": "number"
+      }
+    },
+    "required": [
+      "added",
+      "goneProviders",
+      "name",
+      "newProviders",
+      "removed",
+      "reviewedAt",
+      "score"
+    ],
+    "type": "object"
+  },
+  "RuleSetDetail": {
+    "description": "RuleSetDetail is a set with its rules, the upstream list as reviewed and as last\nfetched, and what upstream changed between the two.",
+    "properties": {
+      "changes": {
+        "$ref": "#/components/schemas/RuleSetChanges"
+      },
+      "fetchedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "latest": {
+        "example": "payload:\n  - DOMAIN-SUFFIX,example.com",
+        "type": "string"
+      },
+      "latestHash": {
+        "example": "a3f1c2",
+        "type": "string"
+      },
+      "name": {
+        "example": "ai",
+        "type": "string"
+      },
+      "pendingSince": {
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "reviewed": {
+        "example": "payload:\n  - DOMAIN-SUFFIX,example.com",
+        "type": "string"
+      },
+      "reviewedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "rules": {
+        "example": "DOMAIN-SUFFIX,example.com",
+        "type": "string"
+      },
+      "upstreamUrl": {
+        "example": "https://example.com/rules.yaml",
+        "type": "string"
+      }
+    },
+    "required": [
+      "changes",
+      "fetchedAt",
+      "latest",
+      "latestHash",
+      "name",
+      "pendingSince",
+      "reviewed",
+      "reviewedAt",
+      "rules",
+      "upstreamUrl"
+    ],
+    "type": "object"
+  },
+  "RuleSetInput": {
+    "description": "RuleSetInput is a review's result: the rules to serve, and the hash of the upstream\nlist it covered; without a hash the set's reviewed list stays as it was.",
+    "properties": {
+      "note": {
+        "example": "Factory added",
+        "type": "string"
+      },
+      "reviewedHash": {
+        "example": "a3f1c2",
+        "type": "string"
+      },
+      "rules": {
+        "example": "DOMAIN-SUFFIX,example.com",
+        "type": "string"
+      }
+    },
+    "required": [
+      "note",
+      "reviewedHash",
+      "rules"
+    ],
+    "type": "object"
+  },
+  "RuleSetSummary": {
+    "description": "RuleSetSummary is a set in the list, without its rules or upstream lists.",
+    "properties": {
+      "fetchError": {
+        "type": "string"
+      },
+      "fetchFailures": {
+        "example": 0,
+        "type": "integer"
+      },
+      "fetchedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "example": "ai",
+        "type": "string"
+      },
+      "pendingSince": {
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "reviewedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "ruleCount": {
+        "example": 334,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "upstreamUrl": {
+        "example": "https://example.com/rules.yaml",
+        "type": "string"
+      }
+    },
+    "required": [
+      "fetchError",
+      "fetchFailures",
+      "fetchedAt",
+      "name",
+      "pendingSince",
+      "reviewedAt",
+      "ruleCount",
+      "updatedAt",
+      "upstreamUrl"
+    ],
+    "type": "object"
+  },
+  "RuleSetVersionView": {
+    "description": "RuleSetVersionView is one kept save, without its lists.",
+    "properties": {
+      "id": {
+        "example": 7,
+        "type": "integer"
+      },
+      "note": {
+        "example": "Factory added",
+        "type": "string"
+      },
+      "ruleCount": {
+        "example": 334,
+        "type": "integer"
+      },
+      "savedAt": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "note",
+      "ruleCount",
+      "savedAt"
+    ],
+    "type": "object"
+  },
+  "RuleSetWatch": {
+    "description": "RuleSetWatch is what the daily check found: each set's upstream changes since its\nlast review, and a score saying whether a review is due.",
+    "properties": {
+      "due": {
+        "example": true,
+        "type": "boolean"
+      },
+      "failingSince": {
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "fetchError": {
+        "type": "string"
+      },
+      "fetchFailures": {
+        "example": 0,
+        "type": "integer"
+      },
+      "pendingSince": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "score": {
+        "example": 14,
+        "type": "number"
+      },
+      "sets": {
+        "items": {
+          "$ref": "#/components/schemas/RuleSetChanges"
+        },
+        "type": "array"
+      },
+      "threshold": {
+        "example": 10,
+        "type": "number"
+      }
+    },
+    "required": [
+      "due",
+      "failingSince",
+      "fetchError",
+      "fetchFailures",
+      "pendingSince",
+      "score",
+      "sets",
+      "threshold"
+    ],
+    "type": "object"
+  },
   "RuleTemplate": {
     "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document whose\ngroups list __PROXY_NODES__, an HTTPS URL, or a variant's changes to its base.",
     "properties": {

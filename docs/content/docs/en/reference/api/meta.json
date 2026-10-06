@@ -14,6 +14,7 @@
     "subscription-balancers",
     "plans",
     "rule-templates",
+    "rule-sets",
     "traffic",
     "ai-usage",
     "probe",

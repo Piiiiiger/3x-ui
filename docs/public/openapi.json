@@ -6595,6 +6595,304 @@
         ],
         "type": "object"
       },
+      "RuleSetChange": {
+        "description": "RuleSetChange is one rule upstream added or removed. Risk says why an added rule\nmay reach beyond one service: keyword, regex, asn, wide, shared, tld or unknown.",
+        "properties": {
+          "provider": {
+            "example": "Example AI",
+            "type": "string"
+          },
+          "risk": {
+            "example": "keyword",
+            "type": "string"
+          },
+          "rule": {
+            "example": "DOMAIN-SUFFIX,example.com",
+            "type": "string"
+          },
+          "tier": {
+            "example": "Core",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "rule",
+          "tier"
+        ],
+        "type": "object"
+      },
+      "RuleSetChanges": {
+        "description": "RuleSetChanges is what upstream changed in one set's list since its last review.",
+        "properties": {
+          "added": {
+            "items": {
+              "$ref": "#/components/schemas/RuleSetChange"
+            },
+            "type": "array"
+          },
+          "goneProviders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "example": "ai",
+            "type": "string"
+          },
+          "newProviders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "removed": {
+            "items": {
+              "$ref": "#/components/schemas/RuleSetChange"
+            },
+            "type": "array"
+          },
+          "reviewedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "score": {
+            "example": 14,
+            "type": "number"
+          }
+        },
+        "required": [
+          "added",
+          "goneProviders",
+          "name",
+          "newProviders",
+          "removed",
+          "reviewedAt",
+          "score"
+        ],
+        "type": "object"
+      },
+      "RuleSetDetail": {
+        "description": "RuleSetDetail is a set with its rules, the upstream list as reviewed and as last\nfetched, and what upstream changed between the two.",
+        "properties": {
+          "changes": {
+            "$ref": "#/components/schemas/RuleSetChanges"
+          },
+          "fetchedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "latest": {
+            "example": "payload:\n  - DOMAIN-SUFFIX,example.com",
+            "type": "string"
+          },
+          "latestHash": {
+            "example": "a3f1c2",
+            "type": "string"
+          },
+          "name": {
+            "example": "ai",
+            "type": "string"
+          },
+          "pendingSince": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "reviewed": {
+            "example": "payload:\n  - DOMAIN-SUFFIX,example.com",
+            "type": "string"
+          },
+          "reviewedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "rules": {
+            "example": "DOMAIN-SUFFIX,example.com",
+            "type": "string"
+          },
+          "upstreamUrl": {
+            "example": "https://example.com/rules.yaml",
+            "type": "string"
+          }
+        },
+        "required": [
+          "changes",
+          "fetchedAt",
+          "latest",
+          "latestHash",
+          "name",
+          "pendingSince",
+          "reviewed",
+          "reviewedAt",
+          "rules",
+          "upstreamUrl"
+        ],
+        "type": "object"
+      },
+      "RuleSetInput": {
+        "description": "RuleSetInput is a review's result: the rules to serve, and the hash of the upstream\nlist it covered; without a hash the set's reviewed list stays as it was.",
+        "properties": {
+          "note": {
+            "example": "Factory added",
+            "type": "string"
+          },
+          "reviewedHash": {
+            "example": "a3f1c2",
+            "type": "string"
+          },
+          "rules": {
+            "example": "DOMAIN-SUFFIX,example.com",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note",
+          "reviewedHash",
+          "rules"
+        ],
+        "type": "object"
+      },
+      "RuleSetSummary": {
+        "description": "RuleSetSummary is a set in the list, without its rules or upstream lists.",
+        "properties": {
+          "fetchError": {
+            "type": "string"
+          },
+          "fetchFailures": {
+            "example": 0,
+            "type": "integer"
+          },
+          "fetchedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "example": "ai",
+            "type": "string"
+          },
+          "pendingSince": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "reviewedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "ruleCount": {
+            "example": 334,
+            "type": "integer"
+          },
+          "updatedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "upstreamUrl": {
+            "example": "https://example.com/rules.yaml",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fetchError",
+          "fetchFailures",
+          "fetchedAt",
+          "name",
+          "pendingSince",
+          "reviewedAt",
+          "ruleCount",
+          "updatedAt",
+          "upstreamUrl"
+        ],
+        "type": "object"
+      },
+      "RuleSetVersionView": {
+        "description": "RuleSetVersionView is one kept save, without its lists.",
+        "properties": {
+          "id": {
+            "example": 7,
+            "type": "integer"
+          },
+          "note": {
+            "example": "Factory added",
+            "type": "string"
+          },
+          "ruleCount": {
+            "example": 334,
+            "type": "integer"
+          },
+          "savedAt": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "note",
+          "ruleCount",
+          "savedAt"
+        ],
+        "type": "object"
+      },
+      "RuleSetWatch": {
+        "description": "RuleSetWatch is what the daily check found: each set's upstream changes since its\nlast review, and a score saying whether a review is due.",
+        "properties": {
+          "due": {
+            "example": true,
+            "type": "boolean"
+          },
+          "failingSince": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "fetchError": {
+            "type": "string"
+          },
+          "fetchFailures": {
+            "example": 0,
+            "type": "integer"
+          },
+          "pendingSince": {
+            "example": 1735689600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "score": {
+            "example": 14,
+            "type": "number"
+          },
+          "sets": {
+            "items": {
+              "$ref": "#/components/schemas/RuleSetChanges"
+            },
+            "type": "array"
+          },
+          "threshold": {
+            "example": 10,
+            "type": "number"
+          }
+        },
+        "required": [
+          "due",
+          "failingSince",
+          "fetchError",
+          "fetchFailures",
+          "pendingSince",
+          "score",
+          "sets",
+          "threshold"
+        ],
+        "type": "object"
+      },
       "RuleTemplate": {
         "description": "RuleTemplate is a set of Clash rules plans share: rule lines, a YAML document whose\ngroups list __PROXY_NODES__, an HTTPS URL, or a variant's changes to its base.",
         "properties": {
@@ -7588,6 +7886,10 @@
     {
       "name": "Rule templates",
       "description": "Clash rule templates plans share: rule lines, a YAML document (whose proxy groups list __PROXY_NODES__ where the subscription's nodes go, or select them with a filter) or one HTTPS URL. A variant (baseId set) holds only what it changes in a full YAML template, as a Clash Verge Merge document: a top-level key replaces the base's, prepend-rules / append-rules and prepend-proxy-groups / append-proxy-groups add before or after the base's lists. A plan names its template by id; plans with templateId 0 and clients without a plan get the default template. Each content change is kept as a version, the newest 20 per template."
+    },
+    {
+      "name": "Rule sets",
+      "description": "Rule lists templates use as RULE-SET,<name>,<target> without declaring a rule-provider: the subscription writes the set's rules in that line's place, each sent to its target, so clients fetch nothing extra. RULE-SET,<name>:<provider>,<target> takes only the rules under that provider's headings. A set holds classical rules without targets (DOMAIN, DOMAIN-SUFFIX, DOMAIN-KEYWORD, DOMAIN-REGEX, IP-CIDR, IP-CIDR6, PROCESS-NAME), as plain lines or a payload list, with '# Provider / Tier' headings. A set may follow an upstream list: a daily check at 10:00 (UTC+8) fetches it and scores what changed since the last review, and the Telegram bot tells the admins when a review is due. Fetching never changes what subscriptions get; only a save does. Each save is kept as a version, the newest 30 per set."
     },
     {
       "name": "Plans",
@@ -15731,7 +16033,7 @@
         "tags": [
           "Rule templates"
         ],
-        "summary": "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. Refused for a plan without members.",
+        "summary": "Render the Clash config the plan's first member would get with this content as their template, checked as on save; with baseId the content is a variant merged onto that template. ruleSets, by name, tries proposed rules in place of those rule sets' saved ones, checked as a rule set save would check them. Refused for a plan without members.",
         "operationId": "post_panel_api_ruleTemplates_preview",
         "requestBody": {
           "required": true,
@@ -15742,8 +16044,11 @@
               },
               "example": {
                 "planId": 1,
-                "content": "DOMAIN-SUFFIX,example.com,DIRECT",
-                "baseId": 0
+                "content": "RULE-SET,ai,PROXY\nMATCH,DIRECT",
+                "baseId": 0,
+                "ruleSets": {
+                  "ai": "DOMAIN-SUFFIX,example.com"
+                }
               }
             }
           }
@@ -15846,6 +16151,400 @@
                     "moved": 5,
                     "planCount": 1,
                     "size": 2048
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/list": {
+      "get": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "List the sets without their lists: how many rules each serves, when they were saved and reviewed, the last fetch and any failures in a row, and since when upstream has changes not yet reviewed.",
+        "operationId": "get_panel_api_ruleSets_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RuleSetSummary"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "fetchError": "",
+                      "fetchFailures": 0,
+                      "fetchedAt": 1735689600000,
+                      "name": "ai",
+                      "pendingSince": 0,
+                      "reviewedAt": 1735689600000,
+                      "ruleCount": 334,
+                      "updatedAt": 1735689600000,
+                      "upstreamUrl": "https://example.com/rules.yaml"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/get/{name}": {
+      "get": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "Get one set: the rules it serves, the upstream list as last reviewed and as last fetched, the latest list's hash for a save to name, and what upstream added and removed between the two, with risks flagged.",
+        "operationId": "get_panel_api_ruleSets_get_name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "Rule set name, e.g. ai.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RuleSetDetail"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "changes": {
+                      "added": [
+                        {
+                          "provider": "Example AI",
+                          "risk": "keyword",
+                          "rule": "DOMAIN-SUFFIX,example.com",
+                          "tier": "Core"
+                        }
+                      ],
+                      "goneProviders": [
+                        ""
+                      ],
+                      "name": "ai",
+                      "newProviders": [
+                        ""
+                      ],
+                      "removed": [
+                        {
+                          "provider": "Example AI",
+                          "risk": "keyword",
+                          "rule": "DOMAIN-SUFFIX,example.com",
+                          "tier": "Core"
+                        }
+                      ],
+                      "reviewedAt": 1735689600000,
+                      "score": 14
+                    },
+                    "fetchedAt": 1735689600000,
+                    "latest": "payload:\n  - DOMAIN-SUFFIX,example.com",
+                    "latestHash": "a3f1c2",
+                    "name": "ai",
+                    "pendingSince": 0,
+                    "reviewed": "payload:\n  - DOMAIN-SUFFIX,example.com",
+                    "reviewedAt": 1735689600000,
+                    "rules": "DOMAIN-SUFFIX,example.com",
+                    "upstreamUrl": "https://example.com/rules.yaml"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/update/{name}": {
+      "post": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "Save a review: the rules the set serves from now on, checked as a client would read them (no IP-ASN, options only no-resolve on IP rules, no repeats, at most 5000). reviewedHash, the latestHash the review read, marks that upstream list reviewed; one naming an older list is refused, since the review has not seen what changed after it. Without reviewedHash the reviewed list stays as it was. Kept as a version.",
+        "operationId": "post_panel_api_ruleSets_update_name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "Rule set name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "rules": "# Example AI / Core\nDOMAIN-SUFFIX,example.com",
+                "reviewedHash": "a3f1c2",
+                "note": "Example AI added"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RuleSetSummary"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "fetchError": "",
+                    "fetchFailures": 0,
+                    "fetchedAt": 1735689600000,
+                    "name": "ai",
+                    "pendingSince": 0,
+                    "reviewedAt": 1735689600000,
+                    "ruleCount": 334,
+                    "updatedAt": 1735689600000,
+                    "upstreamUrl": "https://example.com/rules.yaml"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/versions/{name}": {
+      "get": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "List the set's kept versions, newest first, without their lists.",
+        "operationId": "get_panel_api_ruleSets_versions_name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "Rule set name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RuleSetVersionView"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "id": 7,
+                      "note": "Factory added",
+                      "ruleCount": 334,
+                      "savedAt": 1735689600000
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/restore/{versionId}": {
+      "post": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "Put a kept version back: its rules and the upstream list it reviewed, so what upstream changed since then is pending again. The restore is itself a new version.",
+        "operationId": "post_panel_api_ruleSets_restore_versionId",
+        "parameters": [
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "description": "Version id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RuleSetSummary"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "fetchError": "",
+                    "fetchFailures": 0,
+                    "fetchedAt": 1735689600000,
+                    "name": "ai",
+                    "pendingSince": 0,
+                    "reviewedAt": 1735689600000,
+                    "ruleCount": 334,
+                    "updatedAt": 1735689600000,
+                    "upstreamUrl": "https://example.com/rules.yaml"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/check": {
+      "post": {
+        "tags": [
+          "Rule sets"
+        ],
+        "summary": "Fetch every set's upstream list now, as the daily check does, and answer what changed since each review: per set the new and gone providers, the rules added and removed, and the score; overall the score with the days pending, the threshold, and whether a review is due.",
+        "operationId": "post_panel_api_ruleSets_check",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RuleSetWatch"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "due": true,
+                    "failingSince": 0,
+                    "fetchError": "",
+                    "fetchFailures": 0,
+                    "pendingSince": 1735689600000,
+                    "score": 14,
+                    "sets": [
+                      {
+                        "added": [
+                          {
+                            "provider": "Example AI",
+                            "risk": "keyword",
+                            "rule": "DOMAIN-SUFFIX,example.com",
+                            "tier": "Core"
+                          }
+                        ],
+                        "goneProviders": [
+                          ""
+                        ],
+                        "name": "ai",
+                        "newProviders": [
+                          ""
+                        ],
+                        "removed": [
+                          {
+                            "provider": "Example AI",
+                            "risk": "keyword",
+                            "rule": "DOMAIN-SUFFIX,example.com",
+                            "tier": "Core"
+                          }
+                        ],
+                        "reviewedAt": 1735689600000,
+                        "score": 14
+                      }
+                    ],
+                    "threshold": 10
                   }
                 }
               }
