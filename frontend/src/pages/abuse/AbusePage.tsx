@@ -100,16 +100,6 @@ const RULES: { action: RuleAction; title: string; hint?: string; fields: [Thresh
         ['fullSpeedStrikeMin', '封禁（分钟）'],
       ],
     },
-    {
-      action: 'relay',
-      title: '中转到自有服务器',
-      hint: '远程桌面、NAS 和部分游戏看起来很像，建议先只记录。',
-      fields: [
-        ['relaySharePct', '同一地址连接占比（%）'],
-        ['relayMinMb', '流量（MB）'],
-        ['relayWindowMin', '窗口（分钟）'],
-      ],
-    },
   ];
 
 // thresholdMax is the schema's own bound, so the input stops where saving would fail.

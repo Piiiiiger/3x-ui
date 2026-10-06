@@ -16,7 +16,6 @@ export interface AbuseActions {
   crawler: string;
   flood: string;
   fullspeed: string;
-  relay: string;
   scan: string;
   spam: string;
   speedtest: string;
@@ -1473,9 +1472,6 @@ export interface Rules {
   fullSpeedMbps: number;
   fullSpeedStrikeMin: number;
   fullSpeedWarnMin: number;
-  relayMinMb: number;
-  relaySharePct: number;
-  relayWindowMin: number;
   scanIps: number;
   scanPortsOnIp: number;
   scanSensitiveIps: number;

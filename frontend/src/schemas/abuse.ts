@@ -28,9 +28,6 @@ export const AbuseSettingsFormSchema = z.object({
     fullSpeedMbps: count,
     fullSpeedWarnMin: count,
     fullSpeedStrikeMin: count,
-    relaySharePct: z.number().int().min(0).max(100),
-    relayMinMb: count,
-    relayWindowMin: minutes,
   }),
   actions: z.object({
     spam: action,
@@ -40,7 +37,6 @@ export const AbuseSettingsFormSchema = z.object({
     crawler: action,
     speedtest: action,
     fullspeed: action,
-    relay: action,
   }),
   signup: z.object({ limit: count, action: z.enum(['record', 'ban']) }),
 });

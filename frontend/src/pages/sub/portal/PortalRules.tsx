@@ -81,7 +81,6 @@ export default function PortalRules({ limitIp }: { limitIp?: number }) {
             <li>批量注册账号</li>
             <li>爬虫、大规模抓取网页</li>
             <li>长时间持续满速占用带宽</li>
-            <li>通过节点中转或转发到自己的服务器</li>
             <li>无故反复测速</li>
             <li>端口扫描、网络攻击、发送垃圾邮件、BT 下载</li>
             <li>{sharing}</li>

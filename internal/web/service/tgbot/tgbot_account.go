@@ -523,7 +523,7 @@ func (t *Tgbot) helpView(tgID int64) botView {
 	b.WriteString("• <b>续费</b>：请联系管理员。\n")
 	b.WriteString("• <b>更换 Telegram 账号</b>：请联系管理员解除绑定后重新绑定。\n\n")
 	b.WriteString("📍 <b>手机请务必关闭定位服务，防止节点「送中」</b>：开着定位时，Google 会读到手机的真实位置，把你正在用的节点 IP 判定为中国大陆；节点被送中后，所有人用它访问 Google、YouTube、Gemini 等都会受影响。\n\n")
-	fmt.Fprintf(&b, "🚫 <b>使用规则</b>：禁止批量注册、爬虫、长时间满速占用、中转到自己的服务器、无故反复测速、端口扫描、网络攻击、发送垃圾邮件、BT 下载。"+
+	fmt.Fprintf(&b, "🚫 <b>使用规则</b>：禁止批量注册、爬虫、长时间满速占用、无故反复测速、端口扫描、网络攻击、发送垃圾邮件、BT 下载。"+
 		"正常下载软件、系统更新不受影响。违规一次封禁 %d 分钟，到时自动恢复；30 天内超过 %d 次，账号停用，需联系管理员。",
 		service.AbuseBanMinutes, service.AbuseStrikesLimit)
 	back := "pg:home"

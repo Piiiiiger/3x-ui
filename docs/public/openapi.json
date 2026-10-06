@@ -27,7 +27,7 @@
     },
     "schemas": {
       "AbuseActions": {
-        "description": "AbuseActions say what each rule's hits do on an enforcing server. Relay only\ntells the admin until it has proven itself on real traffic.",
+        "description": "AbuseActions say what each rule's hits do on an enforcing server.",
         "properties": {
           "bt": {
             "example": "ban",
@@ -43,10 +43,6 @@
           },
           "fullspeed": {
             "example": "ban",
-            "type": "string"
-          },
-          "relay": {
-            "example": "record",
             "type": "string"
           },
           "scan": {
@@ -67,7 +63,6 @@
           "crawler",
           "flood",
           "fullspeed",
-          "relay",
           "scan",
           "spam",
           "speedtest"
@@ -6639,18 +6634,6 @@
             "example": 120,
             "type": "integer"
           },
-          "relayMinMb": {
-            "example": 2048,
-            "type": "integer"
-          },
-          "relaySharePct": {
-            "example": 80,
-            "type": "integer"
-          },
-          "relayWindowMin": {
-            "example": 30,
-            "type": "integer"
-          },
           "scanIps": {
             "example": 150,
             "type": "integer"
@@ -6700,9 +6683,6 @@
           "fullSpeedMbps",
           "fullSpeedStrikeMin",
           "fullSpeedWarnMin",
-          "relayMinMb",
-          "relaySharePct",
-          "relayWindowMin",
           "scanIps",
           "scanPortsOnIp",
           "scanSensitiveIps",
@@ -7375,7 +7355,7 @@
     },
     {
       "name": "Abuse",
-      "description": "Abuse detection: each server (node id 0 is the panel's own core) is off, observe or enforce. A detecting server watches its users' connections and traffic, never their content, for spam, BitTorrent, scanning, floods, crawling, repeated speed tests, hours at full speed and relaying. Observe only records and tells the admins; enforce does what each rule is set to. Each strike bans the account on every server for 30 minutes; the fourth within 30 days locks it until an admin lifts it, which also clears its strikes. IP-limit bans are kept in the same history but never count as strikes. The panel also guards sign-ups on the user page per network."
+      "description": "Abuse detection: each server (node id 0 is the panel's own core) is off, observe or enforce. A detecting server watches its users' connections and traffic, never their content, for spam, BitTorrent, scanning, floods, crawling, repeated speed tests and hours at full speed. Observe only records and tells the admins; enforce does what each rule is set to. Each strike bans the account on every server for 30 minutes; the fourth within 30 days locks it until an admin lifts it, which also clears its strikes. IP-limit bans are kept in the same history but never count as strikes. The panel also guards sign-ups on the user page per network."
     },
     {
       "name": "Backup",
@@ -16929,7 +16909,6 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
-                        "relay": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -16946,9 +16925,6 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
-                        "relayMinMb": 2048,
-                        "relaySharePct": 80,
-                        "relayWindowMin": 30,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,
@@ -17064,7 +17040,6 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
-                        "relay": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -17081,9 +17056,6 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
-                        "relayMinMb": 2048,
-                        "relaySharePct": 80,
-                        "relayWindowMin": 30,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,
@@ -17195,7 +17167,6 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
-                        "relay": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -17212,9 +17183,6 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
-                        "relayMinMb": 2048,
-                        "relaySharePct": 80,
-                        "relayWindowMin": 30,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,

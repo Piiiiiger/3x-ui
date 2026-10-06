@@ -166,7 +166,7 @@ func TestAbuseFullSpeedWarnsBeforeItBans(t *testing.T) {
 }
 
 // On an enforcing server each rule does what the admin set: record tells only
-// the admin, warn tells the person, ban strikes. Relay and unknown rules record.
+// the admin, warn tells the person, ban strikes; a rule it does not know records.
 func TestAbuseEachRuleDoesWhatItIsSetTo(t *testing.T) {
 	s := setupAbuse(t, AbuseModeEnforce)
 	settings := s.Settings()
@@ -178,7 +178,6 @@ func TestAbuseEachRuleDoesWhatItIsSetTo(t *testing.T) {
 	for _, c := range []struct{ rule, want string }{
 		{abuse.RuleScan, AbuseActionNoticed},
 		{abuse.RuleCrawler, AbuseActionWarned},
-		{abuse.RuleRelay, AbuseActionNoticed},
 		{abuse.RuleSpam, AbuseActionBanned},
 		{"tunnelling", AbuseActionNoticed},
 	} {

@@ -188,27 +188,6 @@ func TestFullSpeedWarnsAtTwoHoursStrikesAtFour(t *testing.T) {
 	}
 }
 
-// A tunnel is one bare address on an odd port carrying the traffic; web use of
-// one big site on 443 is not.
-func TestRelayNoticesATunnelNotWebTraffic(t *testing.T) {
-	d := NewDetector(DefaultRules())
-	connect(d, t0, "alice", "203.0.113.9", 8388, "direct")
-	for m := range 30 {
-		d.ObserveTraffic("alice", 100<<20, t0.Add(time.Duration(m)*time.Minute))
-	}
-	s := only(t, d.Collect(t0.Add(29*time.Minute)), RuleRelay)
-	if s.Samples[0] != "203.0.113.9:8388" {
-		t.Errorf("relay signal = %+v, want one naming the tunnel", s)
-	}
-
-	d = NewDetector(DefaultRules())
-	for m := range 30 {
-		connect(d, t0.Add(time.Duration(m)*time.Minute), "bob", "198.51.100.20", 443, "direct")
-		d.ObserveTraffic("bob", 100<<20, t0.Add(time.Duration(m)*time.Minute))
-	}
-	none(t, d.Collect(t0.Add(29*time.Minute)), RuleRelay)
-}
-
 func TestBitTorrentAttemptsStrike(t *testing.T) {
 	d := NewDetector(DefaultRules())
 	for i := range 30 {

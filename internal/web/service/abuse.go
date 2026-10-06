@@ -68,8 +68,7 @@ var (
 	errAbuseAction = errors.New("an action must be record, warn or ban")
 )
 
-// AbuseActions say what each rule's hits do on an enforcing server. Relay only
-// tells the admin until it has proven itself on real traffic.
+// AbuseActions say what each rule's hits do on an enforcing server.
 type AbuseActions struct {
 	Spam      string `json:"spam" example:"ban"`
 	BT        string `json:"bt" example:"ban"`
@@ -78,7 +77,6 @@ type AbuseActions struct {
 	Crawler   string `json:"crawler" example:"ban"`
 	SpeedTest string `json:"speedtest" example:"ban"`
 	FullSpeed string `json:"fullspeed" example:"ban"`
-	Relay     string `json:"relay" example:"record"`
 }
 
 // For is what a hit of rule does; a rule this panel does not know only records.
@@ -98,14 +96,12 @@ func (a AbuseActions) For(rule string) string {
 		return a.SpeedTest
 	case abuse.RuleFullSpeed:
 		return a.FullSpeed
-	case abuse.RuleRelay:
-		return a.Relay
 	}
 	return AbuseActRecord
 }
 
 func (a AbuseActions) valid() bool {
-	for _, act := range []string{a.Spam, a.BT, a.Scan, a.Flood, a.Crawler, a.SpeedTest, a.FullSpeed, a.Relay} {
+	for _, act := range []string{a.Spam, a.BT, a.Scan, a.Flood, a.Crawler, a.SpeedTest, a.FullSpeed} {
 		if act != AbuseActRecord && act != AbuseActWarn && act != AbuseActBan {
 			return false
 		}
@@ -133,7 +129,7 @@ func DefaultAbuseSettings() AbuseSettings {
 		Thresholds: abuse.DefaultRules(),
 		Actions: AbuseActions{
 			Spam: AbuseActBan, BT: AbuseActBan, Scan: AbuseActBan, Flood: AbuseActBan,
-			Crawler: AbuseActBan, SpeedTest: AbuseActBan, FullSpeed: AbuseActBan, Relay: AbuseActRecord,
+			Crawler: AbuseActBan, SpeedTest: AbuseActBan, FullSpeed: AbuseActBan,
 		},
 		Signup: SignupGuard{Limit: 3, Action: AbuseActRecord},
 	}
@@ -427,8 +423,6 @@ func AbuseRuleLabel(rule string) string {
 		return "反复测速"
 	case abuse.RuleFullSpeed:
 		return "长时间满速"
-	case abuse.RuleRelay:
-		return "中转到自有服务器"
 	case BanKindIPLimit:
 		return "同时在线 IP 超出上限"
 	case AbuseRuleSignup:
@@ -474,8 +468,6 @@ func AbuseEvidence(e model.AbuseEvent) string {
 		return fmt.Sprintf("24 小时内测速 %d 次", e.Count)
 	case abuse.MeasureMinutes:
 		return fmt.Sprintf("连续满速 %d 分钟", e.Count)
-	case abuse.MeasureShare:
-		return fmt.Sprintf("%d%% 的连接去往同一个地址", e.Count)
 	case abuseMeasureSignups:
 		var samples []string
 		if json.Unmarshal([]byte(e.Samples), &samples) == nil && len(samples) > 0 {

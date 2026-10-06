@@ -37,9 +37,6 @@ const settings = {
     fullSpeedMbps: 100,
     fullSpeedWarnMin: 120,
     fullSpeedStrikeMin: 240,
-    relaySharePct: 80,
-    relayMinMb: 2048,
-    relayWindowMin: 30,
   },
   actions: {
     spam: 'ban',
@@ -49,7 +46,6 @@ const settings = {
     crawler: 'ban',
     speedtest: 'ban',
     fullspeed: 'ban',
-    relay: 'record',
   },
   signup: { limit: 3, action: 'record' },
 };

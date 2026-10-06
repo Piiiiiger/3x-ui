@@ -70,10 +70,6 @@ func ParseAccessLine(line string, at time.Time) (Event, bool) {
 // but stops remembering new destinations, far above any threshold.
 const mapCap = 4096
 
-// relayMemory is how many of an account's latest connections the relay check
-// weighs; a tunnel opened hours ago is still among them.
-const relayMemory = 32
-
 // idleForget is how long an account with nothing pending stays remembered.
 const idleForget = time.Hour
 
@@ -82,7 +78,6 @@ type bucket struct {
 	conns     int64
 	smtp      int64
 	bt        int64
-	bytes     int64
 	ips       map[string]struct{}
 	sensitive map[string]struct{}
 	hosts     map[string]struct{}
@@ -106,8 +101,6 @@ type account struct {
 	fired    map[string]int64
 	tests    []int64
 	lastTest int64
-	recent   [relayMemory]string
-	recentN  int
 	speed    speedStreak
 	lastSeen int64
 }
@@ -212,7 +205,6 @@ func (d *Detector) Observe(e Event) {
 		b.dests[dest]++
 	}
 	b.hosts = remember(b.hosts, e.Host)
-	relayDest := ""
 	if e.IP {
 		b.ips = remember(b.ips, e.Host)
 		if sensitivePorts[e.Port] {
@@ -228,12 +220,7 @@ func (d *Detector) Observe(e Event) {
 			}
 			ports[e.Port] = struct{}{}
 		}
-		if !webPorts[e.Port] {
-			relayDest = dest
-		}
 	}
-	a.recent[a.recentN%relayMemory] = relayDest
-	a.recentN++
 }
 
 // ObserveTraffic counts bytes an account moved, as the traffic reports give them.
@@ -246,7 +233,6 @@ func (d *Detector) ObserveTraffic(email string, bytes int64, at time.Time) {
 	a := d.account(email)
 	sec := at.Unix()
 	a.lastSeen = max(a.lastSeen, sec)
-	a.bucket(sec / 60).bytes += bytes
 	s := &a.speed
 	if block := sec / 300; block != s.block {
 		full := int64(d.rules.FullSpeedMbps) * 1_000_000 / 8 * 300
@@ -397,10 +383,6 @@ func (d *Detector) check(a *account, sec int64) []Signal {
 			})
 		}
 	}
-
-	if s, ok := d.checkRelay(a, sec); ok {
-		out = append(out, s)
-	}
 	return out
 }
 
@@ -479,38 +461,6 @@ func (d *Detector) checkCrawler(a *account, sec int64) (Signal, bool) {
 		s.Measure, s.Count, s.Limit = MeasureHosts, hosts, int64(r.CrawlerHosts)
 	}
 	return s, true
-}
-
-// checkRelay looks for one bare IP on a non-web port behind most of the latest
-// connections while the account moves a lot: a tunnel to a server of its own.
-func (d *Detector) checkRelay(a *account, sec int64) (Signal, bool) {
-	r := d.rules
-	n := min(a.recentN, relayMemory)
-	if r.RelaySharePct <= 0 || n == 0 {
-		return Signal{}, false
-	}
-	counts := map[string]int64{}
-	for i := 0; i < n; i++ {
-		if dest := a.recent[i]; dest != "" {
-			counts[dest]++
-		}
-	}
-	dest, top := topCount(counts)
-	share := top * 100 / int64(n)
-	var bytes int64
-	for _, b := range a.window(sec/60, r.RelayWindowMin) {
-		bytes += b.bytes
-	}
-	if top == 0 || share < int64(r.RelaySharePct) || bytes < int64(r.RelayMinMB)<<20 {
-		return Signal{}, false
-	}
-	if !a.ready(RuleRelay, sec, r.RelayWindowMin*60) {
-		return Signal{}, false
-	}
-	return Signal{
-		Rule: RuleRelay, Level: LevelStrike, Measure: MeasureShare, Count: share, Limit: int64(r.RelaySharePct),
-		Window: r.RelayWindowMin * 60, Samples: []string{dest},
-	}, true
 }
 
 func topCount(counts map[string]int64) (string, int64) {

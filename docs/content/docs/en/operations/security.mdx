@@ -44,9 +44,9 @@ from the banned network are refused.
 ## Abuse prevention
 
 The panel can watch for accounts that abuse the servers: spam, BitTorrent, port
-scans, attacks, crawling, repeated speed tests, hours at full speed, and relaying
-traffic to a server of their own. It looks at connections and traffic only, never
-at their content, so ordinary use such as downloading software never counts.
+scans, attacks, crawling, repeated speed tests and hours at full speed. It looks at
+connections and traffic only, never at their content, so ordinary use such as
+downloading software never counts.
 
 - **Per server, off by default.** On the **Abuse** page (防滥用) each server, the
   panel's own core and every agent node, is **off**, **observe** or **enforce**.
@@ -55,9 +55,8 @@ at their content, so ordinary use such as downloading software never counts.
   records. An agent detects only from a build that reports the `abuse-v1`
   capability; the page marks a server whose agent cannot.
 - **Rules.** On an enforcing server each rule is set to **record** (tell the
-  admins), **warn** (also tell the user, at no cost) or **ban**. Relaying starts
-  at record, since remote desktops, NAS and some games look the same. Full speed
-  warns after 2 hours and, while the rule bans, strikes after 4.
+  admins), **warn** (also tell the user, at no cost) or **ban**. Full speed warns
+  after 2 hours and, while the rule bans, strikes after 4.
 - **Strikes and locks.** A strike bans the account on every server for 30
   minutes. The fourth strike within 30 days locks it until an admin lifts the
   lock, which also clears its strikes. IP-limit bans share the history but never

@@ -11,7 +11,6 @@ const (
 	RuleCrawler   = "crawler"
 	RuleSpeedTest = "speedtest"
 	RuleFullSpeed = "fullspeed"
-	RuleRelay     = "relay"
 )
 
 // Routing tags a server with detection on sends classified traffic to: the first
@@ -42,7 +41,6 @@ const (
 	MeasureTestsHour = "tests-hour"
 	MeasureTestsDay  = "tests-day"
 	MeasureMinutes   = "minutes"
-	MeasureShare     = "share"
 )
 
 // Signal is one rule one account tripped, with what made it trip.
@@ -87,10 +85,6 @@ type Rules struct {
 	FullSpeedMbps      int `json:"fullSpeedMbps" example:"100"`
 	FullSpeedWarnMin   int `json:"fullSpeedWarnMin" example:"120"`
 	FullSpeedStrikeMin int `json:"fullSpeedStrikeMin" example:"240"`
-
-	RelaySharePct  int `json:"relaySharePct" example:"80"`
-	RelayMinMB     int `json:"relayMinMb" example:"2048"`
-	RelayWindowMin int `json:"relayWindowMin" example:"30"`
 }
 
 // DefaultRules are the starting thresholds: a week of observing on real traffic
@@ -104,7 +98,6 @@ func DefaultRules() Rules {
 		CrawlerConns: 4000, CrawlerHosts: 600, CrawlerWindowMin: 10, CrawlerWindows: 2,
 		SpeedTestsPerHour: 5, SpeedTestsPerDay: 15, SpeedTestGapMin: 3,
 		FullSpeedMbps: 100, FullSpeedWarnMin: 120, FullSpeedStrikeMin: 240,
-		RelaySharePct: 80, RelayMinMB: 2048, RelayWindowMin: 30,
 	}
 }
 
@@ -124,7 +117,6 @@ func (r Rules) Normalized() Rules {
 	r.SpamWindowMin = window(r.SpamWindowMin, d.SpamWindowMin)
 	r.BTWindowMin = window(r.BTWindowMin, d.BTWindowMin)
 	r.ScanWindowMin = window(r.ScanWindowMin, d.ScanWindowMin)
-	r.RelayWindowMin = window(r.RelayWindowMin, d.RelayWindowMin)
 	r.CrawlerWindowMin = window(r.CrawlerWindowMin, d.CrawlerWindowMin)
 	if r.CrawlerWindows <= 0 {
 		r.CrawlerWindows = d.CrawlerWindows
@@ -142,6 +134,3 @@ var sensitivePorts = map[int]bool{
 	22: true, 23: true, 135: true, 139: true, 445: true, 1433: true, 1521: true, 3306: true,
 	3389: true, 5432: true, 5900: true, 6379: true, 9200: true, 11211: true, 27017: true,
 }
-
-// webPorts carry ordinary web traffic, which a relay check must not count.
-var webPorts = map[int]bool{80: true, 443: true, 8080: true, 8443: true}
