@@ -95,6 +95,14 @@ export default function PortalRules({ limitIp }: { limitIp?: number }) {
             <li>同时在线 IP 超出上限只会暂停超出的 IP 30 分钟，不计入违规次数。</li>
             <li>封禁和提醒会通过 Telegram 通知你（请先绑定）。</li>
           </ul>
+          <Typography.Title level={5}>AI 命令行工具</Typography.Title>
+          <Typography.Paragraph>
+            Droid、Claude Code、Codex 等命令行工具不走系统代理，开着 Clash 也会直连而登录失败。请在
+            Clash 里打开 TUN 模式（虚拟网卡），它们就会走「🤖 AI 服务」。不想开
+            TUN，也可以在终端里先设置{' '}
+            <Typography.Text code>HTTPS_PROXY=http://127.0.0.1:7890</Typography.Text>
+            （端口以 Clash 设置里的为准，Clash Verge 默认 7897）。
+          </Typography.Paragraph>
         </Modal>
       )}
     </>
