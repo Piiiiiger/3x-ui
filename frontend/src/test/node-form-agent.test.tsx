@@ -124,6 +124,29 @@ describe('NodeFormModal agent nodes', () => {
     );
   });
 
+  // An agent added from the probe is stored with port 0, a panel-only field the
+  // dialog hides; it must not block a save with "expected number to be >=1".
+  it('saves an agent stored without a port', async () => {
+    const props = renderForm('edit', {
+      id: 21,
+      name: 'edge-de',
+      kind: 'agent',
+      address: '203.0.113.21',
+      port: 0,
+      scheme: '',
+      tlsVerifyMode: 'verify',
+      enable: true,
+      trafficMultiplier: 1,
+    });
+    typeInto('Traffic multiplier', '0.2');
+    submit();
+    await waitFor(() =>
+      expect(props.save).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'agent', trafficMultiplier: 0.2 }),
+      ),
+    );
+  });
+
   // A child panel limits users on the bytes it counts itself, so it has no multiplier.
   it('offers no traffic multiplier for a 3x-ui child panel', () => {
     renderForm('edit', {

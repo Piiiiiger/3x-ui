@@ -131,6 +131,8 @@ export default function NodeFormModal({
             id: node.id,
             kind: node.kind ?? base.kind,
             scheme: (node.scheme as 'http' | 'https') || base.scheme,
+            // An agent added from the probe has no port; the hidden field still validates.
+            port: node.port || base.port,
             inboundSyncMode: (node.inboundSyncMode as 'all' | 'selected') || base.inboundSyncMode,
             inboundTags: node.inboundTags ?? [],
             apiToken: '',
