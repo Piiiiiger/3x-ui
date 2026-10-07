@@ -18,7 +18,14 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import type { RemoteInboundOption } from '@/api/queries/useNodeMutations';
 import type { Msg } from '@/utils';
-import { NodeFormSchema, type NodeFormValues, type ProbeResult } from '@/schemas/node';
+import type { z } from 'zod';
+import {
+  AgentFormSchema,
+  NodeFormSchema,
+  type AgentFormValues,
+  type NodeFormValues,
+  type ProbeResult,
+} from '@/schemas/node';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { useOutboundTagGroups } from '@/api/queries/useOutboundTags';
 import type { AgentSecretView, ProbeServer } from '@/generated/zod';
@@ -131,8 +138,6 @@ export default function NodeFormModal({
             id: node.id,
             kind: node.kind ?? base.kind,
             scheme: (node.scheme as 'http' | 'https') || base.scheme,
-            // An agent added from the probe has no port; the hidden field still validates.
-            port: node.port || base.port,
             inboundSyncMode: (node.inboundSyncMode as 'all' | 'selected') || base.inboundSyncMode,
             inboundTags: node.inboundTags ?? [],
             apiToken: '',
@@ -152,19 +157,20 @@ export default function NodeFormModal({
 
   const editingWithToken = mode === 'edit' && Boolean(node?.hasApiToken);
 
-  function buildPayload(values: NodeFormValues): Partial<NodeRecord> {
-    if (values.kind === 'agent') {
-      return {
-        id: values.id || 0,
-        kind: 'agent',
-        name: values.name.trim(),
-        remark: values.remark?.trim() || '',
-        address: values.address.trim(),
-        enable: values.enable,
-        trafficMultiplier: values.trafficMultiplier,
-        ...(values.probeServerId ? { probeServerId: values.probeServerId } : {}),
-      };
-    }
+  function agentPayload(values: AgentFormValues): Partial<NodeRecord> {
+    return {
+      id: values.id || 0,
+      kind: 'agent',
+      name: values.name.trim(),
+      remark: values.remark?.trim() || '',
+      address: values.address.trim(),
+      enable: values.enable,
+      trafficMultiplier: values.trafficMultiplier,
+      ...(values.probeServerId ? { probeServerId: values.probeServerId } : {}),
+    };
+  }
+
+  function panelPayload(values: NodeFormValues): Partial<NodeRecord> {
     const token = values.apiToken.trim();
     const payload: Partial<NodeRecord> = {
       id: values.id || 0,
@@ -192,7 +198,7 @@ export default function NodeFormModal({
     setTesting(true);
     setTestResult(null);
     try {
-      const payload = buildPayload(methods.getValues());
+      const payload = panelPayload(methods.getValues());
       const msg = await testConnection(payload);
       if (msg?.success && msg.obj) {
         setTestResult(msg.obj);
@@ -208,7 +214,7 @@ export default function NodeFormModal({
     if (!(await methods.trigger(['name', 'address', 'port']))) return;
     setFetchingPin(true);
     try {
-      const payload = buildPayload(methods.getValues());
+      const payload = panelPayload(methods.getValues());
       const msg = await fetchFingerprint(payload);
       if (msg?.success && msg.obj) {
         methods.setValue('pinnedCertSha256', msg.obj);
@@ -225,7 +231,7 @@ export default function NodeFormModal({
     if (!(await methods.trigger(['name', 'address', 'port', 'apiToken']))) return;
     setFetchingInbounds(true);
     try {
-      const msg = await fetchInbounds(buildPayload(methods.getValues()));
+      const msg = await fetchInbounds(panelPayload(methods.getValues()));
       if (msg?.success && Array.isArray(msg.obj)) {
         setInboundOptions(msg.obj);
         messageApi.success(t('pages.nodes.inboundsLoaded', { count: msg.obj.length }));
@@ -271,19 +277,28 @@ export default function NodeFormModal({
     }
   }
 
+  function refuse(error: z.ZodError) {
+    messageApi.error(t(error.issues[0]?.message ?? 'pages.nodes.toasts.fillRequired'));
+  }
+
   async function onFinish(values: NodeFormValues) {
-    const result = NodeFormSchema.safeParse(values);
-    if (!result.success) {
-      messageApi.error(t(result.error.issues[0]?.message ?? 'pages.nodes.toasts.fillRequired'));
+    // The panel fields stay hidden and unsent for an agent, so they are not checked.
+    if (values.kind === 'agent') {
+      const agent = AgentFormSchema.safeParse(values);
+      if (!agent.success) return refuse(agent.error);
+      setSubmitting(true);
+      try {
+        await saveAgent(agentPayload(agent.data));
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
+    const result = NodeFormSchema.safeParse(values);
+    if (!result.success) return refuse(result.error);
     setSubmitting(true);
     try {
-      const payload = buildPayload(result.data);
-      if (result.data.kind === 'agent') {
-        await saveAgent(payload);
-        return;
-      }
+      const payload = panelPayload(result.data);
       const test = await testConnection(payload);
       const probe = test?.success ? test.obj : null;
       if (!probe || probe.status !== 'online') {

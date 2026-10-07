@@ -65,22 +65,37 @@ export const ProbeResultSchema = z
   })
   .loose();
 
+// What every host has. An agent is checked on these alone: the panel keeps no
+// connection for it, so its row holds port 0 and an empty scheme and TLS mode.
+const hostFormFields = {
+  id: z.number().optional(),
+  name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
+  remark: z.string().optional(),
+  address: z.string().trim(),
+  probeServerId: z.string().optional().default(''),
+  enable: z.boolean(),
+  // A cleared field saves the default: bytes count as they are.
+  trafficMultiplier: z
+    .number()
+    .min(0)
+    .max(100)
+    .nullish()
+    .transform((multiplier) => multiplier ?? 1),
+};
+
+export const AgentFormSchema = z.object({ ...hostFormFields, kind: z.literal('agent') });
+
 export const NodeFormSchema = z
   .object({
-    id: z.number().optional(),
-    name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
-    remark: z.string().optional(),
+    ...hostFormFields,
     kind: z.enum(['panel', 'agent']).default('panel'),
     scheme: z.enum(['http', 'https']),
-    address: z.string().trim(),
-    probeServerId: z.string().optional().default(''),
     port: z.number().int().min(1).max(65535),
     basePath: z.string(),
     // mTLS nodes authenticate via the client certificate, so the token is optional
     // there; every other verify mode still requires one (matches remote.do()).
     apiToken: z.string().trim(),
     hasStoredToken: z.boolean().optional().default(false),
-    enable: z.boolean(),
     allowPrivateAddress: z.boolean(),
     tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
     pinnedCertSha256: z.string().optional().default(''),
@@ -92,13 +107,6 @@ export const NodeFormSchema = z
       .nullish()
       .transform((tags) => tags ?? []),
     outboundTag: z.string().optional(),
-    // A cleared field saves the default: bytes count as they are.
-    trafficMultiplier: z
-      .number()
-      .min(0)
-      .max(100)
-      .nullish()
-      .transform((multiplier) => multiplier ?? 1),
   })
   .superRefine((val, ctx) => {
     if (val.kind === 'panel' && !val.address) {
@@ -126,3 +134,4 @@ export const NodeFormSchema = z
 export type NodeRecord = z.infer<typeof NodeRecordSchema>;
 export type ProbeResult = z.infer<typeof ProbeResultSchema>;
 export type NodeFormValues = z.infer<typeof NodeFormSchema>;
+export type AgentFormValues = z.infer<typeof AgentFormSchema>;

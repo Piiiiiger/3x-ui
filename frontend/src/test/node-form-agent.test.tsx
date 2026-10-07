@@ -124,25 +124,25 @@ describe('NodeFormModal agent nodes', () => {
     );
   });
 
-  // An agent added from the probe is stored with port 0, a panel-only field the
-  // dialog hides; it must not block a save with "expected number to be >=1".
-  it('saves an agent stored without a port', async () => {
+  // An agent has no panel connection: after a save its row holds port 0 and an
+  // empty scheme and TLS mode, the hidden panel fields, which must not block saves.
+  it('saves an agent again after an earlier save', async () => {
     const props = renderForm('edit', {
-      id: 21,
-      name: 'edge-de',
+      id: 17,
+      name: 'edge-uk',
       kind: 'agent',
-      address: '203.0.113.21',
+      address: '203.0.113.17',
       port: 0,
       scheme: '',
-      tlsVerifyMode: 'verify',
+      tlsVerifyMode: '',
       enable: true,
-      trafficMultiplier: 1,
-    });
-    typeInto('Traffic multiplier', '0.2');
+      trafficMultiplier: 0.2,
+    } as unknown as NodeRecord);
+    typeInto('Name', 'edge-gb');
     submit();
     await waitFor(() =>
       expect(props.save).toHaveBeenCalledWith(
-        expect.objectContaining({ kind: 'agent', trafficMultiplier: 0.2 }),
+        expect.objectContaining({ kind: 'agent', name: 'edge-gb', trafficMultiplier: 0.2 }),
       ),
     );
   });
