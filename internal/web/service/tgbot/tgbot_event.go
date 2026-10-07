@@ -33,10 +33,16 @@ func (t *Tgbot) HandleEvent(e eventbus.Event) {
 	if !t.isEventEnabled(e.Type) {
 		return
 	}
-	if e.Type != eventbus.EventLoginAttempt {
-		if !tgEventLimiter.Allow(e.Type, e.Source) {
-			return
+	if data, ok := e.Data.(*eventbus.LoginEventData); ok && e.Type == eventbus.EventLoginAttempt {
+		at := e.Timestamp
+		if at.IsZero() {
+			at = time.Now()
 		}
+		t.noteLoginAttempt(data, at)
+		return
+	}
+	if e.Type != eventbus.EventLoginAttempt && !tgEventLimiter.Allow(e.Type, e.Source) {
+		return
 	}
 	msg := t.formatEventMessage(e)
 	if msg != "" {
@@ -136,25 +142,6 @@ func (t *Tgbot) formatEventMessage(e eventbus.Event) string {
 		return ""
 
 	case eventbus.EventLoginAttempt:
-		if data, ok := e.Data.(*eventbus.LoginEventData); ok {
-			if data.Status == "success" {
-				msg := t.I18nBot("tgbot.messages.loginSuccess")
-				msg += t.I18nBot("tgbot.messages.hostname", "Hostname=="+host)
-				msg += t.I18nBot("tgbot.messages.username", "Username=="+data.Username)
-				msg += t.I18nBot("tgbot.messages.ip", "IP=="+data.IP)
-				msg += t.I18nBot("tgbot.messages.time", "Time=="+data.Time)
-				return msg
-			}
-			msg := t.I18nBot("tgbot.messages.loginFailed")
-			msg += t.I18nBot("tgbot.messages.hostname", "Hostname=="+host)
-			if data.Reason != "" {
-				msg += t.I18nBot("tgbot.messages.reason", "Reason=="+data.Reason)
-			}
-			msg += t.I18nBot("tgbot.messages.username", "Username=="+data.Username)
-			msg += t.I18nBot("tgbot.messages.ip", "IP=="+data.IP)
-			msg += t.I18nBot("tgbot.messages.time", "Time=="+data.Time)
-			return msg
-		}
 		return header + t.I18nBot("tgbot.messages.eventLoginFallback", "Source=="+e.Source)
 	}
 

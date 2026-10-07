@@ -189,6 +189,7 @@ func (t *Tgbot) UserLoginNotify(attempt LoginAttempt) {
 			Time:     attempt.Time,
 			Status:   status,
 			Reason:   attempt.Reason,
+			NewIP:    attempt.NewIP,
 		},
 	})
 }

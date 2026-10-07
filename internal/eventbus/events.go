@@ -56,6 +56,7 @@ type LoginEventData struct {
 	Time     string
 	Status   string // "success" or "fail"
 	Reason   string
+	NewIP    bool // the address's network had never signed in before this attempt
 }
 
 // SystemMetricData carries raw system metric values for threshold-based events.

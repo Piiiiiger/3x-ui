@@ -235,6 +235,8 @@ func newPiggerBot(t *testing.T) (*Tgbot, *botRecorder) {
 	t.Cleanup(userStateMgr.reset)
 	resetAccountPacing()
 	t.Cleanup(resetAccountPacing)
+	resetLoginFailures()
+	t.Cleanup(resetLoginFailures)
 	inviteAttemptsMu.Lock()
 	inviteAttemptsBy = map[int64]*inviteAttempts{}
 	inviteAttemptsMu.Unlock()
@@ -249,6 +251,12 @@ func resetAccountPacing() {
 	accountPacing.Lock()
 	accountPacing.serversAt, accountPacing.servers, accountPacing.prunedOn = time.Time{}, nil, ""
 	accountPacing.Unlock()
+}
+
+func resetLoginFailures() {
+	loginFailures.Lock()
+	loginFailures.held = map[string]*heldLoginFailures{}
+	loginFailures.Unlock()
 }
 
 // withProbe stands in for Lite, counting how often the scheduler asks it.

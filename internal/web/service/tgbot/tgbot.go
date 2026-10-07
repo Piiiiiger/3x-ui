@@ -219,6 +219,7 @@ type LoginAttempt struct {
 	Time     string
 	Status   LoginStatus
 	Reason   string
+	NewIP    bool
 }
 
 // Tgbot provides business logic for Telegram bot integration.

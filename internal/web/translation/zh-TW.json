@@ -2474,8 +2474,6 @@
       "udpCount": "🔸 UDP: {{ .Count }}\r\n",
       "traffic": "🚦 流量：{{ .Total }} (↑{{ .Upload }},↓{{ .Download }})\r\n",
       "xrayStatus": "ℹ️ 狀態: {{ .State }}\r\n",
-      "username": "👤 使用者名稱：{{ .Username }}\r\n",
-      "reason": "❗️ 原因：{{ .Reason }}\r\n",
       "time": "⏰ 時間：{{ .Time }}\r\n",
       "inbound": "📍 入站: {{ .Remark }}\r\n",
       "port": "🔌 連接埠: {{ .Port }}\r\n",

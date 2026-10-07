@@ -2474,8 +2474,6 @@
       "udpCount": "🔸 UDP: {{ .Count }}\r\n",
       "traffic": "🚦 Трафик: {{ .Total }} (↑{{ .Upload }},↓{{ .Download }})\r\n",
       "xrayStatus": "ℹ️ Статус: {{ .State }}\r\n",
-      "username": "👤 Имя пользователя: {{ .Username }}\r\n",
-      "reason": "❗️ Причина: {{ .Reason }}\r\n",
       "time": "⏰ Время: {{ .Time }}\r\n",
       "inbound": "📍 Входящий: {{ .Remark }}\r\n",
       "port": "🔌 Порт: {{ .Port }}\r\n",

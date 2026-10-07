@@ -708,6 +708,7 @@ func (t *Tgbot) sendAccountNotifications(ctx context.Context, now time.Time) {
 	t.notifyRuleSets(ctx, now)
 	t.notifyDueUsers(ctx, now)
 	t.notifyServerRenewals(ctx, now, clock)
+	t.flushLoginFailures(ctx, now)
 
 	accountPacing.Lock()
 	prune := accountPacing.prunedOn != local.Format("2006-01-02")

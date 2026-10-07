@@ -83,6 +83,7 @@ func migrationModels() []any {
 		&model.PortalSignup{},
 		&model.RuleSet{},
 		&model.RuleSetVersion{},
+		&model.PanelLoginNetwork{},
 	}
 }
 

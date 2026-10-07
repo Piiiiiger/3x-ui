@@ -2474,8 +2474,6 @@
       "udpCount": "🔸 UDP: {{ .Count }}\r\n",
       "traffic": "🚦 Tráfico: {{ .Total }} (↑{{ .Upload }},↓{{ .Download }})\r\n",
       "xrayStatus": "ℹ️ Estado: {{ .State }}\r\n",
-      "username": "👤 Nombre de usuario: {{ .Username }}\r\n",
-      "reason": "❗️ Motivo: {{ .Reason }}\r\n",
       "time": "⏰ Hora: {{ .Time }}\r\n",
       "inbound": "📍 Entrada: {{ .Remark }}\r\n",
       "port": "🔌 Puerto: {{ .Port }}\r\n",

@@ -138,6 +138,7 @@ func (a *IndexController) login(c *gin.Context) {
 			Time:     timeStr,
 			Status:   tgbot.LoginFail,
 			Reason:   reason,
+			NewIP:    !service.PanelLoginKnown(remoteIP),
 		})
 		pureJsonMsg(c, http.StatusOK, false, I18nWeb(c, "pages.login.toasts.wrongUsernameOrPassword"))
 		return
@@ -158,6 +159,7 @@ func (a *IndexController) login(c *gin.Context) {
 			Time:     timeStr,
 			Status:   tgbot.LoginFail,
 			Reason:   reason,
+			NewIP:    !service.PanelLoginKnown(remoteIP),
 		})
 		pureJsonMsg(c, http.StatusOK, false, I18nWeb(c, "pages.login.toasts.wrongUsernameOrPassword"))
 		return
@@ -165,11 +167,17 @@ func (a *IndexController) login(c *gin.Context) {
 
 	defaultLoginLimiter.RegisterSuccess(remoteIP, form.Username)
 	logger.Infof("logged in successfully: username=%q, IP=%q", form.Username, remoteIP)
+	newIP, err := service.RecordPanelLogin(remoteIP, time.Now())
+	if err != nil {
+		logger.Warning("Unable to remember the login network:", err)
+		newIP = true
+	}
 	a.tgbot.UserLoginNotify(tgbot.LoginAttempt{
 		Username: safeUser,
 		IP:       remoteIP,
 		Time:     timeStr,
 		Status:   tgbot.LoginSuccess,
+		NewIP:    newIP,
 	})
 
 	if err := session.SetLoginUser(c, user); err != nil {
