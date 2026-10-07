@@ -116,6 +116,26 @@ then advertise that port with the node's share address, while Xray keeps
 listening on the node's own port. Leave it at 0 when people connect to the
 node's own port.
 
+## Traffic multiplier
+
+A host's **traffic multiplier** sets what each byte users move through it counts
+as toward their quotas: at 0.1, 10 GB used there counts as 1 GB; at 0 it counts
+nothing; at 2 it counts double. Set it in the host's edit dialog; for this
+panel's own host, use the edit button on the local panel's card. Cards show the
+multiplier when it is not 1.
+
+- It applies per host, not per node: Xray counts each user's traffic per server,
+  so every node on a host, Snell included, counts at the host's rate.
+- Traffic through a relay chain counts at the rate of the chain's exit host,
+  which is where it is billed.
+- Usage, quotas, daily history and the bot's notices use the charged amount, as
+  do the traffic overview's daily chart and user ranking. Host and node
+  counters, the host ranking and the probe keep the real bytes.
+- A change applies to traffic counted from then on; past usage is not
+  recalculated.
+- A 3x-ui child panel limits users on the bytes it counts itself, so its
+  multiplier stays 1.
+
 ## Related
 
 <Cards>

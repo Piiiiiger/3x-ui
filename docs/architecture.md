@@ -404,6 +404,15 @@ A client reset is queued per hosting node in `model.NodePendingReset` (`service/
 and replayed by the node sync until the node accepts it.
 Periodic resets: `job/periodic_traffic_reset_job.go` (keyed off `Inbound.TrafficReset`).
 
+**Traffic multiplier.** Client usage is charged at the multiplier of the host that moved it:
+`Node.TrafficMultiplier` for an agent, the hidden setting `localTrafficMultiplier` for this
+panel (`/panel/api/server/trafficMultiplier`); a 3x-ui panel node stays at 1 because it
+enforces quotas on its own counters. `addClientTraffic` applies it to `client_traffics` only.
+Inbound counters, `node_client_traffics` and host history keep the real bytes, and the local
+poll handed to the abuse checks is left unscaled. It is per host because Xray counts a user
+per core, not per inbound. The local mtg sidecar's quota is converted at the same rate
+(`sidecarQuota`), in both the reconcile job and the edit push. Helpers: `service/traffic_multiplier.go`.
+
 ### 5.4 Background jobs (cron)
 
 All registered in `web.go` → `startTask()`. Each is a struct with a `Run()` method in `internal/web/job/`:
