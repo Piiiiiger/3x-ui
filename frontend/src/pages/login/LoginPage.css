@@ -201,6 +201,10 @@
     color 9999s ease-in-out 0s;
 }
 
+.remember-row {
+  margin-bottom: 16px;
+}
+
 .submit-row {
   margin-bottom: 0;
 }

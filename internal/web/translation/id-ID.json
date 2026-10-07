@@ -159,6 +159,7 @@
       "hello": "Halo",
       "title": "Selamat Datang",
       "loginAgain": "Sesi Anda telah berakhir, harap masuk kembali",
+      "rememberMe": "Ingat saya selama 30 hari",
       "toasts": {
         "invalidFormData": "Format data input tidak valid.",
         "emptyUsername": "Nama Pengguna diperlukan",

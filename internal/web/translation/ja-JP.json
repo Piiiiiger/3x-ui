@@ -159,6 +159,7 @@
       "hello": "こんにちは",
       "title": "ようこそ",
       "loginAgain": "ログインセッションが切れました。再度ログインしてください。",
+      "rememberMe": "30 日間ログインしたままにする",
       "toasts": {
         "invalidFormData": "データ形式エラー",
         "emptyUsername": "ユーザー名を入力してください",

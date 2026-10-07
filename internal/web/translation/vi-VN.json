@@ -159,6 +159,7 @@
       "hello": "Xin chào",
       "title": "Chào mừng",
       "loginAgain": "Thời hạn đăng nhập đã hết. Vui lòng đăng nhập lại.",
+      "rememberMe": "Ghi nhớ tôi trong 30 ngày",
       "toasts": {
         "invalidFormData": "Dạng dữ liệu nhập không hợp lệ.",
         "emptyUsername": "Vui lòng nhập tên người dùng.",

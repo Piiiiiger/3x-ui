@@ -4,6 +4,7 @@ export const LoginFormSchema = z.object({
   username: z.string().min(1, 'username'),
   password: z.string().min(1, 'password'),
   twoFactorCode: z.string().optional(),
+  rememberMe: z.boolean().optional(),
 });
 
 export const TwoFactorCodeSchema = z.string().min(1, 'twoFactorCode');

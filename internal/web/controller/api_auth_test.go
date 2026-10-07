@@ -47,7 +47,7 @@ func newAPIAuthTestEngine(t *testing.T) (*gin.Engine, *APIController) {
 			c.Status(http.StatusInternalServerError)
 			return
 		}
-		if err := session.SetLoginUser(c, u); err != nil {
+		if err := session.SetLoginUser(c, u, false); err != nil {
 			c.Status(http.StatusInternalServerError)
 			return
 		}

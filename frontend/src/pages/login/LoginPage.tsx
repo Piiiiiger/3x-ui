@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
+  Checkbox,
   ConfigProvider,
   Form,
   Input,
@@ -33,6 +34,16 @@ import { LoginFormSchema, TwoFactorCodeSchema, type LoginFormValues } from '@/sc
 import './LoginPage.css';
 
 const HEADLINE_INTERVAL_MS = 2000;
+const REMEMBER_STORAGE = 'pigger.login.remember';
+
+/** The last sign-in's "remember me" choice, so the box keeps being ticked. */
+function readRemember(): boolean {
+  try {
+    return localStorage.getItem(REMEMBER_STORAGE) === '1';
+  } catch {
+    return false;
+  }
+}
 
 type LoginForm = LoginFormValues;
 
@@ -53,7 +64,7 @@ export default function LoginPage() {
   const [twoFactorEnable, setTwoFactorEnable] = useState(false);
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const methods = useForm<LoginForm>({
-    defaultValues: { username: '', password: '', twoFactorCode: '' },
+    defaultValues: { username: '', password: '', twoFactorCode: '', rememberMe: readRemember() },
   });
   const [lang, setLang] = useState<string>(() => LanguageManager.getLanguage());
 
@@ -83,7 +94,13 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const msg = await HttpUtil.post('/login', values);
-      if (msg.success) window.location.href = basePath + 'panel/';
+      if (!msg.success) return;
+      try {
+        localStorage.setItem(REMEMBER_STORAGE, values.rememberMe ? '1' : '0');
+      } catch {
+        // Without storage the box starts unticked next time.
+      }
+      window.location.href = basePath + 'panel/';
     } finally {
       setSubmitting(false);
     }
@@ -237,6 +254,10 @@ export default function LoginPage() {
                         />
                       </FormField>
                     )}
+
+                    <FormField name="rememberMe" valueProp="checked" className="remember-row">
+                      <Checkbox>{t('pages.login.rememberMe')}</Checkbox>
+                    </FormField>
 
                     <Form.Item className="submit-row">
                       <Button

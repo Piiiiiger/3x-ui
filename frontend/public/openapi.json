@@ -8277,6 +8277,10 @@
                   "twoFactorCode": {
                     "type": "string",
                     "description": "OTP code when 2FA is enabled. Omit otherwise."
+                  },
+                  "rememberMe": {
+                    "type": "boolean",
+                    "description": "Keep the session cookie for 30 days, renewed while in use, instead of the panel session length."
                   }
                 },
                 "required": [
@@ -8287,7 +8291,8 @@
               "example": {
                 "username": "admin",
                 "password": "admin",
-                "twoFactorCode": "123456"
+                "twoFactorCode": "123456",
+                "rememberMe": true
               }
             }
           }

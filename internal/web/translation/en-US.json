@@ -159,6 +159,7 @@
       "hello": "Hello",
       "title": "Welcome",
       "loginAgain": "Your session has expired, please log in again",
+      "rememberMe": "Remember me for 30 days",
       "toasts": {
         "invalidFormData": "The input data format is invalid.",
         "emptyUsername": "Username is required",

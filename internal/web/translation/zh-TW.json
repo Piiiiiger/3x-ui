@@ -159,6 +159,7 @@
       "hello": "你好",
       "title": "歡迎",
       "loginAgain": "登入時效已過，請重新登入",
+      "rememberMe": "記住我（30 天內免登入）",
       "toasts": {
         "invalidFormData": "資料格式錯誤",
         "emptyUsername": "請輸入使用者名稱",

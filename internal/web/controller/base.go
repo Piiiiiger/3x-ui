@@ -4,6 +4,7 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
@@ -26,6 +27,7 @@ func (a *BaseController) checkLogin(c *gin.Context) {
 		}
 		c.Abort()
 	} else {
+		session.RefreshRemembered(c, time.Now())
 		c.Next()
 	}
 }

@@ -24,14 +24,23 @@ func init() {
 	gob.Register(model.User{})
 }
 
-func SetLoginUser(c *gin.Context, user *model.User) error {
+// SetLoginUser signs user in; remember keeps the login for RememberMaxAge instead of
+// the panel's session length.
+func SetLoginUser(c *gin.Context, user *model.User, remember bool) error {
 	if user == nil {
 		return nil
 	}
 	s := sessions.Default(c)
 	s.Set(loginUserKey, user.Id)
 	s.Set(loginEpochKey, user.LoginEpoch)
+	setRemembered(c, s, remember, time.Now())
 	return s.Save()
+}
+
+func dropLogin(c *gin.Context, s sessions.Session) {
+	s.Delete(loginUserKey)
+	s.Delete(loginEpochKey)
+	setRemembered(c, s, false, time.Time{})
 }
 
 func SetAPIAuthUser(c *gin.Context, user *model.User) {
@@ -54,8 +63,7 @@ func GetLoginUser(c *gin.Context) *model.User {
 	}
 	userID, ok := sessionUserID(obj)
 	if !ok {
-		s.Delete(loginUserKey)
-		s.Delete(loginEpochKey)
+		dropLogin(c, s)
 		if err := s.Save(); err != nil {
 			logger.Warning("session: failed to drop stale user payload:", err)
 		}
@@ -70,16 +78,14 @@ func GetLoginUser(c *gin.Context) *model.User {
 	user, err := getUserByID(userID)
 	if err != nil {
 		logger.Warning("session: failed to load user:", err)
-		s.Delete(loginUserKey)
-		s.Delete(loginEpochKey)
+		dropLogin(c, s)
 		if saveErr := s.Save(); saveErr != nil {
 			logger.Warning("session: failed to drop missing user:", saveErr)
 		}
 		return nil
 	}
 	if !sessionEpochMatches(s.Get(loginEpochKey), user.LoginEpoch) {
-		s.Delete(loginUserKey)
-		s.Delete(loginEpochKey)
+		dropLogin(c, s)
 		if saveErr := s.Save(); saveErr != nil {
 			logger.Warning("session: failed to drop stale epoch:", saveErr)
 		}

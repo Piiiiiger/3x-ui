@@ -25,6 +25,7 @@ type LoginForm struct {
 	Username      string `json:"username" form:"username"`
 	Password      string `json:"password" form:"password"`
 	TwoFactorCode string `json:"twoFactorCode" form:"twoFactorCode"`
+	RememberMe    bool   `json:"rememberMe" form:"rememberMe"`
 }
 
 // IndexController handles the main index and login-related routes.
@@ -74,7 +75,7 @@ func (a *IndexController) portalAdminHandoff(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	if err := session.SetLoginUser(c, user); err != nil {
+	if err := session.SetLoginUser(c, user, false); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "server"})
 		return
 	}
@@ -180,7 +181,7 @@ func (a *IndexController) login(c *gin.Context) {
 		NewIP:    newIP,
 	})
 
-	if err := session.SetLoginUser(c, user); err != nil {
+	if err := session.SetLoginUser(c, user, form.RememberMe); err != nil {
 		logger.Warning("Unable to save session:", err)
 		return
 	}

@@ -159,6 +159,7 @@
       "hello": "Merhaba",
       "title": "Hoş Geldiniz",
       "loginAgain": "Oturum süreniz doldu, lütfen tekrar giriş yapın.",
+      "rememberMe": "30 gün boyunca beni hatırla",
       "toasts": {
         "invalidFormData": "Veri formatı geçersiz.",
         "emptyUsername": "Kullanıcı adı zorunludur",
