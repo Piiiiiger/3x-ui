@@ -2126,6 +2126,14 @@ func (s *InboundService) buildInboundForLocalRuntime(tx *gorm.DB, inbound *model
 		return nil, err
 	}
 
+	// mtg stops a secret on the bytes it moves itself, so its quota is the one
+	// the panel charges, converted at this host's multiplier.
+	sidecarMultiplier := 1.0
+	if built.Protocol == model.MTProto {
+		if sidecarMultiplier, err = (&SettingService{}).GetLocalTrafficMultiplier(); err != nil {
+			return nil, err
+		}
+	}
 	finalClients := make([]any, 0, len(clients))
 	for _, client := range clients {
 		c, ok := client.(map[string]any)
@@ -2138,6 +2146,9 @@ func (s *InboundService) buildInboundForLocalRuntime(tx *gorm.DB, inbound *model
 		}
 		if manualEnable, ok := c["enable"].(bool); ok && !manualEnable {
 			continue
+		}
+		if total, ok := c["totalGB"].(float64); ok && sidecarMultiplier != 1 {
+			c["totalGB"] = sidecarQuota(int64(total), sidecarMultiplier)
 		}
 		finalClients = append(finalClients, c)
 	}

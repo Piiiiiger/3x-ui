@@ -35,6 +35,7 @@ import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import { useProbeQuery } from '@/api/queries/useProbeQuery';
+import { useLocalTrafficMultiplier } from '@/api/queries/useLocalTrafficMultiplier';
 import { useStatusQuery } from '@/api/queries/useStatusQuery';
 import type { ProbeServer } from '@/generated/zod';
 import AppNav from '@/layouts/AppNav';
@@ -47,6 +48,7 @@ import { LocalPanelCard, nodesByHostOf } from './HostNodeChips';
 import { localHostView, remoteHostView, type HostView } from './hostView';
 import { useInboundOptions } from '@/api/queries/useInboundOptions';
 import NodeFormModal from './NodeFormModal';
+import LocalHostModal from './LocalHostModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil, TimeFormatter } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
@@ -182,6 +184,7 @@ export default function NodesPage() {
     refetch: refetchProbe,
   } = useProbeQuery();
   const { status } = useStatusQuery();
+  const { multiplier: localMultiplier, save: saveLocalMultiplier } = useLocalTrafficMultiplier();
   const {
     create,
     update,
@@ -211,6 +214,7 @@ export default function NodesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [formNode, setFormNode] = useState<NodeRecord | null>(null);
+  const [localFormOpen, setLocalFormOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [linksOpen, setLinksOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -246,6 +250,7 @@ export default function NodesPage() {
         nodesByHost.get(0) ?? [],
         t('pages.inbounds.localPanel'),
         window.X_UI_CUR_VER ? formatPanelVersion(window.X_UI_CUR_VER) : '',
+        localMultiplier ?? 1,
       ),
       ...nodes.map((node) =>
         remoteHostView(
@@ -255,7 +260,7 @@ export default function NodesPage() {
         ),
       ),
     ],
-    [status, probeByHost, nodesByHost, nodes, t],
+    [status, probeByHost, nodesByHost, nodes, t, localMultiplier],
   );
 
   const onCopyNodeCa = useCallback(async () => {
@@ -363,6 +368,10 @@ export default function NodesPage() {
 
   const onEditHost = useCallback(
     (host: HostView) => {
+      if (host.kind === 'local') {
+        setLocalFormOpen(true);
+        return;
+      }
       const node = nodeOf(host);
       if (node) onEdit(node);
     },
@@ -634,7 +643,11 @@ export default function NodesPage() {
                     </div>
                   ) : (
                     <>
-                      <LocalPanelCard nodes={nodesByHost.get(0) ?? []} />
+                      <LocalPanelCard
+                        nodes={nodesByHost.get(0) ?? []}
+                        trafficMultiplier={localMultiplier ?? 1}
+                        onEdit={() => setLocalFormOpen(true)}
+                      />
                       <NodeList
                         nodes={nodes}
                         nodesByHost={nodesByHost}
@@ -671,6 +684,14 @@ export default function NodesPage() {
           mintAgentSecret={mintAgentSecret}
           onOpenChange={setFormOpen}
         />
+
+        {localFormOpen && (
+          <LocalHostModal
+            multiplier={localMultiplier ?? 1}
+            save={saveLocalMultiplier}
+            onClose={() => setLocalFormOpen(false)}
+          />
+        )}
 
         <ProbeLinksModal
           open={linksOpen}

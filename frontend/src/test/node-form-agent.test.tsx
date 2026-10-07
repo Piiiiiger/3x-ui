@@ -81,6 +81,7 @@ describe('NodeFormModal agent nodes', () => {
       remark: '',
       address: '203.0.113.53',
       enable: true,
+      trafficMultiplier: 1,
     });
     await waitFor(() => {
       const values = Array.from(document.querySelectorAll('input')).map((el) => el.value);
@@ -102,6 +103,40 @@ describe('NodeFormModal agent nodes', () => {
     submit();
     await waitFor(() => expect(agent.save).toHaveBeenCalled());
     expect(agent.mintAgentSecret).not.toHaveBeenCalled();
+  });
+
+  // Users' bytes on this host count toward their quotas at this rate.
+  it("saves an agent's traffic multiplier", async () => {
+    const props = renderForm('edit', {
+      id: 3,
+      name: 'edge-us',
+      kind: 'agent',
+      address: '203.0.113.17',
+      enable: true,
+      trafficMultiplier: 0.1,
+    });
+    const field = screen.getByLabelText('Traffic multiplier') as HTMLInputElement;
+    expect(field.value).toBe('0.1');
+    typeInto('Traffic multiplier', '0.5');
+    submit();
+    await waitFor(() =>
+      expect(props.save).toHaveBeenCalledWith(expect.objectContaining({ trafficMultiplier: 0.5 })),
+    );
+  });
+
+  // A child panel limits users on the bytes it counts itself, so it has no multiplier.
+  it('offers no traffic multiplier for a 3x-ui child panel', () => {
+    renderForm('edit', {
+      id: 5,
+      name: 'edge-hk',
+      kind: 'panel',
+      scheme: 'https',
+      address: 'panel.example.com',
+      port: 2053,
+      hasApiToken: true,
+      enable: true,
+    });
+    expect(screen.queryByLabelText('Traffic multiplier')).toBeNull();
   });
 
   it('mints a secret when a panel node is converted', async () => {

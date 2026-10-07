@@ -5141,6 +5141,12 @@
             ],
             "type": "string"
           },
+          "trafficMultiplier": {
+            "description": "TrafficMultiplier is what a byte users move on this host counts as toward\ntheir quotas. A pointer, so that 0 (a free host) is stored, not the default.",
+            "example": 1,
+            "nullable": true,
+            "type": "number"
+          },
           "transitive": {
             "type": "boolean"
           },
@@ -5211,7 +5217,7 @@
         "type": "object"
       },
       "NodeMutationRequest": {
-        "description": "NodeMutationRequest is the node write/probe contract. ApiToken is accepted\nonly as input. On update, nil means keep the stored token; replacement and\nclearing are explicit and mutually exclusive.",
+        "description": "NodeMutationRequest is the node write/probe contract. ApiToken is accepted\nonly as input. On update, nil means keep the stored token or multiplier;\ntoken replacement and clearing are explicit and mutually exclusive.",
         "properties": {
           "address": {
             "type": "string"
@@ -5291,6 +5297,10 @@
               "mtls"
             ],
             "type": "string"
+          },
+          "trafficMultiplier": {
+            "nullable": true,
+            "type": "number"
           }
         },
         "required": [
@@ -5466,6 +5476,10 @@
             "example": "verify",
             "type": "string"
           },
+          "trafficMultiplier": {
+            "example": 1,
+            "type": "number"
+          },
           "transitive": {
             "example": false,
             "type": "boolean"
@@ -5528,6 +5542,7 @@
           "scheme",
           "status",
           "tlsVerifyMode",
+          "trafficMultiplier",
           "updatedAt",
           "uptimeSecs",
           "xrayError",
@@ -7612,6 +7627,19 @@
           "nodeId",
           "quotaBytes",
           "usedBytes"
+        ],
+        "type": "object"
+      },
+      "TrafficMultiplierView": {
+        "description": "TrafficMultiplierView is a host's multiplier on its own, as the panel's own\nhost reads and saves it.",
+        "properties": {
+          "multiplier": {
+            "example": 0.1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "multiplier"
         ],
         "type": "object"
       },
@@ -11516,6 +11544,93 @@
         }
       }
     },
+    "/panel/api/server/trafficMultiplier": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get the traffic multiplier of this panel's own host: what each byte users move through it counts as toward their quotas (1 counts bytes as they are, 0.1 a tenth, 0 nothing). Agent hosts keep theirs as trafficMultiplier on the node.",
+        "operationId": "get_panel_api_server_trafficMultiplier",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/TrafficMultiplierView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "multiplier": 0.1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Set the traffic multiplier of this panel's own host, a number from 0 to 100; it applies to traffic counted from then on. The host's own counters keep the real bytes. Returns the value as stored.",
+        "operationId": "post_panel_api_server_trafficMultiplier",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrafficMultiplierView"
+              },
+              "example": {
+                "multiplier": 0.1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/TrafficMultiplierView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "multiplier": 0.1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/customGroups": {
       "get": {
         "tags": [
@@ -14579,6 +14694,7 @@
                       "scheme": "https",
                       "status": "online",
                       "tlsVerifyMode": "verify",
+                      "trafficMultiplier": 1,
                       "transitive": false,
                       "updatedAt": 1700003600,
                       "uptimeSecs": 86400,
@@ -14781,6 +14897,7 @@
                     "scheme": "https",
                     "status": "online",
                     "tlsVerifyMode": "verify",
+                    "trafficMultiplier": 1,
                     "transitive": false,
                     "updatedAt": 1700003600,
                     "uptimeSecs": 86400,
@@ -14848,7 +14965,7 @@
         "tags": [
           "Nodes"
         ],
-        "summary": "Register a new node. kind \"panel\" (default) is a remote 3x-ui reached at its URL with a write-only apiToken. kind \"agent\" dials in with the secret from nodes/agentSecret; address may be blank and is filled from its first authenticated public connection. An optional probeServerId creates the host and its Lite link atomically; the server must exist and be unlinked. Responses expose hasApiToken only.",
+        "summary": "Register a new node. kind \"panel\" (default) is a remote 3x-ui reached at its URL with a write-only apiToken. kind \"agent\" dials in with the secret from nodes/agentSecret; address may be blank and is filled from its first authenticated public connection. An optional probeServerId creates the host and its Lite link atomically; the server must exist and be unlinked. An agent may take a trafficMultiplier from 0 to 100 (default 1): what each byte users move through it counts as toward their quotas; a panel node always counts 1. Responses expose hasApiToken only.",
         "operationId": "post_panel_api_nodes_add",
         "requestBody": {
           "required": true,
@@ -14933,6 +15050,7 @@
                     "scheme": "https",
                     "status": "online",
                     "tlsVerifyMode": "verify",
+                    "trafficMultiplier": 1,
                     "transitive": false,
                     "updatedAt": 1700003600,
                     "uptimeSecs": 86400,
@@ -14952,7 +15070,7 @@
         "tags": [
           "Nodes"
         ],
-        "summary": "Replace a node’s connection details. apiToken is write-only: omit it or send an empty string to keep the stored token; set clearApiToken=true to clear it.",
+        "summary": "Replace a node’s connection details. apiToken is write-only: omit it or send an empty string to keep the stored token; set clearApiToken=true to clear it. Omit trafficMultiplier to keep an agent’s multiplier; a panel node is reset to 1.",
         "operationId": "post_panel_api_nodes_update_id",
         "parameters": [
           {
@@ -21268,6 +21386,7 @@
                   "scheme": "https",
                   "status": "online",
                   "tlsVerifyMode": "verify",
+                  "trafficMultiplier": 1,
                   "transitive": false,
                   "updatedAt": 1700003600,
                   "uptimeSecs": 86400,

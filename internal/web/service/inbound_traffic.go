@@ -26,11 +26,15 @@ import (
 const depletedClientsClause = "reset = 0 and reset_day = 0 and reset_weekday = 0 and ((total > 0 and up + down >= total) or (expiry_time > 0 and expiry_time <= ?))"
 
 func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (needRestart bool, clientsDisabled bool, err error) {
+	multiplier, err := (&SettingService{}).GetLocalTrafficMultiplier()
+	if err != nil {
+		return false, false, err
+	}
 	return s.commitTraffic(func(tx *gorm.DB) error {
 		if err := s.addInboundTraffic(tx, inboundTraffics); err != nil {
 			return err
 		}
-		return s.addClientTraffic(tx, clientTraffics)
+		return s.addClientTraffic(tx, clientTraffics, multiplier)
 	})
 }
 
@@ -53,7 +57,12 @@ func (s *InboundService) AddAgentTraffic(nodeID int, instance string, seq int64,
 		if err := s.addNodeInboundTraffic(tx, nodeID, inboundTraffics); err != nil {
 			return err
 		}
-		if err := s.addClientTraffic(tx, clientTraffics); err != nil {
+		var multiplier float64
+		if err := tx.Model(&model.Node{}).Select("traffic_multiplier").Where("id = ?", nodeID).
+			Row().Scan(&multiplier); err != nil {
+			return err
+		}
+		if err := s.addClientTraffic(tx, clientTraffics, multiplier); err != nil {
 			return err
 		}
 		return addNodeClientTraffic(tx, nodeID, clientTraffics)
@@ -183,8 +192,8 @@ func (s *InboundService) addNodeInboundTraffic(tx *gorm.DB, nodeID int, traffics
 	return nil
 }
 
-// addNodeClientTraffic grows each client's usage on one agent, which the
-// per-server breakdown reads.
+// addNodeClientTraffic grows what each client really moved on one agent, which
+// the per-server breakdown reads; the host's multiplier applies to quotas only.
 func addNodeClientTraffic(tx *gorm.DB, nodeID int, traffics []*xray.ClientTraffic) error {
 	upsert := fmt.Sprintf(`INSERT INTO node_client_traffics (node_id, email, up, down) VALUES (?, ?, ?, ?)
 		ON CONFLICT (node_id, email) DO UPDATE SET up = %s, down = %s`,
@@ -200,7 +209,9 @@ func addNodeClientTraffic(tx *gorm.DB, nodeID int, traffics []*xray.ClientTraffi
 	return nil
 }
 
-func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTraffic) (err error) {
+// addClientTraffic charges each client's bytes at the multiplier of the host
+// that moved them; a client who moved any bytes counts as seen, charged or not.
+func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTraffic, multiplier float64) (err error) {
 	if len(traffics) == 0 {
 		return nil
 	}
@@ -261,7 +272,7 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 				database.ClampedAddExpr("down"),
 				database.GreatestExpr("last_online", "?"),
 			),
-			t.Up, t.Down, now, ct.Email,
+			chargedBytes(t.Up, multiplier), chargedBytes(t.Down, multiplier), now, ct.Email,
 		).Error; err != nil {
 			logger.Warning("AddClientTraffic update data ", err)
 		}

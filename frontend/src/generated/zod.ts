@@ -1257,6 +1257,7 @@ export const NodeSchema = z.object({
   scheme: z.enum(['http', 'https']),
   status: z.string(),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
+  trafficMultiplier: z.number().nullable().optional(),
   transitive: z.boolean().optional(),
   updatedAt: z.number().int(),
   uptimeSecs: z.number().int(),
@@ -1285,6 +1286,7 @@ export const NodeMutationRequestSchema = z.object({
   remark: z.string(),
   scheme: z.enum(['http', 'https']),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
+  trafficMultiplier: z.number().nullable().optional(),
 });
 export type NodeMutationRequest = z.infer<typeof NodeMutationRequestSchema>;
 
@@ -1325,6 +1327,7 @@ export const NodeViewSchema = z.object({
   scheme: z.string(),
   status: z.string(),
   tlsVerifyMode: z.string(),
+  trafficMultiplier: z.number(),
   transitive: z.boolean().optional(),
   updatedAt: z.number().int(),
   uptimeSecs: z.number().int(),
@@ -1827,6 +1830,11 @@ export const TrafficHostSchema = z.object({
   usedBytes: z.number().int(),
 });
 export type TrafficHost = z.infer<typeof TrafficHostSchema>;
+
+export const TrafficMultiplierViewSchema = z.object({
+  multiplier: z.number(),
+});
+export type TrafficMultiplierView = z.infer<typeof TrafficMultiplierViewSchema>;
 
 export const TrafficOverviewSchema = z.object({
   daily: z.array(z.lazy(() => TrafficDaySchema)),

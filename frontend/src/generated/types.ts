@@ -1161,6 +1161,7 @@ export interface Node {
   scheme: string;
   status: string;
   tlsVerifyMode: string;
+  trafficMultiplier?: number | null;
   transitive?: boolean;
   updatedAt: number;
   uptimeSecs: number;
@@ -1188,6 +1189,7 @@ export interface NodeMutationRequest {
   remark: string;
   scheme: string;
   tlsVerifyMode: string;
+  trafficMultiplier?: number | null;
 }
 
 export interface NodeView {
@@ -1227,6 +1229,7 @@ export interface NodeView {
   scheme: string;
   status: string;
   tlsVerifyMode: string;
+  trafficMultiplier: number;
   transitive?: boolean;
   updatedAt: number;
   uptimeSecs: number;
@@ -1685,6 +1688,10 @@ export interface TrafficHost {
   nodeId: number;
   quotaBytes: number;
   usedBytes: number;
+}
+
+export interface TrafficMultiplierView {
+  multiplier: number;
 }
 
 export interface TrafficOverview {

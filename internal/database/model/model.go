@@ -820,6 +820,9 @@ type Node struct {
 	// AbuseMode is off, observe or enforce: whether this host watches for abuse
 	// and whether what it sees bans anyone.
 	AbuseMode string `json:"abuseMode" form:"abuseMode" gorm:"column:abuse_mode;default:off" example:"off"`
+	// TrafficMultiplier is what a byte users move on this host counts as toward
+	// their quotas. A pointer, so that 0 (a free host) is stored, not the default.
+	TrafficMultiplier *float64 `json:"trafficMultiplier" form:"trafficMultiplier" gorm:"column:traffic_multiplier;not null;default:1" example:"1"`
 
 	// Kind is NodeKindPanel (a 3x-ui this panel calls) or NodeKindAgent (a
 	// pigger-agent that dials in and runs only Xray; this panel owns its state).

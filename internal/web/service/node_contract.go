@@ -26,6 +26,7 @@ type NodeView struct {
 	InboundSyncMode     string   `json:"inboundSyncMode" example:"all"`
 	InboundTags         []string `json:"inboundTags" example:"[\"in-443-tcp\"]"`
 	OutboundTag         string   `json:"outboundTag" example:"direct"`
+	TrafficMultiplier   float64  `json:"trafficMultiplier" example:"1"`
 	Guid                string   `json:"guid" example:"node-guid"`
 	Status              string   `json:"status" example:"online"`
 	LastHeartbeat       int64    `json:"lastHeartbeat" example:"1700000000"`
@@ -58,6 +59,10 @@ func toNodeView(n *model.Node) *NodeView {
 	if n == nil {
 		return nil
 	}
+	multiplier := 1.0
+	if n.TrafficMultiplier != nil {
+		multiplier = *n.TrafficMultiplier
+	}
 	return &NodeView{
 		Id:                  n.Id,
 		Name:                n.Name,
@@ -75,6 +80,7 @@ func toNodeView(n *model.Node) *NodeView {
 		InboundSyncMode:     n.InboundSyncMode,
 		InboundTags:         n.InboundTags,
 		OutboundTag:         n.OutboundTag,
+		TrafficMultiplier:   multiplier,
 		Guid:                n.Guid,
 		Status:              n.Status,
 		LastHeartbeat:       n.LastHeartbeat,
@@ -118,8 +124,8 @@ type AgentSecretView struct {
 }
 
 // NodeMutationRequest is the node write/probe contract. ApiToken is accepted
-// only as input. On update, nil means keep the stored token; replacement and
-// clearing are explicit and mutually exclusive.
+// only as input. On update, nil means keep the stored token or multiplier;
+// token replacement and clearing are explicit and mutually exclusive.
 type NodeMutationRequest struct {
 	Id                  int      `json:"id" form:"id"`
 	Name                string   `json:"name" form:"name" validate:"required"`
@@ -139,6 +145,7 @@ type NodeMutationRequest struct {
 	InboundSyncMode     string   `json:"inboundSyncMode" form:"inboundSyncMode" validate:"omitempty,oneof=all selected"`
 	InboundTags         []string `json:"inboundTags" form:"inboundTags"`
 	OutboundTag         string   `json:"outboundTag" form:"outboundTag"`
+	TrafficMultiplier   *float64 `json:"trafficMultiplier,omitempty" form:"trafficMultiplier"`
 }
 
 func (r *NodeMutationRequest) validateCredentials(create bool) error {
@@ -188,6 +195,7 @@ func (r *NodeMutationRequest) toNode() *model.Node {
 		InboundSyncMode:     r.InboundSyncMode,
 		InboundTags:         r.InboundTags,
 		OutboundTag:         r.OutboundTag,
+		TrafficMultiplier:   r.TrafficMultiplier,
 	}
 	if r.ApiToken != nil {
 		n.ApiToken = *r.ApiToken

@@ -23,6 +23,7 @@ import {
 import NodeHistoryPanel from './NodeHistoryPanel';
 import { useRelativeTime } from './relativeTime';
 import { HostNodeChips, type HostNode } from './HostNodeChips';
+import { TrafficMultiplierTag } from './TrafficMultiplierTag';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { isPanelUpdateAvailable } from '@/lib/panel-version';
 import { activateOnKey } from '@/utils/a11y';
@@ -329,6 +330,7 @@ export default function NodeList({
               {record.kind === 'agent' && (
                 <Tag style={{ marginInlineStart: 6 }}>{t('pages.nodes.kindAgent')}</Tag>
               )}
+              <TrafficMultiplierTag multiplier={record.trafficMultiplier ?? 1} />
             </span>
             {record.remark && <span className="remark">{record.remark}</span>}
           </div>

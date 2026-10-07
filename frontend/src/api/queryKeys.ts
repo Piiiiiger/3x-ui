@@ -1,6 +1,7 @@
 export const keys = {
   server: {
     status: () => ['server', 'status'] as const,
+    trafficMultiplier: () => ['server', 'trafficMultiplier'] as const,
   },
   nodes: {
     root: () => ['nodes'] as const,

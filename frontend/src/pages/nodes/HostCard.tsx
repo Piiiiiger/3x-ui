@@ -9,6 +9,7 @@ import { RainbowBar } from '@/components/ui';
 import { daysUntilReset } from '@/lib/traffic/resetDay';
 import { SizeFormatter, TimeFormatter } from '@/utils';
 import type { HostMeter, HostView } from './hostView';
+import { TrafficMultiplierTag } from './TrafficMultiplierTag';
 import { useRelativeTime } from './relativeTime';
 import './HostCard.css';
 
@@ -110,7 +111,7 @@ const HostCard = memo(function HostCard({
               onClick={() => onRestartXray(host)}
             />
           </Tooltip>
-          {remote && (
+          {(remote || host.kind === 'local') && (
             <Tooltip title={t('edit')}>
               <Button
                 size="small"
@@ -154,6 +155,7 @@ const HostCard = memo(function HostCard({
       <div className="host-card-tags">
         <Tag>{t(KIND_KEYS[host.kind])}</Tag>
         <Tag color={status.color}>{t(status.key)}</Tag>
+        <TrafficMultiplierTag multiplier={host.trafficMultiplier} />
         <span className="host-card-fact">
           {t('pages.nodes.nodesCount', { enabled: host.nodesEnabled, total: host.nodesTotal })}
         </span>

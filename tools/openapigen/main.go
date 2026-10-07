@@ -171,6 +171,7 @@ func run(root, outDir string) error {
 				"ProbeLinkInput",
 				"ProbeLinksInput",
 				"ProbeSettings",
+				"TrafficMultiplierView",
 				"PortalProbe",
 				"PortalProbeServer",
 			),

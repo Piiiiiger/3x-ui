@@ -262,6 +262,9 @@ var defaultValueMap = map[string]string{
 	// hidden keys with their own endpoint like the probe's.
 	"abuseLocalMode": "off",
 	"abuseSettings":  "",
+	// The panel's own host's traffic multiplier, a hidden key with its own
+	// endpoint; other hosts keep theirs on the node row.
+	"localTrafficMultiplier": "1",
 }
 
 // SettingService provides business logic for application settings management.

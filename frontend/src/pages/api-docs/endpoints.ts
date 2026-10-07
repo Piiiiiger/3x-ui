@@ -953,6 +953,22 @@ export const sections: readonly Section[] = [
           },
         },
       },
+      {
+        method: 'GET',
+        path: '/panel/api/server/trafficMultiplier',
+        summary:
+          "Get the traffic multiplier of this panel's own host: what each byte users move through it counts as toward their quotas (1 counts bytes as they are, 0.1 a tenth, 0 nothing). Agent hosts keep theirs as trafficMultiplier on the node.",
+        responseSchema: 'TrafficMultiplierView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/server/trafficMultiplier',
+        summary:
+          "Set the traffic multiplier of this panel's own host, a number from 0 to 100; it applies to traffic counted from then on. The host's own counters keep the real bytes. Returns the value as stored.",
+        body: '{\n  "multiplier": 0.1\n}',
+        requestSchema: { $ref: '#/components/schemas/TrafficMultiplierView' },
+        responseSchema: 'TrafficMultiplierView',
+      },
     ],
   },
 
@@ -1724,7 +1740,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/nodes/add',
         summary:
-          'Register a new node. kind "panel" (default) is a remote 3x-ui reached at its URL with a write-only apiToken. kind "agent" dials in with the secret from nodes/agentSecret; address may be blank and is filled from its first authenticated public connection. An optional probeServerId creates the host and its Lite link atomically; the server must exist and be unlinked. Responses expose hasApiToken only.',
+          'Register a new node. kind "panel" (default) is a remote 3x-ui reached at its URL with a write-only apiToken. kind "agent" dials in with the secret from nodes/agentSecret; address may be blank and is filled from its first authenticated public connection. An optional probeServerId creates the host and its Lite link atomically; the server must exist and be unlinked. An agent may take a trafficMultiplier from 0 to 100 (default 1): what each byte users move through it counts as toward their quotas; a panel node always counts 1. Responses expose hasApiToken only.',
         body: '{\n  "name": "de-fra-1",\n  "kind": "panel",\n  "remark": "",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef...",\n  "clearApiToken": false,\n  "enable": true,\n  "allowPrivateAddress": false\n}',
         responseSchema: 'NodeView',
       },
@@ -1732,7 +1748,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/nodes/update/:id',
         summary:
-          'Replace a node\u2019s connection details. apiToken is write-only: omit it or send an empty string to keep the stored token; set clearApiToken=true to clear it.',
+          'Replace a node\u2019s connection details. apiToken is write-only: omit it or send an empty string to keep the stored token; set clearApiToken=true to clear it. Omit trafficMultiplier to keep an agent\u2019s multiplier; a panel node is reset to 1.',
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node ID.' }],
         body: '{\n  "name": "de-fra-1",\n  "remark": "",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "",\n  "clearApiToken": false,\n  "enable": true,\n  "allowPrivateAddress": false\n}',
       },

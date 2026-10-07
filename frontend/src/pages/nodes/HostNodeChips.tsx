@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Card, Space, Tag } from 'antd';
+import { Button, Card, Space, Tag, Tooltip } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
+
+import { TrafficMultiplierTag } from './TrafficMultiplierTag';
 
 export interface HostNode {
   id: number;
@@ -60,7 +63,15 @@ export function HostNodeChips({ nodes }: { nodes: HostNode[] }) {
 }
 
 /** This panel's own Xray as a host, leading to its page like every other host. */
-export function LocalPanelCard({ nodes }: { nodes: HostNode[] }) {
+export function LocalPanelCard({
+  nodes,
+  trafficMultiplier = 1,
+  onEdit,
+}: {
+  nodes: HostNode[];
+  trafficMultiplier?: number;
+  onEdit?: () => void;
+}) {
   const { t } = useTranslation();
   return (
     <Card size="small" className="local-panel-card">
@@ -68,7 +79,13 @@ export function LocalPanelCard({ nodes }: { nodes: HostNode[] }) {
         <Link to="/nodes/local">
           <strong>{t('pages.inbounds.localPanel')}</strong>
         </Link>
+        <TrafficMultiplierTag multiplier={trafficMultiplier} />
         <HostNodeChips nodes={nodes} />
+        {onEdit && (
+          <Tooltip title={t('edit')}>
+            <Button size="small" icon={<EditOutlined />} aria-label={t('edit')} onClick={onEdit} />
+          </Tooltip>
+        )}
       </Space>
     </Card>
   );

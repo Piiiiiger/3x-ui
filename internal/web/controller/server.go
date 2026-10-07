@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -63,6 +64,7 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 	g.GET("/getNewmlkem768", a.getNewmlkem768)
 	g.GET("/getNewVlessEnc", a.getNewVlessEnc)
 	g.GET("/clientIps", a.getClientIps)
+	g.GET("/trafficMultiplier", a.getTrafficMultiplier)
 
 	g.POST("/stopXrayService", a.stopXrayService)
 	g.POST("/restartXrayService", a.restartXrayService)
@@ -81,6 +83,7 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 	g.POST("/scanRealityTarget", a.scanRealityTarget)
 	g.POST("/scanRealityTargets", a.scanRealityTargets)
 	g.POST("/clientIps", a.setClientIps)
+	g.POST("/trafficMultiplier", a.setTrafficMultiplier)
 }
 
 // startTask registers the @2s ticker that refreshes server status, samples
@@ -537,4 +540,32 @@ func (a *ServerController) setClientIps(c *gin.Context) {
 	}
 	err := (&service.InboundService{}).MergeInboundClientIps(ips)
 	jsonMsg(c, "Client IPs merged", err)
+}
+
+// getTrafficMultiplier reads what a byte users move on this panel's own host
+// counts as toward their quotas; other hosts keep theirs on the node.
+func (a *ServerController) getTrafficMultiplier(c *gin.Context) {
+	multiplier, err := a.settingService.GetLocalTrafficMultiplier()
+	jsonObj(c, service.TrafficMultiplierView{Multiplier: multiplier}, err)
+}
+
+type trafficMultiplierRequest struct {
+	Multiplier *float64 `json:"multiplier"`
+}
+
+func (a *ServerController) setTrafficMultiplier(c *gin.Context) {
+	var req trafficMultiplierRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if req.Multiplier == nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), errors.New("multiplier is required"))
+		return
+	}
+	if err := a.settingService.SetLocalTrafficMultiplier(*req.Multiplier); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	a.getTrafficMultiplier(c)
 }

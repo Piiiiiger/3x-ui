@@ -49,11 +49,16 @@ func (s *InboundService) DesiredMtprotoInstances() ([]mtproto.Instance, error) {
 	if err != nil {
 		return nil, err
 	}
+	multiplier, err := (&SettingService{}).GetLocalTrafficMultiplier()
+	if err != nil {
+		return nil, err
+	}
 	served := instances[:0]
 	for _, inst := range instances {
 		kept := make([]mtproto.SecretEntry, 0, len(inst.Secrets))
 		for _, e := range inst.Secrets {
 			if _, off := disabled[e.Name]; !off {
+				e.QuotaBytes = sidecarQuota(e.QuotaBytes, multiplier)
 				kept = append(kept, e)
 			}
 		}

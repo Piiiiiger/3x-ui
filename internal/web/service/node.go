@@ -409,6 +409,11 @@ func (s *NodeService) normalize(n *model.Node) error {
 		}
 		n.Address = addr
 	}
+	if n.TrafficMultiplier != nil {
+		if err := validateTrafficMultiplier(*n.TrafficMultiplier); err != nil {
+			return err
+		}
+	}
 	if n.Kind == model.NodeKindAgent {
 		// An agent dials in and its config comes whole from this panel, so the
 		// outbound bridge and inbound selection that steer node calls never apply.
@@ -419,6 +424,11 @@ func (s *NodeService) normalize(n *model.Node) error {
 		return nil
 	}
 	n.Kind = model.NodeKindPanel
+	if n.TrafficMultiplier != nil && *n.TrafficMultiplier != 1 {
+		return errPanelTrafficMultiplier
+	}
+	unchanged := 1.0
+	n.TrafficMultiplier = &unchanged
 	if n.Port <= 0 || n.Port > 65535 {
 		return common.NewError("node port must be 1-65535")
 	}
@@ -561,6 +571,9 @@ func (s *NodeService) Update(id int, in *model.Node) error {
 	if nodeSelectionGrew(existing, in) {
 		updates["inbounds_adopted_at"] = 0
 	}
+	if in.TrafficMultiplier != nil {
+		updates["traffic_multiplier"] = *in.TrafficMultiplier
+	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(model.Node{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 			return err
@@ -624,6 +637,9 @@ func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error 
 	}
 	if nodeSelectionGrew(existing, in) {
 		updates["inbounds_adopted_at"] = 0
+	}
+	if in.TrafficMultiplier != nil {
+		updates["traffic_multiplier"] = *in.TrafficMultiplier
 	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(model.Node{}).Where("id = ?", id).Updates(updates).Error; err != nil {

@@ -60,6 +60,7 @@ function defaultValues(): NodeFormValues {
     inboundSyncMode: 'all',
     inboundTags: [],
     outboundTag: '',
+    trafficMultiplier: 1,
   };
 }
 
@@ -158,6 +159,7 @@ export default function NodeFormModal({
         remark: values.remark?.trim() || '',
         address: values.address.trim(),
         enable: values.enable,
+        trafficMultiplier: values.trafficMultiplier,
         ...(values.probeServerId ? { probeServerId: values.probeServerId } : {}),
       };
     }
@@ -435,6 +437,23 @@ export default function NodeFormModal({
                   <Switch />
                 </FormField>
               </Col>
+              {isAgent && (
+                <Col xs={24} md={12}>
+                  <FormField
+                    label={t('pages.nodes.trafficMultiplier')}
+                    name="trafficMultiplier"
+                    tooltip={t('pages.nodes.trafficMultiplierHint')}
+                  >
+                    <InputNumber
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      suffix="×"
+                      style={{ width: '100%' }}
+                    />
+                  </FormField>
+                </Col>
+              )}
             </Row>
 
             {isAgent && (

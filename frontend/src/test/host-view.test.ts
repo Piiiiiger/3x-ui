@@ -103,6 +103,7 @@ describe('host views', () => {
       [{ id: 1 }, { id: 2, enable: false }],
       'Local',
       'v3.1.0',
+      1,
     );
     expect(view.address).toBe('');
     expect(view.cpu).toEqual({ percent: 12 });

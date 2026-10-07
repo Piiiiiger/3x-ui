@@ -37,18 +37,22 @@ _openapi:
         panel.
       url: '#fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel'
     - depth: 2
-      title: Register a new node. kind "panel" (default) is a remote 3x-ui reached at
+      title: 'Register a new node. kind "panel" (default) is a remote 3x-ui reached at
         its URL with a write-only apiToken. kind "agent" dials in with the
         secret from nodes/agentSecret; address may be blank and is filled from
         its first authenticated public connection. An optional probeServerId
         creates the host and its Lite link atomically; the server must exist and
-        be unlinked. Responses expose hasApiToken only.
-      url: '#register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-responses-expose-hasapitoken-only'
+        be unlinked. An agent may take a trafficMultiplier from 0 to 100
+        (default 1): what each byte users move through it counts as toward their
+        quotas; a panel node always counts 1. Responses expose hasApiToken
+        only.'
+      url: '#register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-an-agent-may-take-a-trafficmultiplier-from-0-to-100-default-1-what-each-byte-users-move-through-it-counts-as-toward-their-quotas-a-panel-node-always-counts-1-responses-expose-hasapitoken-only'
     - depth: 2
       title: 'Replace a node’s connection details. apiToken is write-only: omit it or
         send an empty string to keep the stored token; set clearApiToken=true to
-        clear it.'
-      url: '#replace-a-nodes-connection-details-apitoken-is-write-only-omit-it-or-send-an-empty-string-to-keep-the-stored-token-set-clearapitokentrue-to-clear-it'
+        clear it. Omit trafficMultiplier to keep an agent’s multiplier; a panel
+        node is reset to 1.'
+      url: '#replace-a-nodes-connection-details-apitoken-is-write-only-omit-it-or-send-an-empty-string-to-keep-the-stored-token-set-clearapitokentrue-to-clear-it-omit-trafficmultiplier-to-keep-an-agents-multiplier-a-panel-node-is-reset-to-1'
     - depth: 2
       title: Delete a node. Inbounds bound to it are not auto-migrated.
       url: '#delete-a-node-inbounds-bound-to-it-are-not-auto-migrated'
@@ -125,17 +129,21 @@ _openapi:
           node-assigned inbound gets paths that exist on the node, not the
           central panel.
         id: fetch-a-nodes-own-web-tls-certificatekey-file-paths-proxied-to-the-node-used-by-the-inbound-forms-set-cert-from-panel-so-a-node-assigned-inbound-gets-paths-that-exist-on-the-node-not-the-central-panel
-      - content: Register a new node. kind "panel" (default) is a remote 3x-ui reached
+      - content: 'Register a new node. kind "panel" (default) is a remote 3x-ui reached
           at its URL with a write-only apiToken. kind "agent" dials in with the
           secret from nodes/agentSecret; address may be blank and is filled from
           its first authenticated public connection. An optional probeServerId
           creates the host and its Lite link atomically; the server must exist
-          and be unlinked. Responses expose hasApiToken only.
-        id: register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-responses-expose-hasapitoken-only
+          and be unlinked. An agent may take a trafficMultiplier from 0 to 100
+          (default 1): what each byte users move through it counts as toward
+          their quotas; a panel node always counts 1. Responses expose
+          hasApiToken only.'
+        id: register-a-new-node-kind-panel-default-is-a-remote-3x-ui-reached-at-its-url-with-a-write-only-apitoken-kind-agent-dials-in-with-the-secret-from-nodesagentsecret-address-may-be-blank-and-is-filled-from-its-first-authenticated-public-connection-an-optional-probeserverid-creates-the-host-and-its-lite-link-atomically-the-server-must-exist-and-be-unlinked-an-agent-may-take-a-trafficmultiplier-from-0-to-100-default-1-what-each-byte-users-move-through-it-counts-as-toward-their-quotas-a-panel-node-always-counts-1-responses-expose-hasapitoken-only
       - content: 'Replace a node’s connection details. apiToken is write-only: omit it
           or send an empty string to keep the stored token; set
-          clearApiToken=true to clear it.'
-        id: replace-a-nodes-connection-details-apitoken-is-write-only-omit-it-or-send-an-empty-string-to-keep-the-stored-token-set-clearapitokentrue-to-clear-it
+          clearApiToken=true to clear it. Omit trafficMultiplier to keep an
+          agent’s multiplier; a panel node is reset to 1.'
+        id: replace-a-nodes-connection-details-apitoken-is-write-only-omit-it-or-send-an-empty-string-to-keep-the-stored-token-set-clearapitokentrue-to-clear-it-omit-trafficmultiplier-to-keep-an-agents-multiplier-a-panel-node-is-reset-to-1
       - content: Delete a node. Inbounds bound to it are not auto-migrated.
         id: delete-a-node-inbounds-bound-to-it-are-not-auto-migrated
       - content: Pause or resume traffic sync with this node.

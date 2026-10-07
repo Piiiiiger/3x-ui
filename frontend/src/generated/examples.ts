@@ -1553,6 +1553,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "scheme": "https",
     "status": "online",
     "tlsVerifyMode": "verify",
+    "trafficMultiplier": 1,
     "transitive": false,
     "updatedAt": 1700000000,
     "uptimeSecs": 86400,
@@ -1580,7 +1581,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "probeServerId": "",
     "remark": "",
     "scheme": "http",
-    "tlsVerifyMode": "verify"
+    "tlsVerifyMode": "verify",
+    "trafficMultiplier": null
   },
   "NodeView": {
     "activeCount": 20,
@@ -1621,6 +1623,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "scheme": "https",
     "status": "online",
     "tlsVerifyMode": "verify",
+    "trafficMultiplier": 1,
     "transitive": false,
     "updatedAt": 1700003600,
     "uptimeSecs": 86400,
@@ -2306,6 +2309,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "nodeId": 2,
     "quotaBytes": 1073741824000,
     "usedBytes": 44023414784
+  },
+  "TrafficMultiplierView": {
+    "multiplier": 0.1
   },
   "TrafficOverview": {
     "daily": [

@@ -40,6 +40,8 @@ export interface HostView {
   /** This panel's own version, shown on its card where a host shows its heartbeat. */
   panelVersion: string;
   transitive: boolean;
+  /** What a byte users move here counts as toward their quotas. */
+  trafficMultiplier: number;
 }
 
 /** One of a host's nodes; a node without the flag counts as enabled. */
@@ -110,6 +112,7 @@ export function remoteHostView(
     lastHeartbeat: node.lastHeartbeat || 0,
     panelVersion: '',
     transitive: !!node.transitive,
+    trafficMultiplier: node.trafficMultiplier ?? 1,
   };
 }
 
@@ -120,6 +123,7 @@ export function localHostView(
   nodes: HostNodeFlag[],
   name: string,
   panelVersion: string,
+  trafficMultiplier: number,
 ): HostView {
   const figures = probeFigures(probe);
   const ip = String(status.publicIP.ipv4 || '');
@@ -143,5 +147,6 @@ export function localHostView(
     lastHeartbeat: 0,
     panelVersion,
     transitive: false,
+    trafficMultiplier,
   };
 }

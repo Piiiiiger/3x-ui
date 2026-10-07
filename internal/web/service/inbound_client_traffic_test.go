@@ -57,7 +57,7 @@ func TestAddClientTraffic_MatchesByEmail(t *testing.T) {
 	err := svc.addClientTraffic(db, []*xray.ClientTraffic{
 		{Email: staleEmail, Up: 10, Down: 20},
 		{Email: dualEmail, Up: 30, Down: 40},
-	})
+	}, 1)
 	if err != nil {
 		t.Fatalf("addClientTraffic: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestAdjustTraffics_DelayedStartConvertsDespiteStaleInboundId(t *testing.T) 
 	}
 
 	before := time.Now().UnixMilli()
-	if err := svc.addClientTraffic(db, []*xray.ClientTraffic{{Email: email, Up: 100, Down: 200}}); err != nil {
+	if err := svc.addClientTraffic(db, []*xray.ClientTraffic{{Email: email, Up: 100, Down: 200}}, 1); err != nil {
 		t.Fatalf("addClientTraffic: %v", err)
 	}
 
@@ -199,7 +199,7 @@ func TestAddClientTraffic_ExpiryWriteOnlyForConvertedClients(t *testing.T) {
 	err := svc.addClientTraffic(db, []*xray.ClientTraffic{
 		{Email: delayedEmail, Up: 10, Down: 20},
 		{Email: normalEmail, Up: 30, Down: 40},
-	})
+	}, 1)
 	if err != nil {
 		t.Fatalf("addClientTraffic: %v", err)
 	}

@@ -5115,6 +5115,12 @@ export const SCHEMAS: Record<string, unknown> = {
         ],
         "type": "string"
       },
+      "trafficMultiplier": {
+        "description": "TrafficMultiplier is what a byte users move on this host counts as toward\ntheir quotas. A pointer, so that 0 (a free host) is stored, not the default.",
+        "example": 1,
+        "nullable": true,
+        "type": "number"
+      },
       "transitive": {
         "type": "boolean"
       },
@@ -5185,7 +5191,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "type": "object"
   },
   "NodeMutationRequest": {
-    "description": "NodeMutationRequest is the node write/probe contract. ApiToken is accepted\nonly as input. On update, nil means keep the stored token; replacement and\nclearing are explicit and mutually exclusive.",
+    "description": "NodeMutationRequest is the node write/probe contract. ApiToken is accepted\nonly as input. On update, nil means keep the stored token or multiplier;\ntoken replacement and clearing are explicit and mutually exclusive.",
     "properties": {
       "address": {
         "type": "string"
@@ -5265,6 +5271,10 @@ export const SCHEMAS: Record<string, unknown> = {
           "mtls"
         ],
         "type": "string"
+      },
+      "trafficMultiplier": {
+        "nullable": true,
+        "type": "number"
       }
     },
     "required": [
@@ -5440,6 +5450,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "verify",
         "type": "string"
       },
+      "trafficMultiplier": {
+        "example": 1,
+        "type": "number"
+      },
       "transitive": {
         "example": false,
         "type": "boolean"
@@ -5502,6 +5516,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "scheme",
       "status",
       "tlsVerifyMode",
+      "trafficMultiplier",
       "updatedAt",
       "uptimeSecs",
       "xrayError",
@@ -7586,6 +7601,19 @@ export const SCHEMAS: Record<string, unknown> = {
       "nodeId",
       "quotaBytes",
       "usedBytes"
+    ],
+    "type": "object"
+  },
+  "TrafficMultiplierView": {
+    "description": "TrafficMultiplierView is a host's multiplier on its own, as the panel's own\nhost reads and saves it.",
+    "properties": {
+      "multiplier": {
+        "example": 0.1,
+        "type": "number"
+      }
+    },
+    "required": [
+      "multiplier"
     ],
     "type": "object"
   },

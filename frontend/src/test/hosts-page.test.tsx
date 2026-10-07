@@ -139,6 +139,7 @@ const NODES = [
     memPct: 30,
     uptimeSecs: 3600,
     lastHeartbeat: 0,
+    trafficMultiplier: 0.1,
   },
   {
     id: 3,
@@ -152,6 +153,7 @@ const NODES = [
     memPct: 41,
     uptimeSecs: 7200,
     lastHeartbeat: 0,
+    trafficMultiplier: 1,
   },
 ];
 
@@ -180,6 +182,8 @@ function serve(answer: () => Msg<unknown>) {
     if (url === '/panel/api/inbounds/options') return new Msg(true, '', INBOUND_OPTIONS);
     if (url === '/panel/api/server/status') return new Msg(true, '', STATUS);
     if (url === '/panel/api/server/getPanelUpdateInfo') return new Msg(true, '', {});
+    if (url === '/panel/api/server/trafficMultiplier')
+      return new Msg(true, '', { multiplier: 0.5 });
     return new Msg(false, `unexpected GET ${url}`);
   });
 }
@@ -357,6 +361,36 @@ describe('the hosts page (服务管理)', () => {
     expect(post).not.toHaveBeenCalledWith(url);
     fireEvent.click(within(dialog).getByRole('button', { name: 'Restart Xray' }));
     await waitFor(() => expect(post).toHaveBeenCalledWith(url));
+  });
+
+  // Users' bytes count toward their quotas at their host's multiplier; a card
+  // shows one only when it is not 1, and the panel's own host is edited here too.
+  it("shows each host's traffic multiplier, and edits the panel's own", async () => {
+    serve(() => new Msg(true, '', overview()));
+    const post = vi
+      .spyOn(HttpUtil, 'post')
+      .mockResolvedValue(new Msg(true, '', { multiplier: 0.2 }));
+    renderPage();
+    await waitFor(() => expect(hostCards()).toHaveLength(3));
+
+    expect(within(hostCard('edge-hk')).getByText('0.1×')).toBeTruthy();
+    expect(within(hostCard('edge-sg')).queryByText(/×$/)).toBeNull();
+    await within(hostCard('Local panel')).findByText('0.5×');
+
+    fireEvent.click(within(hostCard('Local panel')).getByRole('button', { name: 'Edit' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit Host' });
+    expect(within(dialog).getByText('Local panel')).toBeTruthy();
+    const field = within(dialog).getByLabelText('Traffic multiplier') as HTMLInputElement;
+    expect(field.value).toBe('0.5');
+    fireEvent.change(field, { target: { value: '0.2' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/panel/api/server/trafficMultiplier',
+        { multiplier: 0.2 },
+        { headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
   });
 
   // Disabling stops the panel managing a host, so it asks first; the local panel has no switch.
