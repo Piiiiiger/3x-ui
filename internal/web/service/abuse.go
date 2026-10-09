@@ -77,6 +77,7 @@ type AbuseActions struct {
 	Crawler   string `json:"crawler" example:"ban"`
 	SpeedTest string `json:"speedtest" example:"ban"`
 	FullSpeed string `json:"fullspeed" example:"ban"`
+	Register  string `json:"register" example:"record"`
 }
 
 // For is what a hit of rule does; a rule this panel does not know only records.
@@ -96,12 +97,14 @@ func (a AbuseActions) For(rule string) string {
 		return a.SpeedTest
 	case abuse.RuleFullSpeed:
 		return a.FullSpeed
+	case abuse.RuleRegister:
+		return a.Register
 	}
 	return AbuseActRecord
 }
 
 func (a AbuseActions) valid() bool {
-	for _, act := range []string{a.Spam, a.BT, a.Scan, a.Flood, a.Crawler, a.SpeedTest, a.FullSpeed} {
+	for _, act := range []string{a.Spam, a.BT, a.Scan, a.Flood, a.Crawler, a.SpeedTest, a.FullSpeed, a.Register} {
 		if act != AbuseActRecord && act != AbuseActWarn && act != AbuseActBan {
 			return false
 		}
@@ -130,6 +133,8 @@ func DefaultAbuseSettings() AbuseSettings {
 		Actions: AbuseActions{
 			Spam: AbuseActBan, BT: AbuseActBan, Scan: AbuseActBan, Flood: AbuseActBan,
 			Crawler: AbuseActBan, SpeedTest: AbuseActBan, FullSpeed: AbuseActBan,
+			// Bulk sign-ups are guessed from busy minutes, so they only record until tuned.
+			Register: AbuseActRecord,
 		},
 		Signup: SignupGuard{Limit: 3, Action: AbuseActRecord},
 	}
@@ -423,6 +428,8 @@ func AbuseRuleLabel(rule string) string {
 		return "反复测速"
 	case abuse.RuleFullSpeed:
 		return "长时间满速"
+	case abuse.RuleRegister:
+		return "批量注册 AI/Google/微软账号"
 	case BanKindIPLimit:
 		return "同时在线 IP 超出上限"
 	case AbuseRuleSignup:
@@ -439,6 +446,19 @@ func windowText(seconds int) string {
 		return fmt.Sprintf("%d 分钟", seconds/60)
 	}
 	return fmt.Sprintf("%d 秒", seconds)
+}
+
+// signInServerName says which platform's sign-in server a bulk sign-up hit was at.
+func signInServerName(platform string) string {
+	switch platform {
+	case abuse.PlatformOpenAI:
+		return " OpenAI（ChatGPT）的登录/注册服务器"
+	case abuse.PlatformGoogle:
+		return " Google（含 Gemini）的登录/注册服务器"
+	case abuse.PlatformMicrosoft:
+		return "微软的账号注册服务器"
+	}
+	return "账号登录/注册服务器"
 }
 
 // AbuseEvidence says in one sentence what a hit measured.
@@ -468,6 +488,13 @@ func AbuseEvidence(e model.AbuseEvent) string {
 		return fmt.Sprintf("24 小时内测速 %d 次", e.Count)
 	case abuse.MeasureMinutes:
 		return fmt.Sprintf("连续满速 %d 分钟", e.Count)
+	case abuse.MeasureRegisterHour, abuse.MeasureRegisterDay:
+		var samples []string
+		platform := ""
+		if json.Unmarshal([]byte(e.Samples), &samples) == nil && len(samples) > 0 {
+			platform = samples[0]
+		}
+		return fmt.Sprintf("%s内有 %d 分钟在连%s", w, e.Count, signInServerName(platform))
 	case abuseMeasureSignups:
 		var samples []string
 		if json.Unmarshal([]byte(e.Samples), &samples) == nil && len(samples) > 0 {

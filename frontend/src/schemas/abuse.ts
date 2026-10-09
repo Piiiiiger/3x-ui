@@ -4,6 +4,7 @@ import { z } from 'zod';
 // within the hour a server remembers, as the server keeps them anyway.
 const count = z.number().int().min(0);
 const minutes = z.number().int().min(0).max(60);
+const minutesOfDay = z.number().int().min(0).max(1440);
 const action = z.enum(['record', 'warn', 'ban']);
 
 export const AbuseSettingsFormSchema = z.object({
@@ -28,6 +29,12 @@ export const AbuseSettingsFormSchema = z.object({
     fullSpeedMbps: count,
     fullSpeedWarnMin: count,
     fullSpeedStrikeMin: count,
+    openaiAuthMinPerHour: minutes,
+    openaiAuthMinPerDay: minutesOfDay,
+    googleAuthMinPerHour: minutes,
+    googleAuthMinPerDay: minutesOfDay,
+    microsoftSignupMinPerHour: minutes,
+    microsoftSignupMinPerDay: minutesOfDay,
   }),
   actions: z.object({
     spam: action,
@@ -37,6 +44,7 @@ export const AbuseSettingsFormSchema = z.object({
     crawler: action,
     speedtest: action,
     fullspeed: action,
+    register: action,
   }),
   signup: z.object({ limit: count, action: z.enum(['record', 'ban']) }),
 });

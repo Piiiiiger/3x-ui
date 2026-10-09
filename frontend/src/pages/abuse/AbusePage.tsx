@@ -100,6 +100,19 @@ const RULES: { action: RuleAction; title: string; hint?: string; fields: [Thresh
         ['fullSpeedStrikeMin', '封禁（分钟）'],
       ],
     },
+    {
+      action: 'register',
+      title: '批量注册（AI / Google / 微软账号）',
+      hint: '按分钟计：某分钟里连过平台的登录/注册服务器（auth.openai.com、accounts.google.com、signup.live.com）就算 1 分钟，超过上限记一次。看不出是登录还是注册、注册了几个账号；Google 在浏览器和手机后台也常连，所以上限宽、默认不按天算。',
+      fields: [
+        ['openaiAuthMinPerHour', 'OpenAI 每小时分钟数'],
+        ['openaiAuthMinPerDay', 'OpenAI 每天分钟数'],
+        ['googleAuthMinPerHour', 'Google 每小时分钟数'],
+        ['googleAuthMinPerDay', 'Google 每天分钟数'],
+        ['microsoftSignupMinPerHour', '微软每小时分钟数'],
+        ['microsoftSignupMinPerDay', '微软每天分钟数'],
+      ],
+    },
   ];
 
 // thresholdMax is the schema's own bound, so the input stops where saving would fail.

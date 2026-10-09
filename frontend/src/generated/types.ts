@@ -6,6 +6,7 @@ export type ProcessState = string;
 export type Protocol = string;
 export type TrafficPeriod = string;
 export type addrFamily = number;
+export type busyMinutes = number[];
 export type liteBlocks = Record<string, Record<number, ProbePingBlock[]>>;
 export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
@@ -16,6 +17,7 @@ export interface AbuseActions {
   crawler: string;
   flood: string;
   fullspeed: string;
+  register: string;
   scan: string;
   spam: string;
   speedtest: string;
@@ -1594,6 +1596,12 @@ export interface Rules {
   fullSpeedMbps: number;
   fullSpeedStrikeMin: number;
   fullSpeedWarnMin: number;
+  googleAuthMinPerDay: number;
+  googleAuthMinPerHour: number;
+  microsoftSignupMinPerDay: number;
+  microsoftSignupMinPerHour: number;
+  openaiAuthMinPerDay: number;
+  openaiAuthMinPerHour: number;
   scanIps: number;
   scanPortsOnIp: number;
   scanSensitiveIps: number;

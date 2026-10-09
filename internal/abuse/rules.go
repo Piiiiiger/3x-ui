@@ -11,6 +11,7 @@ const (
 	RuleCrawler   = "crawler"
 	RuleSpeedTest = "speedtest"
 	RuleFullSpeed = "fullspeed"
+	RuleRegister  = "register"
 )
 
 // Routing tags a server with detection on sends classified traffic to: the first
@@ -41,7 +42,28 @@ const (
 	MeasureTestsHour = "tests-hour"
 	MeasureTestsDay  = "tests-day"
 	MeasureMinutes   = "minutes"
+
+	MeasureRegisterHour = "register-hour"
+	MeasureRegisterDay  = "register-day"
 )
+
+// The platforms whose bulk sign-ups are watched, each named by the server it
+// signs people in or up on; their other sites never count.
+const (
+	PlatformOpenAI    = "auth.openai.com"
+	PlatformGoogle    = "accounts.google.com"
+	PlatformMicrosoft = "signup.live.com"
+)
+
+var platforms = []string{PlatformOpenAI, PlatformGoogle, PlatformMicrosoft}
+
+// signInServers maps every sign-in or sign-up server to its platform.
+var signInServers = map[string]string{
+	"auth.openai.com":     PlatformOpenAI,
+	"auth0.openai.com":    PlatformOpenAI,
+	"accounts.google.com": PlatformGoogle,
+	"signup.live.com":     PlatformMicrosoft,
+}
 
 // Signal is one rule one account tripped, with what made it trip.
 type Signal struct {
@@ -85,6 +107,27 @@ type Rules struct {
 	FullSpeedMbps      int `json:"fullSpeedMbps" example:"100"`
 	FullSpeedWarnMin   int `json:"fullSpeedWarnMin" example:"120"`
 	FullSpeedStrikeMin int `json:"fullSpeedStrikeMin" example:"240"`
+
+	OpenAIAuthMinPerHour      int `json:"openaiAuthMinPerHour" example:"10"`
+	OpenAIAuthMinPerDay       int `json:"openaiAuthMinPerDay" example:"30"`
+	GoogleAuthMinPerHour      int `json:"googleAuthMinPerHour" example:"30"`
+	GoogleAuthMinPerDay       int `json:"googleAuthMinPerDay" example:"0"`
+	MicrosoftSignupMinPerHour int `json:"microsoftSignupMinPerHour" example:"10"`
+	MicrosoftSignupMinPerDay  int `json:"microsoftSignupMinPerDay" example:"20"`
+}
+
+// registerLimits are how many minutes at platform's sign-in server an hour and
+// a day may hold before they look like bulk sign-ups.
+func (r Rules) registerLimits(platform string) (perHour, perDay int) {
+	switch platform {
+	case PlatformOpenAI:
+		return r.OpenAIAuthMinPerHour, r.OpenAIAuthMinPerDay
+	case PlatformGoogle:
+		return r.GoogleAuthMinPerHour, r.GoogleAuthMinPerDay
+	case PlatformMicrosoft:
+		return r.MicrosoftSignupMinPerHour, r.MicrosoftSignupMinPerDay
+	}
+	return 0, 0
 }
 
 // DefaultRules are the starting thresholds: a week of observing on real traffic
@@ -98,6 +141,8 @@ func DefaultRules() Rules {
 		CrawlerConns: 4000, CrawlerHosts: 600, CrawlerWindowMin: 10, CrawlerWindows: 2,
 		SpeedTestsPerHour: 5, SpeedTestsPerDay: 15, SpeedTestGapMin: 3,
 		FullSpeedMbps: 100, FullSpeedWarnMin: 120, FullSpeedStrikeMin: 240,
+		OpenAIAuthMinPerHour: 10, OpenAIAuthMinPerDay: 30, GoogleAuthMinPerHour: 30,
+		MicrosoftSignupMinPerHour: 10, MicrosoftSignupMinPerDay: 20,
 	}
 }
 

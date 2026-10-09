@@ -21,6 +21,9 @@ export type TrafficPeriod = z.infer<typeof TrafficPeriodSchema>;
 export const addrFamilySchema = z.number().int();
 export type addrFamily = z.infer<typeof addrFamilySchema>;
 
+export const busyMinutesSchema = z.array(z.number().int());
+export type busyMinutes = z.infer<typeof busyMinutesSchema>;
+
 export const liteBlocksSchema = z.record(z.string(), z.record(z.number().int(), z.array(z.lazy(() => ProbePingBlockSchema))));
 export type liteBlocks = z.infer<typeof liteBlocksSchema>;
 
@@ -38,6 +41,7 @@ export const AbuseActionsSchema = z.object({
   crawler: z.string(),
   flood: z.string(),
   fullspeed: z.string(),
+  register: z.string(),
   scan: z.string(),
   spam: z.string(),
   speedtest: z.string(),
@@ -1727,6 +1731,12 @@ export const RulesSchema = z.object({
   fullSpeedMbps: z.number().int(),
   fullSpeedStrikeMin: z.number().int(),
   fullSpeedWarnMin: z.number().int(),
+  googleAuthMinPerDay: z.number().int(),
+  googleAuthMinPerHour: z.number().int(),
+  microsoftSignupMinPerDay: z.number().int(),
+  microsoftSignupMinPerHour: z.number().int(),
+  openaiAuthMinPerDay: z.number().int(),
+  openaiAuthMinPerHour: z.number().int(),
   scanIps: z.number().int(),
   scanPortsOnIp: z.number().int(),
   scanSensitiveIps: z.number().int(),

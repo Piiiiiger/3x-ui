@@ -193,6 +193,35 @@ func TestAbuseEachRuleDoesWhatItIsSetTo(t *testing.T) {
 	}
 }
 
+// Bulk sign-ups are a guess from busy minutes, so even an enforcing server only
+// records them until the admin chooses otherwise.
+func TestAbuseBulkSignUpsOnlyRecordUntilTheirActionIsChanged(t *testing.T) {
+	s := setupAbuse(t, AbuseModeEnforce)
+	now := time.Now()
+	hit := abuse.Signal{
+		Email: "alice", Rule: abuse.RuleRegister, Level: abuse.LevelStrike, Measure: abuse.MeasureRegisterHour,
+		Count: 11, Limit: 10, Window: 3600, Samples: []string{abuse.PlatformOpenAI},
+	}
+	if _, err := s.HandleSignals(0, []abuse.Signal{hit}, now); err != nil {
+		t.Fatal(err)
+	}
+	if got := lastAction(t); got != AbuseActionNoticed || len(banRecords(t)) != 0 {
+		t.Fatalf("by default a bulk sign-up was %s with records %+v, want only noticed", got, banRecords(t))
+	}
+
+	settings := s.Settings()
+	settings.Actions.Register = AbuseActBan
+	if err := s.SetSettings(settings); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.HandleSignals(0, []abuse.Signal{hit}, now); err != nil {
+		t.Fatal(err)
+	}
+	if got := lastAction(t); got != AbuseActionBanned {
+		t.Fatalf("set to ban, a bulk sign-up was %s, want banned", got)
+	}
+}
+
 // An action the policy cannot take is refused, and the stored ones stay.
 func TestAbuseSettingsRefuseAnActionThatCannotBeTaken(t *testing.T) {
 	s := setupAbuse(t, AbuseModeEnforce)

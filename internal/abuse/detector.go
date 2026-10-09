@@ -96,11 +96,16 @@ type speedStreak struct {
 	struck   bool
 }
 
+// busyMinutes are the minutes of the last day in which an account opened
+// connections to one platform's sign-in server, oldest first.
+type busyMinutes []int64
+
 type account struct {
 	buckets  [ringMinutes]bucket
 	fired    map[string]int64
 	tests    []int64
 	lastTest int64
+	signIns  map[string]busyMinutes
 	speed    speedStreak
 	lastSeen int64
 }
@@ -126,7 +131,7 @@ func (d *Detector) SetRules(rules Rules) {
 func (d *Detector) account(email string) *account {
 	a := d.accounts[email]
 	if a == nil {
-		a = &account{fired: map[string]int64{}}
+		a = &account{fired: map[string]int64{}, signIns: map[string]busyMinutes{}}
 		d.accounts[email] = a
 	}
 	return a
@@ -197,6 +202,12 @@ func (d *Detector) Observe(e Event) {
 		}
 		a.lastTest = sec
 	}
+	if platform := signInServers[e.Host]; platform != "" {
+		busy := a.signIns[platform]
+		if n := len(busy); n == 0 || sec/60 > busy[n-1] {
+			a.signIns[platform] = append(busy, sec/60)
+		}
+	}
 	dest := net.JoinHostPort(e.Host, strconv.Itoa(e.Port))
 	if b.dests == nil {
 		b.dests = map[string]int64{}
@@ -266,7 +277,17 @@ func (d *Detector) Collect(now time.Time) []Signal {
 		for len(a.tests) > 0 && a.tests[0] <= day {
 			a.tests = a.tests[1:]
 		}
-		if sec-a.lastSeen > int64(idleForget/time.Second) && len(a.tests) == 0 && a.speed.blocks == 0 {
+		for platform, busy := range a.signIns {
+			for len(busy) > 0 && busy[0] <= day/60 {
+				busy = busy[1:]
+			}
+			if len(busy) == 0 {
+				delete(a.signIns, platform)
+			} else {
+				a.signIns[platform] = busy
+			}
+		}
+		if sec-a.lastSeen > int64(idleForget/time.Second) && len(a.tests) == 0 && len(a.signIns) == 0 && a.speed.blocks == 0 {
 			delete(d.accounts, email)
 			continue
 		}
@@ -366,6 +387,8 @@ func (d *Detector) check(a *account, sec int64) []Signal {
 		}
 	}
 
+	out = append(out, d.checkRegister(a, sec)...)
+
 	if r.FullSpeedMbps > 0 {
 		minutes := int64(a.speed.blocks) * 5
 		switch {
@@ -426,6 +449,37 @@ func (d *Detector) checkScan(a *account, sec int64) (Signal, bool) {
 	}
 	s.Rule, s.Level, s.Window = RuleScan, LevelStrike, r.ScanWindowMin*60
 	return s, true
+}
+
+// checkRegister counts each platform's busy minutes: a person signs in for a
+// minute or two now and then, while bulk sign-ups keep at it.
+func (d *Detector) checkRegister(a *account, sec int64) []Signal {
+	var out []Signal
+	for _, platform := range platforms {
+		busy := a.signIns[platform]
+		if len(busy) == 0 {
+			continue
+		}
+		perHour, perDay := d.rules.registerLimits(platform)
+		var hour int64
+		for _, m := range busy {
+			if m > sec/60-60 {
+				hour++
+			}
+		}
+		day := int64(len(busy))
+		s := Signal{Rule: RuleRegister, Level: LevelStrike, Samples: []string{platform}}
+		switch {
+		case perHour > 0 && hour > int64(perHour) && a.ready(MeasureRegisterHour+":"+platform, sec, 3600):
+			s.Measure, s.Count, s.Limit, s.Window = MeasureRegisterHour, hour, int64(perHour), 3600
+		case perDay > 0 && day > int64(perDay) && a.ready(MeasureRegisterDay+":"+platform, sec, 24*3600):
+			s.Measure, s.Count, s.Limit, s.Window = MeasureRegisterDay, day, int64(perDay), 24*3600
+		default:
+			continue
+		}
+		out = append(out, s)
+	}
+	return out
 }
 
 // checkCrawler wants every one of the last few windows busy: a crawler keeps

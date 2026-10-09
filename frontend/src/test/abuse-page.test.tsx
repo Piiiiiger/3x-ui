@@ -37,6 +37,12 @@ const settings = {
     fullSpeedMbps: 100,
     fullSpeedWarnMin: 120,
     fullSpeedStrikeMin: 240,
+    openaiAuthMinPerHour: 10,
+    openaiAuthMinPerDay: 30,
+    googleAuthMinPerHour: 30,
+    googleAuthMinPerDay: 0,
+    microsoftSignupMinPerHour: 10,
+    microsoftSignupMinPerDay: 20,
   },
   actions: {
     spam: 'ban',
@@ -46,6 +52,7 @@ const settings = {
     crawler: 'ban',
     speedtest: 'ban',
     fullspeed: 'ban',
+    register: 'record',
   },
   signup: { limit: 3, action: 'record' },
 };
@@ -185,6 +192,26 @@ it('saves what a rule does together with its thresholds', async () => {
       rules: { ...settings.rules, crawlerHosts: 700 },
       actions: { ...settings.actions, crawler: 'warn' },
       signup: { limit: 3, action: 'ban' },
+    },
+  });
+});
+
+it('saves the bulk sign-up limit of each platform', async () => {
+  await renderPage();
+  const register = sectionOf('批量注册（AI / Google / 微软账号）');
+  fireEvent.change(within(register).getByLabelText('Google 每小时分钟数'), {
+    target: { value: '40' },
+  });
+  chooseIn(within(register).getByLabelText('处理'), '提醒用户');
+  fireEvent.click(screen.getByRole('button', { name: '保存设置' }));
+
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  expect(lastPost()).toEqual({
+    url: '/panel/api/abuse/settings',
+    body: {
+      rules: { ...settings.rules, googleAuthMinPerHour: 40 },
+      actions: { ...settings.actions, register: 'warn' },
+      signup: { limit: 3, action: 'record' },
     },
   });
 });

@@ -143,6 +143,90 @@ func TestSpeedTestsCountTestsNotConnections(t *testing.T) {
 	}
 }
 
+// busy connects once a minute to host for the given minutes, from at.
+func busy(d *Detector, at time.Time, minutes int, email, host string) {
+	for i := range minutes {
+		connect(d, at.Add(time.Duration(i)*time.Minute), email, host, 443, "direct")
+	}
+}
+
+// A login takes a couple of minutes, and a few of them in an hour pass; being
+// at OpenAI's sign-in servers in 11 minutes of one hour trips, either server.
+func TestRegisterCountsMinutesAtAPlatformsSignInServer(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	for i := range 4 {
+		busy(d, t0.Add(time.Duration(i)*12*time.Minute), 2, "alice", "auth.openai.com")
+	}
+	none(t, d.Collect(t0.Add(50*time.Minute)), RuleRegister)
+
+	busy(d, t0.Add(50*time.Minute), 3, "alice", "auth0.openai.com")
+	s := only(t, d.Collect(t0.Add(53*time.Minute)), RuleRegister)
+	if s.Measure != MeasureRegisterHour || s.Count != 11 || s.Limit != 10 || len(s.Samples) != 1 || s.Samples[0] != "auth.openai.com" {
+		t.Errorf("register signal = %+v, want 11 minutes at OpenAI's sign-in in an hour", s)
+	}
+	busy(d, t0.Add(53*time.Minute), 1, "alice", "auth.openai.com")
+	none(t, d.Collect(t0.Add(54*time.Minute)), RuleRegister)
+}
+
+// A bot signing up one account after another never pauses; the faster it goes,
+// the more minutes it fills.
+func TestRegisterCatchesSignUpsBackToBack(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	for i := range 30 {
+		connect(d, t0.Add(time.Duration(i)*30*time.Second), "bob", "auth.openai.com", 443, "direct")
+	}
+	if s := only(t, d.Collect(t0.Add(15*time.Minute)), RuleRegister); s.Email != "bob" || s.Count != 15 {
+		t.Errorf("register signal = %+v, want bob's 15 busy minutes", s)
+	}
+}
+
+// However many connections a page opens in one minute, that minute counts once.
+func TestRegisterCountsAMinuteOnceWhateverItsConnections(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	for i := range 200 {
+		connect(d, t0.Add(time.Duration(i)*250*time.Millisecond), "alice", "signup.live.com", 443, "direct")
+	}
+	none(t, d.Collect(t0.Add(time.Minute)), RuleRegister)
+}
+
+// Using ChatGPT, Gemini, Gmail or Outlook all hour is not signing in to them.
+func TestRegisterIgnoresThePlatformsOtherSites(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	for _, host := range []string{"chatgpt.com", "gemini.google.com", "mail.google.com", "login.live.com", "outlook.live.com"} {
+		busy(d, t0, 60, "alice", host)
+	}
+	none(t, d.Collect(t0.Add(time.Hour)), RuleRegister)
+}
+
+// Google's server also gets browsers' background account checks, so its limit
+// is wide; Microsoft's only creates accounts, so its limit is tight.
+func TestRegisterUsesEachPlatformsOwnLimit(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	busy(d, t0, 25, "alice", "accounts.google.com")
+	busy(d, t0, 11, "bob", "signup.live.com")
+	s := only(t, d.Collect(t0.Add(30*time.Minute)), RuleRegister)
+	if s.Email != "bob" || s.Samples[0] != "signup.live.com" || s.Count != 11 || s.Limit != 10 {
+		t.Errorf("register signal = %+v, want bob's 11 minutes at Microsoft's sign-up over a limit of 10", s)
+	}
+}
+
+// Sign-ups spread over a day trip the daily limit even with idle hours between
+// them, and Google, with no daily limit, never does.
+func TestRegisterDailyLimitOutlastsQuietHours(t *testing.T) {
+	d := NewDetector(DefaultRules())
+	var got []Signal
+	for i := range 7 {
+		at := t0.Add(time.Duration(i) * 3 * time.Hour)
+		busy(d, at, 3, "bob", "signup.live.com")
+		busy(d, at, 25, "alice", "accounts.google.com")
+		got = append(got, d.Collect(at.Add(2*time.Hour))...)
+	}
+	s := only(t, got, RuleRegister)
+	if s.Email != "bob" || s.Measure != MeasureRegisterDay || s.Count != 21 || s.Limit != 20 {
+		t.Errorf("register signal = %+v, want bob's 21 minutes at Microsoft's sign-up in a day", s)
+	}
+}
+
 // fullSpeed feeds traffic at mbps in 5-second reports, collecting as a server does.
 func fullSpeed(d *Detector, from time.Time, minutes int, mbps int64) []Signal {
 	var out []Signal

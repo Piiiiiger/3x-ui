@@ -19,6 +19,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "ban",
         "type": "string"
       },
+      "register": {
+        "example": "record",
+        "type": "string"
+      },
       "scan": {
         "example": "ban",
         "type": "string"
@@ -37,6 +41,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "crawler",
       "flood",
       "fullspeed",
+      "register",
       "scan",
       "spam",
       "speedtest"
@@ -7194,6 +7199,30 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 120,
         "type": "integer"
       },
+      "googleAuthMinPerDay": {
+        "example": 0,
+        "type": "integer"
+      },
+      "googleAuthMinPerHour": {
+        "example": 30,
+        "type": "integer"
+      },
+      "microsoftSignupMinPerDay": {
+        "example": 20,
+        "type": "integer"
+      },
+      "microsoftSignupMinPerHour": {
+        "example": 10,
+        "type": "integer"
+      },
+      "openaiAuthMinPerDay": {
+        "example": 30,
+        "type": "integer"
+      },
+      "openaiAuthMinPerHour": {
+        "example": 10,
+        "type": "integer"
+      },
       "scanIps": {
         "example": 150,
         "type": "integer"
@@ -7243,6 +7272,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "fullSpeedMbps",
       "fullSpeedStrikeMin",
       "fullSpeedWarnMin",
+      "googleAuthMinPerDay",
+      "googleAuthMinPerHour",
+      "microsoftSignupMinPerDay",
+      "microsoftSignupMinPerHour",
+      "openaiAuthMinPerDay",
+      "openaiAuthMinPerHour",
       "scanIps",
       "scanPortsOnIp",
       "scanSensitiveIps",

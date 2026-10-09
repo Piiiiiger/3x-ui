@@ -9,8 +9,9 @@ import (
 // agent takes it out before Xray reads the rest.
 const ConfigKey = "_piggerAbuse"
 
-// Capability is what an agent able to detect abuse says in its hello.
-const Capability = "abuse-v1"
+// Capability is what an agent able to detect abuse says in its hello; v2 also
+// watches bulk sign-ups, so a v1 agent shows as needing an update.
+const Capability = "abuse-v2"
 
 // SplitConfig takes the detection rules out of an agent config; nil rules mean
 // detection is off on that server.
