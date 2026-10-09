@@ -45,6 +45,10 @@
             "example": "ban",
             "type": "string"
           },
+          "register": {
+            "example": "record",
+            "type": "string"
+          },
           "scan": {
             "example": "ban",
             "type": "string"
@@ -63,6 +67,7 @@
           "crawler",
           "flood",
           "fullspeed",
+          "register",
           "scan",
           "spam",
           "speedtest"
@@ -7220,6 +7225,30 @@
             "example": 120,
             "type": "integer"
           },
+          "googleAuthMinPerDay": {
+            "example": 0,
+            "type": "integer"
+          },
+          "googleAuthMinPerHour": {
+            "example": 30,
+            "type": "integer"
+          },
+          "microsoftSignupMinPerDay": {
+            "example": 20,
+            "type": "integer"
+          },
+          "microsoftSignupMinPerHour": {
+            "example": 10,
+            "type": "integer"
+          },
+          "openaiAuthMinPerDay": {
+            "example": 30,
+            "type": "integer"
+          },
+          "openaiAuthMinPerHour": {
+            "example": 10,
+            "type": "integer"
+          },
           "scanIps": {
             "example": 150,
             "type": "integer"
@@ -7269,6 +7298,12 @@
           "fullSpeedMbps",
           "fullSpeedStrikeMin",
           "fullSpeedWarnMin",
+          "googleAuthMinPerDay",
+          "googleAuthMinPerHour",
+          "microsoftSignupMinPerDay",
+          "microsoftSignupMinPerHour",
+          "openaiAuthMinPerDay",
+          "openaiAuthMinPerHour",
           "scanIps",
           "scanPortsOnIp",
           "scanSensitiveIps",
@@ -18013,6 +18048,7 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
+                        "register": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -18029,6 +18065,12 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
+                        "googleAuthMinPerDay": 0,
+                        "googleAuthMinPerHour": 30,
+                        "microsoftSignupMinPerDay": 20,
+                        "microsoftSignupMinPerHour": 10,
+                        "openaiAuthMinPerDay": 30,
+                        "openaiAuthMinPerHour": 10,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,
@@ -18144,6 +18186,7 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
+                        "register": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -18160,6 +18203,12 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
+                        "googleAuthMinPerDay": 0,
+                        "googleAuthMinPerHour": 30,
+                        "microsoftSignupMinPerDay": 20,
+                        "microsoftSignupMinPerHour": 10,
+                        "openaiAuthMinPerDay": 30,
+                        "openaiAuthMinPerHour": 10,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,
@@ -18271,6 +18320,7 @@
                         "crawler": "ban",
                         "flood": "ban",
                         "fullspeed": "ban",
+                        "register": "record",
                         "scan": "ban",
                         "spam": "ban",
                         "speedtest": "ban"
@@ -18287,6 +18337,12 @@
                         "fullSpeedMbps": 100,
                         "fullSpeedStrikeMin": 240,
                         "fullSpeedWarnMin": 120,
+                        "googleAuthMinPerDay": 0,
+                        "googleAuthMinPerHour": 30,
+                        "microsoftSignupMinPerDay": 20,
+                        "microsoftSignupMinPerHour": 10,
+                        "openaiAuthMinPerDay": 30,
+                        "openaiAuthMinPerHour": 10,
                         "scanIps": 150,
                         "scanPortsOnIp": 50,
                         "scanSensitiveIps": 20,

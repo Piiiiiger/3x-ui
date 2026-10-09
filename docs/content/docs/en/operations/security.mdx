@@ -44,7 +44,8 @@ from the banned network are refused.
 ## Abuse prevention
 
 The panel can watch for accounts that abuse the servers: spam, BitTorrent, port
-scans, attacks, crawling, repeated speed tests and hours at full speed. It looks at
+scans, attacks, crawling, repeated speed tests, hours at full speed and bulk
+sign-ups on AI, Google and Microsoft. It looks at
 connections and traffic only, never at their content, so ordinary use such as
 downloading software never counts.
 
@@ -52,7 +53,7 @@ downloading software never counts.
   panel's own core and every agent node, is **off**, **observe** or **enforce**.
   Observe records hits and tells the admins; enforce does what each rule is set
   to do. Observe for about a week first and tune the thresholds on what it
-  records. An agent detects only from a build that reports the `abuse-v1`
+  records. An agent detects only from a build that reports the `abuse-v2`
   capability; the page marks a server whose agent cannot.
 - **Rules.** On an enforcing server each rule is set to **record** (tell the
   admins), **warn** (also tell the user, at no cost) or **ban**. Full speed warns
@@ -61,6 +62,14 @@ downloading software never counts.
   minutes. The fourth strike within 30 days locks it until an admin lifts the
   lock, which also clears its strikes. IP-limit bans share the history but never
   count as strikes.
+- **Bulk sign-ups on AI, Google and Microsoft.** Each platform's own sign-in or
+  sign-up server is watched: `auth.openai.com` (ChatGPT), `accounts.google.com`
+  (Google, Gemini included) and `signup.live.com` (Microsoft). The rule counts the
+  minutes of an hour, and of a day, in which an account connected to one of them:
+  a person signs in for a minute or two, while bulk sign-ups keep at it. It cannot
+  tell a login from a sign-up or count the accounts made, and Google's server also
+  gets browsers' background checks, so its limit is wide. The rule only records
+  until you change its action, even on enforcing servers.
 - **Sign-ups.** The user page counts sign-ups per network (an IPv4 /24 or an IPv6
   /48) over 24 hours. A network reaching the limit (default 3) is reported to the
   admins with the accounts it made; while the guard bans, it cannot sign up again
