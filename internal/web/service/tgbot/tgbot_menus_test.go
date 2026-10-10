@@ -88,7 +88,7 @@ func TestDevicesViewShowsOnlineIpsAndBans(t *testing.T) {
 	tb.send(5150, "/ips")
 
 	view := rec.last(t)
-	for _, want := range []string{"1/1", "203.0.113.9", "暂停使用", "198.51.100.7", "还剩"} {
+	for _, want := range []string{"1/1", "203.0.113.9", "暂停使用", "198.51.100.0/24", "还剩"} {
 		if !strings.Contains(view.Text, want) {
 			t.Errorf("devices view lacks %q:\n%s", want, view.Text)
 		}

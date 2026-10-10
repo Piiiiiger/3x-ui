@@ -47,14 +47,14 @@ func TestIpBanNoticeReachesThePersonAndTheAdminOnce(t *testing.T) {
 	tb.sendAccountNotifications(context.Background(), now.Add(time.Minute))
 
 	toUser, toAdmin := sentTo(rec, 5150), sentTo(rec, adminTgID)
-	if len(toUser) != 1 || !strings.Contains(toUser[0].Text, "超出上限") || !strings.Contains(toUser[0].Text, "198.51.100.7") {
+	if len(toUser) != 1 || !strings.Contains(toUser[0].Text, "超出上限") || !strings.Contains(toUser[0].Text, "198.51.100.0/24") {
 		t.Fatalf("user notices = %d, first %q; want one naming the banned IP", len(toUser), firstText(toUser))
 	}
 	if len(toAdmin) != 1 {
 		t.Fatalf("admin notices = %d, want 1", len(toAdmin))
 	}
 	unban := toAdmin[0].dataFor(t, "解封")
-	if want := fmt.Sprintf("pg:a:bx:%d:198.51.100.7!", alice.Id); unban != want {
+	if want := fmt.Sprintf("pg:a:bx:%d:198.51.100.0/24!", alice.Id); unban != want {
 		t.Errorf("admin unban button = %q, want %q", unban, want)
 	}
 	tb.tap(adminTgID, unban)

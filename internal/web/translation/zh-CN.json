@@ -847,7 +847,7 @@
       "expiryTime": "过期时间",
       "addClients": "添加用户",
       "limitIp": "IP 限制",
-      "limitIpDesc": "同时在线的网络数上限，所有服务器合计（IPv6 按 /64 计）。0 = 不限制。",
+      "limitIpDesc": "同时在线的网络数上限，所有服务器合计（IPv4 按 /24、IPv6 按 /64 计）。0 = 不限制。",
       "ipExemptThisPanel": "本机",
       "ipExemptAllowlist": "白名单",
       "ipNotCounted": "不计入",

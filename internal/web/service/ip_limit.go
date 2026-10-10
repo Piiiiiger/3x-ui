@@ -64,18 +64,22 @@ var (
 	cgnatPrefix    = netip.MustParsePrefix("100.64.0.0/10")
 )
 
-// ipLimitNetwork maps a source address to the network the limit counts: the
-// address itself for IPv4, its /64 for IPv6 (one home LAN or one mobile line).
-func ipLimitNetwork(ip string) (string, netip.Addr, bool) {
+// ipLimitNetwork maps a source address to the network the limit counts: its /24
+// for IPv4, since carrier NAT spreads one phone over a pool, its /64 for IPv6.
+func ipLimitNetwork(addr netip.Addr) netip.Prefix {
+	if addr.Is4() {
+		return netip.PrefixFrom(addr, 24).Masked()
+	}
+	return netip.PrefixFrom(addr, 64).Masked()
+}
+
+// parseSourceAddr reads a client address as Xray reports it, IPv4 in plain form.
+func parseSourceAddr(ip string) (netip.Addr, bool) {
 	addr, err := netip.ParseAddr(strings.Trim(strings.TrimSpace(ip), "[]"))
 	if err != nil {
-		return "", netip.Addr{}, false
+		return netip.Addr{}, false
 	}
-	addr = addr.Unmap().WithZone("")
-	if addr.Is4() {
-		return addr.String(), addr, true
-	}
-	return netip.PrefixFrom(addr, 64).Masked().String(), addr, true
+	return addr.Unmap().WithZone(""), true
 }
 
 func isPublicAddr(a netip.Addr) bool {
@@ -115,6 +119,21 @@ func (e *ipLimitExemptions) reason(addr netip.Addr) (kind, host string) {
 		return IpExemptAllowlist, ""
 	}
 	return "", ""
+}
+
+// holdsExempt says whether a server or allowlisted address lies in p.
+func (e *ipLimitExemptions) holdsExempt(p netip.Prefix) bool {
+	for _, h := range e.hosts {
+		if h.prefix.Overlaps(p) {
+			return true
+		}
+	}
+	for _, a := range e.allowlist.prefixes {
+		if a.Overlaps(p) {
+			return true
+		}
+	}
+	return slices.ContainsFunc(e.allowlist.addrs, p.Contains)
 }
 
 // exemptions collects every Pigger server's addresses (any of them can relay
@@ -413,13 +432,19 @@ func (s *IpLimitService) liveNetworks(now time.Time, observed []IpObservation) (
 		if owner, ok := owners[email]; ok {
 			email = owner
 		}
-		network, addr, ok := ipLimitNetwork(o.IP)
+		addr, ok := parseSourceAddr(o.IP)
 		if !ok || email == "" {
 			continue
 		}
 		kind, _ := ex.reason(addr)
 		if kind == IpExemptHost || kind == IpExemptPrivate {
 			continue
+		}
+		network := ipLimitNetwork(addr).String()
+		// Beside an exempt relay a network is the address alone: a ban on the
+		// range would cut the relay off, and a relay never shares with a device.
+		if kind == IpExemptAllowlist || ex.holdsExempt(ipLimitNetwork(addr)) {
+			network = addr.String()
 		}
 		if live[email] == nil {
 			live[email] = map[string]*liveNetwork{}

@@ -301,7 +301,7 @@ func TestPortalOnlineIpsShowOnlyThePersonsOwnState(t *testing.T) {
 	if err := json.Unmarshal(res.Body.Bytes(), &got); err != nil || res.Code != http.StatusOK {
 		t.Fatalf("online ips = %d %s", res.Code, res.Body)
 	}
-	if got.Limit != 3 || got.Count != 1 || len(got.Online) != 1 || got.Online[0].Network != "198.51.100.5" {
+	if got.Limit != 3 || got.Count != 1 || len(got.Online) != 1 || got.Online[0].Network != "198.51.100.0/24" {
 		t.Fatalf("online = %+v; want pa@e's one network of 3", got)
 	}
 	if len(got.Bans) != 1 || got.Bans[0].Network != "198.51.100.9" {

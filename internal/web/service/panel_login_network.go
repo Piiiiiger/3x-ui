@@ -1,6 +1,7 @@
 package service
 
 import (
+	"net/netip"
 	"time"
 
 	"gorm.io/gorm/clause"
@@ -12,10 +13,14 @@ import (
 // PanelLoginNetwork is the key a login address is remembered by; IPv6 privacy
 // suffixes rotate, so a /64 stands for one line. Unparsable input is its own key.
 func PanelLoginNetwork(ip string) string {
-	if network, _, ok := ipLimitNetwork(ip); ok {
-		return network
+	addr, ok := parseSourceAddr(ip)
+	switch {
+	case !ok:
+		return ip
+	case addr.Is4():
+		return addr.String()
 	}
-	return ip
+	return netip.PrefixFrom(addr, 64).Masked().String()
 }
 
 // PanelLoginKnown says whether the admin has signed in from ip's network before.

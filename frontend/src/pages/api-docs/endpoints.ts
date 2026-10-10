@@ -1555,7 +1555,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/clients/onlineIps/:email',
         summary:
-          'How many of the client’s IP-limit slots are in use right now (`count` of `limit`, 0 = no limit), the networks it is online from (an IPv4 address, or an IPv6 /64 with the addresses seen) with the servers they connect to, and its running bans. Relay and other server addresses never appear; allowlisted networks are listed with `counted: false`. Taken from the last 10-second scan.',
+          'How many of the client’s IP-limit slots are in use right now (`count` of `limit`, 0 = no limit), the networks it is online from (an IPv4 /24 or an IPv6 /64 with the addresses seen; just the address when its range holds a server or allowlisted address) with the servers they connect to, and its running bans. Relay and other server addresses never appear; allowlisted networks are listed with `counted: false`. Taken from the last 10-second scan.',
         params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
         responseSchema: 'ClientOnlineIps',
       },

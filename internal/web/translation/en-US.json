@@ -847,7 +847,7 @@
       "expiryTime": "Expiry",
       "addClients": "Add Users",
       "limitIp": "IP Limit",
-      "limitIpDesc": "Most networks a user can be online from at once, across all servers (IPv6 counts per /64). 0 = no limit.",
+      "limitIpDesc": "Most networks a user can be online from at once, across all servers (IPv4 counts per /24, IPv6 per /64). 0 = no limit.",
       "ipExemptThisPanel": "This panel",
       "ipExemptAllowlist": "Allowlisted",
       "ipNotCounted": "not counted",

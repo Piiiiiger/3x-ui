@@ -28,9 +28,9 @@ func TestCheckClientIpJobBansFromAgentReportsAndFlagsTheLocalCore(t *testing.T) 
 	now := time.Now().Unix()
 	status := agentproto.Status{IPs: map[string][]agentproto.IPEntry{"pat": {
 		{IP: "198.51.100.1", Timestamp: now - 400},
-		{IP: "198.51.100.2", Timestamp: now - 30},
-		{IP: "198.51.100.3", Timestamp: now - 20},
-		{IP: "198.51.100.4", Timestamp: now - 10},
+		{IP: "192.0.2.2", Timestamp: now - 30},
+		{IP: "2001:db8:3::3", Timestamp: now - 20},
+		{IP: "2001:db8:4::4", Timestamp: now - 10},
 	}}}
 	agent.Send(agentproto.Message{Type: agentproto.TypeStatus, Status: &status})
 	deadline := time.Now().Add(3 * time.Second)
@@ -52,7 +52,7 @@ func TestCheckClientIpJobBansFromAgentReportsAndFlagsTheLocalCore(t *testing.T) 
 	if err := database.GetDB().Find(&bans).Error; err != nil {
 		t.Fatal(err)
 	}
-	if len(bans) != 1 || bans[0].Email != "pat" || bans[0].Network != "198.51.100.1" {
+	if len(bans) != 1 || bans[0].Email != "pat" || bans[0].Network != "198.51.100.0/24" {
 		t.Fatalf("bans = %+v; want pat's stalest network banned", bans)
 	}
 	if !xrayService.IsNeedRestartAndSetFalse() {

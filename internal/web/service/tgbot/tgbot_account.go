@@ -354,7 +354,7 @@ func (t *Tgbot) ipRule(limit int) string {
 	if err != nil || minutes <= 0 {
 		minutes = 30
 	}
-	return fmt.Sprintf("ℹ️ 同一时间最多 %d 个 IP 在线（IPv6 按 /64 网段计）。超出时，最久未活动的 IP 会暂停使用 %d 分钟，到时自动恢复。", limit, minutes)
+	return fmt.Sprintf("ℹ️ 同一时间最多 %d 个 IP 在线（同一网段的 IP 算一个：IPv4 按 /24、IPv6 按 /64）。超出时，最久未活动的 IP 会暂停使用 %d 分钟，到时自动恢复。", limit, minutes)
 }
 
 // onlineLines lists the networks online now, relays never among them: the

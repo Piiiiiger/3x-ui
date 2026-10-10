@@ -63,14 +63,14 @@ func TestIpLimitBansTheLeastRecentlySeenNetworkAcrossServers(t *testing.T) {
 
 	observed := []IpObservation{
 		{Email: "alice", IP: "198.51.100.1", LastSeen: now.Unix() - 300},
-		{Email: "alice", IP: "198.51.100.2", LastSeen: now.Unix() - 20},
-		{Email: "alice", IP: "198.51.100.3", LastSeen: now.Unix() - 5},
+		{Email: "alice", IP: "192.0.2.2", LastSeen: now.Unix() - 20},
+		{Email: "alice", IP: "2001:db8:3::3", LastSeen: now.Unix() - 5},
 	}
 	changed, err := (&IpLimitService{}).Enforce(now, observed)
 	if err != nil || !changed {
 		t.Fatalf("Enforce = %v, %v; want a new ban", changed, err)
 	}
-	if got := activeBanNetworks(t, "alice", now); !slices.Equal(got, []string{"198.51.100.1"}) {
+	if got := activeBanNetworks(t, "alice", now); !slices.Equal(got, []string{"198.51.100.0/24"}) {
 		t.Fatalf("banned %v, want only the least recently seen network", got)
 	}
 	var ban model.ClientIpBan
@@ -143,13 +143,13 @@ func TestIpLimitCountsRelayedUsersByTheirRealAddress(t *testing.T) {
 	observed := []IpObservation{
 		{Email: alias, IP: "198.51.100.20", LastSeen: now.Unix() - 40},
 		{Email: "carol", IP: relayNode.Address, LastSeen: now.Unix() - 40},
-		{Email: "carol", IP: "198.51.100.21", LastSeen: now.Unix() - 2},
+		{Email: "carol", IP: "192.0.2.21", LastSeen: now.Unix() - 2},
 	}
 	changed, err := (&IpLimitService{}).Enforce(now, observed)
 	if err != nil || !changed {
 		t.Fatalf("Enforce = %v, %v; the relayed device is a second network", changed, err)
 	}
-	if got := activeBanNetworks(t, "carol", now); !slices.Equal(got, []string{"198.51.100.20"}) {
+	if got := activeBanNetworks(t, "carol", now); !slices.Equal(got, []string{"198.51.100.0/24"}) {
 		t.Fatalf("banned %v, want the relayed device's own address", got)
 	}
 }
@@ -173,16 +173,72 @@ func TestIpLimitCountsIPv6PerSlash64(t *testing.T) {
 	if err != nil || !changed {
 		t.Fatalf("Enforce = %v, %v; an IPv4 network next to the /64 is a second one", changed, err)
 	}
-	if got := activeBanNetworks(t, "dave", now); !slices.Equal(got, []string{"198.51.100.30"}) {
-		t.Fatalf("banned %v, want the mapped IPv4 address in plain form", got)
+	if got := activeBanNetworks(t, "dave", now); !slices.Equal(got, []string{"198.51.100.0/24"}) {
+		t.Fatalf("banned %v, want the mapped IPv4 address's /24 in plain form", got)
 	}
 
 	other := append(sameLan[:2:2], IpObservation{Email: "dave", IP: "2001:db8:9:9::1", LastSeen: now.Unix()})
 	if _, err := (&IpLimitService{}).Enforce(now, other); err != nil {
 		t.Fatal(err)
 	}
-	if got := activeBanNetworks(t, "dave", now); !slices.Equal(got, []string{"198.51.100.30", "2001:db8:1:2::/64"}) {
+	if got := activeBanNetworks(t, "dave", now); !slices.Equal(got, []string{"198.51.100.0/24", "2001:db8:1:2::/64"}) {
 		t.Fatalf("banned %v, want the older /64 banned as a whole", got)
+	}
+}
+
+// A mobile carrier's NAT sends one phone out through several addresses of one
+// pool at once, a different one per server; they are one network.
+func TestIpLimitCountsIPv4PerSlash24(t *testing.T) {
+	setupIpLimitTest(t)
+	node := seedAgentNodeRow(t, "edge")
+	seedLimitedClient(t, &node.Id, "in-4", 443, "ivy", 2)
+	now := time.Unix(1_800_000_000, 0)
+
+	phoneAndHome := []IpObservation{
+		{Email: "ivy", IP: "198.51.100.61", LastSeen: now.Unix() - 5, Server: node.Id},
+		{Email: "ivy", IP: "198.51.100.125", LastSeen: now.Unix() - 3, Server: node.Id},
+		{Email: "ivy", IP: "198.51.100.189", LastSeen: now.Unix() - 1},
+		{Email: "ivy", IP: "192.0.2.159", LastSeen: now.Unix() - 60},
+	}
+	changed, err := (&IpLimitService{}).Enforce(now, phoneAndHome)
+	if err != nil || changed {
+		t.Fatalf("Enforce = %v, %v; three addresses of one /24 and a home are two networks", changed, err)
+	}
+	online, err := (&IpLimitService{}).OnlineIps("ivy", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if online.Count != 2 || online.Online[0].Network != "198.51.100.0/24" ||
+		!slices.Equal(online.Online[0].Addresses, []string{"198.51.100.125", "198.51.100.189", "198.51.100.61"}) {
+		t.Fatalf("online = %+v; want the pool as one network listing its addresses", online)
+	}
+
+	third := append(phoneAndHome, IpObservation{Email: "ivy", IP: "2001:db8:4::10", LastSeen: now.Unix() - 30})
+	if _, err := (&IpLimitService{}).Enforce(now, third); err != nil {
+		t.Fatal(err)
+	}
+	if got := activeBanNetworks(t, "ivy", now); !slices.Equal(got, []string{"192.0.2.0/24"}) {
+		t.Fatalf("banned %v, want the least recently seen /24", got)
+	}
+}
+
+// A Pigger server can sit in a user's /24 (a home line on the user's ISP); a ban
+// on that range would cut off the server relaying for them, so it is narrowed.
+func TestIpLimitNeverBansARangeHoldingAPiggerServer(t *testing.T) {
+	setupIpLimitTest(t)
+	node := seedAgentNodeRow(t, "home-line")
+	seedLimitedClient(t, &node.Id, "in-h", 443, "jon", 1)
+	now := time.Unix(1_800_000_000, 0)
+
+	observed := []IpObservation{
+		{Email: "jon", IP: "203.0.113.159", LastSeen: now.Unix() - 60},
+		{Email: "jon", IP: "198.51.100.61", LastSeen: now.Unix() - 1},
+	}
+	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
+		t.Fatal(err)
+	}
+	if got := activeBanNetworks(t, "jon", now); !slices.Equal(got, []string{"203.0.113.159"}) {
+		t.Fatalf("banned %v, want only the address beside the server at %s", got, node.Address)
 	}
 }
 
@@ -217,10 +273,12 @@ func TestIpLimitHonoursTheAllowlistAndBanDuration(t *testing.T) {
 	}
 	now := time.Unix(1_800_000_000, 0)
 
+	// The allowlisted relay shares a /24 with one of fay's devices: the device is
+	// counted and banned on its own address, so the relay is never cut off.
 	observed := []IpObservation{
 		{Email: "fay", IP: "198.51.100.3", LastSeen: now.Unix() - 900},
 		{Email: "fay", IP: "198.51.100.50", LastSeen: now.Unix() - 600},
-		{Email: "fay", IP: "198.51.100.51", LastSeen: now.Unix() - 1},
+		{Email: "fay", IP: "203.0.113.51", LastSeen: now.Unix() - 1},
 	}
 	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
 		t.Fatal(err)
@@ -231,6 +289,13 @@ func TestIpLimitHonoursTheAllowlistAndBanDuration(t *testing.T) {
 	}
 	if len(bans) != 1 || bans[0].Network != "198.51.100.50" || bans[0].ExpiresAt != now.Unix()+5*60 {
 		t.Fatalf("bans = %+v; want 198.51.100.50 for 5 minutes and the allowlisted address untouched", bans)
+	}
+	online, err := (&IpLimitService{}).OnlineIps("fay", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(online.Online) != 2 || online.Online[1].Network != "198.51.100.3" || online.Online[1].Counted {
+		t.Fatalf("online = %+v; want the allowlisted address listed alone, uncounted", online)
 	}
 }
 
@@ -515,14 +580,14 @@ func TestClientListRowsCarryOnlineIpCounts(t *testing.T) {
 	seedLimitedClient(t, &node.Id, "in-w1", 443, "wes", 3)
 	seedLimitedClient(t, &node.Id, "in-w2", 444, "xia", 3)
 	now := time.Now()
-	ban := model.ClientIpBan{Email: "wes", Network: "198.51.100.43", BannedAt: now.Unix(), ExpiresAt: now.Unix() + 600}
+	ban := model.ClientIpBan{Email: "wes", Network: "2001:db8:43::/64", BannedAt: now.Unix(), ExpiresAt: now.Unix() + 600}
 	if err := database.GetDB().Create(&ban).Error; err != nil {
 		t.Fatal(err)
 	}
 	observed := []IpObservation{
 		{Email: "wes", IP: "198.51.100.41", LastSeen: now.Unix() - 9, Server: node.Id},
-		{Email: "wes", IP: "198.51.100.42", LastSeen: now.Unix() - 3, Server: node.Id},
-		{Email: "wes", IP: "198.51.100.43", LastSeen: now.Unix() - 1, Server: node.Id},
+		{Email: "wes", IP: "192.0.2.42", LastSeen: now.Unix() - 3, Server: node.Id},
+		{Email: "wes", IP: "2001:db8:43::43", LastSeen: now.Unix() - 1, Server: node.Id},
 	}
 	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
 		t.Fatal(err)
@@ -553,7 +618,7 @@ func TestIpLimitBansAreKeptAsHistory(t *testing.T) {
 	now := time.Unix(1_800_000_000, 0)
 	observed := []IpObservation{
 		{Email: "alice", IP: "198.51.100.1", LastSeen: now.Unix() - 60},
-		{Email: "alice", IP: "198.51.100.2", LastSeen: now.Unix() - 5},
+		{Email: "alice", IP: "192.0.2.2", LastSeen: now.Unix() - 5},
 	}
 	if _, err := (&IpLimitService{}).Enforce(now, observed); err != nil {
 		t.Fatal(err)
@@ -562,11 +627,11 @@ func TestIpLimitBansAreKeptAsHistory(t *testing.T) {
 	if err != nil || len(history) != 1 {
 		t.Fatalf("history = %+v, %v; want the one ban", history, err)
 	}
-	if h := history[0]; h.Kind != BanKindIPLimit || h.Network != "198.51.100.1" || h.ExpiresAt != now.Unix()+30*60 || h.Reason == "" {
+	if h := history[0]; h.Kind != BanKindIPLimit || h.Network != "198.51.100.0/24" || h.ExpiresAt != now.Unix()+30*60 || h.Reason == "" {
 		t.Errorf("history entry = %+v, want the banned network, its 30 minutes and a reason", h)
 	}
 
-	if err := (&IpLimitService{}).Unban("alice", "198.51.100.1"); err != nil {
+	if err := (&IpLimitService{}).Unban("alice", "198.51.100.0/24"); err != nil {
 		t.Fatal(err)
 	}
 	if history, _ = (&AbuseService{}).History("alice", now.Add(-time.Hour)); history[0].LiftedAt == 0 {
