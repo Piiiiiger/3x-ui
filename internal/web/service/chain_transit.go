@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/abuse"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
@@ -133,7 +134,7 @@ func injectChainTransit(cfg *xray.Config) (map[string]string, error) {
 			return nil, err
 		}
 		for _, ep := range endpoints {
-			rule := map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "port": strconv.Itoa(ep.port), "outboundTag": "chain-transit-direct"}
+			rule := map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "port": strconv.Itoa(ep.port), "outboundTag": abuse.TagChainTransitDirect}
 			if net.ParseIP(ep.host) != nil {
 				rule["ip"] = []string{ep.host}
 			} else {
@@ -141,14 +142,14 @@ func injectChainTransit(cfg *xray.Config) (map[string]string, error) {
 			}
 			extraRules = append(extraRules, rule)
 		}
-		extraRules = append(extraRules, map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "outboundTag": "chain-transit-block"})
+		extraRules = append(extraRules, map[string]any{"type": "field", "user": users, "inboundTag": []string{relay.Tag}, "outboundTag": abuse.TagChainTransitBlock})
 	}
 	if len(extraRules) == 0 {
 		return owners, nil
 	}
 	err = prependRoutingWithOutbound(cfg, extraRules,
-		map[string]any{"tag": "chain-transit-direct", "protocol": "freedom", "settings": map[string]any{}},
-		map[string]any{"tag": "chain-transit-block", "protocol": "blackhole", "settings": map[string]any{}})
+		map[string]any{"tag": abuse.TagChainTransitDirect, "protocol": "freedom", "settings": map[string]any{}},
+		map[string]any{"tag": abuse.TagChainTransitBlock, "protocol": "blackhole", "settings": map[string]any{}})
 	return owners, err
 }
 

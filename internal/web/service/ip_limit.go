@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/abuse"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
@@ -47,7 +48,6 @@ const (
 )
 
 const (
-	ipLimitBlockOutboundTag  = "iplimit-block"
 	defaultIpLimitBanMinutes = 30
 	ipLimitResolveTTL        = 10 * time.Minute
 	ipLimitOwnersTTL         = 15 * time.Second
@@ -783,11 +783,11 @@ func injectIpLimitBans(cfg *xray.Config, transitOwners map[string]string, now ti
 		slices.Sort(users)
 		users = slices.Compact(users)
 		rules = append(rules, map[string]any{
-			"type": "field", "user": users, "sourceIP": networks[owner], "outboundTag": ipLimitBlockOutboundTag,
+			"type": "field", "user": users, "sourceIP": networks[owner], "outboundTag": abuse.TagIPLimitBlock,
 		})
 	}
 	return prependRoutingWithOutbound(cfg, rules, map[string]any{
-		"tag": ipLimitBlockOutboundTag, "protocol": "blackhole", "settings": map[string]any{},
+		"tag": abuse.TagIPLimitBlock, "protocol": "blackhole", "settings": map[string]any{},
 	})
 }
 

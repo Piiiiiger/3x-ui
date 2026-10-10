@@ -178,9 +178,14 @@ func remember(set map[string]struct{}, key string) map[string]struct{} {
 	return set
 }
 
+// notOwnTraffic are the outbounds whose connections Observe leaves out.
+var notOwnTraffic = map[string]bool{
+	TagBlock: true, TagIPLimitBlock: true, TagChainTransitDirect: true, TagChainTransitBlock: true,
+}
+
 // Observe counts one connection.
 func (d *Detector) Observe(e Event) {
-	if e.Email == "" {
+	if e.Email == "" || notOwnTraffic[e.Tag] {
 		return
 	}
 	d.mu.Lock()

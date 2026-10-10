@@ -47,14 +47,16 @@ The panel can watch for accounts that abuse the servers: spam, BitTorrent, port
 scans, attacks, crawling, repeated speed tests, hours at full speed and bulk
 sign-ups on AI, Google and Microsoft. It looks at
 connections and traffic only, never at their content, so ordinary use such as
-downloading software never counts.
+downloading software never counts. Nor do connections that stay within the
+panel's servers: a banned device's retries into its blackhole, and a relay's hops
+on to the next server, which checks the real destinations itself.
 
 - **Per server, off by default.** On the **Abuse** page (防滥用) each server, the
   panel's own core and every agent node, is **off**, **observe** or **enforce**.
   Observe records hits and tells the admins; enforce does what each rule is set
   to do. Observe for about a week first and tune the thresholds on what it
-  records. An agent detects only from a build that reports the `abuse-v2`
-  capability; the page marks a server whose agent cannot.
+  records. The page marks a server whose agent does not report the current
+  `abuse-v3` capability as needing an update.
 - **Rules.** On an enforcing server each rule is set to **record** (tell the
   admins), **warn** (also tell the user, at no cost) or **ban**. Full speed warns
   after 2 hours and, while the rule bans, strikes after 4.

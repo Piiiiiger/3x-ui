@@ -107,6 +107,20 @@ func TestFloodTripsOnABurstNotOnADownloadManager(t *testing.T) {
 	}
 }
 
+// A banned device retrying into its blackhole, or a relay identity that can only
+// reach the next Pigger server, is no attack: neither leaves for anyone else.
+func TestBansAndRelayHopsAreNotTheAccountsTraffic(t *testing.T) {
+	for _, outbound := range []string{TagBlock, TagIPLimitBlock, TagChainTransitDirect, TagChainTransitBlock} {
+		d := NewDetector(DefaultRules())
+		for range 3000 {
+			connect(d, t0, "carol", "192.0.2.73", 443, outbound)
+		}
+		if signals := d.Collect(t0.Add(30 * time.Second)); len(signals) != 0 {
+			t.Errorf("via %s: signals = %+v, want none", outbound, signals)
+		}
+	}
+}
+
 // One busy stretch is browsing; a crawler keeps every window busy.
 func TestCrawlerNeedsBusyWindowsInARow(t *testing.T) {
 	d := NewDetector(DefaultRules())

@@ -23,6 +23,14 @@ const (
 	TagBlock     = "abuse-block"
 )
 
+// Routing tags of traffic that is not the account's own: an IP-limit ban's
+// blackhole, and a relay identity's only way on, to its target Pigger server.
+const (
+	TagIPLimitBlock       = "iplimit-block"
+	TagChainTransitDirect = "chain-transit-direct"
+	TagChainTransitBlock  = "chain-transit-block"
+)
+
 // Levels say how far a hit went: a strike is a full hit, a warning the first
 // stage of one, which never costs a strike whatever the rule is set to do.
 const (
